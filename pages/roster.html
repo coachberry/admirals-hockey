@@ -5,6 +5,74 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Roster - Franklin Admirals Hockey</title>
   <link rel="stylesheet" href="/assets/css/styles.css">
+  <style>
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: white;
+      border-radius: 8px;
+      max-width: 500px;
+      width: 90%;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .modal-header {
+      background: linear-gradient(135deg, #5e1825, #3d0f18);
+      color: white;
+      padding: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h2 { font-size: 1.4rem; }
+    .modal-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .modal-body { padding: 2rem; }
+    .modal-photo {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 1.5rem;
+      border: 4px solid #5e1825;
+    }
+    .modal-photo-placeholder {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: #5e1825;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 0 auto 1.5rem;
+    }
+    .modal-name { text-align: center; font-size: 1.4rem; font-weight: 700; color: #5e1825; margin-bottom: 0.25rem; }
+    .modal-title { text-align: center; color: #666; margin-bottom: 1.5rem; }
+    .modal-details { display: flex; gap: 1rem; justify-content: center; margin-bottom: 1.5rem; }
+    .modal-detail { background: #f0f0f0; padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600; color: #5e1825; }
+    .modal-bio { font-size: 0.95rem; color: #444; line-height: 1.7; }
+    .player-card { cursor: pointer; }
+    .player-card:hover { box-shadow: 0 4px 12px rgba(94,24,37,0.2); border-color: #5e1825; transform: translateY(-2px); }
+  </style>
 </head>
 <body>
 
@@ -33,41 +101,47 @@
 
 <div class="main-container">
 
-  <div style="margin-top: 3rem; margin-bottom: 3rem;">
-    <div class="section-header">
-      <h2 class="section-title">Forwards</h2>
-    </div>
+  <div style="margin-top: 3rem; margin-bottom: 2rem;">
+    <div class="section-header"><h2 class="section-title">Forwards</h2></div>
     <div id="forwardsGrid" class="roster-grid"></div>
   </div>
 
-  <div style="margin-top: 3rem; margin-bottom: 3rem;">
-    <div class="section-header">
-      <h2 class="section-title">Defense</h2>
-    </div>
+  <div style="margin-top: 3rem; margin-bottom: 2rem;">
+    <div class="section-header"><h2 class="section-title">Defense</h2></div>
     <div id="defenseGrid" class="roster-grid"></div>
   </div>
 
-  <div style="margin-top: 3rem; margin-bottom: 3rem;">
-    <div class="section-header">
-      <h2 class="section-title">Goaltenders</h2>
-    </div>
+  <div style="margin-top: 3rem; margin-bottom: 2rem;">
+    <div class="section-header"><h2 class="section-title">Goaltenders</h2></div>
     <div id="goaltendersGrid" class="roster-grid"></div>
   </div>
 
-  <div style="margin-top: 3rem; margin-bottom: 3rem;">
-    <div class="section-header">
-      <h2 class="section-title">Coaching Staff</h2>
-    </div>
+  <div style="margin-top: 3rem; margin-bottom: 2rem;">
+    <div class="section-header"><h2 class="section-title">Coaching Staff</h2></div>
     <div id="coachesGrid" class="roster-grid"></div>
   </div>
 
   <div style="margin-top: 3rem; margin-bottom: 3rem;">
-    <div class="section-header">
-      <h2 class="section-title">Board Members</h2>
-    </div>
+    <div class="section-header"><h2 class="section-title">Board Members</h2></div>
     <div id="boardGrid" class="roster-grid"></div>
   </div>
 
+</div>
+
+<!-- PROFILE MODAL -->
+<div id="profileModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalName">Player Profile</h2>
+      <button class="modal-close" id="closeModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="modalPhotoContainer"></div>
+      <div id="modalSubtitle" class="modal-title"></div>
+      <div id="modalDetails" class="modal-details"></div>
+      <div id="modalBio" class="modal-bio"></div>
+    </div>
+  </div>
 </div>
 
 <footer>
@@ -81,14 +155,12 @@
     </div>
     <div class="footer-section">
       <h3>Contact</h3>
-      <p><strong>Coach:</strong> [Your Name]</p>
-      <p><strong>Email:</strong> coach@franklinhockey.edu</p>
-      <p><strong>Phone:</strong> (615) 555-0147</p>
+      <p><strong>Coach:</strong> Matt Berry</p>
+      <p><strong>Email:</strong> coachberry03@gmail.com</p>
     </div>
     <div class="footer-section">
       <h3>Location</h3>
       <p>Franklin High School</p>
-      <p>Franklin Ice Arena</p>
       <p>Nashville, TN</p>
     </div>
   </div>
@@ -97,46 +169,107 @@
   </div>
 </footer>
 
-<script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
+    authDomain: "admirals-hockey.firebaseapp.com",
+    projectId: "admirals-hockey",
+    storageBucket: "admirals-hockey.firebasestorage.app",
+    messagingSenderId: "783358659334",
+    appId: "1:783358659334:web:5daffd093adca386faec87"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Nav active link
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
   document.querySelectorAll('.nav-link').forEach(link => {
     const href = link.getAttribute('href').split('/').pop() || 'index.html';
     if (href === currentPage) link.classList.add('active');
   });
 
-  function renderGrid(containerId, players, labelKey, numberKey) {
+  // Modal
+  const modal = document.getElementById('profileModal');
+  document.getElementById('closeModal').addEventListener('click', () => modal.classList.remove('active'));
+  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
+
+  function openModal(member) {
+    document.getElementById('modalName').textContent = member.name;
+
+    // Photo
+    const photoContainer = document.getElementById('modalPhotoContainer');
+    if (member.photoURL) {
+      photoContainer.innerHTML = `<img src="${member.photoURL}" class="modal-photo" alt="${member.name}">`;
+    } else {
+      photoContainer.innerHTML = `<div class="modal-photo-placeholder">${member.name.charAt(0)}</div>`;
+    }
+
+    // Subtitle
+    const subtitle = document.getElementById('modalSubtitle');
+    if (member.type === 'player') subtitle.textContent = `${member.position}`;
+    else subtitle.textContent = member.title || '';
+
+    // Details
+    const details = document.getElementById('modalDetails');
+    details.innerHTML = '';
+    if (member.number) details.innerHTML += `<div class="modal-detail">#${member.number}</div>`;
+    if (member.grade) details.innerHTML += `<div class="modal-detail">${member.grade}</div>`;
+    if (member.position && member.type === 'player') details.innerHTML += `<div class="modal-detail">${member.position}</div>`;
+
+    // Bio
+    document.getElementById('modalBio').textContent = member.bio || 'No bio available.';
+
+    modal.classList.add('active');
+  }
+
+  function renderGrid(containerId, members) {
     const grid = document.getElementById(containerId);
     grid.innerHTML = '';
-    if (players.length === 0) {
+    if (members.length === 0) {
       grid.innerHTML = '<p style="color:#666; font-style:italic;">No members added yet</p>';
       return;
     }
-    players.forEach(p => {
+    members.forEach(m => {
       const card = document.createElement('div');
       card.className = 'player-card';
       card.innerHTML = `
-        <div class="player-number">${numberKey ? p[numberKey] : p.role || ''}</div>
+        <div class="player-number">${m.number || m.title || ''}</div>
         <div class="player-info">
-          <div class="player-name">${p.name}</div>
-          <div class="player-position">${p[labelKey] || p.position || p.role || ''}</div>
-          ${p.grade ? `<span class="player-grade">${p.grade}</span>` : ''}
+          <div class="player-name">${m.name}</div>
+          <div class="player-position">${m.type === 'player' ? m.position : m.title || ''}</div>
+          ${m.grade ? `<span class="player-grade">${m.grade}</span>` : ''}
         </div>
       `;
+      card.addEventListener('click', () => openModal(m));
       grid.appendChild(card);
     });
   }
 
-  function loadRoster() {
-    const roster = JSON.parse(localStorage.getItem('admirals_roster')) || [];
-    renderGrid('forwardsGrid', roster.filter(p => p.position === 'Forward'), 'position', 'number');
-    renderGrid('defenseGrid', roster.filter(p => p.position === 'Defense'), 'position', 'number');
-    renderGrid('goaltendersGrid', roster.filter(p => p.position === 'Goaltender'), 'position', 'number');
-    renderGrid('coachesGrid', roster.filter(p => p.position === 'Coach'), 'role', null);
-    renderGrid('boardGrid', roster.filter(p => p.position === 'Board Member'), 'role', null);
+  async function loadRoster() {
+    const snap = await getDocs(collection(db, 'roster'));
+    const forwards = [], defense = [], goalies = [], coaches = [], board = [];
+    snap.forEach(d => {
+      const m = d.data();
+      if (m.type === 'player') {
+        if (m.position === 'Forward') forwards.push(m);
+        else if (m.position === 'Defense') defense.push(m);
+        else if (m.position === 'Goaltender') goalies.push(m);
+      } else if (m.type === 'coach') coaches.push(m);
+      else if (m.type === 'board') board.push(m);
+    });
+
+    renderGrid('forwardsGrid', forwards.sort((a,b) => parseInt(a.number) - parseInt(b.number)));
+    renderGrid('defenseGrid', defense.sort((a,b) => parseInt(a.number) - parseInt(b.number)));
+    renderGrid('goaltendersGrid', goalies.sort((a,b) => parseInt(a.number) - parseInt(b.number)));
+    renderGrid('coachesGrid', coaches);
+    renderGrid('boardGrid', board);
   }
 
   loadRoster();
-  setInterval(loadRoster, 5000);
 </script>
 
 </body>

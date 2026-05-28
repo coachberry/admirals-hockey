@@ -342,3 +342,83 @@ body {
     gap: 0.75rem;
   }
 }
+
+/* ROSTER ACTION BUTTONS */
+.roster-action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* LIST HEADING */
+.list-heading {
+  color: #5e1825;
+  font-size: 1.1rem;
+  margin: 2rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #d4a574;
+}
+
+/* FORM ROW */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+/* PHOTO UPLOAD */
+.photo-upload-section {
+  margin-bottom: 1rem;
+}
+
+.photo-upload-section label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #111;
+}
+
+.photo-preview {
+  margin-top: 0.75rem;
+}
+
+.photo-preview img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #5e1825;
+}
+
+/* ITEM PHOTO */
+.item-photo {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 0.75rem;
+  border: 2px solid #5e1825;
+}
+
+.item-info {
+  display: flex;
+  align-items: center;
+}
+
+/* SAVE STATUS */
+.save-status {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: green;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  .roster-action-buttons {
+    flex-direction: column;
+  }
+}
