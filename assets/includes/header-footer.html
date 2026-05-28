@@ -1,0 +1,53 @@
+<!-- HEADER - Include this at the top of every page -->
+<header>
+  <div class="header-container">
+    <div class="logo">ADMIRALS HOCKEY</div>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="/index.html" class="nav-link" data-page="home">Home</a></li>
+        <li><a href="/pages/schedule.html" class="nav-link" data-page="schedule">Schedule</a></li>
+        <li><a href="/pages/roster.html" class="nav-link" data-page="roster">Roster</a></li>
+        <li><a href="/pages/stats.html" class="nav-link" data-page="stats">Stats</a></li>
+        <li><a href="/pages/contact.html" class="nav-link" data-page="contact">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<!-- FOOTER - Include this at the bottom of every page -->
+<footer>
+  <div class="footer-content">
+    <div class="footer-section">
+      <h3>Quick Links</h3>
+      <p><a href="/index.html">Home</a></p>
+      <p><a href="/pages/schedule.html">Schedule</a></p>
+      <p><a href="/pages/roster.html">Roster</a></p>
+      <p><a href="/pages/stats.html">Stats</a></p>
+    </div>
+    <div class="footer-section">
+      <h3>Contact</h3>
+      <p><strong>Coach:</strong> [Your Name]</p>
+      <p><strong>Email:</strong> coach@franklinhockey.edu</p>
+      <p><strong>Phone:</strong> (615) 555-0147</p>
+    </div>
+    <div class="footer-section">
+      <h3>Location</h3>
+      <p>Franklin High School</p>
+      <p>Franklin Ice Arena</p>
+      <p>Nashville, TN</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2025 Franklin High School Admirals Hockey. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+  document.querySelectorAll('.nav-link').forEach(link => {
+    const href = link.getAttribute('href').split('/').pop() || 'index.html';
+    if (href === currentPage) {
+      link.classList.add('active');
+    }
+  });
+</script>
