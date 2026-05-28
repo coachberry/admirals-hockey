@@ -1,9 +1,6 @@
 {
   "buildCommand": "",
   "outputDirectory": ".",
-  "framework": "html",
-  "functions": {},
-  "env": [],
   "headers": [
     {
       "source": "/assets/(.*)",
