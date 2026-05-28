@@ -1,9 +1,12 @@
 {
   "buildCommand": "",
   "outputDirectory": ".",
-  "framework": "html",
-  "functions": {},
-  "env": [],
+  "rewrites": [
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    }
+  ],
   "headers": [
     {
       "source": "/assets/(.*)",
