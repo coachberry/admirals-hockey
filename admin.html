@@ -1,1 +1,298 @@
-Host not in allowlist
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Franklin Admirals Hockey</title>
+  <link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-container">
+  <div class="login-box">
+    <h1>⚓ Franklin Admirals</h1>
+    <h2>Admin Portal</h2>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Username" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <button type="submit">Login</button>
+    </form>
+    <p id="loginError" class="error"></p>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div id="dashboard" class="admin-dashboard" style="display: none;">
+  <div class="admin-header">
+    <div class="admin-header-left">
+      <h1>⚓ Admin Dashboard</h1>
+      <p>Logged in as: <span id="currentUser"></span></p>
+    </div>
+    <button id="logoutBtn">Logout</button>
+  </div>
+
+  <div class="admin-tabs">
+    <button class="tab-btn active" data-tab="roster">Roster</button>
+    <button class="tab-btn" data-tab="schedule">Schedule</button>
+    <button class="tab-btn" data-tab="statistics">Statistics</button>
+    <button class="tab-btn" data-tab="news">News & Updates</button>
+    <button class="tab-btn" data-tab="users">Manage Users</button>
+    <button class="tab-btn" data-tab="settings">Settings</button>
+  </div>
+
+  <div class="admin-content">
+
+    <!-- ROSTER TAB -->
+    <div id="rosterTab" class="tab-content active">
+      <h2>Team Roster</h2>
+      <div class="roster-action-buttons">
+        <button id="addPlayerBtn" class="btn-primary">+ Add Player</button>
+        <button id="addCoachBtn" class="btn-primary">+ Add Coach</button>
+        <button id="addBoardBtn" class="btn-primary">+ Add Board Member</button>
+      </div>
+
+      <!-- ADD PLAYER FORM -->
+      <div id="playerForm" class="form-section" style="display: none;">
+        <h3>Add / Edit Player</h3>
+        <input type="hidden" id="playerId">
+        <div class="form-row">
+          <input type="text" id="playerName" placeholder="Player Name">
+          <input type="number" id="playerNumber" placeholder="Jersey Number">
+        </div>
+        <div class="form-row">
+          <select id="playerPosition">
+            <option value="">Select Position</option>
+            <option value="Forward">Forward</option>
+            <option value="Defense">Defense</option>
+            <option value="Goaltender">Goaltender</option>
+          </select>
+          <select id="playerGrade">
+            <option value="">Select Grade</option>
+            <option value="Senior">Senior</option>
+            <option value="Junior">Junior</option>
+            <option value="Sophomore">Sophomore</option>
+            <option value="Freshman">Freshman</option>
+          </select>
+        </div>
+        <textarea id="playerBio" placeholder="Player Bio" rows="4"></textarea>
+        <div class="photo-upload-section">
+          <label>Player Photo</label>
+          <input type="file" id="playerPhoto" accept="image/*,.heic,.heif,.HEIC,.HEIF">
+          <div id="playerPhotoPreview" class="photo-preview"></div>
+        </div>
+        <div class="form-buttons">
+          <button id="savePlayerBtn" class="btn-primary">Save Player</button>
+          <button id="cancelPlayerBtn" class="btn-secondary">Cancel</button>
+        </div>
+        <p id="playerSaveStatus" class="save-status"></p>
+      </div>
+
+      <!-- ADD COACH FORM -->
+      <div id="coachForm" class="form-section" style="display: none;">
+        <h3>Add / Edit Coach</h3>
+        <input type="hidden" id="coachId">
+        <input type="text" id="coachName" placeholder="Coach Name">
+        <input type="text" id="coachTitle" placeholder="Title (e.g. Head Coach, Assistant Coach)">
+        <textarea id="coachBio" placeholder="Coach Bio" rows="4"></textarea>
+        <div class="photo-upload-section">
+          <label>Coach Photo</label>
+          <input type="file" id="coachPhoto" accept="image/*,.heic,.heif,.HEIC,.HEIF">
+          <div id="coachPhotoPreview" class="photo-preview"></div>
+        </div>
+        <div class="form-buttons">
+          <button id="saveCoachBtn" class="btn-primary">Save Coach</button>
+          <button id="cancelCoachBtn" class="btn-secondary">Cancel</button>
+        </div>
+        <p id="coachSaveStatus" class="save-status"></p>
+      </div>
+
+      <!-- ADD BOARD MEMBER FORM -->
+      <div id="boardForm" class="form-section" style="display: none;">
+        <h3>Add / Edit Board Member</h3>
+        <input type="hidden" id="boardId">
+        <input type="text" id="boardName" placeholder="Name">
+        <input type="text" id="boardTitle" placeholder="Title (e.g. President, Treasurer)">
+        <textarea id="boardBio" placeholder="Bio" rows="4"></textarea>
+        <div class="photo-upload-section">
+          <label>Photo</label>
+          <input type="file" id="boardPhoto" accept="image/*,.heic,.heif,.HEIC,.HEIF">
+          <div id="boardPhotoPreview" class="photo-preview"></div>
+        </div>
+        <div class="form-buttons">
+          <button id="saveBoardBtn" class="btn-primary">Save Board Member</button>
+          <button id="cancelBoardBtn" class="btn-secondary">Cancel</button>
+        </div>
+        <p id="boardSaveStatus" class="save-status"></p>
+      </div>
+
+      <h3 class="list-heading">Players</h3>
+      <div id="playersList" class="items-list"><div class="empty-state">No players added yet</div></div>
+
+      <h3 class="list-heading">Coaching Staff</h3>
+      <div id="coachesList" class="items-list"><div class="empty-state">No coaches added yet</div></div>
+
+      <h3 class="list-heading">Board Members</h3>
+      <div id="boardList" class="items-list"><div class="empty-state">No board members added yet</div></div>
+    </div>
+
+    <!-- SCHEDULE TAB -->
+    <div id="scheduleTab" class="tab-content">
+      <h2>Game Schedule</h2>
+      <button id="addGameBtn" class="btn-primary">+ Add Game</button>
+      <div id="gameForm" class="form-section" style="display: none;">
+        <h3>Add / Edit Game</h3>
+        <input type="hidden" id="gameId">
+        <div class="form-row">
+          <input type="date" id="gameDate">
+          <input type="time" id="gameTime">
+        </div>
+        <input type="text" id="gameOpponent" placeholder="Opponent">
+        <div class="form-row">
+          <select id="gameType">
+            <option value="">Home or Away</option>
+            <option value="Home">Home</option>
+            <option value="Away">Away</option>
+          </select>
+          <input type="text" id="gameLocation" placeholder="Location">
+        </div>
+        <div class="form-buttons">
+          <button id="saveGameBtn" class="btn-primary">Save Game</button>
+          <button id="cancelGameBtn" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+      <div id="gamesList" class="items-list"><div class="empty-state">No games added yet</div></div>
+    </div>
+
+    <!-- STATISTICS TAB -->
+    <div id="statisticsTab" class="tab-content">
+      <h2>Statistics</h2>
+      <div class="form-section">
+        <h3>Season Record</h3>
+        <div class="form-row">
+          <input type="number" id="wins" placeholder="Wins" min="0">
+          <input type="number" id="losses" placeholder="Losses" min="0">
+          <input type="number" id="ties" placeholder="Ties" min="0">
+        </div>
+        <button id="saveStatsBtn" class="btn-primary">Save Stats</button>
+      </div>
+      <h3 class="list-heading">Scoring Leaders</h3>
+      <button id="addScorerBtn" class="btn-primary">+ Add Scorer</button>
+      <div id="scorerForm" class="form-section" style="display: none;">
+        <input type="hidden" id="scorerId">
+        <div class="form-row">
+          <input type="text" id="scorerName" placeholder="Player Name">
+          <input type="number" id="scorerGoals" placeholder="Goals" min="0">
+          <input type="number" id="scorerAssists" placeholder="Assists" min="0">
+        </div>
+        <div class="form-buttons">
+          <button id="saveScorerBtn" class="btn-primary">Save</button>
+          <button id="cancelScorerBtn" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+      <div id="scorersList" class="items-list"><div class="empty-state">No scorers added yet</div></div>
+      <h3 class="list-heading">Goaltenders</h3>
+      <button id="addGoaltenderBtn" class="btn-primary">+ Add Goaltender</button>
+      <div id="goaltenderForm" class="form-section" style="display: none;">
+        <input type="hidden" id="goaltenderId">
+        <div class="form-row">
+          <input type="text" id="goaltenderName" placeholder="Player Name">
+          <input type="number" id="goaltenderGames" placeholder="Games Played" min="0">
+          <input type="number" id="goaltenderGAA" placeholder="GAA" step="0.01">
+          <input type="number" id="goaltenderSave" placeholder="Save %" step="0.01">
+        </div>
+        <div class="form-buttons">
+          <button id="saveGoaltenderBtn" class="btn-primary">Save</button>
+          <button id="cancelGoaltenderBtn" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+      <div id="goaltendersList" class="items-list"><div class="empty-state">No goaltenders added yet</div></div>
+    </div>
+
+    <!-- NEWS TAB -->
+    <div id="newsTab" class="tab-content">
+      <h2>News & Updates</h2>
+      <button id="addNewsBtn" class="btn-primary">+ Add Post</button>
+      <div id="newsForm" class="form-section" style="display: none;">
+        <h3>Add / Edit Post</h3>
+        <input type="hidden" id="newsId">
+        <input type="text" id="newsTitle" placeholder="Title">
+        <div class="form-row">
+          <input type="date" id="newsDate">
+          <select id="newsCategory">
+            <option value="">Select Category</option>
+            <option value="Game Report">Game Report</option>
+            <option value="Team Update">Team Update</option>
+            <option value="Player Spotlight">Player Spotlight</option>
+            <option value="Announcement">Announcement</option>
+          </select>
+        </div>
+        <textarea id="newsContent" placeholder="Content" rows="6"></textarea>
+        <div class="form-buttons">
+          <button id="saveNewsBtn" class="btn-primary">Save Post</button>
+          <button id="cancelNewsBtn" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+      <div id="newsList" class="items-list"><div class="empty-state">No posts added yet</div></div>
+    </div>
+
+    <!-- MANAGE USERS TAB -->
+    <div id="usersTab" class="tab-content">
+      <h2>Manage Users</h2>
+      <button id="inviteUserBtn" class="btn-primary">+ Invite User</button>
+      <div id="inviteForm" class="form-section" style="display: none;">
+        <h3>Invite New Admin</h3>
+        <input type="email" id="inviteEmail" placeholder="Email Address">
+        <div class="form-buttons">
+          <button id="generateInviteBtn" class="btn-primary">Generate Invite Link</button>
+          <button id="cancelInviteBtn" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+      <div id="inviteResult" class="form-section" style="display: none;">
+        <h3>Share This Link</h3>
+        <input type="text" id="inviteLink" readonly>
+        <button id="copyLinkBtn" class="btn-primary" style="margin-top: 0.75rem;">Copy Link</button>
+      </div>
+      <h3 class="list-heading">Current Admins</h3>
+      <div id="usersList" class="items-list"></div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div id="settingsTab" class="tab-content">
+      <h2>Settings</h2>
+      <div class="form-section">
+        <h3>Your Account</h3>
+        <p style="margin-bottom: 1rem;">Username: <strong id="settingsUsername"></strong></p>
+        <h4 style="margin-bottom: 0.5rem;">Change Email</h4>
+        <input type="email" id="settingsEmail" placeholder="New Email">
+        <button id="updateEmailBtn" class="btn-primary">Update Email</button>
+        <h4 style="margin: 1.5rem 0 0.5rem;">Change Password</h4>
+        <input type="password" id="currentPassword" placeholder="Current Password">
+        <input type="password" id="newPassword" placeholder="New Password">
+        <input type="password" id="confirmPassword" placeholder="Confirm New Password">
+        <button id="updatePasswordBtn" class="btn-primary">Update Password</button>
+        <p id="settingsMsg" style="margin-top: 1rem; font-size: 0.9rem;"></p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SIGNUP SCREEN -->
+<div id="signupScreen" class="login-container" style="display: none;">
+  <div class="login-box">
+    <h1>⚓ Franklin Admirals</h1>
+    <h2>Create Your Account</h2>
+    <form id="signupForm">
+      <input type="email" id="signupEmail" placeholder="Email" readonly>
+      <input type="password" id="signupPassword" placeholder="Create Password">
+      <input type="password" id="signupConfirm" placeholder="Confirm Password">
+      <button type="submit">Create Account</button>
+    </form>
+    <p id="signupError" class="error"></p>
+  </div>
+</div>
+
+<script type="module" src="/assets/js/admin.js"></script>
+</body>
+</html>
