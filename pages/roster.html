@@ -6,6 +6,49 @@
   <title>Roster - Franklin Admirals Hockey</title>
   <link rel="stylesheet" href="/assets/css/styles.css">
   <style>
+    /* PLAYER CARD OVERRIDES */
+    .player-card {
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .player-card:hover {
+      box-shadow: 0 4px 12px rgba(94,24,37,0.2);
+      border-color: #5e1825;
+      transform: translateY(-2px);
+    }
+    .player-photo {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      display: block;
+    }
+    .player-photo-placeholder {
+      width: 100%;
+      height: 160px;
+      background: linear-gradient(135deg, #5e1825, #3d0f18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 3rem;
+      font-weight: 700;
+    }
+    .player-number-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 3px;
+    }
+    .player-card-inner {
+      position: relative;
+    }
+
+    /* MODAL */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -20,7 +63,7 @@
     .modal {
       background: white;
       border-radius: 8px;
-      max-width: 500px;
+      max-width: 480px;
       width: 90%;
       overflow: hidden;
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
@@ -28,50 +71,48 @@
     .modal-header {
       background: linear-gradient(135deg, #5e1825, #3d0f18);
       color: white;
-      padding: 1.5rem;
+      padding: 1.25rem 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .modal-header h2 { font-size: 1.4rem; }
+    .modal-header h2 { font-size: 1.2rem; margin: 0; }
     .modal-close {
       background: none;
       border: none;
       color: white;
-      font-size: 1.5rem;
+      font-size: 1.8rem;
       cursor: pointer;
       line-height: 1;
+      padding: 0;
     }
-    .modal-body { padding: 2rem; }
-    .modal-photo {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
+    .modal-photo-wrap {
+      width: 100%;
+      height: 220px;
+      overflow: hidden;
+    }
+    .modal-photo-wrap img {
+      width: 100%;
+      height: 100%;
       object-fit: cover;
-      display: block;
-      margin: 0 auto 1.5rem;
-      border: 4px solid #5e1825;
     }
     .modal-photo-placeholder {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: #5e1825;
-      color: white;
+      width: 100%;
+      height: 220px;
+      background: linear-gradient(135deg, #5e1825, #3d0f18);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.5rem;
+      color: white;
+      font-size: 4rem;
       font-weight: 700;
-      margin: 0 auto 1.5rem;
     }
-    .modal-name { text-align: center; font-size: 1.4rem; font-weight: 700; color: #5e1825; margin-bottom: 0.25rem; }
-    .modal-title { text-align: center; color: #666; margin-bottom: 1.5rem; }
-    .modal-details { display: flex; gap: 1rem; justify-content: center; margin-bottom: 1.5rem; }
-    .modal-detail { background: #f0f0f0; padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600; color: #5e1825; }
-    .modal-bio { font-size: 0.95rem; color: #444; line-height: 1.7; }
-    .player-card { cursor: pointer; }
-    .player-card:hover { box-shadow: 0 4px 12px rgba(94,24,37,0.2); border-color: #5e1825; transform: translateY(-2px); }
+    .modal-body { padding: 1.5rem; }
+    .modal-name { font-size: 1.4rem; font-weight: 700; color: #5e1825; margin-bottom: 0.25rem; }
+    .modal-subtitle { color: #666; margin-bottom: 1rem; font-size: 0.95rem; }
+    .modal-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .modal-tag { background: #f0f0f0; color: #5e1825; padding: 4px 10px; border-radius: 3px; font-size: 0.8rem; font-weight: 600; }
+    .modal-bio { font-size: 0.9rem; color: #444; line-height: 1.7; }
   </style>
 </head>
 <body>
@@ -100,45 +141,40 @@
 </section>
 
 <div class="main-container">
-
   <div style="margin-top: 3rem; margin-bottom: 2rem;">
     <div class="section-header"><h2 class="section-title">Forwards</h2></div>
     <div id="forwardsGrid" class="roster-grid"></div>
   </div>
-
   <div style="margin-top: 3rem; margin-bottom: 2rem;">
     <div class="section-header"><h2 class="section-title">Defense</h2></div>
     <div id="defenseGrid" class="roster-grid"></div>
   </div>
-
   <div style="margin-top: 3rem; margin-bottom: 2rem;">
     <div class="section-header"><h2 class="section-title">Goaltenders</h2></div>
     <div id="goaltendersGrid" class="roster-grid"></div>
   </div>
-
   <div style="margin-top: 3rem; margin-bottom: 2rem;">
     <div class="section-header"><h2 class="section-title">Coaching Staff</h2></div>
     <div id="coachesGrid" class="roster-grid"></div>
   </div>
-
   <div style="margin-top: 3rem; margin-bottom: 3rem;">
     <div class="section-header"><h2 class="section-title">Board Members</h2></div>
     <div id="boardGrid" class="roster-grid"></div>
   </div>
-
 </div>
 
 <!-- PROFILE MODAL -->
 <div id="profileModal" class="modal-overlay">
   <div class="modal">
     <div class="modal-header">
-      <h2 id="modalName">Player Profile</h2>
+      <h2 id="modalTitle">Profile</h2>
       <button class="modal-close" id="closeModal">&times;</button>
     </div>
+    <div id="modalPhotoWrap" class="modal-photo-wrap"></div>
     <div class="modal-body">
-      <div id="modalPhotoContainer"></div>
-      <div id="modalSubtitle" class="modal-title"></div>
-      <div id="modalDetails" class="modal-details"></div>
+      <div id="modalName" class="modal-name"></div>
+      <div id="modalSubtitle" class="modal-subtitle"></div>
+      <div id="modalTags" class="modal-tags"></div>
       <div id="modalBio" class="modal-bio"></div>
     </div>
   </div>
@@ -197,33 +233,69 @@
   document.getElementById('closeModal').addEventListener('click', () => modal.classList.remove('active'));
   modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
 
-  function openModal(member) {
-    document.getElementById('modalName').textContent = member.name;
+  function openModal(m) {
+    document.getElementById('modalTitle').textContent = m.name;
+    document.getElementById('modalName').textContent = m.name;
 
     // Photo
-    const photoContainer = document.getElementById('modalPhotoContainer');
-    if (member.photoURL) {
-      photoContainer.innerHTML = `<img src="${member.photoURL}" class="modal-photo" alt="${member.name}">`;
+    const photoWrap = document.getElementById('modalPhotoWrap');
+    if (m.photoURL) {
+      photoWrap.innerHTML = `<img src="${m.photoURL}" alt="${m.name}">`;
     } else {
-      photoContainer.innerHTML = `<div class="modal-photo-placeholder">${member.name.charAt(0)}</div>`;
+      photoWrap.innerHTML = `<div class="modal-photo-placeholder">${m.name.charAt(0)}</div>`;
     }
 
     // Subtitle
     const subtitle = document.getElementById('modalSubtitle');
-    if (member.type === 'player') subtitle.textContent = `${member.position}`;
-    else subtitle.textContent = member.title || '';
+    if (m.type === 'player') subtitle.textContent = m.position;
+    else subtitle.textContent = m.title || '';
 
-    // Details
-    const details = document.getElementById('modalDetails');
-    details.innerHTML = '';
-    if (member.number) details.innerHTML += `<div class="modal-detail">#${member.number}</div>`;
-    if (member.grade) details.innerHTML += `<div class="modal-detail">${member.grade}</div>`;
-    if (member.position && member.type === 'player') details.innerHTML += `<div class="modal-detail">${member.position}</div>`;
+    // Tags
+    const tags = document.getElementById('modalTags');
+    tags.innerHTML = '';
+    if (m.number) tags.innerHTML += `<span class="modal-tag">#${m.number}</span>`;
+    if (m.grade) tags.innerHTML += `<span class="modal-tag">${m.grade}</span>`;
+    if (m.position && m.type === 'player') tags.innerHTML += `<span class="modal-tag">${m.position}</span>`;
 
     // Bio
-    document.getElementById('modalBio').textContent = member.bio || 'No bio available.';
+    document.getElementById('modalBio').textContent = m.bio || 'No bio available.';
 
     modal.classList.add('active');
+  }
+
+  function buildCard(m) {
+    const card = document.createElement('div');
+    card.className = 'player-card';
+
+    const inner = document.createElement('div');
+    inner.className = 'player-card-inner';
+
+    // Photo or placeholder
+    if (m.photoURL) {
+      inner.innerHTML = `<img src="${m.photoURL}" alt="${m.name}" class="player-photo">`;
+    } else {
+      inner.innerHTML = `<div class="player-photo-placeholder">${m.name.charAt(0)}</div>`;
+    }
+
+    // Number badge for players
+    if (m.number) {
+      inner.innerHTML += `<div class="player-number-badge">#${m.number}</div>`;
+    }
+
+    card.appendChild(inner);
+
+    // Info section
+    const info = document.createElement('div');
+    info.className = 'player-info';
+    info.innerHTML = `
+      <div class="player-name">${m.name}</div>
+      <div class="player-position">${m.type === 'player' ? m.position : m.title || ''}</div>
+      ${m.grade ? `<span class="player-grade">${m.grade}</span>` : ''}
+    `;
+    card.appendChild(info);
+
+    card.addEventListener('click', () => openModal(m));
+    return card;
   }
 
   function renderGrid(containerId, members) {
@@ -233,20 +305,7 @@
       grid.innerHTML = '<p style="color:#666; font-style:italic;">No members added yet</p>';
       return;
     }
-    members.forEach(m => {
-      const card = document.createElement('div');
-      card.className = 'player-card';
-      card.innerHTML = `
-        <div class="player-number">${m.number || m.title || ''}</div>
-        <div class="player-info">
-          <div class="player-name">${m.name}</div>
-          <div class="player-position">${m.type === 'player' ? m.position : m.title || ''}</div>
-          ${m.grade ? `<span class="player-grade">${m.grade}</span>` : ''}
-        </div>
-      `;
-      card.addEventListener('click', () => openModal(m));
-      grid.appendChild(card);
-    });
+    members.forEach(m => grid.appendChild(buildCard(m)));
   }
 
   async function loadRoster() {
@@ -261,10 +320,10 @@
       } else if (m.type === 'coach') coaches.push(m);
       else if (m.type === 'board') board.push(m);
     });
-
-    renderGrid('forwardsGrid', forwards.sort((a,b) => parseInt(a.number) - parseInt(b.number)));
-    renderGrid('defenseGrid', defense.sort((a,b) => parseInt(a.number) - parseInt(b.number)));
-    renderGrid('goaltendersGrid', goalies.sort((a,b) => parseInt(a.number) - parseInt(b.number)));
+    const byNumber = (a, b) => parseInt(a.number) - parseInt(b.number);
+    renderGrid('forwardsGrid', forwards.sort(byNumber));
+    renderGrid('defenseGrid', defense.sort(byNumber));
+    renderGrid('goaltendersGrid', goalies.sort(byNumber));
     renderGrid('coachesGrid', coaches);
     renderGrid('boardGrid', board);
   }
