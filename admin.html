@@ -25,15 +25,20 @@
 <!-- ADMIN DASHBOARD -->
 <div id="dashboard" class="admin-dashboard" style="display: none;">
   <div class="admin-header">
-    <h1>Admin Dashboard</h1>
+    <div class="admin-header-left">
+      <h1>⚓ Admin Dashboard</h1>
+      <p>Logged in as: <span id="currentUser"></span></p>
+    </div>
     <button id="logoutBtn">Logout</button>
   </div>
 
   <div class="admin-tabs">
     <button class="tab-btn active" data-tab="roster">Roster</button>
     <button class="tab-btn" data-tab="schedule">Schedule</button>
-    <button class="tab-btn" data-tab="stats">Stats</button>
-    <button class="tab-btn" data-tab="news">News</button>
+    <button class="tab-btn" data-tab="statistics">Statistics</button>
+    <button class="tab-btn" data-tab="news">News & Updates</button>
+    <button class="tab-btn" data-tab="users">Manage Users</button>
+    <button class="tab-btn" data-tab="settings">Settings</button>
   </div>
 
   <div class="admin-content">
@@ -41,99 +46,198 @@
     <!-- ROSTER TAB -->
     <div id="rosterTab" class="tab-content active">
       <h2>Team Roster</h2>
-      <button id="addPlayerBtn" class="btn">+ Add Player</button>
-      
+      <button id="addPlayerBtn" class="btn-primary">+ Add Player</button>
+
       <div id="playerForm" class="form-section" style="display: none;">
-        <h3>Add/Edit Player</h3>
+        <h3>Add / Edit Player</h3>
         <input type="hidden" id="playerId">
-        <input type="text" id="playerName" placeholder="Player Name" required>
-        <input type="number" id="playerNumber" placeholder="Jersey Number" required>
-        <select id="playerPosition" required>
-          <option value="">Position</option>
+        <input type="text" id="playerName" placeholder="Player Name">
+        <input type="number" id="playerNumber" placeholder="Jersey Number">
+        <select id="playerPosition">
+          <option value="">Select Position</option>
           <option value="Forward">Forward</option>
           <option value="Defense">Defense</option>
           <option value="Goaltender">Goaltender</option>
         </select>
-        <select id="playerGrade" required>
-          <option value="">Grade</option>
+        <select id="playerGrade">
+          <option value="">Select Grade</option>
           <option value="Senior">Senior</option>
           <option value="Junior">Junior</option>
           <option value="Sophomore">Sophomore</option>
           <option value="Freshman">Freshman</option>
         </select>
         <div class="form-buttons">
-          <button type="button" id="savePlayerBtn" class="btn btn-primary">Save</button>
-          <button type="button" id="cancelPlayerBtn" class="btn">Cancel</button>
+          <button id="savePlayerBtn" class="btn-primary">Save Player</button>
+          <button id="cancelPlayerBtn" class="btn-secondary">Cancel</button>
         </div>
       </div>
 
-      <div id="playersList" class="items-list"></div>
+      <div id="playersList" class="items-list">
+        <div class="empty-state">No players added yet</div>
+      </div>
     </div>
 
     <!-- SCHEDULE TAB -->
     <div id="scheduleTab" class="tab-content">
       <h2>Game Schedule</h2>
-      <button id="addGameBtn" class="btn">+ Add Game</button>
-      
+      <button id="addGameBtn" class="btn-primary">+ Add Game</button>
+
       <div id="gameForm" class="form-section" style="display: none;">
-        <h3>Add/Edit Game</h3>
+        <h3>Add / Edit Game</h3>
         <input type="hidden" id="gameId">
-        <input type="date" id="gameDate" required>
-        <input type="time" id="gameTime" required>
-        <input type="text" id="gameOpponent" placeholder="Opponent" required>
-        <select id="gameType" required>
+        <input type="date" id="gameDate">
+        <input type="time" id="gameTime">
+        <input type="text" id="gameOpponent" placeholder="Opponent">
+        <select id="gameType">
           <option value="">Home or Away</option>
           <option value="Home">Home</option>
           <option value="Away">Away</option>
         </select>
-        <input type="text" id="gameLocation" placeholder="Location" required>
+        <input type="text" id="gameLocation" placeholder="Location">
         <div class="form-buttons">
-          <button type="button" id="saveGameBtn" class="btn btn-primary">Save</button>
-          <button type="button" id="cancelGameBtn" class="btn">Cancel</button>
+          <button id="saveGameBtn" class="btn-primary">Save Game</button>
+          <button id="cancelGameBtn" class="btn-secondary">Cancel</button>
         </div>
       </div>
 
-      <div id="gamesList" class="items-list"></div>
+      <div id="gamesList" class="items-list">
+        <div class="empty-state">No games added yet</div>
+      </div>
     </div>
 
-    <!-- STATS TAB -->
-    <div id="statsTab" class="tab-content">
-      <h2>Team Statistics</h2>
-      <div class="stats-section">
+    <!-- STATISTICS TAB -->
+    <div id="statisticsTab" class="tab-content">
+      <h2>Statistics</h2>
+      <div class="form-section">
         <h3>Season Record</h3>
         <input type="number" id="wins" placeholder="Wins" min="0">
         <input type="number" id="losses" placeholder="Losses" min="0">
         <input type="number" id="ties" placeholder="Ties" min="0">
-        <button id="saveStatsBtn" class="btn btn-primary">Save Stats</button>
+        <button id="saveStatsBtn" class="btn-primary">Save Stats</button>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem;">Scoring Leaders</h3>
+      <button id="addScorerBtn" class="btn-primary">+ Add Scorer</button>
+      <div id="scorerForm" class="form-section" style="display: none;">
+        <input type="hidden" id="scorerId">
+        <input type="text" id="scorerName" placeholder="Player Name">
+        <input type="number" id="scorerGoals" placeholder="Goals" min="0">
+        <input type="number" id="scorerAssists" placeholder="Assists" min="0">
+        <div class="form-buttons">
+          <button id="saveScorerBtn" class="btn-primary">Save</button>
+          <button id="cancelScorerBtn" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+      <div id="scorersList" class="items-list">
+        <div class="empty-state">No scorers added yet</div>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem;">Goaltenders</h3>
+      <button id="addGoaltenderBtn" class="btn-primary">+ Add Goaltender</button>
+      <div id="goaltenderForm" class="form-section" style="display: none;">
+        <input type="hidden" id="goaltenderId">
+        <input type="text" id="goaltenderName" placeholder="Player Name">
+        <input type="number" id="goaltenderGames" placeholder="Games Played" min="0">
+        <input type="number" id="goaltenderGAA" placeholder="Goals Against Avg" step="0.01">
+        <input type="number" id="goaltenderSave" placeholder="Save %" step="0.01">
+        <div class="form-buttons">
+          <button id="saveGoaltenderBtn" class="btn-primary">Save</button>
+          <button id="cancelGoaltenderBtn" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+      <div id="goaltendersList" class="items-list">
+        <div class="empty-state">No goaltenders added yet</div>
       </div>
     </div>
 
     <!-- NEWS TAB -->
     <div id="newsTab" class="tab-content">
       <h2>News & Updates</h2>
-      <button id="addNewsBtn" class="btn">+ Add Post</button>
-      
+      <button id="addNewsBtn" class="btn-primary">+ Add Post</button>
+
       <div id="newsForm" class="form-section" style="display: none;">
-        <h3>Add/Edit News Post</h3>
+        <h3>Add / Edit Post</h3>
         <input type="hidden" id="newsId">
-        <input type="text" id="newsTitle" placeholder="Title" required>
-        <input type="date" id="newsDate" required>
-        <select id="newsCategory" required>
-          <option value="">Category</option>
+        <input type="text" id="newsTitle" placeholder="Title">
+        <input type="date" id="newsDate">
+        <select id="newsCategory">
+          <option value="">Select Category</option>
           <option value="Game Report">Game Report</option>
           <option value="Team Update">Team Update</option>
+          <option value="Player Spotlight">Player Spotlight</option>
           <option value="Announcement">Announcement</option>
         </select>
-        <textarea id="newsContent" placeholder="Content" rows="5" required></textarea>
+        <textarea id="newsContent" placeholder="Content" rows="6"></textarea>
         <div class="form-buttons">
-          <button type="button" id="saveNewsBtn" class="btn btn-primary">Save</button>
-          <button type="button" id="cancelNewsBtn" class="btn">Cancel</button>
+          <button id="saveNewsBtn" class="btn-primary">Save Post</button>
+          <button id="cancelNewsBtn" class="btn-secondary">Cancel</button>
         </div>
       </div>
 
-      <div id="newsList" class="items-list"></div>
+      <div id="newsList" class="items-list">
+        <div class="empty-state">No posts added yet</div>
+      </div>
     </div>
 
+    <!-- MANAGE USERS TAB -->
+    <div id="usersTab" class="tab-content">
+      <h2>Manage Users</h2>
+      <button id="inviteUserBtn" class="btn-primary">+ Invite User</button>
+
+      <div id="inviteForm" class="form-section" style="display: none;">
+        <h3>Invite New Admin</h3>
+        <input type="email" id="inviteEmail" placeholder="Email Address">
+        <div class="form-buttons">
+          <button id="generateInviteBtn" class="btn-primary">Generate Invite Link</button>
+          <button id="cancelInviteBtn" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+
+      <div id="inviteResult" class="form-section" style="display: none;">
+        <h3>Share This Link</h3>
+        <input type="text" id="inviteLink" readonly>
+        <button id="copyLinkBtn" class="btn-primary">Copy Link</button>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem;">Current Admins</h3>
+      <div id="usersList" class="items-list"></div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div id="settingsTab" class="tab-content">
+      <h2>Settings</h2>
+      <div class="form-section">
+        <h3>Your Account</h3>
+        <p style="margin-bottom: 1rem;">Username: <strong id="settingsUsername"></strong></p>
+
+        <h4 style="margin-bottom: 0.5rem;">Change Email</h4>
+        <input type="email" id="settingsEmail" placeholder="New Email">
+        <button id="updateEmailBtn" class="btn-primary">Update Email</button>
+
+        <h4 style="margin: 1.5rem 0 0.5rem;">Change Password</h4>
+        <input type="password" id="currentPassword" placeholder="Current Password">
+        <input type="password" id="newPassword" placeholder="New Password">
+        <input type="password" id="confirmPassword" placeholder="Confirm New Password">
+        <button id="updatePasswordBtn" class="btn-primary">Update Password</button>
+        <p id="settingsMsg" style="margin-top: 1rem; font-size: 0.9rem;"></p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SIGNUP SCREEN -->
+<div id="signupScreen" class="login-container" style="display: none;">
+  <div class="login-box">
+    <h1>⚓ Franklin Admirals</h1>
+    <h2>Create Your Account</h2>
+    <form id="signupForm">
+      <input type="email" id="signupEmail" placeholder="Email" readonly>
+      <input type="password" id="signupPassword" placeholder="Create Password">
+      <input type="password" id="signupConfirm" placeholder="Confirm Password">
+      <button type="submit">Create Account</button>
+    </form>
+    <p id="signupError" class="error"></p>
   </div>
 </div>
 
