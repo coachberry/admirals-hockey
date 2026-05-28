@@ -142,10 +142,10 @@ class AdminPortal {
   }
 
   // ROSTER
-  clearPlayerForm() { ['playerId','playerName','playerNumber','playerPosition','playerGrade'].forEach(id => document.getElementById(id).value = ''); }
+  clearPlayerForm() { ['playerId','playerName','playerNumber','playerPosition','playerGrade','playerRole'].forEach(id => document.getElementById(id).value = ''); }
   savePlayer() {
     const id = document.getElementById('playerId').value;
-    const player = { id: id || Date.now().toString(), name: document.getElementById('playerName').value, number: document.getElementById('playerNumber').value, position: document.getElementById('playerPosition').value, grade: document.getElementById('playerGrade').value };
+    const player = { id: id || Date.now().toString(), name: document.getElementById('playerName').value, number: document.getElementById('playerNumber').value, position: document.getElementById('playerPosition').value, grade: document.getElementById('playerGrade').value, role: document.getElementById('playerRole').value };
     if (id) { this.roster[this.roster.findIndex(p => p.id === id)] = player; } else { this.roster.push(player); }
     this.saveData(); this.loadRoster(); document.getElementById('playerForm').style.display = 'none';
   }
@@ -154,11 +154,11 @@ class AdminPortal {
     list.innerHTML = this.roster.length === 0 ? '<div class="empty-state">No players added yet</div>' : '';
     this.roster.forEach(p => {
       const item = document.createElement('div'); item.className = 'item';
-      item.innerHTML = `<div class="item-info"><strong>#${p.number} - ${p.name}</strong><span>${p.position} | ${p.grade}</span></div><div><button class="btn-edit" onclick="portal.editPlayer('${p.id}')">Edit</button><button class="btn-delete" onclick="portal.deletePlayer('${p.id}')">Delete</button></div>`;
+      item.innerHTML = `<div class="item-info"><strong>${p.number ? '#'+p.number+' - ' : ''}${p.name}</strong><span>${p.position}${p.grade ? ' | '+p.grade : ''}${p.role ? ' | '+p.role : ''}</span></div><div><button class="btn-edit" onclick="portal.editPlayer('${p.id}')">Edit</button><button class="btn-delete" onclick="portal.deletePlayer('${p.id}')">Delete</button></div>`;
       list.appendChild(item);
     });
   }
-  editPlayer(id) { const p = this.roster.find(x => x.id === id); document.getElementById('playerId').value = p.id; document.getElementById('playerName').value = p.name; document.getElementById('playerNumber').value = p.number; document.getElementById('playerPosition').value = p.position; document.getElementById('playerGrade').value = p.grade; document.getElementById('playerForm').style.display = 'block'; }
+  editPlayer(id) { const p = this.roster.find(x => x.id === id); document.getElementById('playerId').value = p.id; document.getElementById('playerName').value = p.name; document.getElementById('playerNumber').value = p.number; document.getElementById('playerPosition').value = p.position; document.getElementById('playerGrade').value = p.grade; document.getElementById('playerRole').value = p.role || ''; document.getElementById('playerForm').style.display = 'block'; }
   deletePlayer(id) { if (confirm('Delete player?')) { this.roster = this.roster.filter(p => p.id !== id); this.saveData(); this.loadRoster(); } }
 
   // SCHEDULE
