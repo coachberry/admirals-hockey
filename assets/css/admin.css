@@ -286,6 +286,10 @@ body {
   margin-top: 0.5rem;
 }
 
+.form-buttons button {
+  flex: 1;
+}
+
 /* ITEMS LIST */
 .items-list {
   display: flex;

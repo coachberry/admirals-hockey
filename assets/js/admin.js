@@ -170,7 +170,7 @@ document.getElementById('memberPhoto').addEventListener('change', function() {
 function showPhotoConfirmed(dataURL, container, originalSrc = null) {
   container.innerHTML = `
     <div style="margin-top:0.75rem;">
-      <img src="${dataURL}" style="width:100%; aspect-ratio:7/8; object-fit:cover; border-radius:4px; border:2px solid #5e1825; display:block;">
+      <img src="${dataURL}" style="width:40%; aspect-ratio:7/8; object-fit:contain; border-radius:4px; border:2px solid #5e1825; display:block; background:#f0f0f0;">
       <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
         ${originalSrc ? `<button type="button" id="reframeBtn" class="btn-secondary" style="font-size:0.8rem; padding:6px 12px; flex:1;">Re-frame</button>` : ''}
         <button type="button" id="removePhotoBtn" class="btn-delete" style="font-size:0.8rem; padding:6px 12px; flex:1;">Remove Photo</button>
