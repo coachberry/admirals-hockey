@@ -278,25 +278,38 @@
 /* SEASON STATS BAR */
 .season-stats-bar {
   display: flex;
-  align-items: center;
-  gap: 0;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.stats-bar-card {
   background: white;
   border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  margin-top: 1rem;
-  overflow: hidden;
-  width: fit-content;
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 0.25rem;
 }
 
-.stats-bar-item {
-  padding: 0.6rem 1.5rem;
-  font-size: 0.95rem;
+.stats-bar-record {
+  flex: 2;
+}
+
+.stats-bar-label {
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #5e1825;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.stats-bar-divider {
-  width: 1px;
-  height: 24px;
-  background: #e0e0e0;
+.stats-bar-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #5e1825;
 }

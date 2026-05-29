@@ -42,11 +42,18 @@
 
   <!-- Season Stats Bar -->
   <div class="season-stats-bar" id="seasonStatsBar" style="display:none;">
-    <div class="stats-bar-item" id="statsRecord">Record: -</div>
-    <div class="stats-bar-divider"></div>
-    <div class="stats-bar-item" id="statsGF">GF: -</div>
-    <div class="stats-bar-divider"></div>
-    <div class="stats-bar-item" id="statsGA">GA: -</div>
+    <div class="stats-bar-card stats-bar-record">
+      <div class="stats-bar-label">Record</div>
+      <div class="stats-bar-value" id="statsRecord">-</div>
+    </div>
+    <div class="stats-bar-card">
+      <div class="stats-bar-label">GF</div>
+      <div class="stats-bar-value" id="statsGF">-</div>
+    </div>
+    <div class="stats-bar-card">
+      <div class="stats-bar-label">GA</div>
+      <div class="stats-bar-value" id="statsGA">-</div>
+    </div>
   </div>
 
   <!-- Next Game / Last Game -->
@@ -263,9 +270,9 @@
     const statsBar = document.getElementById('seasonStatsBar');
     const hasAnyResult = games.some(g => g.result);
     if (hasAnyResult) {
-      document.getElementById('statsRecord').textContent = 'Record: ' + recordStr;
-      document.getElementById('statsGF').textContent = 'GF: ' + gf;
-      document.getElementById('statsGA').textContent = 'GA: ' + ga;
+      document.getElementById('statsRecord').textContent = recordStr;
+      document.getElementById('statsGF').textContent = gf;
+      document.getElementById('statsGA').textContent = ga;
       statsBar.style.display = 'flex';
     } else {
       statsBar.style.display = 'none';
