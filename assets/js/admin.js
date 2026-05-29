@@ -121,14 +121,26 @@ async function loadSeasons() {
     select.innerHTML = '<option value="">No seasons - create one first</option>';
   }
 
+  // Populate schedule season selector
+  const schedSelect = document.getElementById('scheduleSeasonSelect');
+  schedSelect.innerHTML = allSeasons.map(s =>
+    `<option value="${s.id}" ${s.id === currentSeasonId ? 'selected' : ''}>${s.label}${s.current ? ' (Current)' : ''}</option>`
+  ).join('');
+  if (!allSeasons.length) schedSelect.innerHTML = '<option value="">No seasons</option>';
+
   // Load roster for current season
   if (currentSeasonId) {
     loadRoster(currentSeasonId);
+    loadScheduleGames(currentSeasonId);
   }
 
   // Populate seasons list tab
   renderSeasonsList();
 }
+
+document.getElementById('scheduleSeasonSelect').addEventListener('change', e => {
+  loadScheduleGames(e.target.value);
+});
 
 document.getElementById('rosterSeasonSelect').addEventListener('change', e => {
   currentSeasonId = e.target.value;
@@ -537,45 +549,342 @@ window.deleteMember = async (id, type) => {
 // ============================================
 // SCHEDULE
 // ============================================
-document.getElementById('addGameBtn').addEventListener('click', () => {
-  ['gameId','gameDate','gameTime','gameOpponent','gameType','gameLocation'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('gameForm').style.display = 'block';
-});
-document.getElementById('cancelGameBtn').addEventListener('click', () => document.getElementById('gameForm').style.display = 'none');
-document.getElementById('saveGameBtn').addEventListener('click', async () => {
-  const id = document.getElementById('gameId').value || Date.now().toString();
-  await setDoc(doc(db, 'schedule', id), { id, date: document.getElementById('gameDate').value, time: document.getElementById('gameTime').value, opponent: document.getElementById('gameOpponent').value, type: document.getElementById('gameType').value, location: document.getElementById('gameLocation').value });
-  document.getElementById('gameForm').style.display = 'none';
-  loadSchedule();
-});
+let currentGameId = null;
+let savedRinks = [];
+let savedLeagues = [];
+let savedTournaments = [];
 
-async function loadSchedule() {
+document.getElementById('addGameBtn').addEventListener('click', () => openGameModal());
+
+async function openGameModal(data = null) {
+  currentGameId = data?.id || null;
+  // Load saved rinks, leagues, tournaments
+  await loadSavedOptions();
+  showGameModal(data);
+}
+
+function showGameModal(data = null) {
+  const modal = document.getElementById('gameModal');
+  if (!modal) createGameModal();
+
+  // Reset fields
+  const fields = ['gameDate','gameTime','gameTimezone','gameOpponent','gameHomeAway','gameRinkName','gameRinkAddress','gameResult','gameTeamScore','gameOpponentScore'];
+  fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = data?.[id.replace('game', '').toLowerCase()] || ''; });
+
+  if (data) {
+    document.getElementById('gameDate').value = data.date || '';
+    document.getElementById('gameTime').value = data.time || '';
+    document.getElementById('gameTimezone').value = data.timezone || 'CT';
+    document.getElementById('gameGameType').value = data.gameType || '';
+    document.getElementById('gameLeagueName').value = data.leagueName || '';
+    document.getElementById('gameTournamentName').value = data.tournamentName || '';
+    document.getElementById('gameSubtype').value = data.subtype || '';
+    document.getElementById('gameOpponent').value = data.opponent || '';
+    document.getElementById('gameHomeAway').value = data.homeAway || '';
+    document.getElementById('gameRinkName').value = data.rinkName || '';
+    document.getElementById('gameRinkAddress').value = data.rinkAddress || '';
+    document.getElementById('gameResult').value = data.result || '';
+    document.getElementById('gameTeamScore').value = data.teamScore ?? '';
+    document.getElementById('gameOpponentScore').value = data.opponentScore ?? '';
+    if (data.opponentLogo) {
+      document.getElementById('gameOpponentLogoPreview').innerHTML = `<img src="${data.opponentLogo}" style="height:50px;object-fit:contain;">`;
+    }
+  }
+
+  toggleGameTypeFields();
+  document.getElementById('gameModal').classList.add('active');
+}
+
+function createGameModal() {
+  const modal = document.createElement('div');
+  modal.id = 'gameModal';
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal" style="max-width:560px;">
+      <div class="modal-header">
+        <h2 id="gameModalTitle">Add Game</h2>
+        <button class="modal-close" id="closeGameModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <input type="date" id="gameDate" placeholder="Date">
+          <input type="time" id="gameTime" placeholder="Time">
+          <select id="gameTimezone">
+            <option value="ET">ET</option>
+            <option value="CT" selected>CT</option>
+            <option value="MT">MT</option>
+            <option value="PT">PT</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <select id="gameGameType">
+            <option value="">Game Type</option>
+            <option value="Exhibition">Exhibition</option>
+            <option value="League">League</option>
+            <option value="Tournament">Tournament</option>
+          </select>
+          <select id="gameSubtype">
+            <option value="">Sub-Type</option>
+            <option value="Regular Season">Regular Season</option>
+            <option value="Playoffs">Playoffs</option>
+            <option value="Championship">Championship</option>
+          </select>
+        </div>
+
+        <div id="leagueField" style="display:none;">
+          <input type="text" id="gameLeagueName" placeholder="League Name" list="leaguesList">
+          <datalist id="leaguesList"></datalist>
+        </div>
+        <div id="tournamentField" style="display:none;">
+          <input type="text" id="gameTournamentName" placeholder="Tournament Name" list="tournamentsList">
+          <datalist id="tournamentsList"></datalist>
+        </div>
+
+        <div class="form-row">
+          <input type="text" id="gameOpponent" placeholder="Opponent Name">
+          <select id="gameHomeAway">
+            <option value="">Home or Away</option>
+            <option value="Home">Home</option>
+            <option value="Away">Away</option>
+          </select>
+        </div>
+
+        <div class="photo-upload-section" style="margin-bottom:0.75rem;">
+          <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.4rem;">Opponent Logo (optional)</label>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <div id="gameOpponentLogoPreview" class="opp-logo-admin-preview"></div>
+            <label class="btn-secondary photo-btn photo-choose-label" style="font-size:0.8rem;">
+              Choose Logo
+              <input type="file" id="gameOpponentLogo" accept="image/*" style="display:none;">
+            </label>
+            <button type="button" id="removeOpponentLogo" class="btn-delete photo-btn" style="font-size:0.8rem;display:none;">Remove</button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <input type="text" id="gameRinkName" placeholder="Rink Name" list="rinkNamesList">
+          <datalist id="rinkNamesList"></datalist>
+          <input type="text" id="gameRinkAddress" placeholder="Rink Address" list="rinkAddressList">
+          <datalist id="rinkAddressList"></datalist>
+        </div>
+
+        <h4 style="margin:1rem 0 0.5rem;color:#5e1825;">Result (add after game)</h4>
+        <div class="form-row">
+          <select id="gameResult">
+            <option value="">No Result Yet</option>
+            <option value="W">W - Win</option>
+            <option value="L">L - Loss</option>
+            <option value="T">T - Tie</option>
+            <option value="OTW">OTW - Overtime Win</option>
+            <option value="OTL">OTL - Overtime Loss</option>
+            <option value="SOW">SOW - Shootout Win</option>
+            <option value="SOL">SOL - Shootout Loss</option>
+          </select>
+        </div>
+        <div class="form-row" id="scoreFields" style="display:none;">
+          <input type="number" id="gameTeamScore" placeholder="Our Score" min="0">
+          <input type="number" id="gameOpponentScore" placeholder="Opp Score" min="0">
+        </div>
+
+        <div class="form-buttons">
+          <button id="saveGameBtn" class="btn-primary">Save Game</button>
+          <button id="cancelGameBtn" class="btn-secondary">Cancel</button>
+        </div>
+        <p id="gameSaveStatus" class="save-status"></p>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  document.getElementById('closeGameModal').addEventListener('click', () => modal.classList.remove('active'));
+  document.getElementById('cancelGameBtn').addEventListener('click', () => modal.classList.remove('active'));
+  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
+
+  document.getElementById('gameGameType').addEventListener('change', toggleGameTypeFields);
+  document.getElementById('gameResult').addEventListener('change', () => {
+    const hasResult = document.getElementById('gameResult').value;
+    document.getElementById('scoreFields').style.display = hasResult ? 'grid' : 'none';
+  });
+
+  // Opponent logo upload
+  let opponentLogoData = null;
+  document.getElementById('gameOpponentLogo').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      opponentLogoData = e.target.result;
+      document.getElementById('gameOpponentLogoPreview').innerHTML = `<img src="${opponentLogoData}" style="height:50px;object-fit:contain;">`;
+      document.getElementById('removeOpponentLogo').style.display = 'inline-block';
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('removeOpponentLogo').addEventListener('click', () => {
+    opponentLogoData = null;
+    document.getElementById('gameOpponentLogoPreview').innerHTML = '';
+    document.getElementById('gameOpponentLogo').value = '';
+    document.getElementById('removeOpponentLogo').style.display = 'none';
+  });
+
+  // Auto-fill rink address when rink name selected
+  document.getElementById('gameRinkName').addEventListener('change', () => {
+    const name = document.getElementById('gameRinkName').value;
+    const rink = savedRinks.find(r => r.name === name);
+    if (rink) document.getElementById('gameRinkAddress').value = rink.address;
+  });
+
+  document.getElementById('saveGameBtn').addEventListener('click', async () => {
+    const seasonId = document.getElementById('scheduleSeasonSelect').value;
+    if (!seasonId) { alert('Please select a season first'); return; }
+
+    const status = document.getElementById('gameSaveStatus');
+    status.textContent = 'Saving...';
+
+    const id = currentGameId || Date.now().toString();
+    const gameType = document.getElementById('gameGameType').value;
+    const result = document.getElementById('gameResult').value;
+    const rinkName = document.getElementById('gameRinkName').value;
+    const rinkAddress = document.getElementById('gameRinkAddress').value;
+    const leagueName = document.getElementById('gameLeagueName').value;
+    const tournamentName = document.getElementById('gameTournamentName').value;
+
+    // Upload opponent logo if new one selected
+    let opponentLogo = '';
+    if (opponentLogoData) {
+      try {
+        const storageRef = ref(storage, `schedule/${seasonId}/${id}/opponentLogo`);
+        await uploadString(storageRef, opponentLogoData, 'data_url');
+        opponentLogo = await getDownloadURL(storageRef);
+      } catch(e) { console.error('Logo upload failed:', e); }
+    }
+
+    const game = {
+      id,
+      date: document.getElementById('gameDate').value,
+      time: document.getElementById('gameTime').value,
+      timezone: document.getElementById('gameTimezone').value,
+      gameType,
+      subtype: document.getElementById('gameSubtype').value,
+      leagueName: gameType === 'League' ? leagueName : '',
+      tournamentName: gameType === 'Tournament' ? tournamentName : '',
+      opponent: document.getElementById('gameOpponent').value,
+      homeAway: document.getElementById('gameHomeAway').value,
+      rinkName,
+      rinkAddress,
+      opponentLogo,
+      result,
+      teamScore: result ? parseInt(document.getElementById('gameTeamScore').value) || 0 : null,
+      opponentScore: result ? parseInt(document.getElementById('gameOpponentScore').value) || 0 : null,
+    };
+
+    await setDoc(doc(db, 'seasons', seasonId, 'schedule', id), game);
+
+    // Save rink for reuse
+    if (rinkName) {
+      await setDoc(doc(db, 'rinks', rinkName.replace(/\s+/g, '_')), { name: rinkName, address: rinkAddress }, { merge: true });
+    }
+    // Save league for reuse
+    if (gameType === 'League' && leagueName) {
+      await setDoc(doc(db, 'leagues', leagueName.replace(/\s+/g, '_')), { name: leagueName }, { merge: true });
+    }
+    // Save tournament for reuse
+    if (gameType === 'Tournament' && tournamentName) {
+      await setDoc(doc(db, 'tournaments', tournamentName.replace(/\s+/g, '_')), { name: tournamentName }, { merge: true });
+    }
+
+    status.textContent = '✅ Saved!';
+    status.style.color = 'green';
+    setTimeout(() => {
+      document.getElementById('gameModal').classList.remove('active');
+      loadScheduleGames(seasonId);
+    }, 800);
+  });
+}
+
+function toggleGameTypeFields() {
+  const type = document.getElementById('gameGameType')?.value;
+  const leagueField = document.getElementById('leagueField');
+  const tournamentField = document.getElementById('tournamentField');
+  const subtypeField = document.getElementById('gameSubtype')?.parentElement;
+  if (leagueField) leagueField.style.display = type === 'League' ? 'block' : 'none';
+  if (tournamentField) tournamentField.style.display = type === 'Tournament' ? 'block' : 'none';
+  if (subtypeField) subtypeField.style.display = type === 'Exhibition' ? 'none' : 'block';
+}
+
+async function loadSavedOptions() {
+  savedRinks = [];
+  savedLeagues = [];
+  savedTournaments = [];
+
+  const [rinkSnap, leagueSnap, tournSnap] = await Promise.all([
+    getDocs(collection(db, 'rinks')),
+    getDocs(collection(db, 'leagues')),
+    getDocs(collection(db, 'tournaments'))
+  ]);
+
+  rinkSnap.forEach(d => savedRinks.push(d.data()));
+  leagueSnap.forEach(d => savedLeagues.push(d.data()));
+  tournSnap.forEach(d => savedTournaments.push(d.data()));
+
+  if (!document.getElementById('gameModal')) createGameModal();
+
+  const rinkList = document.getElementById('rinkNamesList');
+  const rinkAddressList = document.getElementById('rinkAddressList');
+  const leagueList = document.getElementById('leaguesList');
+  const tournList = document.getElementById('tournamentsList');
+
+  if (rinkList) rinkList.innerHTML = savedRinks.map(r => `<option value="${r.name}">`).join('');
+  if (rinkAddressList) rinkAddressList.innerHTML = savedRinks.map(r => `<option value="${r.address}">`).join('');
+  if (leagueList) leagueList.innerHTML = savedLeagues.map(l => `<option value="${l.name}">`).join('');
+  if (tournList) tournList.innerHTML = savedTournaments.map(t => `<option value="${t.name}">`).join('');
+}
+
+async function loadScheduleGames(seasonId) {
+  if (!seasonId) return;
   const list = document.getElementById('gamesList');
   list.innerHTML = '';
-  const snap = await getDocs(collection(db, 'schedule'));
+  const snap = await getDocs(collection(db, 'seasons', seasonId, 'schedule'));
   const games = [];
   snap.forEach(d => games.push(d.data()));
   if (!games.length) { list.innerHTML = '<div class="empty-state">No games added yet</div>'; return; }
   games.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(g => {
-    const dateStr = new Date(g.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const dateStr = new Date(g.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const homeAway = g.homeAway === 'Home' ? 'vs.' : '@';
+    const resultStr = g.result ? ` | ${g.result} ${g.teamScore}-${g.opponentScore}` : '';
     const item = document.createElement('div'); item.className = 'item';
-    item.innerHTML = `<div class="item-info"><div><strong>${dateStr} @ ${g.time} - ${g.opponent}</strong><span>${g.type} | ${g.location}</span></div></div><div><button class="btn-edit" onclick="editGame('${g.id}')">Edit</button><button class="btn-delete" onclick="deleteGame('${g.id}')">Delete</button></div>`;
+    item.innerHTML = `
+      <div class="item-info">
+        <div>
+          <strong>${dateStr} ${g.time} · ${homeAway} ${g.opponent}</strong>
+          <span>${g.gameType}${g.subtype ? ' · ' + g.subtype : ''}${resultStr}</span>
+        </div>
+      </div>
+      <div>
+        <button class="btn-edit" onclick="editGame('${g.id}')">Edit</button>
+        <button class="btn-delete" onclick="deleteGame('${g.id}')">Delete</button>
+      </div>
+    `;
     list.appendChild(item);
   });
 }
 
 window.editGame = async (id) => {
-  const snap = await getDoc(doc(db, 'schedule', id));
-  const g = snap.data();
-  document.getElementById('gameId').value = g.id;
-  document.getElementById('gameDate').value = g.date;
-  document.getElementById('gameTime').value = g.time;
-  document.getElementById('gameOpponent').value = g.opponent;
-  document.getElementById('gameType').value = g.type;
-  document.getElementById('gameLocation').value = g.location;
-  document.getElementById('gameForm').style.display = 'block';
+  const seasonId = document.getElementById('scheduleSeasonSelect').value;
+  const snap = await getDoc(doc(db, 'seasons', seasonId, 'schedule', id));
+  if (snap.exists()) {
+    currentGameId = id;
+    await loadSavedOptions();
+    showGameModal(snap.data());
+  }
 };
-window.deleteGame = async (id) => { if (!confirm('Delete game?')) return; await deleteDoc(doc(db, 'schedule', id)); loadSchedule(); };
+
+window.deleteGame = async (id) => {
+  if (!confirm('Delete game?')) return;
+  const seasonId = document.getElementById('scheduleSeasonSelect').value;
+  await deleteDoc(doc(db, 'seasons', seasonId, 'schedule', id));
+  loadScheduleGames(seasonId);
+};
 
 // ============================================
 // STATISTICS

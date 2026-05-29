@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Schedule - Franklin Admirals Hockey</title>
   <link rel="stylesheet" href="/assets/css/styles.css">
+  <link rel="stylesheet" href="/assets/css/schedule-styles.css">
 </head>
 <body>
 
@@ -25,7 +26,7 @@
 
 <section class="hero-section">
   <div class="hero-container">
-    <div class="hero-badge">2024-2025 Season</div>
+    <div class="hero-badge" id="seasonBadge">Loading...</div>
     <h1 class="hero-title">Schedule</h1>
     <p class="hero-subtitle">Complete game schedule and results</p>
   </div>
@@ -33,190 +34,31 @@
 
 <div class="main-container">
 
-  <div style="margin-top: 3rem; margin-bottom: 3rem;">
-    <div class="section-header">
-      <h2 class="section-title">Regular Season Games</h2>
+  <!-- Season selector -->
+  <div class="season-selector-wrap">
+    <label for="seasonSelect">View Season:</label>
+    <select id="seasonSelect" class="season-selector-public"></select>
+  </div>
+
+  <!-- Next Game / Last Game -->
+  <div class="featured-games-row" id="featuredGames" style="display:none;">
+    <div class="featured-game-card" id="nextGameCard" style="display:none;">
+      <div class="featured-label">Next Game</div>
+      <div class="featured-content" id="nextGameContent"></div>
     </div>
-    <div class="games-grid">
-      <div class="game-card">
-        <div class="game-header">Regular Season</div>
-        <div class="game-content">
-          <div class="game-date">Friday, January 17, 2025</div>
-          <div class="matchup">
-            <div class="team">
-              <div class="team-name">Admirals</div>
-              <div class="team-record">12-4-2</div>
-            </div>
-            <div class="vs">vs</div>
-            <div class="team">
-              <div class="team-name">Hawks</div>
-              <div class="team-record">8-5-3</div>
-            </div>
-          </div>
-          <div class="game-time">7:00 PM</div>
-          <div class="game-location">Franklin Ice Arena</div>
-        </div>
-      </div>
+    <div class="featured-game-card featured-result-card" id="lastGameCard" style="display:none;">
+      <div class="featured-label">Last Game</div>
+      <div class="featured-content" id="lastGameContent"></div>
+    </div>
+  </div>
 
-      <div class="game-card">
-        <div class="game-header">Regular Season</div>
-        <div class="game-content">
-          <div class="game-date">Wednesday, January 22, 2025</div>
-          <div class="matchup">
-            <div class="team">
-              <div class="team-name">Eagles</div>
-              <div class="team-record">10-6-1</div>
-            </div>
-            <div class="vs">@</div>
-            <div class="team">
-              <div class="team-name">Admirals</div>
-              <div class="team-record">12-4-2</div>
-            </div>
-          </div>
-          <div class="game-time">6:30 PM</div>
-          <div class="game-location">Central Sports Complex</div>
-        </div>
-      </div>
-
-      <div class="game-card">
-        <div class="game-header">Regular Season</div>
-        <div class="game-content">
-          <div class="game-date">Saturday, January 25, 2025</div>
-          <div class="matchup">
-            <div class="team">
-              <div class="team-name">Admirals</div>
-              <div class="team-record">12-4-2</div>
-            </div>
-            <div class="vs">vs</div>
-            <div class="team">
-              <div class="team-name">Tigers</div>
-              <div class="team-record">9-7-2</div>
-            </div>
-          </div>
-          <div class="game-time">8:00 PM</div>
-          <div class="game-location">Franklin Ice Arena</div>
-        </div>
-      </div>
-
-      <div class="game-card">
-        <div class="game-header">Regular Season</div>
-        <div class="game-content">
-          <div class="game-date">Friday, February 1, 2025</div>
-          <div class="matchup">
-            <div class="team">
-              <div class="team-name">Admirals</div>
-              <div class="team-record">12-4-2</div>
-            </div>
-            <div class="vs">vs</div>
-            <div class="team">
-              <div class="team-name">Wildcats</div>
-              <div class="team-record">7-8-1</div>
-            </div>
-          </div>
-          <div class="game-time">7:30 PM</div>
-          <div class="game-location">Franklin Ice Arena</div>
-        </div>
-      </div>
-
-      <div class="game-card">
-        <div class="game-header">Regular Season</div>
-        <div class="game-content">
-          <div class="game-date">Wednesday, February 5, 2025</div>
-          <div class="matchup">
-            <div class="team">
-              <div class="team-name">Panthers</div>
-              <div class="team-record">11-5-0</div>
-            </div>
-            <div class="vs">@</div>
-            <div class="team">
-              <div class="team-name">Admirals</div>
-              <div class="team-record">12-4-2</div>
-            </div>
-          </div>
-          <div class="game-time">6:00 PM</div>
-          <div class="game-location">Lakefront Ice Arena</div>
-        </div>
-      </div>
-
-      <div class="game-card">
-        <div class="game-header">Regular Season</div>
-        <div class="game-content">
-          <div class="game-date">Saturday, February 8, 2025</div>
-          <div class="matchup">
-            <div class="team">
-              <div class="team-name">Admirals</div>
-              <div class="team-record">12-4-2</div>
-            </div>
-            <div class="vs">vs</div>
-            <div class="team">
-              <div class="team-name">Knights</div>
-              <div class="team-record">6-10-2</div>
-            </div>
-          </div>
-          <div class="game-time">7:00 PM</div>
-          <div class="game-location">Franklin Ice Arena</div>
-        </div>
-      </div>
-
-      <div class="game-card">
-        <div class="game-header">Regular Season</div>
-        <div class="game-content">
-          <div class="game-date">Friday, February 15, 2025</div>
-          <div class="matchup">
-            <div class="team">
-              <div class="team-name">Admirals</div>
-              <div class="team-record">12-4-2</div>
-            </div>
-            <div class="vs">vs</div>
-            <div class="team">
-              <div class="team-name">Mustangs</div>
-              <div class="team-record">9-6-3</div>
-            </div>
-          </div>
-          <div class="game-time">7:30 PM</div>
-          <div class="game-location">Franklin Ice Arena</div>
-        </div>
-      </div>
-
-      <div class="game-card">
-        <div class="game-header">Regular Season</div>
-        <div class="game-content">
-          <div class="game-date">Wednesday, February 19, 2025</div>
-          <div class="matchup">
-            <div class="team">
-              <div class="team-name">Blazers</div>
-              <div class="team-record">8-7-2</div>
-            </div>
-            <div class="vs">@</div>
-            <div class="team">
-              <div class="team-name">Admirals</div>
-              <div class="team-record">12-4-2</div>
-            </div>
-          </div>
-          <div class="game-time">6:15 PM</div>
-          <div class="game-location">City Ice Center</div>
-        </div>
-      </div>
-
-      <div class="game-card">
-        <div class="game-header">Regular Season</div>
-        <div class="game-content">
-          <div class="game-date">Saturday, February 22, 2025</div>
-          <div class="matchup">
-            <div class="team">
-              <div class="team-name">Admirals</div>
-              <div class="team-record">12-4-2</div>
-            </div>
-            <div class="vs">vs</div>
-            <div class="team">
-              <div class="team-name">Wolves</div>
-              <div class="team-record">10-5-1</div>
-            </div>
-          </div>
-          <div class="game-time">8:00 PM</div>
-          <div class="game-location">Franklin Ice Arena</div>
-        </div>
-      </div>
+  <!-- Full Schedule -->
+  <div style="margin-top:2rem; margin-bottom:3rem;">
+    <div class="section-header">
+      <h2 class="section-title">Full Schedule</h2>
+    </div>
+    <div id="scheduleList" class="schedule-list">
+      <p style="color:#666;font-style:italic;">Loading schedule...</p>
     </div>
   </div>
 
@@ -233,14 +75,12 @@
     </div>
     <div class="footer-section">
       <h3>Contact</h3>
-      <p><strong>Coach:</strong> [Your Name]</p>
-      <p><strong>Email:</strong> coach@franklinhockey.edu</p>
-      <p><strong>Phone:</strong> (615) 555-0147</p>
+      <p><strong>Coach:</strong> Matt Berry</p>
+      <p><strong>Email:</strong> coachberry03@gmail.com</p>
     </div>
     <div class="footer-section">
       <h3>Location</h3>
       <p>Franklin High School</p>
-      <p>Franklin Ice Arena</p>
       <p>Nashville, TN</p>
     </div>
   </div>
@@ -249,14 +89,199 @@
   </div>
 </footer>
 
-<script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
+    authDomain: "admirals-hockey.firebaseapp.com",
+    projectId: "admirals-hockey",
+    storageBucket: "admirals-hockey.firebasestorage.app",
+    messagingSenderId: "783358659334",
+    appId: "1:783358659334:web:5daffd093adca386faec87"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Nav
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
   document.querySelectorAll('.nav-link').forEach(link => {
     const href = link.getAttribute('href').split('/').pop() || 'index.html';
-    if (href === currentPage) {
-      link.classList.add('active');
-    }
+    if (href === currentPage) link.classList.add('active');
   });
+
+  // Result colors
+  const resultColors = { W: '#2e7d32', OTW: '#2e7d32', SOW: '#2e7d32', L: '#c62828', OTL: '#c62828', SOL: '#c62828', T: '#f57c00' };
+  const resultLabel = { W: 'W', L: 'L', T: 'T', OTL: 'OTL', OTW: 'OTW', SOL: 'SOL', SOW: 'SOW' };
+
+  // Opponent logo HTML
+  function opponentLogoHTML(game, size = 48) {
+    if (game.opponentLogo) {
+      return `<img src="${game.opponentLogo}" class="opp-logo" style="width:${size}px;height:${size}px;" alt="${game.opponent}">`;
+    }
+    return `<div class="opp-logo-placeholder" style="width:${size}px;height:${size}px;">🏒</div>`;
+  }
+
+  // Format date
+  function formatDate(dateStr) {
+    const d = new Date(dateStr + 'T12:00:00');
+    return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  // Format time with timezone
+  function formatTime(time, timezone) {
+    return time + (timezone ? ' ' + timezone : '');
+  }
+
+  // Build game type label
+  function gameTypeLabel(game) {
+    let label = game.gameType || '';
+    if (game.gameType === 'League' && game.leagueName) label = game.leagueName;
+    if (game.gameType === 'Tournament' && game.tournamentName) label = game.tournamentName;
+    if (game.subtype) label += ' · ' + game.subtype;
+    return label;
+  }
+
+  // Build featured game card content
+  function buildFeaturedContent(game, showResult) {
+    const homeAway = game.homeAway === 'Home' ? 'vs.' : '@';
+    const typeLabel = gameTypeLabel(game);
+    const resultHTML = showResult && game.result
+      ? `<div class="featured-result" style="color:${resultColors[game.result] || '#333'}">
+           ${resultLabel[game.result]} ${game.teamScore}-${game.opponentScore}
+         </div>` : '';
+
+    return `
+      <div class="featured-game-inner">
+        <div class="featured-meta">${typeLabel}</div>
+        <div class="featured-date">${formatDate(game.date)} · ${formatTime(game.time, game.timezone)}</div>
+        <div class="featured-matchup">
+          <span class="featured-homeaway">${homeAway}</span>
+          ${opponentLogoHTML(game, 40)}
+          <span class="featured-opponent">${game.opponent}</span>
+        </div>
+        <div class="featured-rink">${game.rinkName}${game.rinkAddress ? ' · ' + game.rinkAddress : ''}</div>
+        ${resultHTML}
+      </div>
+    `;
+  }
+
+  // Build schedule row
+  function buildGameRow(game) {
+    const homeAway = game.homeAway === 'Home' ? 'vs.' : '@';
+    const typeLabel = gameTypeLabel(game);
+    const hasResult = game.result && game.teamScore !== undefined && game.opponentScore !== undefined;
+    const isPast = hasResult;
+
+    const resultHTML = hasResult
+      ? `<div class="game-result" style="color:${resultColors[game.result] || '#333'}">
+           <span class="result-badge">${resultLabel[game.result]}</span>
+           <span class="result-score">${game.teamScore}-${game.opponentScore}</span>
+         </div>` : '';
+
+    const row = document.createElement('div');
+    row.className = `game-row${isPast ? ' game-past' : ' game-upcoming'}`;
+    row.innerHTML = `
+      <div class="game-row-date">
+        <div class="game-row-datestr">${formatDate(game.date)}</div>
+        <div class="game-row-time">${formatTime(game.time, game.timezone)}</div>
+      </div>
+      <div class="game-row-main">
+        <div class="game-row-type">${typeLabel}</div>
+        <div class="game-row-matchup">
+          <span class="game-row-homeaway">${homeAway}</span>
+          ${opponentLogoHTML(game, 36)}
+          <span class="game-row-opponent">${game.opponent}</span>
+        </div>
+        <div class="game-row-rink">${game.rinkName}${game.rinkAddress ? ' · ' + game.rinkAddress : ''}</div>
+      </div>
+      <div class="game-row-result">
+        ${resultHTML}
+      </div>
+    `;
+    return row;
+  }
+
+  async function loadSchedule(seasonId) {
+    const list = document.getElementById('scheduleList');
+    list.innerHTML = '<p style="color:#666;font-style:italic;">Loading...</p>';
+
+    const snap = await getDocs(collection(db, 'seasons', seasonId, 'schedule'));
+    const games = [];
+    snap.forEach(d => games.push(d.data()));
+
+    if (!games.length) {
+      list.innerHTML = '<p style="color:#666;font-style:italic;">No games scheduled yet</p>';
+      document.getElementById('featuredGames').style.display = 'none';
+      return;
+    }
+
+    // Sort chronologically
+    games.sort((a, b) => new Date(a.date + 'T' + (a.time || '00:00')) - new Date(b.date + 'T' + (b.time || '00:00')));
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Find next game (no result, date >= today)
+    const nextGame = games.find(g => !g.result && new Date(g.date + 'T12:00:00') >= today);
+
+    // Find last game (has result)
+    const gamesWithResult = games.filter(g => g.result);
+    const lastGame = gamesWithResult.length ? gamesWithResult[gamesWithResult.length - 1] : null;
+
+    // Show featured
+    const featuredEl = document.getElementById('featuredGames');
+    const nextCard = document.getElementById('nextGameCard');
+    const lastCard = document.getElementById('lastGameCard');
+
+    if (nextGame) {
+      document.getElementById('nextGameContent').innerHTML = buildFeaturedContent(nextGame, false);
+      nextCard.style.display = 'block';
+    } else {
+      nextCard.style.display = 'none';
+    }
+
+    if (lastGame) {
+      document.getElementById('lastGameContent').innerHTML = buildFeaturedContent(lastGame, true);
+      lastCard.style.display = 'block';
+    } else {
+      lastCard.style.display = 'none';
+    }
+
+    featuredEl.style.display = nextGame || lastGame ? 'grid' : 'none';
+
+    // Build full list
+    list.innerHTML = '';
+    games.forEach(g => list.appendChild(buildGameRow(g)));
+  }
+
+  async function initSeasons() {
+    const snap = await getDocs(collection(db, 'seasons'));
+    const seasons = [];
+    snap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
+    seasons.sort((a, b) => b.label.localeCompare(a.label));
+
+    const select = document.getElementById('seasonSelect');
+    select.innerHTML = seasons.map(s =>
+      `<option value="${s.id}" ${s.current ? 'selected' : ''}>${s.label}${s.current ? ' (Current)' : ''}</option>`
+    ).join('');
+
+    const current = seasons.find(s => s.current) || seasons[0];
+    if (current) {
+      document.getElementById('seasonBadge').textContent = current.label + ' Season';
+      await loadSchedule(current.id);
+    }
+
+    select.addEventListener('change', async e => {
+      const season = seasons.find(s => s.id === e.target.value);
+      document.getElementById('seasonBadge').textContent = season.label + ' Season';
+      await loadSchedule(e.target.value);
+    });
+  }
+
+  initSeasons();
 </script>
 
 </body>

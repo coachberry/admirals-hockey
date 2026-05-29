@@ -67,29 +67,13 @@
 
     <!-- SCHEDULE TAB -->
     <div id="scheduleTab" class="tab-content">
-      <h2>Game Schedule</h2>
-      <button id="addGameBtn" class="btn-primary">+ Add Game</button>
-      <div id="gameForm" class="form-section" style="display: none;">
-        <h3>Add / Edit Game</h3>
-        <input type="hidden" id="gameId">
-        <div class="form-row">
-          <input type="date" id="gameDate">
-          <input type="time" id="gameTime">
-        </div>
-        <input type="text" id="gameOpponent" placeholder="Opponent">
-        <div class="form-row">
-          <select id="gameType">
-            <option value="">Home or Away</option>
-            <option value="Home">Home</option>
-            <option value="Away">Away</option>
-          </select>
-          <input type="text" id="gameLocation" placeholder="Location">
-        </div>
-        <div class="form-buttons">
-          <button id="saveGameBtn" class="btn-primary">Save Game</button>
-          <button id="cancelGameBtn" class="btn-secondary">Cancel</button>
-        </div>
+      <div class="roster-tab-header">
+        <h2>Game Schedule</h2>
+        <select id="scheduleSeasonSelect" class="season-select">
+          <option value="">Loading seasons...</option>
+        </select>
       </div>
+      <button id="addGameBtn" class="btn-primary">+ Add Game</button>
       <div id="gamesList" class="items-list"><div class="empty-state">No games added yet</div></div>
     </div>
 
