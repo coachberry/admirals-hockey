@@ -1183,24 +1183,24 @@ window.openGameStats = async (gameId, seasonId) => {
     <div class="team-stats-section">
       <div class="team-stats-grid">
         <div class="team-stat-row">
-          <span class="team-stat-label">Bench PIM</span>
-          <input type="number" class="team-stat-input" id="tsBenchPIM" value="${teamStats.benchPIM || 0}" min="0">
+          <span class="team-stat-label">PPG</span>
+          <input type="number" class="team-stat-input" id="tsPPG" value="${teamStats.ppg || 0}" min="0">
         </div>
         <div class="team-stat-row">
           <span class="team-stat-label">PP Opportunities</span>
           <input type="number" class="team-stat-input" id="tsPPOpps" value="${teamStats.ppOpps || 0}" min="0">
         </div>
         <div class="team-stat-row">
-          <span class="team-stat-label">PPG</span>
-          <input type="number" class="team-stat-input" id="tsPPG" value="${teamStats.ppg || 0}" min="0">
+          <span class="team-stat-label">Successful PKs</span>
+          <input type="number" class="team-stat-input" id="tsSuccessfulPKs" value="${teamStats.successfulPKs || 0}" min="0">
         </div>
         <div class="team-stat-row">
           <span class="team-stat-label">PK Attempts</span>
           <input type="number" class="team-stat-input" id="tsPKAttempts" value="${teamStats.pkAttempts || 0}" min="0">
         </div>
-        <div class="team-stat-row">
-          <span class="team-stat-label">Successful PKs</span>
-          <input type="number" class="team-stat-input" id="tsSuccessfulPKs" value="${teamStats.successfulPKs || 0}" min="0">
+        <div class="team-stat-row" style="grid-column:1;">
+          <span class="team-stat-label">Bench PIM</span>
+          <input type="number" class="team-stat-input" id="tsBenchPIM" value="${teamStats.benchPIM || 0}" min="0">
         </div>
       </div>
     </div>
