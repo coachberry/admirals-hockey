@@ -1,3 +1,4 @@
+import { showFramer } from '/assets/js/image-framer.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
@@ -148,121 +149,19 @@ document.getElementById('memberPhoto').addEventListener('change', function() {
   const file = this.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = e => showFramer(e.target.result, document.getElementById('memberPhotoPreview'));
+  reader.onload = e => {
+    const src = e.target.result;
+    const preview = document.getElementById('memberPhotoPreview');
+    showFramer(src, preview, (dataURL) => {
+      croppedPhoto = dataURL;
+      currentPhotoURL = null;
+      showPhotoConfirmed(dataURL, preview, src);
+    });
+  };
   reader.readAsDataURL(file);
 });
 
-function showFramer(src, container) {
-  // Card proportions: 160px tall, full width ~140px = roughly 7:8 ratio (w:h)
-  // We use a fixed 280x320 frame to match card proportions
-  container.innerHTML = `
-    <div class="framer-wrap">
-      <p class="framer-instructions">Drag to reposition · Scroll or slider to zoom</p>
-      <div class="framer-outer">
-        <div class="framer-viewport" id="framerViewport">
-          <img id="framerImg" src="${src}" draggable="false">
-        </div>
-      </div>
-      <div class="framer-controls">
-        <input type="range" id="framerZoom" min="1" max="4" step="0.01" value="1">
-        <label>Zoom</label>
-      </div>
-      <button type="button" id="framerConfirm" class="btn-primary">✓ Use This Photo</button>
-    </div>
-  `;
 
-  const viewport = document.getElementById('framerViewport');
-  const img = document.getElementById('framerImg');
-  const zoomSlider = document.getElementById('framerZoom');
-  let scale = 1, offsetX = 0, offsetY = 0, isDragging = false, startX, startY;
-
-  // Wait for image to load before setting initial scale to fill frame
-  img.onload = () => {
-    const vw = viewport.offsetWidth;
-    const vh = viewport.offsetHeight;
-    const imgRatio = img.naturalWidth / img.naturalHeight;
-    const frameRatio = vw / vh;
-    // Start scale so image fills the frame
-    scale = imgRatio > frameRatio
-      ? vh / img.naturalHeight
-      : vw / img.naturalWidth;
-    scale = Math.max(scale, 1);
-    zoomSlider.min = scale;
-    zoomSlider.value = scale;
-    updateTransform();
-  };
-
-  function updateTransform() {
-    img.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
-  }
-
-  viewport.addEventListener('mousedown', e => {
-    isDragging = true;
-    startX = e.clientX - offsetX;
-    startY = e.clientY - offsetY;
-    viewport.style.cursor = 'grabbing';
-    e.preventDefault();
-  });
-  window.addEventListener('mousemove', e => {
-    if (!isDragging) return;
-    offsetX = e.clientX - startX;
-    offsetY = e.clientY - startY;
-    updateTransform();
-  });
-  window.addEventListener('mouseup', () => { isDragging = false; viewport.style.cursor = 'grab'; });
-
-  viewport.addEventListener('touchstart', e => {
-    isDragging = true;
-    startX = e.touches[0].clientX - offsetX;
-    startY = e.touches[0].clientY - offsetY;
-    e.preventDefault();
-  }, { passive: false });
-  window.addEventListener('touchmove', e => {
-    if (!isDragging) return;
-    offsetX = e.touches[0].clientX - startX;
-    offsetY = e.touches[0].clientY - startY;
-    updateTransform();
-  });
-  window.addEventListener('touchend', () => { isDragging = false; });
-
-  zoomSlider.addEventListener('input', () => {
-    scale = parseFloat(zoomSlider.value);
-    updateTransform();
-  });
-
-  viewport.addEventListener('wheel', e => {
-    e.preventDefault();
-    scale = Math.min(4, Math.max(parseFloat(zoomSlider.min), scale - e.deltaY * 0.002));
-    zoomSlider.value = scale;
-    updateTransform();
-  });
-
-  document.getElementById('framerConfirm').addEventListener('click', () => {
-    // Export at card proportions: 400x457 (matching 7:8 ratio)
-    const canvasW = 400;
-    const canvasH = 457;
-    const canvas = document.createElement('canvas');
-    canvas.width = canvasW;
-    canvas.height = canvasH;
-    const ctx = canvas.getContext('2d');
-
-    const vRect = viewport.getBoundingClientRect();
-    const iRect = img.getBoundingClientRect();
-    const scaleX = img.naturalWidth / iRect.width;
-    const scaleY = img.naturalHeight / iRect.height;
-
-    const sx = (vRect.left - iRect.left) * scaleX;
-    const sy = (vRect.top - iRect.top) * scaleY;
-    const sw = vRect.width * scaleX;
-    const sh = vRect.height * scaleY;
-
-    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvasW, canvasH);
-    const dataURL = canvas.toDataURL('image/jpeg', 0.9);
-    croppedPhoto = dataURL;
-    currentPhotoURL = null;
-    showPhotoConfirmed(dataURL, container, src);
-  });
-}
 
 function showPhotoConfirmed(dataURL, container, originalSrc = null) {
   container.innerHTML = `
@@ -276,7 +175,13 @@ function showPhotoConfirmed(dataURL, container, originalSrc = null) {
   `;
 
   if (originalSrc) {
-    document.getElementById('reframeBtn')?.addEventListener('click', () => showFramer(originalSrc, container));
+    document.getElementById('reframeBtn')?.addEventListener('click', () => {
+    showFramer(originalSrc, container, (dataURL) => {
+      croppedPhoto = dataURL;
+      currentPhotoURL = null;
+      showPhotoConfirmed(dataURL, container, originalSrc);
+    });
+  });
   }
 
   document.getElementById('removePhotoBtn').addEventListener('click', () => {

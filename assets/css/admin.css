@@ -545,38 +545,43 @@ body {
 /* FRAMER */
 .framer-wrap { margin-top: 0.75rem; }
 .framer-instructions { font-size: 0.8rem; color: #666; margin-bottom: 0.5rem; }
-.framer-outer {
-  display: flex;
-  justify-content: center;
-}
-.framer-viewport {
-  width: 100%;
-  /* 7:8 ratio matching card proportions */
-  aspect-ratio: 7 / 8;
-  max-height: 280px;
-  overflow: hidden;
-  border-radius: 4px;
-  border: 2px solid var(--primary-maroon);
-  cursor: grab;
+.framer-stage {
   position: relative;
+  width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
   background: #111;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.framer-viewport img {
-  position: absolute;
-  transform-origin: center center;
-  max-width: none;
+  cursor: move;
   user-select: none;
+}
+.framer-stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.crop-box {
+  position: absolute;
+  border: 2px solid white;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.0);
+  cursor: move;
   pointer-events: none;
 }
+.crop-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 2px;
+}
+.crop-corner.tl { top: -3px; left: -3px; }
+.crop-corner.tr { top: -3px; right: -3px; }
+.crop-corner.bl { bottom: -3px; left: -3px; }
+.crop-corner.br { bottom: -3px; right: -3px; }
 .framer-controls {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   margin-top: 0.5rem;
 }
-.framer-controls input[type="range"] { flex: 1; margin-bottom: 0; }
-.framer-controls label { font-size: 0.8rem; color: #666; white-space: nowrap; }
+.framer-controls button { margin-bottom: 0; }
 #framerConfirm { width: 100%; margin-top: 0.75rem; }
