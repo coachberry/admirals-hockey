@@ -443,14 +443,14 @@ footer {
   .games-grid { grid-template-columns: 1fr; }
   .roster-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
 
-  /* Show hamburger button */
+  /* Always show hamburger on mobile */
   .nav-toggle {
     display: flex;
   }
 
-  /* Hide nav by default on mobile */
-  .nav-links {
-    display: none;
+  /* Always hide inline nav links on mobile */
+  nav .nav-links {
+    display: none !important;
     position: absolute;
     top: 100%;
     left: 0;
@@ -463,9 +463,9 @@ footer {
     z-index: 150;
   }
 
-  /* Show nav when open */
-  .nav-links.open {
-    display: flex;
+  /* Show dropdown when open */
+  nav .nav-links.open {
+    display: flex !important;
   }
 
   .nav-links li {
@@ -475,7 +475,6 @@ footer {
   .nav-links a {
     display: block;
     padding: 1rem 2rem;
-    border-bottom: 1px solid #f0f0f0;
     font-size: 1rem;
     border-bottom: 1px solid #f0f0f0;
   }
