@@ -1261,7 +1261,7 @@ window.openGameStats = async (gameId, seasonId) => {
           <option value="SOW" ${g.decision==='SOW'?'selected':''}>SOW</option>
           <option value="SOL" ${g.decision==='SOL'?'selected':''}>SOL</option>
         </select>`}</td>
-        <td><input type="number" class="stat-input" data-field="minutesPlayed" value="${g.minutesPlayed || 0}" min="0"></td>
+        <td><input type="number" class="stat-input" data-field="minutesPlayed" value="${g.minutesPlayed || 0}" min="0" step="0.01"></td>
         <td><input type="number" class="stat-input" data-field="shotsAgainst" value="${g.shotsAgainst || 0}" min="0"></td>
         <td><input type="number" class="stat-input" data-field="goalsAgainst" value="${g.goalsAgainst || 0}" min="0"></td>
         <td>${isEN ? '-' : `<input type="number" class="stat-input" data-field="assists" value="${g.assists || 0}" min="0">`}</td>
@@ -1321,7 +1321,7 @@ document.getElementById('saveGameStatsBtn').addEventListener('click', async () =
     const stats = { playerId };
     row.querySelectorAll('.stat-input').forEach(input => {
       const field = input.dataset.field;
-      if (field) stats[field] = field === 'decision' ? input.value : (parseInt(input.value) || 0);
+      if (field) stats[field] = field === 'decision' ? input.value : field === 'minutesPlayed' ? (parseFloat(input.value) || 0) : (parseInt(input.value) || 0);
     });
     const gsCheck = row.querySelector('[data-field="gsCheck"]');
     const gpCheck = row.querySelector('[data-field="gpCheck"]');
