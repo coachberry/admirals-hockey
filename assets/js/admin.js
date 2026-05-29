@@ -609,11 +609,11 @@ function createGameModal() {
 
         <div class="form-label-group">
           <label class="field-label">Date, Time &amp; Timezone</label>
-          <div class="form-row">
+          <div style="display:grid;grid-template-columns:1fr 120px 90px;gap:0.5rem;">
             <input type="date" id="gameDate">
             <input type="time" id="gameTime">
             <select id="gameTimezone">
-              <option value="">Timezone</option>
+              <option value="">TZ</option>
               <option value="ET">ET</option>
               <option value="CT">CT</option>
               <option value="MT">MT</option>
@@ -699,7 +699,7 @@ function createGameModal() {
         </div>
 
         <div class="form-label-group" style="margin-top:1rem;">
-          <label class="field-label" style="color:#5e1825;">Result (add after game)</label>
+          <label class="field-label" style="color:#5e1825;">Result</label>
           <select id="gameResult">
             <option value="">No Result Yet</option>
             <option value="W">W - Win</option>

@@ -132,7 +132,12 @@
 
   // Format time with timezone
   function formatTime(time, timezone) {
-    return time + (timezone ? ' ' + timezone : '');
+    if (!time) return '';
+    const [h, m] = time.split(':');
+    const hour = parseInt(h);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${m} ${ampm}${timezone ? ' ' + timezone : ''}`;
   }
 
   // Build game type label
