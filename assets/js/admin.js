@@ -213,38 +213,29 @@ function showEmptyPhotoState(container) {
   });
 }
 
-function showPhotoConfirmed(dataURL, container, originalSrc = null) {
+function showPhotoConfirmed(dataURL, container) {
   container.innerHTML = `
     <div class="photo-preview-layout">
       <div class="photo-preview-frame">
         <img src="${dataURL}" class="photo-preview-img">
       </div>
       <div class="photo-preview-buttons">
-        ${originalSrc ? `<button type="button" id="reframeBtn" class="btn-secondary photo-btn">Change Photo</button>` : `<button type="button" id="reframeBtn" class="btn-secondary photo-btn">Change Photo</button>`}
-        <button type="button" id="removePhotoBtn" class="btn-delete photo-btn">Remove Photo</button>
+        <label class="btn-secondary photo-btn photo-choose-label">
+          Choose File
+          <input type="file" class="persistentPhotoInput" accept="image/*,.heic,.heif,.HEIC,.HEIF" style="display:none;">
+        </label>
+        <button type="button" class="btn-delete photo-btn" id="removePhotoBtn">Remove Photo</button>
       </div>
     </div>
   `;
 
-  if (originalSrc) {
-    document.getElementById('reframeBtn')?.addEventListener('click', () => {
-    if (originalSrc) {
-      showFramer(originalSrc, container, (dataURL) => {
-        croppedPhoto = dataURL;
-        currentPhotoURL = null;
-        showPhotoConfirmed(dataURL, container, originalSrc);
-      });
-    } else {
-      // Trigger file input
-      document.getElementById('memberPhoto').click();
-    }
+  container.querySelector('.persistentPhotoInput').addEventListener('change', function() {
+    handlePhotoFile(this.files[0], container);
   });
-  }
 
   document.getElementById('removePhotoBtn').addEventListener('click', () => {
     croppedPhoto = null;
     currentPhotoURL = null;
-    document.getElementById('memberPhoto').value = '';
     showEmptyPhotoState(container);
   });
 }
