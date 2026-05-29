@@ -406,7 +406,8 @@ document.getElementById('saveMemberBtn').addEventListener('click', async () => {
   const isPlayer = type === 'player';
   const name = isPlayer ? document.getElementById('memberName').value : document.getElementById('memberNameStaff').value;
 
-  const member = { id, type, name, bio: document.getElementById('memberBio').value, photoURL, season: currentSeasonId };
+  const title = !isPlayer ? document.getElementById('memberTitle').value : '';
+  const member = { id, type, name, bio: document.getElementById('memberBio').value, photoURL, season: currentSeasonId, ...(title && { title }) };
 
   if (isPlayer) {
     member.number = document.getElementById('memberNumber').value;
