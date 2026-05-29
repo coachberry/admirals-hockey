@@ -346,3 +346,8 @@
   text-align: center;
   line-height: 1.4;
 }
+
+/* GAME ROW COLUMN WIDTHS */
+.game-row-date { width: 140px; flex-shrink: 0; }
+.game-row-main { flex: 1; min-width: 0; }
+.game-row-result { flex-shrink: 0; width: 110px; text-align: right; }
