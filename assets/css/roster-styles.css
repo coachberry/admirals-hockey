@@ -61,3 +61,33 @@
   font-size: 7rem;
   font-weight: 700;
 }
+
+/* NUMBER BADGE - bottom left */
+.card-number-badge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  color: white;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.8), -1px -1px 4px rgba(0,0,0,0.8);
+  z-index: 2;
+}
+
+/* CAPTAIN BADGE - bottom right */
+.card-captain-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  color: #d4a574;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.8), -1px -1px 4px rgba(0,0,0,0.8);
+  z-index: 2;
+}
+
+.card-alternate-badge {
+  color: #ccc;
+}

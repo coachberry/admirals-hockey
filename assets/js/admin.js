@@ -111,6 +111,8 @@ function openRosterModal(type, data = null) {
   document.getElementById('memberId').value = data?.id || '';
   document.getElementById('memberType').value = type;
   document.getElementById('memberBio').value = data?.bio || '';
+  document.getElementById('memberCaptain').checked = data?.captain || false;
+  document.getElementById('memberAlternate').checked = data?.alternate || false;
   document.getElementById('memberPhoto').value = '';
   document.getElementById('memberSaveStatus').textContent = '';
 
@@ -226,6 +228,8 @@ document.getElementById('saveMemberBtn').addEventListener('click', async () => {
     member.number = document.getElementById('memberNumber').value;
     member.position = document.getElementById('memberPosition').value;
     member.grade = document.getElementById('memberGrade').value;
+    member.captain = document.getElementById('memberCaptain').checked;
+    member.alternate = document.getElementById('memberAlternate').checked;
   } else {
     member.title = document.getElementById('memberTitle').value;
   }
