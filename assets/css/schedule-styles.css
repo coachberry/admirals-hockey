@@ -2,7 +2,6 @@
    SCHEDULE PAGE STYLES
    ============================================ */
 
-/* SEASON SELECTOR - same as roster */
 .season-selector-wrap {
   display: flex;
   align-items: center;
@@ -37,6 +36,54 @@
 }
 
 /* ============================================
+   SEASON STATS BAR
+   ============================================ */
+
+.season-stats-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.stats-bar-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 0.25rem;
+}
+
+.stats-bar-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stats-bar-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #5e1825;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.stats-bar-card.stats-bar-playoff {
+  border-color: #d4a574;
+  background: #fffdf9;
+}
+
+.stats-bar-card.stats-bar-playoff .stats-bar-label { color: #b8860b; }
+.stats-bar-card.stats-bar-playoff .stats-bar-value { color: #b8860b; }
+
+/* ============================================
    FEATURED GAMES (NEXT / LAST)
    ============================================ */
 
@@ -69,9 +116,7 @@
   background: linear-gradient(135deg, #3d0f18, #5e1825);
 }
 
-.featured-content {
-  padding: 1.25rem;
-}
+.featured-content { padding: 1.25rem; }
 
 .featured-game-inner {
   display: flex;
@@ -160,24 +205,54 @@
   border-radius: 6px;
   border: 1px solid #e0e0e0;
   padding: 1rem 1.25rem;
-  display: grid;
-  grid-template-columns: 180px 1fr auto;
-  gap: 1rem;
+  display: flex;
   align-items: center;
-  transition: box-shadow 0.2s;
+  gap: 1.5rem;
+  transition: box-shadow 0.2s, transform 0.2s;
+  cursor: pointer;
 }
 
 .game-row:hover {
-  box-shadow: 0 2px 8px rgba(94,24,37,0.1);
+  box-shadow: 0 2px 12px rgba(94,24,37,0.15);
   border-color: #5e1825;
+  transform: translateY(-1px);
 }
 
-.game-past {
-  border-left: 4px solid #ccc;
+.game-past { border-left: 4px solid #ccc; }
+.game-upcoming { border-left: 4px solid #5e1825; }
+
+/* PLAYOFF GAMES */
+.game-playoff {
+  border-left: 4px solid #d4a574;
+  background: #fffdf9;
 }
 
-.game-upcoming {
-  border-left: 4px solid #5e1825;
+.game-playoff .game-row-type {
+  color: #b8860b;
+  font-weight: 700;
+}
+
+.game-row-date {
+  width: 140px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.game-row-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.game-row-result {
+  flex-shrink: 0;
+  width: 110px;
+  text-align: right;
 }
 
 .game-row-datestr {
@@ -225,70 +300,77 @@
   margin-top: 0.25rem;
 }
 
-.game-row-result {
-  text-align: right;
-  min-width: 80px;
-}
-
 .game-result {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
 }
 
 .result-badge {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  line-height: 1;
 }
 
 .result-score {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 700;
-}
-
-/* ============================================
-   RESPONSIVE
-   ============================================ */
-
-@media (max-width: 768px) {
-  .featured-games-row {
-    grid-template-columns: 1fr;
-  }
-
-  .game-row {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-
-  .game-row-result {
-    text-align: left;
-  }
-
-  .game-result {
-    align-items: flex-start;
-    flex-direction: row;
-    gap: 0.5rem;
-    align-items: center;
-  }
 }
 
 /* ============================================
    GAME VIEW MODAL
    ============================================ */
 
-/* Clickable game rows */
-.game-row-clickable {
-  cursor: pointer;
+/* Modal overlay - hidden by default */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.75);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
 }
 
-.game-row-clickable:hover {
-  box-shadow: 0 2px 12px rgba(94,24,37,0.15);
-  border-color: #5e1825;
-  transform: translateY(-1px);
-  transition: all 0.2s;
+.modal-overlay.active { display: flex; }
+
+.modal {
+  background: white;
+  border-radius: 8px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
 }
+
+.modal-close-float {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+  border: 2px solid black;
+  color: black;
+  font-size: 1.2rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.modal-close-float:hover { background: #f0f0f0; }
+
+.modal-body { padding: 1.5rem; }
 
 /* Game view modal header */
 .gvm-header {
@@ -345,13 +427,12 @@
   flex-wrap: wrap;
 }
 
-/* Team stats row in game view modal */
 .gvm-team-stats {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
   margin-bottom: 1.5rem;
-  padding: 0.75rem 0;
+  padding-bottom: 1rem;
   border-bottom: 1px solid #f0f0f0;
 }
 
@@ -385,4 +466,29 @@
   margin: 0 0 0.75rem 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .featured-games-row { grid-template-columns: 1fr; }
+  .season-stats-bar { gap: 0.5rem; }
+  .stats-bar-card { padding: 0.75rem 0.5rem; }
+  .stats-bar-value { font-size: 1rem; }
+
+  .game-row {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .game-row-date {
+    width: 100%;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 0.5rem;
+  }
+
+  .game-row-result { text-align: right; }
 }
