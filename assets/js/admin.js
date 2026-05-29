@@ -606,53 +606,76 @@ function createGameModal() {
         <button class="modal-close" id="closeGameModal">&times;</button>
       </div>
       <div class="modal-body">
-        <div class="form-row">
-          <input type="date" id="gameDate" placeholder="Date">
-          <input type="time" id="gameTime" placeholder="Time">
-          <select id="gameTimezone">
-            <option value="ET">ET</option>
-            <option value="CT" selected>CT</option>
-            <option value="MT">MT</option>
-            <option value="PT">PT</option>
-          </select>
+
+        <div class="form-label-group">
+          <label class="field-label">Date, Time &amp; Timezone</label>
+          <div class="form-row">
+            <input type="date" id="gameDate">
+            <input type="time" id="gameTime">
+            <select id="gameTimezone">
+              <option value="">Timezone</option>
+              <option value="ET">ET</option>
+              <option value="CT">CT</option>
+              <option value="MT">MT</option>
+              <option value="PT">PT</option>
+            </select>
+          </div>
         </div>
 
         <div class="form-row">
-          <select id="gameGameType">
-            <option value="">Game Type</option>
-            <option value="Exhibition">Exhibition</option>
-            <option value="League">League</option>
-            <option value="Tournament">Tournament</option>
-          </select>
-          <select id="gameSubtype">
-            <option value="">Sub-Type</option>
-            <option value="Regular Season">Regular Season</option>
-            <option value="Playoffs">Playoffs</option>
-            <option value="Championship">Championship</option>
-          </select>
+          <div class="form-label-group">
+            <label class="field-label">Game Type</label>
+            <select id="gameGameType">
+              <option value="">Select...</option>
+              <option value="Exhibition">Exhibition</option>
+              <option value="League">League</option>
+              <option value="Tournament">Tournament</option>
+            </select>
+          </div>
+          <div class="form-label-group">
+            <label class="field-label">Sub-Type</label>
+            <select id="gameSubtype">
+              <option value="">Select...</option>
+              <option value="Regular Season">Regular Season</option>
+              <option value="Playoffs">Playoffs</option>
+              <option value="Championship">Championship</option>
+            </select>
+          </div>
         </div>
 
         <div id="leagueField" style="display:none;">
-          <input type="text" id="gameLeagueName" placeholder="League Name" list="leaguesList">
-          <datalist id="leaguesList"></datalist>
+          <div class="form-label-group">
+            <label class="field-label">League Name</label>
+            <input type="text" id="gameLeagueName" placeholder="e.g. GNASH" list="leaguesList">
+            <datalist id="leaguesList"></datalist>
+          </div>
         </div>
         <div id="tournamentField" style="display:none;">
-          <input type="text" id="gameTournamentName" placeholder="Tournament Name" list="tournamentsList">
-          <datalist id="tournamentsList"></datalist>
+          <div class="form-label-group">
+            <label class="field-label">Tournament Name</label>
+            <input type="text" id="gameTournamentName" placeholder="e.g. Battle at the Border" list="tournamentsList">
+            <datalist id="tournamentsList"></datalist>
+          </div>
         </div>
 
         <div class="form-row">
-          <input type="text" id="gameOpponent" placeholder="Opponent Name">
-          <select id="gameHomeAway">
-            <option value="">Home or Away</option>
-            <option value="Home">Home</option>
-            <option value="Away">Away</option>
-          </select>
+          <div class="form-label-group">
+            <label class="field-label">Opponent</label>
+            <input type="text" id="gameOpponent" placeholder="Opponent Name">
+          </div>
+          <div class="form-label-group">
+            <label class="field-label">Home or Away</label>
+            <select id="gameHomeAway">
+              <option value="">Select...</option>
+              <option value="Home">Home</option>
+              <option value="Away">Away</option>
+            </select>
+          </div>
         </div>
 
         <div class="photo-upload-section" style="margin-bottom:0.75rem;">
-          <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.4rem;">Opponent Logo (optional)</label>
-          <div style="display:flex;align-items:center;gap:0.75rem;">
+          <label class="field-label">Opponent Logo (optional)</label>
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.4rem;">
             <div id="gameOpponentLogoPreview" class="opp-logo-admin-preview"></div>
             <label class="btn-secondary photo-btn photo-choose-label" style="font-size:0.8rem;">
               Choose Logo
@@ -663,14 +686,20 @@ function createGameModal() {
         </div>
 
         <div class="form-row">
-          <input type="text" id="gameRinkName" placeholder="Rink Name" list="rinkNamesList">
-          <datalist id="rinkNamesList"></datalist>
-          <input type="text" id="gameRinkAddress" placeholder="Rink Address" list="rinkAddressList">
-          <datalist id="rinkAddressList"></datalist>
+          <div class="form-label-group">
+            <label class="field-label">Rink Name</label>
+            <input type="text" id="gameRinkName" placeholder="e.g. Centennial Sportsplex" list="rinkNamesList">
+            <datalist id="rinkNamesList"></datalist>
+          </div>
+          <div class="form-label-group">
+            <label class="field-label">Rink Address</label>
+            <input type="text" id="gameRinkAddress" placeholder="e.g. 222 25th Ave N Nashville, TN" list="rinkAddressList">
+            <datalist id="rinkAddressList"></datalist>
+          </div>
         </div>
 
-        <h4 style="margin:1rem 0 0.5rem;color:#5e1825;">Result (add after game)</h4>
-        <div class="form-row">
+        <div class="form-label-group" style="margin-top:1rem;">
+          <label class="field-label" style="color:#5e1825;">Result (add after game)</label>
           <select id="gameResult">
             <option value="">No Result Yet</option>
             <option value="W">W - Win</option>
@@ -683,8 +712,14 @@ function createGameModal() {
           </select>
         </div>
         <div class="form-row" id="scoreFields" style="display:none;">
-          <input type="number" id="gameTeamScore" placeholder="Our Score" min="0">
-          <input type="number" id="gameOpponentScore" placeholder="Opp Score" min="0">
+          <div class="form-label-group">
+            <label class="field-label">Our Score</label>
+            <input type="number" id="gameTeamScore" placeholder="0" min="0">
+          </div>
+          <div class="form-label-group">
+            <label class="field-label">Opponent Score</label>
+            <input type="number" id="gameOpponentScore" placeholder="0" min="0">
+          </div>
         </div>
 
         <div class="form-buttons">

@@ -746,3 +746,19 @@ body {
   max-height: 100%;
   object-fit: contain;
 }
+
+/* FORM LABEL GROUPS */
+.form-label-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+}
+
+.field-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
