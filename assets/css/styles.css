@@ -486,22 +486,29 @@ footer {
     border-bottom-color: #f0f0f0;
   }
 
-  /* Header needs relative positioning for dropdown */
   header {
     position: sticky;
     top: 0;
+    padding: 0.5rem 0;
   }
 
   .header-container {
     position: relative;
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 44px 1fr 44px;
     align-items: center;
-    flex-wrap: nowrap;
+    padding: 0 1rem;
   }
 
   .header-container a:first-child {
-    flex-shrink: 0;
+    grid-column: 2;
+    display: flex;
+    justify-content: center;
+  }
+
+  .nav-toggle {
+    grid-column: 3;
+    justify-self: end;
   }
 }
 
