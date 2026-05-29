@@ -476,7 +476,8 @@ function buildRosterItem(m) {
 }
 
 window.editMember = async (id, type) => {
-  const snap = await getDoc(doc(db, 'roster', currentSeasonId, type + 's', id));
+  const cn = type === 'player' ? 'players' : type === 'coach' ? 'coaches' : 'boards';
+  const snap = await getDoc(doc(db, 'roster', currentSeasonId, cn, id));
   if (snap.exists()) openRosterModal(type, snap.data());
 };
 
