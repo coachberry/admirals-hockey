@@ -400,7 +400,8 @@ document.getElementById('saveMemberBtn').addEventListener('click', async () => {
   }
 
   // Save to season-specific roster
-  await setDoc(doc(db, 'roster', currentSeasonId, type + 's', id), member);
+  const collName = type === 'player' ? 'players' : type === 'coach' ? 'coaches' : 'boards';
+  await setDoc(doc(db, 'roster', currentSeasonId, collName, id), member);
 
   status.textContent = '✅ Saved!';
   status.style.color = 'green';
@@ -481,7 +482,8 @@ window.editMember = async (id, type) => {
 
 window.deleteMember = async (id, type) => {
   if (!confirm('Delete this member from this season?')) return;
-  await deleteDoc(doc(db, 'roster', currentSeasonId, type + 's', id));
+  const collName = type === 'player' ? 'players' : type === 'coach' ? 'coaches' : 'boards';
+  await deleteDoc(doc(db, 'roster', currentSeasonId, collName, id));
   try { await deleteObject(ref(storage, `roster/${currentSeasonId}/${type}/${id}`)); } catch(e) {}
   loadRoster(currentSeasonId);
 };
