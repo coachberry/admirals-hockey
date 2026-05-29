@@ -26,14 +26,23 @@
 
 <section class="hero-section">
   <div class="hero-container">
-    <div class="hero-badge">2024-2025 Season</div>
+    <div class="hero-badge" id="seasonBadge">Loading...</div>
     <h1 class="hero-title">Team Roster</h1>
     <p class="hero-subtitle">Meet the Admirals</p>
   </div>
 </section>
 
 <div class="main-container">
-  <div style="margin-top:3rem;margin-bottom:2rem;">
+
+  <!-- Season selector -->
+  <div class="season-selector-wrap">
+    <label for="seasonSelect">View Season:</label>
+    <select id="seasonSelect" class="season-selector-public">
+      <option value="">Loading...</option>
+    </select>
+  </div>
+
+  <div style="margin-top:2rem;margin-bottom:2rem;">
     <div class="section-header"><h2 class="section-title">Forwards</h2></div>
     <div id="forwardsGrid" class="roster-grid"></div>
   </div>
@@ -96,7 +105,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
@@ -122,12 +131,65 @@
   document.getElementById('closeModal').addEventListener('click', () => modal.classList.remove('active'));
   modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
 
+  // Load seasons and populate dropdown
+  async function initSeasons() {
+    const snap = await getDocs(collection(db, 'seasons'));
+    const seasons = [];
+    snap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
+    seasons.sort((a, b) => b.label.localeCompare(a.label));
+
+    const select = document.getElementById('seasonSelect');
+    select.innerHTML = seasons.map(s =>
+      `<option value="${s.id}" ${s.current ? 'selected' : ''}>${s.label}${s.current ? ' (Current)' : ''}</option>`
+    ).join('');
+
+    const current = seasons.find(s => s.current) || seasons[0];
+    if (current) {
+      document.getElementById('seasonBadge').textContent = current.label + ' Season';
+      await loadRoster(current.id);
+    }
+
+    select.addEventListener('change', async e => {
+      const season = seasons.find(s => s.id === e.target.value);
+      document.getElementById('seasonBadge').textContent = season.label + ' Season';
+      await loadRoster(e.target.value);
+    });
+  }
+
+  async function loadRoster(seasonId) {
+    // Clear all grids
+    ['forwardsGrid','defenseGrid','goaltendersGrid','coachesGrid','boardGrid'].forEach(id => {
+      document.getElementById(id).innerHTML = '<p style="color:#666;font-style:italic;">Loading...</p>';
+    });
+
+    const forwards = [], defense = [], goalies = [], coaches = [], board = [];
+
+    const playersSnap = await getDocs(collection(db, 'roster', seasonId, 'players'));
+    playersSnap.forEach(d => {
+      const m = d.data();
+      if (m.position === 'Forward') forwards.push(m);
+      else if (m.position === 'Defense') defense.push(m);
+      else if (m.position === 'Goaltender') goalies.push(m);
+    });
+
+    const coachesSnap = await getDocs(collection(db, 'roster', seasonId, 'coaches'));
+    coachesSnap.forEach(d => coaches.push(d.data()));
+
+    const boardSnap = await getDocs(collection(db, 'roster', seasonId, 'boards'));
+    boardSnap.forEach(d => board.push(d.data()));
+
+    const byNumber = (a, b) => parseInt(a.number) - parseInt(b.number);
+    renderGrid('forwardsGrid', forwards.sort(byNumber));
+    renderGrid('defenseGrid', defense.sort(byNumber));
+    renderGrid('goaltendersGrid', goalies.sort(byNumber));
+    renderGrid('coachesGrid', coaches);
+    renderGrid('boardGrid', board);
+  }
+
   function openModal(m) {
-    // Photo wrap - fill entire maroon area, no padding
     const photoWrap = document.getElementById('modalPhotoWrap');
     photoWrap.innerHTML = '';
 
-    // Photo container (relative so badges can overlay)
     const photoContainer = document.createElement('div');
     photoContainer.className = 'modal-photo-container';
 
@@ -145,7 +207,6 @@
       photoContainer.appendChild(img);
     }
 
-    // Number badge bottom-left on image (players only)
     if (m.type === 'player' && m.number) {
       const numBadge = document.createElement('div');
       numBadge.className = 'modal-number-badge';
@@ -153,31 +214,26 @@
       photoContainer.appendChild(numBadge);
     }
 
-    // Move close button before appending container
     photoWrap.appendChild(photoContainer);
 
-    // Name - plain, no C/A badge
     document.getElementById('modalName').textContent = m.name;
-
-    // Subtitle = position or title
     document.getElementById('modalSubtitle').textContent = m.type === 'player' ? m.position : (m.title || '');
 
-    // Tags - grade + captain identifier if applicable
     const tags = document.getElementById('modalTags');
     tags.innerHTML = '';
     if (m.grade) tags.innerHTML += `<span class="modal-tag">${m.grade.toUpperCase()}</span>`;
     if (m.type === 'player' && m.captain) tags.innerHTML += `<span class="captain-identifier">Captain</span>`;
     if (m.type === 'player' && m.alternate) tags.innerHTML += `<span class="captain-identifier">Alternate Captain</span>`;
 
-    // Bio - only for coaches and board members, not players
     const bioEl = document.getElementById('modalBio');
     if (m.type === 'player') {
       bioEl.textContent = '';
       bioEl.style.display = 'none';
     } else {
       bioEl.style.display = 'block';
-      bioEl.textContent = m.bio || 'No bio available.';
+      bioEl.textContent = m.bio || '';
     }
+
     modal.classList.add('active');
   }
 
@@ -188,7 +244,6 @@
     const frame = document.createElement('div');
     frame.className = 'card-photo-frame';
 
-    // Photo or admiral logo placeholder for everyone
     if (m.photoURL) {
       const img = document.createElement('img');
       img.src = m.photoURL;
@@ -203,7 +258,6 @@
       frame.appendChild(img);
     }
 
-    // Number badge bottom-left (players only)
     if (m.type === 'player' && m.number) {
       const numBadge = document.createElement('div');
       numBadge.className = 'card-number-badge';
@@ -211,7 +265,6 @@
       frame.appendChild(numBadge);
     }
 
-    // Captain/Alternate badge bottom-right (players only)
     if (m.type === 'player' && m.captain) {
       const badge = document.createElement('div');
       badge.className = 'card-captain-badge';
@@ -231,7 +284,7 @@
     info.innerHTML = `
       <div class="player-name">${m.name}</div>
       <div class="player-position">${m.type === 'player' ? m.position : (m.title || '')}</div>
-      ${m.grade ? `<span class="player-grade">${m.grade}</span>` : ''}
+      ${m.grade ? `<span class="player-grade">${m.grade.toUpperCase()}</span>` : ''}
     `;
     card.appendChild(info);
 
@@ -242,34 +295,14 @@
   function renderGrid(containerId, members) {
     const grid = document.getElementById(containerId);
     grid.innerHTML = '';
-    if (members.length === 0) {
+    if (!members.length) {
       grid.innerHTML = '<p style="color:#666;font-style:italic;">No members added yet</p>';
       return;
     }
     members.forEach(m => grid.appendChild(buildCard(m)));
   }
 
-  async function loadRoster() {
-    const snap = await getDocs(collection(db, 'roster'));
-    const forwards = [], defense = [], goalies = [], coaches = [], board = [];
-    snap.forEach(d => {
-      const m = d.data();
-      if (m.type === 'player') {
-        if (m.position === 'Forward') forwards.push(m);
-        else if (m.position === 'Defense') defense.push(m);
-        else if (m.position === 'Goaltender') goalies.push(m);
-      } else if (m.type === 'coach') coaches.push(m);
-      else if (m.type === 'board') board.push(m);
-    });
-    const byNumber = (a, b) => parseInt(a.number) - parseInt(b.number);
-    renderGrid('forwardsGrid', forwards.sort(byNumber));
-    renderGrid('defenseGrid', defense.sort(byNumber));
-    renderGrid('goaltendersGrid', goalies.sort(byNumber));
-    renderGrid('coachesGrid', coaches);
-    renderGrid('boardGrid', board);
-  }
-
-  loadRoster();
+  initSeasons();
 </script>
 
 </body>

@@ -218,3 +218,37 @@
 .modal-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
 .modal-tag { background: #f0f0f0; color: #5e1825; padding: 4px 10px; border-radius: 3px; font-size: 0.8rem; font-weight: 600; }
 .modal-bio { font-size: 0.9rem; color: #444; line-height: 1.7; }
+
+/* SEASON SELECTOR */
+.season-selector-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  padding: 1rem 1.5rem;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+}
+
+.season-selector-wrap label {
+  font-weight: 600;
+  color: #5e1825;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.season-selector-public {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #111;
+  background: white;
+  min-width: 160px;
+}
+
+.season-selector-public:focus {
+  outline: none;
+  border-color: #5e1825;
+}
