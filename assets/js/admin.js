@@ -558,7 +558,7 @@ document.getElementById('addGameBtn').addEventListener('click', () => openGameMo
 
 async function openGameModal(data = null) {
   currentGameId = data?.id || null;
-  // Load saved rinks, leagues, tournaments
+  opponentLogoData = null;
   await loadSavedOptions();
   showGameModal(data);
 }
@@ -571,10 +571,14 @@ function showGameModal(data = null) {
   const fields = ['gameDate','gameTime','gameTimezone','gameOpponent','gameHomeAway','gameRinkName','gameRinkAddress','gameResult','gameTeamScore','gameOpponentScore'];
   fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = data?.[id.replace('game', '').toLowerCase()] || ''; });
 
+  // Always reset logo preview first
+  document.getElementById('gameOpponentLogoPreview').innerHTML = '<span style="font-size:1.5rem;">🏒</span>';
+  document.getElementById('removeOpponentLogo').style.display = 'none';
+
   if (data) {
     document.getElementById('gameDate').value = data.date || '';
     document.getElementById('gameTime').value = data.time || '';
-    document.getElementById('gameTimezone').value = data.timezone || 'CT';
+    document.getElementById('gameTimezone').value = data.timezone || '';
     document.getElementById('gameGameType').value = data.gameType || '';
     document.getElementById('gameLeagueName').value = data.leagueName || '';
     document.getElementById('gameTournamentName').value = data.tournamentName || '';
@@ -586,9 +590,19 @@ function showGameModal(data = null) {
     document.getElementById('gameResult').value = data.result || '';
     document.getElementById('gameTeamScore').value = data.teamScore ?? '';
     document.getElementById('gameOpponentScore').value = data.opponentScore ?? '';
+    document.getElementById('scoreFields').style.display = data.result ? 'grid' : 'none';
     if (data.opponentLogo) {
       document.getElementById('gameOpponentLogoPreview').innerHTML = `<img src="${data.opponentLogo}" style="height:50px;object-fit:contain;">`;
+      document.getElementById('removeOpponentLogo').style.display = 'inline-block';
     }
+  } else {
+    ['gameDate','gameTime','gameTimezone','gameGameType','gameLeagueName','gameTournamentName',
+     'gameSubtype','gameOpponent','gameHomeAway','gameRinkName','gameRinkAddress','gameResult',
+     'gameTeamScore','gameOpponentScore'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    document.getElementById('scoreFields').style.display = 'none';
   }
 
   toggleGameTypeFields();
