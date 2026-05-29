@@ -89,8 +89,10 @@
 <div id="gameViewModal" class="modal-overlay">
   <div class="modal gvm-modal">
     <button class="modal-close-float" id="closeGameViewModal">&times;</button>
-    <div id="gvmHeader" class="gvm-header"></div>
-    <div class="gvm-sticky-bar" id="gvmTeamStats" style="display:none;"></div>
+    <div class="gvm-sticky-header">
+      <div id="gvmHeader" class="gvm-header"></div>
+      <div class="gvm-sticky-bar" id="gvmTeamStats" style="display:none;"></div>
+    </div>
     <div class="modal-body">
       <div style="margin-bottom:1.5rem;">
         <h3 class="gvm-section-title">Skaters</h3>
@@ -100,7 +102,7 @@
               <tr>
                 <th>#</th><th>Player</th>
                 <th>G</th><th>A</th><th>PTS</th>
-                <th>PPG</th><th>PPA</th><th>SHG</th><th>SHA</th><th>GWG</th>
+                <th>PPG</th><th>PPA</th><th>SHG</th><th>SHA</th>
                 <th>+</th><th>-</th><th>+/-</th><th>SOG</th><th>PIM</th>
               </tr>
             </thead>
@@ -296,7 +298,6 @@
           <td style="font-weight:700;color:#5e1825;">${pts}</td>
           <td>${s.ppg||0}</td><td>${s.ppa||0}</td>
           <td>${s.shg||0}</td><td>${s.sha||0}</td>
-          <td>${isGWG ? '✓' : ''}</td>
           <td>${s.plus||0}</td><td>${s.minus||0}</td>
           <td>${pm > 0 ? '+'+pm : pm}</td>
           <td>${s.sog||0}</td><td>${s.pim||0}</td>
@@ -304,7 +305,7 @@
       }).join('');
 
     document.getElementById('gvmSkatersBody').innerHTML = skaterRows ||
-      '<tr><td colspan="15" style="text-align:center;color:#999;padding:1rem;">No stats entered</td></tr>';
+      '<tr><td colspan="14" style="text-align:center;color:#999;padding:1rem;">No stats entered</td></tr>';
     document.getElementById('gvmGwgKey').style.display = hasGWG ? 'block' : 'none';
 
     // Load goalie stats
