@@ -60,12 +60,12 @@
   z-index: 2;
 }
 
-/* Captain badge - bottom right */
+/* Captain badge - bottom right - matches number style exactly */
 .card-captain-badge {
   position: absolute;
   bottom: 6px;
   right: 8px;
-  color: #d4a574;
+  color: white;
   font-size: 1.5rem;
   font-weight: 700;
   line-height: 1;
@@ -77,9 +77,9 @@
   z-index: 2;
 }
 
-/* Alternate captain badge - slightly different color */
+/* Alternate captain badge - same style as C */
 .card-alternate-badge {
-  color: #cccccc;
+  color: white;
   font-size: 1.5rem;
 }
 
