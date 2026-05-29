@@ -189,35 +189,32 @@ select.stat-input {
 .team-stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
+  gap: 0.75rem;
   margin-bottom: 1rem;
-  width: fit-content;
 }
 
 .team-stat-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.4rem 0.6rem;
+  padding: 0.5rem 0.75rem;
   background: #f9f9f9;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
 }
 
 .team-stat-label {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: #555;
   font-weight: 600;
-  white-space: nowrap;
 }
 
 .team-stat-input {
-  width: 36px;
-  padding: 2px 4px;
+  width: 70px;
+  padding: 4px 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   text-align: center;
   -moz-appearance: textfield;
 }
@@ -230,4 +227,13 @@ select.stat-input {
 .team-stat-input:focus {
   outline: none;
   border-color: #5e1825;
+}
+
+/* GWG row highlight in admin modal */
+.gwg-row {
+  background: #fff8e1 !important;
+}
+
+.gwg-row td {
+  background: #fff8e1 !important;
 }
