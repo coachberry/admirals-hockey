@@ -273,15 +273,22 @@
       `<option value="${s.id}" ${s.current ? 'selected' : ''}>${s.label}${s.current ? ' (Current)' : ''}</option>`
     ).join('');
 
-    const current = seasons.find(s => s.current) || seasons[0];
-    if (current) {
-      document.getElementById('seasonBadge').textContent = current.label + ' Season';
-      await loadSchedule(current.id);
+    // Restore saved season or fall back to current
+    const savedSeason = localStorage.getItem('admirals_scheduleSeasonPublic');
+    const startSeason = (savedSeason && seasons.find(s => s.id === savedSeason))
+      ? seasons.find(s => s.id === savedSeason)
+      : (seasons.find(s => s.current) || seasons[0]);
+
+    if (startSeason) {
+      select.value = startSeason.id;
+      document.getElementById('seasonBadge').textContent = startSeason.label + ' Season';
+      await loadSchedule(startSeason.id);
     }
 
     select.addEventListener('change', async e => {
       const season = seasons.find(s => s.id === e.target.value);
       document.getElementById('seasonBadge').textContent = season.label + ' Season';
+      localStorage.setItem('admirals_scheduleSeasonPublic', e.target.value);
       await loadSchedule(e.target.value);
     });
   }
