@@ -155,6 +155,20 @@ document.getElementById('memberPhoto').style.display = 'none';
 
 
 
+function handlePhotoFile(file, container) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const src = e.target.result;
+    showFramer(src, container, (dataURL) => {
+      croppedPhoto = dataURL;
+      currentPhotoURL = null;
+      showPhotoConfirmed(dataURL, container);
+    });
+  };
+  reader.readAsDataURL(file);
+}
+
 function triggerPhotoPicker(container) {
   // Create a fresh file input each time to avoid browser caching issues
   const input = document.createElement('input');
@@ -187,12 +201,15 @@ function showEmptyPhotoState(container) {
         <span>No Image</span>
       </div>
       <div class="photo-preview-buttons">
-        <button type="button" class="btn-secondary photo-btn" id="photoPickerBtn">Choose File</button>
+        <label class="btn-secondary photo-btn photo-choose-label">
+          Choose File
+          <input type="file" class="persistentPhotoInput" accept="image/*,.heic,.heif,.HEIC,.HEIF" style="display:none;">
+        </label>
       </div>
     </div>
   `;
-  document.getElementById('photoPickerBtn').addEventListener('click', () => {
-    triggerPhotoPicker(container);
+  container.querySelector('.persistentPhotoInput').addEventListener('change', function() {
+    handlePhotoFile(this.files[0], container);
   });
 }
 
