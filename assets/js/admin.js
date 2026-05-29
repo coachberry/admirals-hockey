@@ -1,7 +1,6 @@
-import { initFramer } from '/assets/js/image-framer.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+import { getStorage, ref, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
@@ -17,16 +16,12 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 
 // ============================================
-// AUTH (localStorage for simple login)
+// AUTH
 // ============================================
 const users = JSON.parse(localStorage.getItem('admirals_users')) || { admin: { password: 'admin', email: 'coachberry03@gmail.com' } };
 let currentUser = localStorage.getItem('admirals_currentUser');
-
 function saveUsers() { localStorage.setItem('admirals_users', JSON.stringify(users)); }
 
-// ============================================
-// LOGIN
-// ============================================
 document.getElementById('loginForm').addEventListener('submit', e => {
   e.preventDefault();
   const username = document.getElementById('username').value;
@@ -53,12 +48,6 @@ document.getElementById('signupForm').addEventListener('submit', e => {
   if (password !== confirm) { document.getElementById('signupError').textContent = 'Passwords do not match'; return; }
   const username = email.split('@')[0];
   users[username] = { password, email };
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get('invite');
-  if (token) {
-    const invites = JSON.parse(localStorage.getItem('admirals_invites')) || {};
-    if (invites[token]) { invites[token].used = true; localStorage.setItem('admirals_invites', JSON.stringify(invites)); }
-  }
   saveUsers();
   currentUser = username;
   localStorage.setItem('admirals_currentUser', username);
@@ -66,7 +55,6 @@ document.getElementById('signupForm').addEventListener('submit', e => {
   showDashboard();
 });
 
-// Check invite
 const params = new URLSearchParams(window.location.search);
 const inviteToken = params.get('invite');
 if (inviteToken) {
@@ -84,13 +72,8 @@ function showDashboard() {
   document.getElementById('currentUser').textContent = currentUser;
   document.getElementById('settingsUsername').textContent = currentUser;
   document.getElementById('settingsEmail').value = users[currentUser]?.email || '';
-  loadPlayers();
-  loadCoaches();
-  loadBoardMembers();
-  loadSchedule();
-  loadStats();
-  loadNews();
-  loadUsers();
+  loadPlayers(); loadCoaches(); loadBoardMembers();
+  loadSchedule(); loadStats(); loadNews(); loadUsers();
 }
 
 if (currentUser) showDashboard();
@@ -109,136 +92,205 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 
 // ============================================
-// PHOTO UPLOAD HELPER
+// ROSTER MODAL
 // ============================================
-async function uploadPhoto(file, path) {
-  const storageRef = ref(storage, path);
-  await uploadBytes(storageRef, file);
-  return await getDownloadURL(storageRef);
+let croppedPhoto = null;
+let currentPhotoURL = null;
+
+const rosterModal = document.getElementById('rosterModal');
+const closeRosterModal = document.getElementById('closeRosterModal');
+closeRosterModal.addEventListener('click', () => rosterModal.classList.remove('active'));
+rosterModal.addEventListener('click', e => { if (e.target === rosterModal) rosterModal.classList.remove('active'); });
+document.getElementById('cancelMemberBtn').addEventListener('click', () => rosterModal.classList.remove('active'));
+
+function openRosterModal(type, data = null) {
+  // Reset
+  croppedPhoto = null;
+  currentPhotoURL = data?.photoURL || null;
+  document.getElementById('memberId').value = data?.id || '';
+  document.getElementById('memberType').value = type;
+  document.getElementById('memberBio').value = data?.bio || '';
+  document.getElementById('memberPhoto').value = '';
+  document.getElementById('memberSaveStatus').textContent = '';
+
+  // Show correct fields
+  const isPlayer = type === 'player';
+  document.getElementById('playerFields').style.display = isPlayer ? 'block' : 'none';
+  document.getElementById('staffFields').style.display = isPlayer ? 'none' : 'block';
+
+  if (isPlayer) {
+    document.getElementById('memberName').value = data?.name || '';
+    document.getElementById('memberNumber').value = data?.number || '';
+    document.getElementById('memberPosition').value = data?.position || '';
+    document.getElementById('memberGrade').value = data?.grade || '';
+  } else {
+    document.getElementById('memberNameStaff').value = data?.name || '';
+    document.getElementById('memberTitle').value = data?.title || '';
+  }
+
+  // Title
+  const titles = { player: 'Player', coach: 'Coach', board: 'Board Member' };
+  document.getElementById('rosterModalTitle').textContent = (data ? 'Edit' : 'Add') + ' ' + titles[type];
+
+  // Photo preview
+  const preview = document.getElementById('memberPhotoPreview');
+  if (currentPhotoURL) {
+    showPhotoConfirmed(currentPhotoURL, preview);
+  } else {
+    preview.innerHTML = '';
+  }
+
+  rosterModal.classList.add('active');
 }
 
-
-
-
-
-
-// ============================================
-// PLAYERS
-// ============================================
-document.getElementById('addPlayerBtn').addEventListener('click', () => {
-  clearForm(['playerId','playerName','playerNumber','playerPosition','playerGrade','playerBio']);
-  document.getElementById('playerPhotoPreview').innerHTML = '';
-  document.getElementById('playerPhoto').value = '';
-  document.getElementById('playerForm').style.display = 'block';
-  document.getElementById('coachForm').style.display = 'none';
-  document.getElementById('boardForm').style.display = 'none';
+// Photo upload with framer
+document.getElementById('memberPhoto').addEventListener('change', function() {
+  const file = this.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => showFramer(e.target.result, document.getElementById('memberPhotoPreview'));
+  reader.readAsDataURL(file);
 });
-document.getElementById('cancelPlayerBtn').addEventListener('click', () => document.getElementById('playerForm').style.display = 'none');
 
-document.getElementById('savePlayerBtn').addEventListener('click', async () => {
-  const id = document.getElementById('playerId').value || Date.now().toString();
-  const status = document.getElementById('playerSaveStatus');
+function showFramer(src, container) {
+  container.innerHTML = `
+    <div class="framer-wrap">
+      <p class="framer-instructions">Drag to reposition · Scroll or slider to zoom</p>
+      <div class="framer-viewport" id="framerViewport">
+        <img id="framerImg" src="${src}" draggable="false">
+      </div>
+      <div class="framer-controls">
+        <input type="range" id="framerZoom" min="0.5" max="3" step="0.01" value="1">
+        <label>Zoom</label>
+      </div>
+      <button type="button" id="framerConfirm" class="btn-primary">✓ Use This Photo</button>
+    </div>
+  `;
+
+  const viewport = document.getElementById('framerViewport');
+  const img = document.getElementById('framerImg');
+  const zoomSlider = document.getElementById('framerZoom');
+  let scale = 1, offsetX = 0, offsetY = 0, isDragging = false, startX, startY;
+
+  function updateTransform() { img.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`; }
+
+  viewport.addEventListener('mousedown', e => { isDragging = true; startX = e.clientX - offsetX; startY = e.clientY - offsetY; viewport.style.cursor = 'grabbing'; });
+  window.addEventListener('mousemove', e => { if (!isDragging) return; offsetX = e.clientX - startX; offsetY = e.clientY - startY; updateTransform(); });
+  window.addEventListener('mouseup', () => { isDragging = false; viewport.style.cursor = 'grab'; });
+  viewport.addEventListener('touchstart', e => { isDragging = true; startX = e.touches[0].clientX - offsetX; startY = e.touches[0].clientY - offsetY; });
+  window.addEventListener('touchmove', e => { if (!isDragging) return; offsetX = e.touches[0].clientX - startX; offsetY = e.touches[0].clientY - startY; updateTransform(); });
+  window.addEventListener('touchend', () => { isDragging = false; });
+  zoomSlider.addEventListener('input', () => { scale = parseFloat(zoomSlider.value); updateTransform(); });
+  viewport.addEventListener('wheel', e => { e.preventDefault(); scale = Math.min(3, Math.max(0.5, scale - e.deltaY * 0.001)); zoomSlider.value = scale; updateTransform(); });
+  updateTransform();
+
+  document.getElementById('framerConfirm').addEventListener('click', () => {
+    const size = 400;
+    const canvas = document.createElement('canvas');
+    canvas.width = size; canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const vRect = viewport.getBoundingClientRect();
+    const iRect = img.getBoundingClientRect();
+    const scaleX = img.naturalWidth / iRect.width;
+    const scaleY = img.naturalHeight / iRect.height;
+    ctx.drawImage(img, (vRect.left - iRect.left) * scaleX, (vRect.top - iRect.top) * scaleY, vRect.width * scaleX, vRect.height * scaleY, 0, 0, size, size);
+    const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+    croppedPhoto = dataURL;
+    currentPhotoURL = null;
+    showPhotoConfirmed(dataURL, container, src);
+  });
+}
+
+function showPhotoConfirmed(dataURL, container, originalSrc = null) {
+  container.innerHTML = `
+    <div style="display:flex; align-items:center; gap:1rem; margin-top:0.5rem;">
+      <img src="${dataURL}" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:3px solid #5e1825; flex-shrink:0;">
+      <div style="display:flex; flex-direction:column; gap:0.5rem;">
+        ${originalSrc ? `<button type="button" id="reframeBtn" class="btn-secondary" style="font-size:0.8rem; padding:6px 12px;">Re-frame</button>` : ''}
+        <button type="button" id="removePhotoBtn" class="btn-delete" style="font-size:0.8rem; padding:6px 12px;">Remove Photo</button>
+      </div>
+    </div>
+  `;
+
+  if (originalSrc) {
+    document.getElementById('reframeBtn')?.addEventListener('click', () => showFramer(originalSrc, container));
+  }
+
+  document.getElementById('removePhotoBtn').addEventListener('click', () => {
+    croppedPhoto = null;
+    currentPhotoURL = null;
+    document.getElementById('memberPhoto').value = '';
+    container.innerHTML = '';
+  });
+}
+
+// Save member
+document.getElementById('saveMemberBtn').addEventListener('click', async () => {
+  const id = document.getElementById('memberId').value || Date.now().toString();
+  const type = document.getElementById('memberType').value;
+  const status = document.getElementById('memberSaveStatus');
   status.textContent = 'Saving...';
+  status.style.color = '#666';
 
-  let photoURL = '';
-  const photoFile = document.getElementById('playerPhoto').files[0];
-  if (photoFile) photoURL = await uploadPhoto(photoFile, `roster/players/${id}`);
+  let photoURL = currentPhotoURL || '';
 
-  const player = {
-    id,
-    type: 'player',
-    name: document.getElementById('playerName').value,
-    number: document.getElementById('playerNumber').value,
-    position: document.getElementById('playerPosition').value,
-    grade: document.getElementById('playerGrade').value,
-    bio: document.getElementById('playerBio').value,
-    photoURL: photoURL || document.getElementById('playerPhotoPreview').querySelector('img')?.src || ''
+  // Upload cropped photo if new one selected
+  if (croppedPhoto) {
+    try {
+      const storageRef = ref(storage, `roster/${type}/${id}`);
+      await uploadString(storageRef, croppedPhoto, 'data_url');
+      photoURL = await getDownloadURL(storageRef);
+    } catch (e) {
+      console.error('Photo upload failed:', e);
+    }
+  }
+
+  // Build member object
+  const isPlayer = type === 'player';
+  const member = {
+    id, type,
+    name: isPlayer ? document.getElementById('memberName').value : document.getElementById('memberNameStaff').value,
+    bio: document.getElementById('memberBio').value,
+    photoURL
   };
 
-  await setDoc(doc(db, 'roster', id), player);
+  if (isPlayer) {
+    member.number = document.getElementById('memberNumber').value;
+    member.position = document.getElementById('memberPosition').value;
+    member.grade = document.getElementById('memberGrade').value;
+  } else {
+    member.title = document.getElementById('memberTitle').value;
+  }
+
+  await setDoc(doc(db, 'roster', id), member);
   status.textContent = '✅ Saved!';
-  document.getElementById('playerForm').style.display = 'none';
-  loadPlayers();
+  status.style.color = 'green';
+
+  setTimeout(() => {
+    rosterModal.classList.remove('active');
+    loadPlayers(); loadCoaches(); loadBoardMembers();
+  }, 800);
 });
 
+// Add buttons
+document.getElementById('addPlayerBtn').addEventListener('click', () => openRosterModal('player'));
+document.getElementById('addCoachBtn').addEventListener('click', () => openRosterModal('coach'));
+document.getElementById('addBoardBtn').addEventListener('click', () => openRosterModal('board'));
+
+// ============================================
+// LOAD ROSTER
+// ============================================
 async function loadPlayers() {
   const list = document.getElementById('playersList');
   list.innerHTML = '';
   const snap = await getDocs(collection(db, 'roster'));
   const players = [];
   snap.forEach(d => { if (d.data().type === 'player') players.push(d.data()); });
-
   if (players.length === 0) { list.innerHTML = '<div class="empty-state">No players added yet</div>'; return; }
-
   players.sort((a, b) => parseInt(a.number) - parseInt(b.number)).forEach(p => {
-    const item = document.createElement('div');
-    item.className = 'item';
-    item.innerHTML = `
-      <div class="item-info">
-        ${p.photoURL ? `<img src="${p.photoURL}" class="item-photo">` : ''}
-        <div>
-          <strong>#${p.number} - ${p.name}</strong>
-          <span>${p.position} | ${p.grade}</span>
-        </div>
-      </div>
-      <div>
-        <button class="btn-edit" onclick="editPlayer('${p.id}')">Edit</button>
-        <button class="btn-delete" onclick="deleteRosterMember('${p.id}', 'players')">Delete</button>
-      </div>
-    `;
-    list.appendChild(item);
+    list.appendChild(buildRosterItem(p));
   });
 }
-
-window.editPlayer = async (id) => {
-  const snap = await getDoc(doc(db, 'roster', id));
-  const p = snap.data();
-  document.getElementById('playerId').value = p.id;
-  document.getElementById('playerName').value = p.name;
-  document.getElementById('playerNumber').value = p.number;
-  document.getElementById('playerPosition').value = p.position;
-  document.getElementById('playerGrade').value = p.grade;
-  document.getElementById('playerBio').value = p.bio || '';
-  if (p.photoURL) document.getElementById('playerPhotoPreview').innerHTML = `<img src="${p.photoURL}" alt="Photo">`;
-  document.getElementById('playerForm').style.display = 'block';
-};
-
-// ============================================
-// COACHES
-// ============================================
-document.getElementById('addCoachBtn').addEventListener('click', () => {
-  clearForm(['coachId','coachName','coachTitle','coachBio']);
-  document.getElementById('coachPhotoPreview').innerHTML = '';
-  document.getElementById('coachPhoto').value = '';
-  document.getElementById('coachForm').style.display = 'block';
-  document.getElementById('playerForm').style.display = 'none';
-  document.getElementById('boardForm').style.display = 'none';
-});
-document.getElementById('cancelCoachBtn').addEventListener('click', () => document.getElementById('coachForm').style.display = 'none');
-
-document.getElementById('saveCoachBtn').addEventListener('click', async () => {
-  const id = document.getElementById('coachId').value || Date.now().toString();
-  const status = document.getElementById('coachSaveStatus');
-  status.textContent = 'Saving...';
-
-  let photoURL = '';
-  const photoFile = document.getElementById('coachPhoto').files[0];
-  if (photoFile) photoURL = await uploadPhoto(photoFile, `roster/coaches/${id}`);
-
-  const coach = {
-    id,
-    type: 'coach',
-    name: document.getElementById('coachName').value,
-    title: document.getElementById('coachTitle').value,
-    bio: document.getElementById('coachBio').value,
-    photoURL: photoURL || document.getElementById('coachPhotoPreview').querySelector('img')?.src || ''
-  };
-
-  await setDoc(doc(db, 'roster', id), coach);
-  status.textContent = '✅ Saved!';
-  document.getElementById('coachForm').style.display = 'none';
-  loadCoaches();
-});
 
 async function loadCoaches() {
   const list = document.getElementById('coachesList');
@@ -246,76 +298,9 @@ async function loadCoaches() {
   const snap = await getDocs(collection(db, 'roster'));
   const coaches = [];
   snap.forEach(d => { if (d.data().type === 'coach') coaches.push(d.data()); });
-
   if (coaches.length === 0) { list.innerHTML = '<div class="empty-state">No coaches added yet</div>'; return; }
-
-  coaches.forEach(c => {
-    const item = document.createElement('div');
-    item.className = 'item';
-    item.innerHTML = `
-      <div class="item-info">
-        ${c.photoURL ? `<img src="${c.photoURL}" class="item-photo">` : ''}
-        <div>
-          <strong>${c.name}</strong>
-          <span>${c.title}</span>
-        </div>
-      </div>
-      <div>
-        <button class="btn-edit" onclick="editCoach('${c.id}')">Edit</button>
-        <button class="btn-delete" onclick="deleteRosterMember('${c.id}', 'coaches')">Delete</button>
-      </div>
-    `;
-    list.appendChild(item);
-  });
+  coaches.forEach(c => list.appendChild(buildRosterItem(c)));
 }
-
-window.editCoach = async (id) => {
-  const snap = await getDoc(doc(db, 'roster', id));
-  const c = snap.data();
-  document.getElementById('coachId').value = c.id;
-  document.getElementById('coachName').value = c.name;
-  document.getElementById('coachTitle').value = c.title || '';
-  document.getElementById('coachBio').value = c.bio || '';
-  if (c.photoURL) document.getElementById('coachPhotoPreview').innerHTML = `<img src="${c.photoURL}" alt="Photo">`;
-  document.getElementById('coachForm').style.display = 'block';
-};
-
-// ============================================
-// BOARD MEMBERS
-// ============================================
-document.getElementById('addBoardBtn').addEventListener('click', () => {
-  clearForm(['boardId','boardName','boardTitle','boardBio']);
-  document.getElementById('boardPhotoPreview').innerHTML = '';
-  document.getElementById('boardPhoto').value = '';
-  document.getElementById('boardForm').style.display = 'block';
-  document.getElementById('playerForm').style.display = 'none';
-  document.getElementById('coachForm').style.display = 'none';
-});
-document.getElementById('cancelBoardBtn').addEventListener('click', () => document.getElementById('boardForm').style.display = 'none');
-
-document.getElementById('saveBoardBtn').addEventListener('click', async () => {
-  const id = document.getElementById('boardId').value || Date.now().toString();
-  const status = document.getElementById('boardSaveStatus');
-  status.textContent = 'Saving...';
-
-  let photoURL = '';
-  const photoFile = document.getElementById('boardPhoto').files[0];
-  if (photoFile) photoURL = await uploadPhoto(photoFile, `roster/board/${id}`);
-
-  const member = {
-    id,
-    type: 'board',
-    name: document.getElementById('boardName').value,
-    title: document.getElementById('boardTitle').value,
-    bio: document.getElementById('boardBio').value,
-    photoURL: photoURL || document.getElementById('boardPhotoPreview').querySelector('img')?.src || ''
-  };
-
-  await setDoc(doc(db, 'roster', id), member);
-  status.textContent = '✅ Saved!';
-  document.getElementById('boardForm').style.display = 'none';
-  loadBoardMembers();
-});
 
 async function loadBoardMembers() {
   const list = document.getElementById('boardList');
@@ -323,44 +308,42 @@ async function loadBoardMembers() {
   const snap = await getDocs(collection(db, 'roster'));
   const members = [];
   snap.forEach(d => { if (d.data().type === 'board') members.push(d.data()); });
-
   if (members.length === 0) { list.innerHTML = '<div class="empty-state">No board members added yet</div>'; return; }
-
-  members.forEach(m => {
-    const item = document.createElement('div');
-    item.className = 'item';
-    item.innerHTML = `
-      <div class="item-info">
-        ${m.photoURL ? `<img src="${m.photoURL}" class="item-photo">` : ''}
-        <div>
-          <strong>${m.name}</strong>
-          <span>${m.title}</span>
-        </div>
-      </div>
-      <div>
-        <button class="btn-edit" onclick="editBoard('${m.id}')">Edit</button>
-        <button class="btn-delete" onclick="deleteRosterMember('${m.id}', 'board')">Delete</button>
-      </div>
-    `;
-    list.appendChild(item);
-  });
+  members.forEach(m => list.appendChild(buildRosterItem(m)));
 }
 
-window.editBoard = async (id) => {
+function buildRosterItem(m) {
+  const item = document.createElement('div');
+  item.className = 'item';
+  const subtitle = m.type === 'player' ? `${m.position} | ${m.grade}` : m.title || '';
+  const label = m.type === 'player' ? `#${m.number} - ${m.name}` : m.name;
+  item.innerHTML = `
+    <div class="item-info">
+      ${m.photoURL ? `<img src="${m.photoURL}" class="item-photo">` : ''}
+      <div>
+        <strong>${label}</strong>
+        <span>${subtitle}</span>
+      </div>
+    </div>
+    <div>
+      <button class="btn-edit" onclick="editMember('${m.id}')">Edit</button>
+      <button class="btn-delete" onclick="deleteMember('${m.id}')">Delete</button>
+    </div>
+  `;
+  return item;
+}
+
+window.editMember = async (id) => {
   const snap = await getDoc(doc(db, 'roster', id));
-  const m = snap.data();
-  document.getElementById('boardId').value = m.id;
-  document.getElementById('boardName').value = m.name;
-  document.getElementById('boardTitle').value = m.title || '';
-  document.getElementById('boardBio').value = m.bio || '';
-  if (m.photoURL) document.getElementById('boardPhotoPreview').innerHTML = `<img src="${m.photoURL}" alt="Photo">`;
-  document.getElementById('boardForm').style.display = 'block';
+  if (snap.exists()) openRosterModal(snap.data().type, snap.data());
 };
 
-window.deleteRosterMember = async (id, type) => {
+window.deleteMember = async (id) => {
   if (!confirm('Delete this member?')) return;
   await deleteDoc(doc(db, 'roster', id));
-  try { await deleteObject(ref(storage, `roster/${type}/${id}`)); } catch(e) {}
+  try { await deleteObject(ref(storage, `roster/player/${id}`)); } catch(e) {}
+  try { await deleteObject(ref(storage, `roster/coach/${id}`)); } catch(e) {}
+  try { await deleteObject(ref(storage, `roster/board/${id}`)); } catch(e) {}
   loadPlayers(); loadCoaches(); loadBoardMembers();
 };
 
@@ -368,22 +351,13 @@ window.deleteRosterMember = async (id, type) => {
 // SCHEDULE
 // ============================================
 document.getElementById('addGameBtn').addEventListener('click', () => {
-  clearForm(['gameId','gameDate','gameTime','gameOpponent','gameType','gameLocation']);
+  ['gameId','gameDate','gameTime','gameOpponent','gameType','gameLocation'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('gameForm').style.display = 'block';
 });
 document.getElementById('cancelGameBtn').addEventListener('click', () => document.getElementById('gameForm').style.display = 'none');
-
 document.getElementById('saveGameBtn').addEventListener('click', async () => {
   const id = document.getElementById('gameId').value || Date.now().toString();
-  const game = {
-    id,
-    date: document.getElementById('gameDate').value,
-    time: document.getElementById('gameTime').value,
-    opponent: document.getElementById('gameOpponent').value,
-    type: document.getElementById('gameType').value,
-    location: document.getElementById('gameLocation').value
-  };
-  await setDoc(doc(db, 'schedule', id), game);
+  await setDoc(doc(db, 'schedule', id), { id, date: document.getElementById('gameDate').value, time: document.getElementById('gameTime').value, opponent: document.getElementById('gameOpponent').value, type: document.getElementById('gameType').value, location: document.getElementById('gameLocation').value });
   document.getElementById('gameForm').style.display = 'none';
   loadSchedule();
 });
@@ -398,13 +372,7 @@ async function loadSchedule() {
   games.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(g => {
     const dateStr = new Date(g.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
     const item = document.createElement('div'); item.className = 'item';
-    item.innerHTML = `
-      <div class="item-info"><div><strong>${dateStr} @ ${g.time} - ${g.opponent}</strong><span>${g.type} | ${g.location}</span></div></div>
-      <div>
-        <button class="btn-edit" onclick="editGame('${g.id}')">Edit</button>
-        <button class="btn-delete" onclick="deleteGame('${g.id}')">Delete</button>
-      </div>
-    `;
+    item.innerHTML = `<div class="item-info"><div><strong>${dateStr} @ ${g.time} - ${g.opponent}</strong><span>${g.type} | ${g.location}</span></div></div><div><button class="btn-edit" onclick="editGame('${g.id}')">Edit</button><button class="btn-delete" onclick="deleteGame('${g.id}')">Delete</button></div>`;
     list.appendChild(item);
   });
 }
@@ -420,66 +388,39 @@ window.editGame = async (id) => {
   document.getElementById('gameLocation').value = g.location;
   document.getElementById('gameForm').style.display = 'block';
 };
-
-window.deleteGame = async (id) => {
-  if (!confirm('Delete this game?')) return;
-  await deleteDoc(doc(db, 'schedule', id));
-  loadSchedule();
-};
+window.deleteGame = async (id) => { if (!confirm('Delete game?')) return; await deleteDoc(doc(db, 'schedule', id)); loadSchedule(); };
 
 // ============================================
 // STATISTICS
 // ============================================
 document.getElementById('saveStatsBtn').addEventListener('click', async () => {
-  const stats = {
-    wins: parseInt(document.getElementById('wins').value) || 0,
-    losses: parseInt(document.getElementById('losses').value) || 0,
-    ties: parseInt(document.getElementById('ties').value) || 0
-  };
-  await setDoc(doc(db, 'stats', 'record'), stats);
+  await setDoc(doc(db, 'stats', 'record'), { wins: parseInt(document.getElementById('wins').value) || 0, losses: parseInt(document.getElementById('losses').value) || 0, ties: parseInt(document.getElementById('ties').value) || 0 });
   alert('Stats saved!');
 });
 
-document.getElementById('addScorerBtn').addEventListener('click', () => {
-  clearForm(['scorerId','scorerName','scorerGoals','scorerAssists']);
-  document.getElementById('scorerForm').style.display = 'block';
-});
+document.getElementById('addScorerBtn').addEventListener('click', () => { ['scorerId','scorerName','scorerGoals','scorerAssists'].forEach(id => document.getElementById(id).value = ''); document.getElementById('scorerForm').style.display = 'block'; });
 document.getElementById('cancelScorerBtn').addEventListener('click', () => document.getElementById('scorerForm').style.display = 'none');
-
 document.getElementById('saveScorerBtn').addEventListener('click', async () => {
   const id = document.getElementById('scorerId').value || Date.now().toString();
-  const scorer = { id, name: document.getElementById('scorerName').value, goals: parseInt(document.getElementById('scorerGoals').value) || 0, assists: parseInt(document.getElementById('scorerAssists').value) || 0 };
-  await setDoc(doc(db, 'scorers', id), scorer);
+  await setDoc(doc(db, 'scorers', id), { id, name: document.getElementById('scorerName').value, goals: parseInt(document.getElementById('scorerGoals').value) || 0, assists: parseInt(document.getElementById('scorerAssists').value) || 0 });
   document.getElementById('scorerForm').style.display = 'none';
   loadStats();
 });
 
-document.getElementById('addGoaltenderBtn').addEventListener('click', () => {
-  clearForm(['goaltenderId','goaltenderName','goaltenderGames','goaltenderGAA','goaltenderSave']);
-  document.getElementById('goaltenderForm').style.display = 'block';
-});
+document.getElementById('addGoaltenderBtn').addEventListener('click', () => { ['goaltenderId','goaltenderName','goaltenderGames','goaltenderGAA','goaltenderSave'].forEach(id => document.getElementById(id).value = ''); document.getElementById('goaltenderForm').style.display = 'block'; });
 document.getElementById('cancelGoaltenderBtn').addEventListener('click', () => document.getElementById('goaltenderForm').style.display = 'none');
-
 document.getElementById('saveGoaltenderBtn').addEventListener('click', async () => {
   const id = document.getElementById('goaltenderId').value || Date.now().toString();
-  const g = { id, name: document.getElementById('goaltenderName').value, games: parseInt(document.getElementById('goaltenderGames').value) || 0, gaa: parseFloat(document.getElementById('goaltenderGAA').value) || 0, save: parseFloat(document.getElementById('goaltenderSave').value) || 0 };
-  await setDoc(doc(db, 'goaltenders', id), g);
+  await setDoc(doc(db, 'goaltenders', id), { id, name: document.getElementById('goaltenderName').value, games: parseInt(document.getElementById('goaltenderGames').value) || 0, gaa: parseFloat(document.getElementById('goaltenderGAA').value) || 0, save: parseFloat(document.getElementById('goaltenderSave').value) || 0 });
   document.getElementById('goaltenderForm').style.display = 'none';
   loadStats();
 });
 
 async function loadStats() {
   const recordSnap = await getDoc(doc(db, 'stats', 'record'));
-  if (recordSnap.exists()) {
-    const r = recordSnap.data();
-    document.getElementById('wins').value = r.wins;
-    document.getElementById('losses').value = r.losses;
-    document.getElementById('ties').value = r.ties;
-  }
-
+  if (recordSnap.exists()) { const r = recordSnap.data(); document.getElementById('wins').value = r.wins; document.getElementById('losses').value = r.losses; document.getElementById('ties').value = r.ties; }
   const scorersSnap = await getDocs(collection(db, 'scorers'));
-  const scorers = [];
-  scorersSnap.forEach(d => scorers.push(d.data()));
+  const scorers = []; scorersSnap.forEach(d => scorers.push(d.data()));
   const scorersList = document.getElementById('scorersList');
   scorersList.innerHTML = scorers.length === 0 ? '<div class="empty-state">No scorers added yet</div>' : '';
   scorers.sort((a, b) => (b.goals + b.assists) - (a.goals + a.assists)).forEach(s => {
@@ -487,55 +428,30 @@ async function loadStats() {
     item.innerHTML = `<div class="item-info"><div><strong>${s.name}</strong><span>${s.goals}G | ${s.assists}A | ${s.goals + s.assists}PTS</span></div></div><div><button class="btn-edit" onclick="editScorer('${s.id}')">Edit</button><button class="btn-delete" onclick="deleteScorer('${s.id}')">Delete</button></div>`;
     scorersList.appendChild(item);
   });
-
   const goalSnap = await getDocs(collection(db, 'goaltenders'));
-  const goalies = [];
-  goalSnap.forEach(d => goalies.push(d.data()));
-  const goaltendersList = document.getElementById('goaltendersList');
-  goaltendersList.innerHTML = goalies.length === 0 ? '<div class="empty-state">No goaltenders added yet</div>' : '';
+  const goalies = []; goalSnap.forEach(d => goalies.push(d.data()));
+  const goaliesList = document.getElementById('goaltendersList');
+  goaliesList.innerHTML = goalies.length === 0 ? '<div class="empty-state">No goaltenders added yet</div>' : '';
   goalies.forEach(g => {
     const item = document.createElement('div'); item.className = 'item';
     item.innerHTML = `<div class="item-info"><div><strong>${g.name}</strong><span>${g.games}GP | ${g.gaa} GAA | ${g.save}% SV</span></div></div><div><button class="btn-edit" onclick="editGoaltender('${g.id}')">Edit</button><button class="btn-delete" onclick="deleteGoaltender('${g.id}')">Delete</button></div>`;
-    goaltendersList.appendChild(item);
+    goaliesList.appendChild(item);
   });
 }
 
-window.editScorer = async (id) => {
-  const snap = await getDoc(doc(db, 'scorers', id));
-  const s = snap.data();
-  document.getElementById('scorerId').value = s.id;
-  document.getElementById('scorerName').value = s.name;
-  document.getElementById('scorerGoals').value = s.goals;
-  document.getElementById('scorerAssists').value = s.assists;
-  document.getElementById('scorerForm').style.display = 'block';
-};
+window.editScorer = async (id) => { const snap = await getDoc(doc(db, 'scorers', id)); const s = snap.data(); document.getElementById('scorerId').value = s.id; document.getElementById('scorerName').value = s.name; document.getElementById('scorerGoals').value = s.goals; document.getElementById('scorerAssists').value = s.assists; document.getElementById('scorerForm').style.display = 'block'; };
 window.deleteScorer = async (id) => { if (!confirm('Delete?')) return; await deleteDoc(doc(db, 'scorers', id)); loadStats(); };
-
-window.editGoaltender = async (id) => {
-  const snap = await getDoc(doc(db, 'goaltenders', id));
-  const g = snap.data();
-  document.getElementById('goaltenderId').value = g.id;
-  document.getElementById('goaltenderName').value = g.name;
-  document.getElementById('goaltenderGames').value = g.games;
-  document.getElementById('goaltenderGAA').value = g.gaa;
-  document.getElementById('goaltenderSave').value = g.save;
-  document.getElementById('goaltenderForm').style.display = 'block';
-};
+window.editGoaltender = async (id) => { const snap = await getDoc(doc(db, 'goaltenders', id)); const g = snap.data(); document.getElementById('goaltenderId').value = g.id; document.getElementById('goaltenderName').value = g.name; document.getElementById('goaltenderGames').value = g.games; document.getElementById('goaltenderGAA').value = g.gaa; document.getElementById('goaltenderSave').value = g.save; document.getElementById('goaltenderForm').style.display = 'block'; };
 window.deleteGoaltender = async (id) => { if (!confirm('Delete?')) return; await deleteDoc(doc(db, 'goaltenders', id)); loadStats(); };
 
 // ============================================
 // NEWS
 // ============================================
-document.getElementById('addNewsBtn').addEventListener('click', () => {
-  clearForm(['newsId','newsTitle','newsDate','newsCategory','newsContent']);
-  document.getElementById('newsForm').style.display = 'block';
-});
+document.getElementById('addNewsBtn').addEventListener('click', () => { ['newsId','newsTitle','newsDate','newsCategory','newsContent'].forEach(id => document.getElementById(id).value = ''); document.getElementById('newsForm').style.display = 'block'; });
 document.getElementById('cancelNewsBtn').addEventListener('click', () => document.getElementById('newsForm').style.display = 'none');
-
 document.getElementById('saveNewsBtn').addEventListener('click', async () => {
   const id = document.getElementById('newsId').value || Date.now().toString();
-  const post = { id, title: document.getElementById('newsTitle').value, date: document.getElementById('newsDate').value, category: document.getElementById('newsCategory').value, content: document.getElementById('newsContent').value };
-  await setDoc(doc(db, 'news', id), post);
+  await setDoc(doc(db, 'news', id), { id, title: document.getElementById('newsTitle').value, date: document.getElementById('newsDate').value, category: document.getElementById('newsCategory').value, content: document.getElementById('newsContent').value });
   document.getElementById('newsForm').style.display = 'none';
   loadNews();
 });
@@ -544,8 +460,7 @@ async function loadNews() {
   const list = document.getElementById('newsList');
   list.innerHTML = '';
   const snap = await getDocs(collection(db, 'news'));
-  const posts = [];
-  snap.forEach(d => posts.push(d.data()));
+  const posts = []; snap.forEach(d => posts.push(d.data()));
   if (posts.length === 0) { list.innerHTML = '<div class="empty-state">No posts added yet</div>'; return; }
   posts.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(n => {
     const dateStr = new Date(n.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -555,16 +470,7 @@ async function loadNews() {
   });
 }
 
-window.editNews = async (id) => {
-  const snap = await getDoc(doc(db, 'news', id));
-  const n = snap.data();
-  document.getElementById('newsId').value = n.id;
-  document.getElementById('newsTitle').value = n.title;
-  document.getElementById('newsDate').value = n.date;
-  document.getElementById('newsCategory').value = n.category;
-  document.getElementById('newsContent').value = n.content;
-  document.getElementById('newsForm').style.display = 'block';
-};
+window.editNews = async (id) => { const snap = await getDoc(doc(db, 'news', id)); const n = snap.data(); document.getElementById('newsId').value = n.id; document.getElementById('newsTitle').value = n.title; document.getElementById('newsDate').value = n.date; document.getElementById('newsCategory').value = n.category; document.getElementById('newsContent').value = n.content; document.getElementById('newsForm').style.display = 'block'; };
 window.deleteNews = async (id) => { if (!confirm('Delete post?')) return; await deleteDoc(doc(db, 'news', id)); loadNews(); };
 
 // ============================================
@@ -579,8 +485,7 @@ document.getElementById('generateInviteBtn').addEventListener('click', () => {
   const invites = JSON.parse(localStorage.getItem('admirals_invites')) || {};
   invites[token] = { email, used: false };
   localStorage.setItem('admirals_invites', JSON.stringify(invites));
-  const link = `${window.location.origin}/admin.html?invite=${token}`;
-  document.getElementById('inviteLink').value = link;
+  document.getElementById('inviteLink').value = `${window.location.origin}/admin.html?invite=${token}`;
   document.getElementById('inviteForm').style.display = 'none';
   document.getElementById('inviteResult').style.display = 'block';
 });
@@ -602,33 +507,19 @@ window.deleteUser = (username) => { if (!confirm('Remove user?')) return; delete
 // ============================================
 document.getElementById('updateEmailBtn').addEventListener('click', () => {
   const email = document.getElementById('settingsEmail').value;
-  if (!email) { alert('Please enter an email'); return; }
-  users[currentUser].email = email;
-  saveUsers();
-  showSettingsMsg('✅ Email updated!', 'green');
+  if (!email) return;
+  users[currentUser].email = email; saveUsers();
+  document.getElementById('settingsMsg').textContent = '✅ Email updated!';
+  document.getElementById('settingsMsg').style.color = 'green';
 });
-
 document.getElementById('updatePasswordBtn').addEventListener('click', () => {
   const current = document.getElementById('currentPassword').value;
   const newPwd = document.getElementById('newPassword').value;
   const confirm = document.getElementById('confirmPassword').value;
-  if (users[currentUser].password !== current) { showSettingsMsg('❌ Current password incorrect', 'red'); return; }
-  if (newPwd !== confirm) { showSettingsMsg('❌ Passwords do not match', 'red'); return; }
-  users[currentUser].password = newPwd;
-  saveUsers();
+  const msg = document.getElementById('settingsMsg');
+  if (users[currentUser].password !== current) { msg.textContent = '❌ Current password incorrect'; msg.style.color = 'red'; return; }
+  if (newPwd !== confirm) { msg.textContent = '❌ Passwords do not match'; msg.style.color = 'red'; return; }
+  users[currentUser].password = newPwd; saveUsers();
   ['currentPassword','newPassword','confirmPassword'].forEach(id => document.getElementById(id).value = '');
-  showSettingsMsg('✅ Password updated!', 'green');
+  msg.textContent = '✅ Password updated!'; msg.style.color = 'green';
 });
-
-function showSettingsMsg(msg, color) {
-  const el = document.getElementById('settingsMsg');
-  el.textContent = msg;
-  el.style.color = color;
-}
-
-// ============================================
-// HELPERS
-// ============================================
-function clearForm(ids) {
-  ids.forEach(id => document.getElementById(id).value = '');
-}

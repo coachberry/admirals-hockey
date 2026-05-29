@@ -478,3 +478,99 @@ body {
   width: 100%;
   margin-top: 0.75rem;
 }
+
+/* ROSTER MODAL */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: white;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.modal-header {
+  background: linear-gradient(135deg, var(--primary-maroon), var(--dark-maroon));
+  color: white;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+}
+.modal-header h2 { font-size: 1.1rem; margin: 0; }
+.modal-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.8rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+.modal-body {
+  padding: 1.5rem;
+}
+.modal-body input,
+.modal-body select,
+.modal-body textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+.modal-body input:focus,
+.modal-body select:focus,
+.modal-body textarea:focus {
+  outline: none;
+  border-color: var(--primary-maroon);
+}
+
+/* FRAMER */
+.framer-wrap { margin-top: 0.75rem; }
+.framer-instructions { font-size: 0.8rem; color: #666; margin-bottom: 0.5rem; }
+.framer-viewport {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 6px;
+  border: 2px solid var(--primary-maroon);
+  cursor: grab;
+  position: relative;
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.framer-viewport img {
+  position: absolute;
+  transform-origin: center center;
+  max-width: none;
+  user-select: none;
+  pointer-events: none;
+}
+.framer-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+.framer-controls input[type="range"] { flex: 1; margin-bottom: 0; }
+.framer-controls label { font-size: 0.8rem; color: #666; white-space: nowrap; }
+#framerConfirm { width: 100%; margin-top: 0.75rem; }

@@ -51,87 +51,10 @@
         <button id="addCoachBtn" class="btn-primary">+ Add Coach</button>
         <button id="addBoardBtn" class="btn-primary">+ Add Board Member</button>
       </div>
-
-      <!-- ADD PLAYER FORM -->
-      <div id="playerForm" class="form-section" style="display: none;">
-        <h3>Add / Edit Player</h3>
-        <input type="hidden" id="playerId">
-        <div class="form-row">
-          <input type="text" id="playerName" placeholder="Player Name">
-          <input type="number" id="playerNumber" placeholder="Jersey Number">
-        </div>
-        <div class="form-row">
-          <select id="playerPosition">
-            <option value="">Select Position</option>
-            <option value="Forward">Forward</option>
-            <option value="Defense">Defense</option>
-            <option value="Goaltender">Goaltender</option>
-          </select>
-          <select id="playerGrade">
-            <option value="">Select Grade</option>
-            <option value="Senior">Senior</option>
-            <option value="Junior">Junior</option>
-            <option value="Sophomore">Sophomore</option>
-            <option value="Freshman">Freshman</option>
-          </select>
-        </div>
-        <textarea id="playerBio" placeholder="Player Bio" rows="4"></textarea>
-        <div class="photo-upload-section">
-          <label>Player Photo</label>
-          <input type="file" id="playerPhoto" accept="image/*,.heic,.heif,.HEIC,.HEIF">
-          <div id="playerPhotoPreview" class="photo-preview"></div>
-        </div>
-        <div class="form-buttons">
-          <button id="savePlayerBtn" class="btn-primary">Save Player</button>
-          <button id="cancelPlayerBtn" class="btn-secondary">Cancel</button>
-        </div>
-        <p id="playerSaveStatus" class="save-status"></p>
-      </div>
-
-      <!-- ADD COACH FORM -->
-      <div id="coachForm" class="form-section" style="display: none;">
-        <h3>Add / Edit Coach</h3>
-        <input type="hidden" id="coachId">
-        <input type="text" id="coachName" placeholder="Coach Name">
-        <input type="text" id="coachTitle" placeholder="Title (e.g. Head Coach, Assistant Coach)">
-        <textarea id="coachBio" placeholder="Coach Bio" rows="4"></textarea>
-        <div class="photo-upload-section">
-          <label>Coach Photo</label>
-          <input type="file" id="coachPhoto" accept="image/*,.heic,.heif,.HEIC,.HEIF">
-          <div id="coachPhotoPreview" class="photo-preview"></div>
-        </div>
-        <div class="form-buttons">
-          <button id="saveCoachBtn" class="btn-primary">Save Coach</button>
-          <button id="cancelCoachBtn" class="btn-secondary">Cancel</button>
-        </div>
-        <p id="coachSaveStatus" class="save-status"></p>
-      </div>
-
-      <!-- ADD BOARD MEMBER FORM -->
-      <div id="boardForm" class="form-section" style="display: none;">
-        <h3>Add / Edit Board Member</h3>
-        <input type="hidden" id="boardId">
-        <input type="text" id="boardName" placeholder="Name">
-        <input type="text" id="boardTitle" placeholder="Title (e.g. President, Treasurer)">
-        <textarea id="boardBio" placeholder="Bio" rows="4"></textarea>
-        <div class="photo-upload-section">
-          <label>Photo</label>
-          <input type="file" id="boardPhoto" accept="image/*,.heic,.heif,.HEIC,.HEIF">
-          <div id="boardPhotoPreview" class="photo-preview"></div>
-        </div>
-        <div class="form-buttons">
-          <button id="saveBoardBtn" class="btn-primary">Save Board Member</button>
-          <button id="cancelBoardBtn" class="btn-secondary">Cancel</button>
-        </div>
-        <p id="boardSaveStatus" class="save-status"></p>
-      </div>
-
       <h3 class="list-heading">Players</h3>
       <div id="playersList" class="items-list"><div class="empty-state">No players added yet</div></div>
-
       <h3 class="list-heading">Coaching Staff</h3>
       <div id="coachesList" class="items-list"><div class="empty-state">No coaches added yet</div></div>
-
       <h3 class="list-heading">Board Members</h3>
       <div id="boardList" class="items-list"><div class="empty-state">No board members added yet</div></div>
     </div>
@@ -275,6 +198,63 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- ROSTER MODAL -->
+<div id="rosterModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="rosterModalTitle">Add Member</h2>
+      <button class="modal-close" id="closeRosterModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="memberId">
+      <input type="hidden" id="memberType">
+
+      <!-- Player fields -->
+      <div id="playerFields">
+        <div class="form-row">
+          <input type="text" id="memberName" placeholder="Full Name">
+          <input type="number" id="memberNumber" placeholder="Jersey #">
+        </div>
+        <div class="form-row">
+          <select id="memberPosition">
+            <option value="">Position</option>
+            <option value="Forward">Forward</option>
+            <option value="Defense">Defense</option>
+            <option value="Goaltender">Goaltender</option>
+          </select>
+          <select id="memberGrade">
+            <option value="">Grade</option>
+            <option value="Senior">Senior</option>
+            <option value="Junior">Junior</option>
+            <option value="Sophomore">Sophomore</option>
+            <option value="Freshman">Freshman</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Coach/Board fields -->
+      <div id="staffFields" style="display:none;">
+        <input type="text" id="memberNameStaff" placeholder="Full Name">
+        <input type="text" id="memberTitle" placeholder="Title">
+      </div>
+
+      <textarea id="memberBio" placeholder="Bio" rows="4"></textarea>
+
+      <div class="photo-upload-section">
+        <label>Photo</label>
+        <input type="file" id="memberPhoto" accept="image/*,.heic,.heif,.HEIC,.HEIF">
+        <div id="memberPhotoPreview" class="photo-preview"></div>
+      </div>
+
+      <div class="form-buttons">
+        <button id="saveMemberBtn" class="btn-primary">Save</button>
+        <button id="cancelMemberBtn" class="btn-secondary">Cancel</button>
+      </div>
+      <p id="memberSaveStatus" class="save-status"></p>
+    </div>
   </div>
 </div>
 
