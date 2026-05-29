@@ -35,13 +35,11 @@
 
 <div class="main-container">
 
-  <!-- Season selector -->
   <div class="season-selector-wrap">
     <label for="seasonSelect">View Season:</label>
     <select id="seasonSelect" class="season-selector-public"></select>
   </div>
 
-  <!-- Season Stats Bar -->
   <div class="season-stats-bar" id="seasonStatsBar" style="display:none;">
     <div class="stats-bar-card">
       <div class="stats-bar-label">Season Record</div>
@@ -65,7 +63,6 @@
     </div>
   </div>
 
-  <!-- Next Game / Last Game -->
   <div class="featured-games-row" id="featuredGames" style="display:none;">
     <div class="featured-game-card" id="nextGameCard" style="display:none;">
       <div class="featured-label">Next Game</div>
@@ -77,7 +74,6 @@
     </div>
   </div>
 
-  <!-- Full Schedule -->
   <div style="margin-top:2rem; margin-bottom:3rem;">
     <div class="section-header">
       <h2 class="section-title">Full Schedule</h2>
@@ -89,39 +85,23 @@
 
 </div>
 
-<!-- GAME STATS VIEW MODAL -->
+<!-- GAME VIEW MODAL -->
 <div id="gameViewModal" class="modal-overlay">
-  <div class="modal" style="max-width:800px;">
+  <div class="modal gvm-modal">
     <button class="modal-close-float" id="closeGameViewModal">&times;</button>
-
-    <!-- Game header -->
     <div id="gvmHeader" class="gvm-header"></div>
-
+    <div class="gvm-sticky-bar" id="gvmTeamStats" style="display:none;"></div>
     <div class="modal-body">
-      <!-- Team stats bar -->
-      <div id="gvmTeamStats" class="gvm-team-stats" style="display:none;"></div>
-
-      <!-- Skaters table -->
       <div style="margin-bottom:1.5rem;">
         <h3 class="gvm-section-title">Skaters</h3>
-        <div class="stats-table-scroll">
+        <div class="gvm-table-wrap">
           <table class="game-stats-table">
             <thead>
               <tr>
                 <th>#</th><th>Player</th>
-                <th title="Goals">G</th>
-                <th title="Assists">A</th>
-                <th title="Points">PTS</th>
-                <th title="Power Play Goals">PPG</th>
-                <th title="Power Play Assists">PPA</th>
-                <th title="Short Handed Goals">SHG</th>
-                <th title="Short Handed Assists">SHA</th>
-                <th title="Game Winning Goal">GWG</th>
-                <th title="Plus">+</th>
-                <th title="Minus">-</th>
-                <th title="Plus/Minus">+/-</th>
-                <th title="Shots on Goal">SOG</th>
-                <th title="Penalty Minutes">PIM</th>
+                <th>G</th><th>A</th><th>PTS</th>
+                <th>PPG</th><th>PPA</th><th>SHG</th><th>SHA</th><th>GWG</th>
+                <th>+</th><th>-</th><th>+/-</th><th>SOG</th><th>PIM</th>
               </tr>
             </thead>
             <tbody id="gvmSkatersBody"></tbody>
@@ -129,21 +109,14 @@
         </div>
         <div id="gvmGwgKey" class="gwg-key" style="display:none;">⭐ Game Winning Goal scorer</div>
       </div>
-
-      <!-- Goalies table -->
       <div>
         <h3 class="gvm-section-title">Goaltenders</h3>
-        <div class="stats-table-scroll">
+        <div class="gvm-table-wrap">
           <table class="game-stats-table">
             <thead>
               <tr>
                 <th>#</th><th>Player</th>
-                <th title="Decision">DEC</th>
-                <th title="Minutes Played">MIN</th>
-                <th title="Shots Against">SA</th>
-                <th title="Saves">SV</th>
-                <th title="Save Percentage">SV%</th>
-                <th title="Goals Against">GA</th>
+                <th>DEC</th><th>MIN</th><th>SA</th><th>SV</th><th>SV%</th><th>GA</th>
               </tr>
             </thead>
             <tbody id="gvmGoaliesBody"></tbody>
@@ -195,7 +168,8 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  let currentSeasonId = null;
+  const resultColors = { W:'#2e7d32', OTW:'#2e7d32', SOW:'#2e7d32', L:'#c62828', OTL:'#c62828', SOL:'#c62828', T:'#f57c00' };
+  const resultLabel = { W:'W', L:'L', T:'T', OTL:'OTL', OTW:'OTW', SOL:'SOL', SOW:'SOW' };
 
   // Nav
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
@@ -204,20 +178,13 @@
     if (href === currentPage) link.classList.add('active');
   });
 
-  // Result colors
-  const resultColors = { W: '#2e7d32', OTW: '#2e7d32', SOW: '#2e7d32', L: '#c62828', OTL: '#c62828', SOL: '#c62828', T: '#f57c00' };
-  const resultLabel = { W: 'W', L: 'L', T: 'T', OTL: 'OTL', OTW: 'OTW', SOL: 'SOL', SOW: 'SOW' };
-
-  function opponentLogoHTML(game, size = 48) {
-    if (game.opponentLogo) {
-      return `<img src="${game.opponentLogo}" class="opp-logo" style="width:${size}px;height:${size}px;" alt="${game.opponent}">`;
-    }
+  function opponentLogoHTML(game, size=48) {
+    if (game.opponentLogo) return `<img src="${game.opponentLogo}" class="opp-logo" style="width:${size}px;height:${size}px;" alt="${game.opponent}">`;
     return `<div class="opp-logo-placeholder" style="width:${size}px;height:${size}px;">🏒</div>`;
   }
 
   function formatDate(dateStr) {
-    const d = new Date(dateStr + 'T12:00:00');
-    return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
   }
 
   function formatTime(time, timezone) {
@@ -240,7 +207,7 @@
   const minToMMSS = min => {
     const m = Math.floor(min);
     const s = Math.round((min - m) * 60);
-    return `${m}:${s.toString().padStart(2, '0')}`;
+    return `${m}:${s.toString().padStart(2,'0')}`;
   };
 
   const svPctFmt = (sv, sa) => sa > 0 ? '.' + (sv/sa).toFixed(3).slice(2) : '.000';
@@ -256,7 +223,6 @@
     const homeAway = game.homeAway === 'Home' ? 'vs.' : '@';
     const resultColor = resultColors[game.result] || '#333';
 
-    // Header
     document.getElementById('gvmHeader').innerHTML = `
       <div class="gvm-header-inner">
         <div class="gvm-matchup">
@@ -264,7 +230,9 @@
           ${opponentLogoHTML(game, 48)}
           <span class="gvm-opponent">${game.opponent}</span>
         </div>
-        ${game.result ? `<div class="gvm-result" style="color:${resultColor}">${resultLabel[game.result]} ${game.teamScore}-${game.opponentScore}</div>` : '<div class="gvm-no-result">No Result</div>'}
+        ${game.result
+          ? `<div class="gvm-result" style="color:${resultColor}">${resultLabel[game.result]} ${game.teamScore}-${game.opponentScore}</div>`
+          : '<div class="gvm-no-result">No Result Yet</div>'}
       </div>
       <div class="gvm-meta">
         <span>${formatDate(game.date)} · ${formatTime(game.time, game.timezone)}</span>
@@ -276,17 +244,17 @@
     // Load team stats
     const tsSnap = await getDoc(doc(db, 'seasons', seasonId, 'schedule', game.id, 'teamstats', 'game'));
     const ts = tsSnap.exists() ? tsSnap.data() : null;
-
     const gvmTeamStats = document.getElementById('gvmTeamStats');
+
     if (ts && (ts.ppOpps || ts.ppg || ts.pkAttempts || ts.successfulPKs || ts.benchPIM)) {
-      const ppPct = ts.ppOpps > 0 ? ((ts.ppg / ts.ppOpps) * 100).toFixed(1) + '%' : '0.0%';
-      const pkPct = ts.pkAttempts > 0 ? ((ts.successfulPKs / ts.pkAttempts) * 100).toFixed(1) + '%' : '0.0%';
+      const ppPct = ts.ppOpps > 0 ? ((ts.ppg/ts.ppOpps)*100).toFixed(1)+'%' : '0.0%';
+      const pkPct = ts.pkAttempts > 0 ? ((ts.successfulPKs/ts.pkAttempts)*100).toFixed(1)+'%' : '0.0%';
       gvmTeamStats.innerHTML = `
-        <div class="gvm-team-stat-card"><div class="gvm-ts-label">PPG</div><div class="gvm-ts-value">${ts.ppg || 0}</div></div>
-        <div class="gvm-team-stat-card"><div class="gvm-ts-label">PP Opp</div><div class="gvm-ts-value">${ts.ppOpps || 0}</div></div>
+        <div class="gvm-team-stat-card"><div class="gvm-ts-label">PPG</div><div class="gvm-ts-value">${ts.ppg||0}</div></div>
+        <div class="gvm-team-stat-card"><div class="gvm-ts-label">PP Opp</div><div class="gvm-ts-value">${ts.ppOpps||0}</div></div>
         <div class="gvm-team-stat-card"><div class="gvm-ts-label">PP%</div><div class="gvm-ts-value">${ppPct}</div></div>
-        <div class="gvm-team-stat-card"><div class="gvm-ts-label">Succ PKs</div><div class="gvm-ts-value">${ts.successfulPKs || 0}</div></div>
-        <div class="gvm-team-stat-card"><div class="gvm-ts-label">PK Att</div><div class="gvm-ts-value">${ts.pkAttempts || 0}</div></div>
+        <div class="gvm-team-stat-card"><div class="gvm-ts-label">Succ PKs</div><div class="gvm-ts-value">${ts.successfulPKs||0}</div></div>
+        <div class="gvm-team-stat-card"><div class="gvm-ts-label">PK Att</div><div class="gvm-ts-value">${ts.pkAttempts||0}</div></div>
         <div class="gvm-team-stat-card"><div class="gvm-ts-label">PK%</div><div class="gvm-ts-value">${pkPct}</div></div>
         ${ts.benchPIM ? `<div class="gvm-team-stat-card"><div class="gvm-ts-label">Bench PIM</div><div class="gvm-ts-value">${ts.benchPIM}</div></div>` : ''}
       `;
@@ -295,15 +263,22 @@
       gvmTeamStats.style.display = 'none';
     }
 
+    // Load roster for name/number lookup
+    const rosterSnap = await getDocs(collection(db, 'roster', seasonId, 'players'));
+    const rosterMap = {};
+    rosterSnap.forEach(d => { rosterMap[d.id] = d.data(); });
+    // Add EMPTY NET
+    rosterMap['EMPTY_NET'] = { name: 'EMPTY NET', number: '0', position: 'Goaltender' };
+
     // Load skater stats
     const skaterSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule', game.id, 'skaterstats'));
     const skaters = [];
-    skaterSnap.forEach(d => skaters.push(d.data()));
-    skaters.sort((a, b) => {
-      const ptsA = (a.goals||0) + (a.assists||0);
-      const ptsB = (b.goals||0) + (b.assists||0);
-      return ptsB - ptsA;
+    skaterSnap.forEach(d => {
+      const s = d.data();
+      const player = rosterMap[s.playerId] || {};
+      skaters.push({ ...s, name: player.name || s.name || '?', number: player.number || s.number || '-' });
     });
+    skaters.sort((a, b) => ((b.goals||0)+(b.assists||0)) - ((a.goals||0)+(a.assists||0)));
 
     let hasGWG = false;
     const skaterRows = skaters
@@ -314,21 +289,17 @@
         const isGWG = s.gwg === 1;
         if (isGWG) hasGWG = true;
         return `<tr class="${isGWG ? 'gwg-row' : ''}">
-          <td style="color:#5e1825;font-weight:700;">${s.number || '-'}</td>
+          <td style="color:#5e1825;font-weight:700;">${s.number}</td>
           <td style="font-weight:600;">${s.name}${isGWG ? ' ⭐' : ''}</td>
           <td>${s.goals||0}</td>
           <td>${s.assists||0}</td>
           <td style="font-weight:700;color:#5e1825;">${pts}</td>
-          <td>${s.ppg||0}</td>
-          <td>${s.ppa||0}</td>
-          <td>${s.shg||0}</td>
-          <td>${s.sha||0}</td>
+          <td>${s.ppg||0}</td><td>${s.ppa||0}</td>
+          <td>${s.shg||0}</td><td>${s.sha||0}</td>
           <td>${isGWG ? '✓' : ''}</td>
-          <td>${s.plus||0}</td>
-          <td>${s.minus||0}</td>
+          <td>${s.plus||0}</td><td>${s.minus||0}</td>
           <td>${pm > 0 ? '+'+pm : pm}</td>
-          <td>${s.sog||0}</td>
-          <td>${s.pim||0}</td>
+          <td>${s.sog||0}</td><td>${s.pim||0}</td>
         </tr>`;
       }).join('');
 
@@ -339,22 +310,25 @@
     // Load goalie stats
     const goalieSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule', game.id, 'goaliestats'));
     const goalies = [];
-    goalieSnap.forEach(d => goalies.push(d.data()));
+    goalieSnap.forEach(d => {
+      const g = d.data();
+      const player = rosterMap[g.playerId] || {};
+      goalies.push({ ...g, name: player.name || g.name || '?', number: player.number || g.number || '-' });
+    });
 
     const goalieRows = goalies
       .filter(g => g.gp || g.gs || g.minutesPlayed)
       .map(g => {
         const sv = Math.max(0, (g.shotsAgainst||0) - (g.goalsAgainst||0));
-        const svPct = svPctFmt(sv, g.shotsAgainst||0);
         const isEN = g.playerId === 'EMPTY_NET';
         return `<tr ${isEN ? 'style="background:#f5f5f5;font-style:italic;"' : ''}>
-          <td style="color:#5e1825;font-weight:700;">${g.number || '0'}</td>
-          <td style="font-weight:600;">${g.name || (isEN ? 'EMPTY NET' : '-')}</td>
-          <td>${isEN ? '-' : (g.decision || '-')}</td>
+          <td style="color:#5e1825;font-weight:700;">${g.number}</td>
+          <td style="font-weight:600;">${g.name}</td>
+          <td>${isEN ? '-' : (g.decision||'-')}</td>
           <td>${minToMMSS(g.minutesPlayed||0)}</td>
           <td>${g.shotsAgainst||0}</td>
           <td>${sv}</td>
-          <td>${isEN ? '-' : svPct}</td>
+          <td>${isEN ? '-' : svPctFmt(sv, g.shotsAgainst||0)}</td>
           <td>${g.goalsAgainst||0}</td>
         </tr>`;
       }).join('');
@@ -362,19 +336,19 @@
     document.getElementById('gvmGoaliesBody').innerHTML = goalieRows ||
       '<tr><td colspan="8" style="text-align:center;color:#999;padding:1rem;">No stats entered</td></tr>';
 
+    // Reset modal scroll to top
+    gameViewModal.querySelector('.gvm-modal').scrollTop = 0;
     gameViewModal.classList.add('active');
   }
 
   // ============================================
-  // SCHEDULE BUILDER
+  // SCHEDULE
   // ============================================
   function buildFeaturedContent(game, showResult) {
     const homeAway = game.homeAway === 'Home' ? 'vs.' : '@';
     const typeLabel = gameTypeLabel(game);
     const resultHTML = showResult && game.result
-      ? `<div class="featured-result" style="color:${resultColors[game.result] || '#333'}">
-           ${resultLabel[game.result]} ${game.teamScore}-${game.opponentScore}
-         </div>` : '';
+      ? `<div class="featured-result" style="color:${resultColors[game.result]||'#333'}">${resultLabel[game.result]} ${game.teamScore}-${game.opponentScore}</div>` : '';
     return `
       <div class="featured-game-inner">
         <div class="featured-meta">${typeLabel}</div>
@@ -384,10 +358,9 @@
           ${opponentLogoHTML(game, 40)}
           <span class="featured-opponent">${game.opponent}</span>
         </div>
-        <div class="featured-rink">${game.rinkName}${game.rinkAddress ? ' · ' + game.rinkAddress : ''}</div>
+        <div class="featured-rink">${game.rinkName}${game.rinkAddress ? ' · '+game.rinkAddress : ''}</div>
         ${resultHTML}
-      </div>
-    `;
+      </div>`;
   }
 
   function buildGameRow(game, seasonId) {
@@ -395,14 +368,13 @@
     const typeLabel = gameTypeLabel(game);
     const hasResult = game.result && game.teamScore !== undefined && game.opponentScore !== undefined;
     const resultHTML = hasResult
-      ? `<div class="game-result" style="color:${resultColors[game.result] || '#333'}">
+      ? `<div class="game-result" style="color:${resultColors[game.result]||'#333'}">
            <span class="result-badge">${resultLabel[game.result]}</span>
            <span class="result-score">${game.teamScore}-${game.opponentScore}</span>
          </div>` : '';
     const isPlayoff = game.subtype === 'Playoffs' || game.subtype === 'Championship';
     const row = document.createElement('div');
-    row.className = `game-row${hasResult ? ' game-past' : ' game-upcoming'}${isPlayoff ? ' game-playoff' : ''} game-row-clickable`;
-    row.title = 'Click to view game stats';
+    row.className = `game-row${hasResult ? ' game-past' : ' game-upcoming'}${isPlayoff ? ' game-playoff' : ''}`;
     row.innerHTML = `
       <div class="game-row-date">
         <div class="game-row-datestr">${formatDate(game.date)}</div>
@@ -415,7 +387,7 @@
           ${opponentLogoHTML(game, 36)}
           <span class="game-row-opponent">${game.opponent}</span>
         </div>
-        <div class="game-row-rink">${game.rinkName}${game.rinkAddress ? ' · ' + game.rinkAddress : ''}</div>
+        <div class="game-row-rink">${game.rinkName}${game.rinkAddress ? ' · '+game.rinkAddress : ''}</div>
       </div>
       <div class="game-row-result">${resultHTML}</div>
     `;
@@ -424,7 +396,6 @@
   }
 
   async function loadSchedule(seasonId) {
-    currentSeasonId = seasonId;
     const list = document.getElementById('scheduleList');
     list.innerHTML = '<p style="color:#666;font-style:italic;">Loading...</p>';
 
@@ -435,28 +406,26 @@
     if (!games.length) {
       list.innerHTML = '<p style="color:#666;font-style:italic;">No games scheduled yet</p>';
       document.getElementById('featuredGames').style.display = 'none';
-      document.getElementById('statsRegRecord').textContent = '0-0-0';
-      document.getElementById('statsPlayoffRecord').textContent = '0-0-0';
-      document.getElementById('statsTotalRecord').textContent = '0-0-0';
+      ['statsRegRecord','statsPlayoffRecord','statsTotalRecord'].forEach(id => document.getElementById(id).textContent = '0-0-0');
       document.getElementById('statsGF').textContent = '0';
       document.getElementById('statsGA').textContent = '0';
       document.getElementById('seasonStatsBar').style.display = 'flex';
       return;
     }
 
-    games.sort((a, b) => new Date(a.date + 'T' + (a.time || '00:00')) - new Date(b.date + 'T' + (b.time || '00:00')));
+    games.sort((a, b) => new Date(a.date+'T'+(a.time||'00:00')) - new Date(b.date+'T'+(b.time||'00:00')));
 
-    let gf = 0, ga = 0, regW = 0, regL = 0, regT = 0, playoffW = 0, playoffL = 0, playoffT = 0;
+    let gf=0, ga=0, regW=0, regL=0, regT=0, playoffW=0, playoffL=0, playoffT=0;
     games.forEach(g => {
       if (!g.result) return;
       const isPlayoff = g.subtype === 'Playoffs' || g.subtype === 'Championship';
-      const win = g.result === 'W' || g.result === 'OTW' || g.result === 'SOW';
-      const loss = g.result === 'L' || g.result === 'OTL' || g.result === 'SOL';
-      const tie = g.result === 'T';
-      if (isPlayoff) { if (win) playoffW++; else if (loss) playoffL++; else if (tie) playoffT++; }
-      else { if (win) regW++; else if (loss) regL++; else if (tie) regT++; }
-      if (g.teamScore != null) gf += parseInt(g.teamScore) || 0;
-      if (g.opponentScore != null) ga += parseInt(g.opponentScore) || 0;
+      const win = g.result==='W'||g.result==='OTW'||g.result==='SOW';
+      const loss = g.result==='L'||g.result==='OTL'||g.result==='SOL';
+      const tie = g.result==='T';
+      if (isPlayoff) { if(win)playoffW++; else if(loss)playoffL++; else if(tie)playoffT++; }
+      else { if(win)regW++; else if(loss)regL++; else if(tie)regT++; }
+      if (g.teamScore!=null) gf += parseInt(g.teamScore)||0;
+      if (g.opponentScore!=null) ga += parseInt(g.opponentScore)||0;
     });
 
     document.getElementById('statsRegRecord').textContent = `${regW}-${regL}-${regT}`;
@@ -466,10 +435,10 @@
     document.getElementById('statsGA').textContent = ga;
     document.getElementById('seasonStatsBar').style.display = 'flex';
 
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    const nextGame = games.find(g => !g.result && new Date(g.date + 'T12:00:00') >= today);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const nextGame = games.find(g => !g.result && new Date(g.date+'T12:00:00') >= today);
     const gamesWithResult = games.filter(g => g.result);
-    const lastGame = gamesWithResult.length ? gamesWithResult[gamesWithResult.length - 1] : null;
+    const lastGame = gamesWithResult.length ? gamesWithResult[gamesWithResult.length-1] : null;
 
     const featuredEl = document.getElementById('featuredGames');
     const nextCard = document.getElementById('nextGameCard');
@@ -479,7 +448,7 @@
     else { nextCard.style.display = 'none'; }
     if (lastGame) { document.getElementById('lastGameContent').innerHTML = buildFeaturedContent(lastGame, true); lastCard.style.display = 'block'; }
     else { lastCard.style.display = 'none'; }
-    featuredEl.style.display = nextGame || lastGame ? 'grid' : 'none';
+    featuredEl.style.display = nextGame||lastGame ? 'grid' : 'none';
 
     list.innerHTML = '';
     games.forEach(g => list.appendChild(buildGameRow(g, seasonId)));
@@ -493,7 +462,7 @@
 
     const select = document.getElementById('seasonSelect');
     select.innerHTML = seasons.map(s =>
-      `<option value="${s.id}" ${s.current ? 'selected' : ''}>${s.label}${s.current ? ' (Current)' : ''}</option>`
+      `<option value="${s.id}" ${s.current?'selected':''}>${s.label}${s.current?' (Current)':''}</option>`
     ).join('');
 
     const savedSeason = localStorage.getItem('admirals_scheduleSeasonPublic');
@@ -517,6 +486,5 @@
 
   initSeasons();
 </script>
-
 </body>
 </html>
