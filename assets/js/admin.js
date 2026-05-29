@@ -883,6 +883,15 @@ async function loadScheduleGames(seasonId) {
   const games = [];
   snap.forEach(d => games.push(d.data()));
   if (!games.length) { list.innerHTML = '<div class="empty-state">No games added yet</div>'; return; }
+  function fmt12(time) {
+    if (!time) return '';
+    const [h, m] = time.split(':');
+    const hour = parseInt(h);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${m} ${ampm}`;
+  }
+
   games.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(g => {
     const dateStr = new Date(g.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
     const homeAway = g.homeAway === 'Home' ? 'vs.' : '@';
@@ -891,7 +900,7 @@ async function loadScheduleGames(seasonId) {
     item.innerHTML = `
       <div class="item-info">
         <div>
-          <strong>${dateStr} ${g.time} · ${homeAway} ${g.opponent}</strong>
+          <strong>${dateStr} ${fmt12(g.time)}${g.timezone ? ' ' + g.timezone : ''} · ${homeAway} ${g.opponent}</strong>
           <span>${g.gameType}${g.subtype ? ' · ' + g.subtype : ''}${resultStr}</span>
         </div>
       </div>
