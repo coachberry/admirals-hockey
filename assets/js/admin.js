@@ -74,10 +74,19 @@ async function showDashboard() {
   document.getElementById('settingsUsername').textContent = currentUser;
   document.getElementById('settingsEmail').value = users[currentUser]?.email || '';
   await loadSeasons();
-  loadSchedule();
   loadStats();
   loadNews();
   loadUsers();
+
+  // Restore last active tab
+  const savedTab = localStorage.getItem('admirals_activeTab');
+  if (savedTab && document.getElementById(savedTab + 'Tab')) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(savedTab + 'Tab').classList.add('active');
+    const tabBtn = document.querySelector(`[data-tab="${savedTab}"]`);
+    if (tabBtn) tabBtn.classList.add('active');
+  }
 }
 
 if (currentUser) showDashboard();
@@ -92,6 +101,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(tab + 'Tab').classList.add('active');
     e.target.classList.add('active');
+    localStorage.setItem('admirals_activeTab', tab);
   });
 });
 
@@ -128,22 +138,33 @@ async function loadSeasons() {
   ).join('');
   if (!allSeasons.length) schedSelect.innerHTML = '<option value="">No seasons</option>';
 
-  // Load roster for current season
-  if (currentSeasonId) {
-    loadRoster(currentSeasonId);
-    loadScheduleGames(currentSeasonId);
+  // Restore saved seasons or fall back to current
+  const savedRosterSeason = localStorage.getItem('admirals_rosterSeason');
+  const savedScheduleSeason = localStorage.getItem('admirals_scheduleSeason');
+
+  if (savedRosterSeason && allSeasons.find(s => s.id === savedRosterSeason)) {
+    currentSeasonId = savedRosterSeason;
+    document.getElementById('rosterSeasonSelect').value = savedRosterSeason;
   }
+  if (savedScheduleSeason && allSeasons.find(s => s.id === savedScheduleSeason)) {
+    document.getElementById('scheduleSeasonSelect').value = savedScheduleSeason;
+  }
+
+  if (currentSeasonId) loadRoster(currentSeasonId);
+  loadScheduleGames(document.getElementById('scheduleSeasonSelect').value || currentSeasonId);
 
   // Populate seasons list tab
   renderSeasonsList();
 }
 
 document.getElementById('scheduleSeasonSelect').addEventListener('change', e => {
+  localStorage.setItem('admirals_scheduleSeason', e.target.value);
   loadScheduleGames(e.target.value);
 });
 
 document.getElementById('rosterSeasonSelect').addEventListener('change', e => {
   currentSeasonId = e.target.value;
+  localStorage.setItem('admirals_rosterSeason', currentSeasonId);
   loadRoster(currentSeasonId);
 });
 
