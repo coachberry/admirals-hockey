@@ -48,14 +48,15 @@
   font-weight: 600;
 }
 
-.stats-tab-content { display: none; }
+.stats-tab-content { display: none; overflow-x: auto; }
 .stats-tab-content.active { display: block; }
 
 /* GAME STATS TABLE */
 .game-stats-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
+  min-width: 600px;
 }
 
 .game-stats-table thead {
@@ -64,15 +65,16 @@
 }
 
 .game-stats-table th {
-  padding: 0.6rem 0.5rem;
+  padding: 0.5rem 0.35rem;
   text-align: center;
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
-.game-stats-table th:nth-child(2) { text-align: left; }
+.game-stats-table th:nth-child(2) { text-align: left; padding-left: 0.5rem; }
 
 .game-stats-table tbody tr {
   border-bottom: 1px solid #f0f0f0;
@@ -81,19 +83,20 @@
 .game-stats-table tbody tr:nth-child(even) { background: #fafafa; }
 
 .game-stats-table td {
-  padding: 0.4rem 0.5rem;
+  padding: 0.3rem 0.35rem;
   text-align: center;
+  vertical-align: middle;
 }
 
-.game-stats-table td:nth-child(2) { text-align: left; }
+.game-stats-table td:nth-child(2) { text-align: left; padding-left: 0.5rem; }
 
 /* STAT INPUTS */
 .stat-input {
-  width: 52px;
-  padding: 4px 6px;
+  width: 44px;
+  padding: 3px 4px;
   border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 0.85rem;
+  border-radius: 3px;
+  font-size: 0.8rem;
   text-align: center;
   font-family: inherit;
 }
@@ -105,8 +108,16 @@
 }
 
 select.stat-input {
-  width: 60px;
-  padding: 4px 2px;
+  width: 58px;
+  padding: 3px 2px;
+}
+
+/* Checkbox styling */
+.stat-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #5e1825;
 }
 
 /* Add Stats button on schedule list */
@@ -122,3 +133,14 @@ select.stat-input {
 }
 
 .btn-stats:hover { background: #3d0f18; }
+
+/* Totals row */
+.stats-totals-row {
+  background: #f0e8ea !important;
+  font-weight: 700;
+  border-top: 2px solid #5e1825 !important;
+}
+
+.stats-totals-row td {
+  color: #5e1825;
+}

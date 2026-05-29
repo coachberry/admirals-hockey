@@ -347,6 +347,20 @@
   line-height: 1.4;
 }
 
+/* Playoff record card matches playoff game color */
+.stats-bar-card.stats-bar-playoff {
+  border-color: #d4a574;
+  background: #fffdf9;
+}
+
+.stats-bar-card.stats-bar-playoff .stats-bar-label {
+  color: #b8860b;
+}
+
+.stats-bar-card.stats-bar-playoff .stats-bar-value {
+  color: #b8860b;
+}
+
 /* GAME ROW COLUMN WIDTHS */
 .game-row-date { width: 140px; flex-shrink: 0; }
 .game-row-main { flex: 1; min-width: 0; }
