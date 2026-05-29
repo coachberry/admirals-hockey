@@ -140,6 +140,7 @@ function openRosterModal(type, data = null) {
   // Photo preview
   const preview = document.getElementById('memberPhotoPreview');
   if (currentPhotoURL) {
+    // Show existing photo (Firebase URL) in confirmed state
     showPhotoConfirmed(currentPhotoURL, preview);
   } else {
     showEmptyPhotoState(preview);
