@@ -160,15 +160,13 @@
   border-radius: 6px;
   border: 1px solid #e0e0e0;
   padding: 1rem 1.25rem;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 1.5rem;
   transition: box-shadow 0.2s;
+  width: fit-content;
+  min-width: 0;
 }
-
-.game-row-date { min-width: 140px; flex-shrink: 0; }
-.game-row-main { flex: 0 1 auto; }
-.game-row-result { flex-shrink: 0; min-width: 80px; text-align: right; margin-left: auto; }
 
 .game-row:hover {
   box-shadow: 0 2px 8px rgba(94,24,37,0.1);
