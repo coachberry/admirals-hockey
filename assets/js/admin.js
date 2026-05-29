@@ -433,6 +433,15 @@ document.getElementById('saveMemberBtn').addEventListener('click', async () => {
       }
     }
     member.playerId = playerId;
+  } else {
+    member.title = document.getElementById('memberTitle').value;
+    const staffCollName = type === 'coach' ? 'coaches' : 'board';
+    let staffId = document.getElementById('memberStaffId').value;
+    if (!staffId) {
+      staffId = type + '_' + Date.now().toString();
+    }
+    await setDoc(doc(db, staffCollName, staffId), { name, createdAt: new Date().toISOString() }, { merge: true });
+    member.staffId = staffId;
   }
 
   // Save to season-specific roster
