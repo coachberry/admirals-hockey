@@ -42,17 +42,25 @@
 
   <!-- Season Stats Bar -->
   <div class="season-stats-bar" id="seasonStatsBar" style="display:none;">
-    <div class="stats-bar-card stats-bar-record">
-      <div class="stats-bar-label">Record</div>
-      <div class="stats-bar-value" id="statsRecord">-</div>
+    <div class="stats-bar-card">
+      <div class="stats-bar-label">Season Record</div>
+      <div class="stats-bar-value" id="statsRegRecord">0-0-0</div>
+    </div>
+    <div class="stats-bar-card">
+      <div class="stats-bar-label">Playoff Record</div>
+      <div class="stats-bar-value" id="statsPlayoffRecord">0-0-0</div>
+    </div>
+    <div class="stats-bar-card">
+      <div class="stats-bar-label">Total Record</div>
+      <div class="stats-bar-value" id="statsTotalRecord">0-0-0</div>
     </div>
     <div class="stats-bar-card">
       <div class="stats-bar-label">GF</div>
-      <div class="stats-bar-value" id="statsGF">-</div>
+      <div class="stats-bar-value" id="statsGF">0</div>
     </div>
     <div class="stats-bar-card">
       <div class="stats-bar-label">GA</div>
-      <div class="stats-bar-value" id="statsGA">-</div>
+      <div class="stats-bar-value" id="statsGA">0</div>
     </div>
   </div>
 
@@ -237,7 +245,9 @@
     if (!games.length) {
       list.innerHTML = '<p style="color:#666;font-style:italic;">No games scheduled yet</p>';
       document.getElementById('featuredGames').style.display = 'none';
-      document.getElementById('statsRecord').innerHTML = '0-0-0';
+      document.getElementById('statsRegRecord').textContent = '0-0-0';
+      document.getElementById('statsPlayoffRecord').textContent = '0-0-0';
+      document.getElementById('statsTotalRecord').textContent = '0-0-0';
       document.getElementById('statsGF').textContent = '0';
       document.getElementById('statsGA').textContent = '0';
       document.getElementById('seasonStatsBar').style.display = 'flex';
@@ -295,7 +305,10 @@
       recordHTML = `RS: ${regW}-${regL}-${regT}<br>PO: ${playoffW}-${playoffL}-${playoffT}`;
     }
 
-    document.getElementById('statsRecord').innerHTML = recordHTML;
+    document.getElementById('statsRegRecord').textContent = `${regW}-${regL}-${regT}`;
+    document.getElementById('statsPlayoffRecord').textContent = `${playoffW}-${playoffL}-${playoffT}`;
+    const totalW = regW + playoffW, totalL = regL + playoffL, totalT = regT + playoffT;
+    document.getElementById('statsTotalRecord').textContent = `${totalW}-${totalL}-${totalT}`;
     document.getElementById('statsGF').textContent = gf;
     document.getElementById('statsGA').textContent = ga;
     document.getElementById('seasonStatsBar').style.display = 'flex';

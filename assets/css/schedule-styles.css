@@ -329,9 +329,7 @@
   gap: 0.25rem;
 }
 
-.stats-bar-record {
-  flex: 2;
-}
+
 
 .stats-bar-label {
   font-size: 0.75rem;
