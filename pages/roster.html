@@ -274,7 +274,11 @@
     if (m.photoURL) {
       inner.innerHTML = `<img src="${m.photoURL}" alt="${m.name}" class="player-photo">`;
     } else {
+      if (m.type === 'player') {
       inner.innerHTML = `<div class="player-photo-placeholder">${m.number || m.name.charAt(0)}</div>`;
+    } else {
+      inner.innerHTML = `<img src="/assets/images/admiral-logo.png" alt="Admiral Logo" class="player-photo" style="object-fit: contain; background: #f0f0f0; padding: 1rem;">`;
+    }
     }
 
     card.appendChild(inner);
