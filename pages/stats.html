@@ -217,8 +217,14 @@
     let totalBenchPIM = 0, totalPPOpps = 0, totalPPG = 0, totalPKAttempts = 0, totalSuccessfulPKs = 0;
 
     // Aggregate per game
-    for (const game of games) {
-      const skaterSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule', game.id, 'skaterstats'));
+    // Fetch all game stats in parallel
+    await Promise.all(games.map(async game => {
+      const [skaterSnap, goalieSnap, tsSnap] = await Promise.all([
+        getDocs(collection(db, 'seasons', seasonId, 'schedule', game.id, 'skaterstats')),
+        getDocs(collection(db, 'seasons', seasonId, 'schedule', game.id, 'goaliestats')),
+        getDoc(doc(db, 'seasons', seasonId, 'schedule', game.id, 'teamstats', 'game'))
+      ]);
+
       skaterSnap.forEach(d => {
         const s = d.data();
         if (!skaterStats[s.playerId]) return;
@@ -237,7 +243,6 @@
         st.pim += s.pim || 0;
       });
 
-      const goalieSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule', game.id, 'goaliestats'));
       goalieSnap.forEach(d => {
         const g = d.data();
         const pid = g.playerId;
@@ -263,8 +268,6 @@
         gt.sv = Math.max(0, gt.sa - gt.ga);
       });
 
-      // Team stats
-      const tsSnap = await getDoc(doc(db, 'seasons', seasonId, 'schedule', game.id, 'teamstats', 'game'));
       if (tsSnap.exists()) {
         const ts = tsSnap.data();
         totalBenchPIM += ts.benchPIM || 0;
@@ -273,7 +276,7 @@
         totalPKAttempts += ts.pkAttempts || 0;
         totalSuccessfulPKs += ts.successfulPKs || 0;
       }
-    }
+    }));
 
     // Render team stats
     document.getElementById('tsBenchPIM').textContent = totalBenchPIM;
