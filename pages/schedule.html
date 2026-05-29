@@ -321,7 +321,14 @@
       .filter(g => {
         const isEN = g.playerId === 'EMPTY_NET';
         if (isEN) return g.gp && g.minutesPlayed > 0;
-        return true; // show all non-EN goalies
+        return true;
+      })
+      .sort((a, b) => {
+        // Starter first, then by minutes played desc, EN always last
+        if (a.playerId === 'EMPTY_NET') return 1;
+        if (b.playerId === 'EMPTY_NET') return -1;
+        if (b.gs !== a.gs) return (b.gs||0) - (a.gs||0);
+        return (b.minutesPlayed||0) - (a.minutesPlayed||0);
       })
       .map(g => {
         const sv = Math.max(0, (g.shotsAgainst||0) - (g.goalsAgainst||0));
