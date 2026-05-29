@@ -153,6 +153,9 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  width: fit-content;
+  min-width: min(100%, 600px);
+  max-width: 100%;
 }
 
 .game-row {
@@ -160,12 +163,11 @@
   border-radius: 6px;
   border: 1px solid #e0e0e0;
   padding: 1rem 1.25rem;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 1.5rem;
   transition: box-shadow 0.2s;
-  width: fit-content;
-  min-width: 0;
+  width: 100%;
 }
 
 .game-row:hover {
@@ -249,6 +251,17 @@
   font-weight: 700;
 }
 
+/* PLAYOFF GAMES */
+.game-playoff {
+  border-left: 4px solid #d4a574;
+  background: #fffdf9;
+}
+
+.game-playoff .game-row-type {
+  color: #b8860b;
+  font-weight: 700;
+}
+
 /* ============================================
    RESPONSIVE
    ============================================ */
@@ -258,20 +271,40 @@
     grid-template-columns: 1fr;
   }
 
-  .game-row {
-    grid-template-columns: 1fr;
+  .season-stats-bar {
     gap: 0.5rem;
+  }
+
+  .stats-bar-card {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .stats-bar-value {
+    font-size: 1rem;
+  }
+
+  .game-row {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .game-row-date {
+    min-width: 100%;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 0.5rem;
+  }
+
+  .game-row-main {
+    flex: 1;
   }
 
   .game-row-result {
-    text-align: left;
+    text-align: right;
   }
 
-  .game-result {
-    align-items: flex-start;
-    flex-direction: row;
-    gap: 0.5rem;
-    align-items: center;
+  .schedule-list {
+    width: 100%;
   }
 }
 
@@ -309,7 +342,9 @@
 }
 
 .stats-bar-value {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: #5e1825;
+  text-align: center;
+  line-height: 1.4;
 }

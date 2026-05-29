@@ -202,8 +202,9 @@
            <span class="result-score">${game.teamScore}-${game.opponentScore}</span>
          </div>` : '';
 
+    const isPlayoff = game.subtype === 'Playoffs' || game.subtype === 'Championship';
     const row = document.createElement('div');
-    row.className = `game-row${isPast ? ' game-past' : ' game-upcoming'}`;
+    row.className = `game-row${isPast ? ' game-past' : ' game-upcoming'}${isPlayoff ? ' game-playoff' : ''}`;
     row.innerHTML = `
       <div class="game-row-date">
         <div class="game-row-datestr">${formatDate(game.date)}</div>
@@ -236,6 +237,10 @@
     if (!games.length) {
       list.innerHTML = '<p style="color:#666;font-style:italic;">No games scheduled yet</p>';
       document.getElementById('featuredGames').style.display = 'none';
+      document.getElementById('statsRecord').innerHTML = '0-0-0';
+      document.getElementById('statsGF').textContent = '0';
+      document.getElementById('statsGA').textContent = '0';
+      document.getElementById('seasonStatsBar').style.display = 'flex';
       return;
     }
 
@@ -267,16 +272,33 @@
       recordStr = `${w}-${l}-${t}-${otlTotal}`;
     }
 
-    const statsBar = document.getElementById('seasonStatsBar');
-    const hasAnyResult = games.some(g => g.result);
-    if (hasAnyResult) {
-      document.getElementById('statsRecord').textContent = recordStr;
-      document.getElementById('statsGF').textContent = gf;
-      document.getElementById('statsGA').textContent = ga;
-      statsBar.style.display = 'flex';
-    } else {
-      statsBar.style.display = 'none';
+    // Separate regular season and playoff records
+    const rsW = 0, rsL = 0, rsT = 0;
+    let regW = 0, regL = 0, regT = 0;
+    let playoffW = 0, playoffL = 0, playoffT = 0;
+    games.forEach(g => {
+      if (!g.result) return;
+      const isPlayoff = g.subtype === 'Playoffs' || g.subtype === 'Championship';
+      const win = g.result === 'W' || g.result === 'OTW' || g.result === 'SOW';
+      const loss = g.result === 'L' || g.result === 'OTL' || g.result === 'SOL';
+      const tie = g.result === 'T';
+      if (isPlayoff) {
+        if (win) playoffW++; else if (loss) playoffL++; else if (tie) playoffT++;
+      } else {
+        if (win) regW++; else if (loss) regL++; else if (tie) regT++;
+      }
+    });
+
+    const hasPlayoffs = games.some(g => g.subtype === 'Playoffs' || g.subtype === 'Championship');
+    let recordHTML = `${regW}-${regL}-${regT}`;
+    if (hasPlayoffs) {
+      recordHTML = `RS: ${regW}-${regL}-${regT}<br>PO: ${playoffW}-${playoffL}-${playoffT}`;
     }
+
+    document.getElementById('statsRecord').innerHTML = recordHTML;
+    document.getElementById('statsGF').textContent = gf;
+    document.getElementById('statsGA').textContent = ga;
+    document.getElementById('seasonStatsBar').style.display = 'flex';
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
