@@ -37,6 +37,7 @@
     <button class="tab-btn" data-tab="schedule">Schedule</button>
     <button class="tab-btn" data-tab="statistics">Statistics</button>
     <button class="tab-btn" data-tab="news">News & Updates</button>
+    <button class="tab-btn" data-tab="seasons">Seasons</button>
     <button class="tab-btn" data-tab="users">Manage Users</button>
     <button class="tab-btn" data-tab="settings">Settings</button>
   </div>
@@ -45,7 +46,12 @@
 
     <!-- ROSTER TAB -->
     <div id="rosterTab" class="tab-content active">
-      <h2>Team Roster</h2>
+      <div class="roster-tab-header">
+        <h2>Team Roster</h2>
+        <select id="rosterSeasonSelect" class="season-select">
+          <option value="">Loading seasons...</option>
+        </select>
+      </div>
       <div class="roster-action-buttons">
         <button id="addPlayerBtn" class="btn-primary">+ Add Player</button>
         <button id="addCoachBtn" class="btn-primary">+ Add Coach</button>
@@ -159,6 +165,24 @@
       <div id="newsList" class="items-list"><div class="empty-state">No posts added yet</div></div>
     </div>
 
+    <!-- SEASONS TAB -->
+    <div id="seasonsTab" class="tab-content">
+      <h2>Seasons</h2>
+      <button id="addSeasonBtn" class="btn-primary">+ Add Season</button>
+      <div id="seasonForm" class="form-section" style="display: none;">
+        <h3>Add Season</h3>
+        <input type="text" id="seasonLabel" placeholder="Season (e.g. 2026-27)">
+        <label class="captain-label" style="margin-bottom:0.75rem;">
+          <input type="checkbox" id="seasonCurrent"> Set as current season
+        </label>
+        <div class="form-buttons">
+          <button id="saveSeasonBtn" class="btn-primary">Save Season</button>
+          <button id="cancelSeasonBtn" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+      <div id="seasonsList" class="items-list"><div class="empty-state">No seasons added yet</div></div>
+    </div>
+
     <!-- MANAGE USERS TAB -->
     <div id="usersTab" class="tab-content">
       <h2>Manage Users</h2>
@@ -211,9 +235,20 @@
     <div class="modal-body">
       <input type="hidden" id="memberId">
       <input type="hidden" id="memberType">
+      <input type="hidden" id="memberPlayerId">
 
       <!-- Player fields -->
       <div id="playerFields">
+        <!-- Returning player search -->
+        <div id="returningPlayerSection" class="form-section" style="background:#f9f9f9; margin-bottom:1rem;">
+          <h4 style="margin-bottom:0.5rem; color:#5e1825;">Returning Player?</h4>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="playerSearch" placeholder="Search by name from previous seasons..." style="flex:1; margin-bottom:0;">
+            <button type="button" id="playerSearchBtn" class="btn-secondary" style="white-space:nowrap; margin-bottom:0;">Search</button>
+          </div>
+          <div id="playerSearchResults" style="margin-top:0.5rem;"></div>
+        </div>
+
         <div class="form-row">
           <input type="text" id="memberName" placeholder="Full Name">
           <input type="number" id="memberNumber" placeholder="Jersey #">
@@ -252,8 +287,7 @@
       <div id="bioPart"><textarea id="memberBio" placeholder="Bio" rows="4"></textarea></div>
 
       <div class="photo-upload-section">
-        <label>Photo</label>
-        <input type="file" id="memberPhoto" accept="image/*,.heic,.heif,.HEIC,.HEIF">
+        <input type="file" id="memberPhoto" accept="image/*,.heic,.heif,.HEIC,.HEIF" style="display:none;">
         <div id="memberPhotoPreview" class="photo-preview"></div>
       </div>
 

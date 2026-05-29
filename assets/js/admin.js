@@ -1,6 +1,6 @@
 import { showFramer } from '/assets/js/image-framer.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, getDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
@@ -67,14 +67,17 @@ if (inviteToken) {
   }
 }
 
-function showDashboard() {
+async function showDashboard() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   document.getElementById('currentUser').textContent = currentUser;
   document.getElementById('settingsUsername').textContent = currentUser;
   document.getElementById('settingsEmail').value = users[currentUser]?.email || '';
-  loadPlayers(); loadCoaches(); loadBoardMembers();
-  loadSchedule(); loadStats(); loadNews(); loadUsers();
+  await loadSeasons();
+  loadSchedule();
+  loadStats();
+  loadNews();
+  loadUsers();
 }
 
 if (currentUser) showDashboard();
@@ -93,54 +96,152 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 
 // ============================================
+// SEASONS
+// ============================================
+let currentSeasonId = null;
+let allSeasons = [];
+
+async function loadSeasons() {
+  const snap = await getDocs(collection(db, 'seasons'));
+  allSeasons = [];
+  snap.forEach(d => allSeasons.push({ id: d.id, ...d.data() }));
+  allSeasons.sort((a, b) => b.label.localeCompare(a.label));
+
+  // Find current season
+  const current = allSeasons.find(s => s.current) || allSeasons[0];
+  currentSeasonId = current?.id || null;
+
+  // Populate season selector in roster tab
+  const select = document.getElementById('rosterSeasonSelect');
+  select.innerHTML = allSeasons.map(s =>
+    `<option value="${s.id}" ${s.id === currentSeasonId ? 'selected' : ''}>${s.label}${s.current ? ' (Current)' : ''}</option>`
+  ).join('');
+
+  if (!allSeasons.length) {
+    select.innerHTML = '<option value="">No seasons - create one first</option>';
+  }
+
+  // Load roster for current season
+  if (currentSeasonId) {
+    loadRoster(currentSeasonId);
+  }
+
+  // Populate seasons list tab
+  renderSeasonsList();
+}
+
+document.getElementById('rosterSeasonSelect').addEventListener('change', e => {
+  currentSeasonId = e.target.value;
+  loadRoster(currentSeasonId);
+});
+
+function renderSeasonsList() {
+  const list = document.getElementById('seasonsList');
+  list.innerHTML = '';
+  if (!allSeasons.length) { list.innerHTML = '<div class="empty-state">No seasons added yet</div>'; return; }
+  allSeasons.forEach(s => {
+    const item = document.createElement('div');
+    item.className = 'item';
+    item.innerHTML = `
+      <div class="item-info">
+        <div>
+          <strong>${s.label}</strong>
+          <span>${s.current ? '✅ Current Season' : ''}</span>
+        </div>
+      </div>
+      <div style="display:flex; gap:0.5rem;">
+        ${!s.current ? `<button class="btn-edit" onclick="setCurrentSeason('${s.id}')">Set Current</button>` : ''}
+        <button class="btn-delete" onclick="deleteSeason('${s.id}')">Delete</button>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+document.getElementById('addSeasonBtn').addEventListener('click', () => {
+  document.getElementById('seasonLabel').value = '';
+  document.getElementById('seasonCurrent').checked = false;
+  document.getElementById('seasonForm').style.display = 'block';
+});
+document.getElementById('cancelSeasonBtn').addEventListener('click', () => document.getElementById('seasonForm').style.display = 'none');
+
+document.getElementById('saveSeasonBtn').addEventListener('click', async () => {
+  const label = document.getElementById('seasonLabel').value.trim();
+  if (!label) { alert('Please enter a season label'); return; }
+  const isCurrent = document.getElementById('seasonCurrent').checked;
+  const id = label.replace(/[^a-zA-Z0-9-]/g, '-');
+
+  // If setting as current, unset others
+  if (isCurrent) {
+    for (const s of allSeasons) {
+      if (s.current) await setDoc(doc(db, 'seasons', s.id), { ...s, current: false });
+    }
+  }
+
+  await setDoc(doc(db, 'seasons', id), { label, current: isCurrent, createdAt: new Date().toISOString() });
+  document.getElementById('seasonForm').style.display = 'none';
+  await loadSeasons();
+});
+
+window.setCurrentSeason = async (id) => {
+  for (const s of allSeasons) {
+    await setDoc(doc(db, 'seasons', s.id), { ...s, current: s.id === id });
+  }
+  await loadSeasons();
+};
+
+window.deleteSeason = async (id) => {
+  if (!confirm('Delete this season? All roster data for this season will be lost.')) return;
+  await deleteDoc(doc(db, 'seasons', id));
+  await loadSeasons();
+};
+
+// ============================================
 // ROSTER MODAL
 // ============================================
 let croppedPhoto = null;
 let currentPhotoURL = null;
 
 const rosterModal = document.getElementById('rosterModal');
-const closeRosterModal = document.getElementById('closeRosterModal');
-closeRosterModal.addEventListener('click', () => rosterModal.classList.remove('active'));
+document.getElementById('closeRosterModal').addEventListener('click', () => rosterModal.classList.remove('active'));
 rosterModal.addEventListener('click', e => { if (e.target === rosterModal) rosterModal.classList.remove('active'); });
 document.getElementById('cancelMemberBtn').addEventListener('click', () => rosterModal.classList.remove('active'));
 
 function openRosterModal(type, data = null) {
-  // Reset
   croppedPhoto = null;
   currentPhotoURL = data?.photoURL || null;
   document.getElementById('memberId').value = data?.id || '';
   document.getElementById('memberType').value = type;
+  document.getElementById('memberPlayerId').value = data?.playerId || '';
   document.getElementById('memberBio').value = data?.bio || '';
-  // Hide bio for players, show for coaches and board members
   document.getElementById('bioPart').style.display = type === 'player' ? 'none' : 'block';
-  document.getElementById('memberCaptain').checked = data?.captain || false;
-  document.getElementById('memberAlternate').checked = data?.alternate || false;
   document.getElementById('memberPhoto').value = '';
   document.getElementById('memberSaveStatus').textContent = '';
+  document.getElementById('playerSearchResults').innerHTML = '';
+  document.getElementById('playerSearch').value = '';
 
-  // Show correct fields
   const isPlayer = type === 'player';
   document.getElementById('playerFields').style.display = isPlayer ? 'block' : 'none';
   document.getElementById('staffFields').style.display = isPlayer ? 'none' : 'block';
+  document.getElementById('returningPlayerSection').style.display = isPlayer && !data ? 'block' : 'none';
 
   if (isPlayer) {
     document.getElementById('memberName').value = data?.name || '';
     document.getElementById('memberNumber').value = data?.number || '';
     document.getElementById('memberPosition').value = data?.position || '';
     document.getElementById('memberGrade').value = data?.grade || '';
+    document.getElementById('memberCaptain').checked = data?.captain || false;
+    document.getElementById('memberAlternate').checked = data?.alternate || false;
   } else {
     document.getElementById('memberNameStaff').value = data?.name || '';
     document.getElementById('memberTitle').value = data?.title || '';
   }
 
-  // Title
   const titles = { player: 'Player', coach: 'Coach', board: 'Board Member' };
   document.getElementById('rosterModalTitle').textContent = (data ? 'Edit' : 'Add') + ' ' + titles[type];
 
-  // Photo preview
   const preview = document.getElementById('memberPhotoPreview');
   if (currentPhotoURL) {
-    // Show existing photo (Firebase URL) in confirmed state
     showPhotoConfirmed(currentPhotoURL, preview);
   } else {
     showEmptyPhotoState(preview);
@@ -149,18 +250,54 @@ function openRosterModal(type, data = null) {
   rosterModal.classList.add('active');
 }
 
-// Photo upload with framer
-// memberPhoto input is hidden - we use triggerPhotoPicker() instead
+// ============================================
+// RETURNING PLAYER SEARCH
+// ============================================
+document.getElementById('playerSearchBtn').addEventListener('click', async () => {
+  const query = document.getElementById('playerSearch').value.trim().toLowerCase();
+  if (!query) return;
+
+  const results = document.getElementById('playerSearchResults');
+  results.innerHTML = '<p style="font-size:0.8rem;color:#666;">Searching...</p>';
+
+  // Search players collection
+  const snap = await getDocs(collection(db, 'players'));
+  const matches = [];
+  snap.forEach(d => {
+    const p = d.data();
+    if (p.name.toLowerCase().includes(query)) matches.push({ id: d.id, ...p });
+  });
+
+  if (!matches.length) {
+    results.innerHTML = '<p style="font-size:0.8rem;color:#666;">No matching players found. Add as new player below.</p>';
+    return;
+  }
+
+  results.innerHTML = matches.map(p => `
+    <div class="search-result-item" onclick="selectReturningPlayer('${p.id}', '${p.name.replace(/'/g, "\\'")}')">
+      <strong>${p.name}</strong>
+      <span style="font-size:0.75rem;color:#666;">${p.seasons ? p.seasons.join(', ') : ''}</span>
+    </div>
+  `).join('');
+});
+
+window.selectReturningPlayer = (playerId, name) => {
+  document.getElementById('memberPlayerId').value = playerId;
+  document.getElementById('memberName').value = name;
+  document.getElementById('playerSearch').value = name;
+  document.getElementById('playerSearchResults').innerHTML = `<p style="font-size:0.8rem;color:green;">✅ Linked to existing player profile: ${name}</p>`;
+};
+
+// ============================================
+// PHOTO HANDLING
+// ============================================
 document.getElementById('memberPhoto').style.display = 'none';
-
-
 
 function handlePhotoFile(file, container) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    const src = e.target.result;
-    showFramer(src, container, (dataURL) => {
+    showFramer(e.target.result, container, (dataURL) => {
       croppedPhoto = dataURL;
       currentPhotoURL = null;
       showPhotoConfirmed(dataURL, container);
@@ -169,37 +306,10 @@ function handlePhotoFile(file, container) {
   reader.readAsDataURL(file);
 }
 
-function triggerPhotoPicker(container) {
-  // Create a fresh file input each time to avoid browser caching issues
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*,.heic,.heif,.HEIC,.HEIF';
-  input.style.display = 'none';
-  document.body.appendChild(input);
-  input.addEventListener('change', function() {
-    const file = this.files[0];
-    document.body.removeChild(input);
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-      const src = e.target.result;
-      showFramer(src, container, (dataURL) => {
-        croppedPhoto = dataURL;
-        currentPhotoURL = null;
-        showPhotoConfirmed(dataURL, container);
-      });
-    };
-    reader.readAsDataURL(file);
-  });
-  input.click();
-}
-
 function showEmptyPhotoState(container) {
   container.innerHTML = `
     <div class="photo-preview-layout">
-      <div class="photo-preview-frame photo-preview-empty">
-        <span>No Image</span>
-      </div>
+      <div class="photo-preview-frame photo-preview-empty"><span>No Image</span></div>
       <div class="photo-preview-buttons">
         <label class="btn-secondary photo-btn photo-choose-label">
           Choose File
@@ -216,9 +326,7 @@ function showEmptyPhotoState(container) {
 function showPhotoConfirmed(dataURL, container) {
   container.innerHTML = `
     <div class="photo-preview-layout">
-      <div class="photo-preview-frame">
-        <img src="${dataURL}" class="photo-preview-img">
-      </div>
+      <div class="photo-preview-frame"><img src="${dataURL}" class="photo-preview-img"></div>
       <div class="photo-preview-buttons">
         <label class="btn-secondary photo-btn photo-choose-label">
           Choose File
@@ -228,11 +336,9 @@ function showPhotoConfirmed(dataURL, container) {
       </div>
     </div>
   `;
-
   container.querySelector('.persistentPhotoInput').addEventListener('change', function() {
     handlePhotoFile(this.files[0], container);
   });
-
   document.getElementById('removePhotoBtn').addEventListener('click', () => {
     croppedPhoto = null;
     currentPhotoURL = null;
@@ -240,8 +346,12 @@ function showPhotoConfirmed(dataURL, container) {
   });
 }
 
-// Save member
+// ============================================
+// SAVE MEMBER
+// ============================================
 document.getElementById('saveMemberBtn').addEventListener('click', async () => {
+  if (!currentSeasonId) { alert('Please select or create a season first.'); return; }
+
   const id = document.getElementById('memberId').value || Date.now().toString();
   const type = document.getElementById('memberType').value;
   const status = document.getElementById('memberSaveStatus');
@@ -249,26 +359,18 @@ document.getElementById('saveMemberBtn').addEventListener('click', async () => {
   status.style.color = '#666';
 
   let photoURL = currentPhotoURL || '';
-
-  // Upload cropped photo if new one selected
   if (croppedPhoto) {
     try {
-      const storageRef = ref(storage, `roster/${type}/${id}`);
+      const storageRef = ref(storage, `roster/${currentSeasonId}/${type}/${id}`);
       await uploadString(storageRef, croppedPhoto, 'data_url');
       photoURL = await getDownloadURL(storageRef);
-    } catch (e) {
-      console.error('Photo upload failed:', e);
-    }
+    } catch (e) { console.error('Photo upload failed:', e); }
   }
 
-  // Build member object
   const isPlayer = type === 'player';
-  const member = {
-    id, type,
-    name: isPlayer ? document.getElementById('memberName').value : document.getElementById('memberNameStaff').value,
-    bio: document.getElementById('memberBio').value,
-    photoURL
-  };
+  const name = isPlayer ? document.getElementById('memberName').value : document.getElementById('memberNameStaff').value;
+
+  const member = { id, type, name, bio: document.getElementById('memberBio').value, photoURL, season: currentSeasonId };
 
   if (isPlayer) {
     member.number = document.getElementById('memberNumber').value;
@@ -276,17 +378,34 @@ document.getElementById('saveMemberBtn').addEventListener('click', async () => {
     member.grade = document.getElementById('memberGrade').value;
     member.captain = document.getElementById('memberCaptain').checked;
     member.alternate = document.getElementById('memberAlternate').checked;
-  } else {
-    member.title = document.getElementById('memberTitle').value;
+
+    // Handle permanent player profile
+    let playerId = document.getElementById('memberPlayerId').value;
+    if (!playerId) {
+      // New player - create permanent profile
+      playerId = 'player_' + Date.now().toString();
+      await setDoc(doc(db, 'players', playerId), { name, seasons: [currentSeasonId], createdAt: new Date().toISOString() });
+    } else {
+      // Existing player - add this season
+      const existingSnap = await getDoc(doc(db, 'players', playerId));
+      if (existingSnap.exists()) {
+        const existing = existingSnap.data();
+        const seasons = existing.seasons || [];
+        if (!seasons.includes(currentSeasonId)) seasons.push(currentSeasonId);
+        await setDoc(doc(db, 'players', playerId), { ...existing, name, seasons });
+      }
+    }
+    member.playerId = playerId;
   }
 
-  await setDoc(doc(db, 'roster', id), member);
+  // Save to season-specific roster
+  await setDoc(doc(db, 'roster', currentSeasonId, type + 's', id), member);
+
   status.textContent = '✅ Saved!';
   status.style.color = 'green';
-
   setTimeout(() => {
     rosterModal.classList.remove('active');
-    loadPlayers(); loadCoaches(); loadBoardMembers();
+    loadRoster(currentSeasonId);
   }, 800);
 });
 
@@ -298,35 +417,40 @@ document.getElementById('addBoardBtn').addEventListener('click', () => openRoste
 // ============================================
 // LOAD ROSTER
 // ============================================
-async function loadPlayers() {
-  const list = document.getElementById('playersList');
-  list.innerHTML = '';
-  const snap = await getDocs(collection(db, 'roster'));
-  const players = [];
-  snap.forEach(d => { if (d.data().type === 'player') players.push(d.data()); });
-  if (players.length === 0) { list.innerHTML = '<div class="empty-state">No players added yet</div>'; return; }
-  players.sort((a, b) => parseInt(a.number) - parseInt(b.number)).forEach(p => {
-    list.appendChild(buildRosterItem(p));
-  });
+async function loadRoster(seasonId) {
+  if (!seasonId) return;
+  await loadPlayers(seasonId);
+  await loadCoaches(seasonId);
+  await loadBoardMembers(seasonId);
 }
 
-async function loadCoaches() {
+async function loadPlayers(seasonId) {
+  const list = document.getElementById('playersList');
+  list.innerHTML = '';
+  const snap = await getDocs(collection(db, 'roster', seasonId, 'players'));
+  const players = [];
+  snap.forEach(d => players.push(d.data()));
+  if (!players.length) { list.innerHTML = '<div class="empty-state">No players added yet</div>'; return; }
+  players.sort((a, b) => parseInt(a.number) - parseInt(b.number)).forEach(p => list.appendChild(buildRosterItem(p)));
+}
+
+async function loadCoaches(seasonId) {
   const list = document.getElementById('coachesList');
   list.innerHTML = '';
-  const snap = await getDocs(collection(db, 'roster'));
+  const snap = await getDocs(collection(db, 'roster', seasonId, 'coaches'));
   const coaches = [];
-  snap.forEach(d => { if (d.data().type === 'coach') coaches.push(d.data()); });
-  if (coaches.length === 0) { list.innerHTML = '<div class="empty-state">No coaches added yet</div>'; return; }
+  snap.forEach(d => coaches.push(d.data()));
+  if (!coaches.length) { list.innerHTML = '<div class="empty-state">No coaches added yet</div>'; return; }
   coaches.forEach(c => list.appendChild(buildRosterItem(c)));
 }
 
-async function loadBoardMembers() {
+async function loadBoardMembers(seasonId) {
   const list = document.getElementById('boardList');
   list.innerHTML = '';
-  const snap = await getDocs(collection(db, 'roster'));
+  const snap = await getDocs(collection(db, 'roster', seasonId, 'boards'));
   const members = [];
-  snap.forEach(d => { if (d.data().type === 'board') members.push(d.data()); });
-  if (members.length === 0) { list.innerHTML = '<div class="empty-state">No board members added yet</div>'; return; }
+  snap.forEach(d => members.push(d.data()));
+  if (!members.length) { list.innerHTML = '<div class="empty-state">No board members added yet</div>'; return; }
   members.forEach(m => list.appendChild(buildRosterItem(m)));
 }
 
@@ -339,31 +463,26 @@ function buildRosterItem(m) {
   item.innerHTML = `
     <div class="item-info">
       ${m.photoURL ? `<img src="${m.photoURL}" class="item-photo">` : ''}
-      <div>
-        <strong>${label}</strong>
-        <span>${subtitle}</span>
-      </div>
+      <div><strong>${label}</strong><span>${subtitle}</span></div>
     </div>
     <div>
-      <button class="btn-edit" onclick="editMember('${m.id}')">Edit</button>
-      <button class="btn-delete" onclick="deleteMember('${m.id}')">Delete</button>
+      <button class="btn-edit" onclick="editMember('${m.id}', '${m.type}')">Edit</button>
+      <button class="btn-delete" onclick="deleteMember('${m.id}', '${m.type}')">Delete</button>
     </div>
   `;
   return item;
 }
 
-window.editMember = async (id) => {
-  const snap = await getDoc(doc(db, 'roster', id));
-  if (snap.exists()) openRosterModal(snap.data().type, snap.data());
+window.editMember = async (id, type) => {
+  const snap = await getDoc(doc(db, 'roster', currentSeasonId, type + 's', id));
+  if (snap.exists()) openRosterModal(type, snap.data());
 };
 
-window.deleteMember = async (id) => {
-  if (!confirm('Delete this member?')) return;
-  await deleteDoc(doc(db, 'roster', id));
-  try { await deleteObject(ref(storage, `roster/player/${id}`)); } catch(e) {}
-  try { await deleteObject(ref(storage, `roster/coach/${id}`)); } catch(e) {}
-  try { await deleteObject(ref(storage, `roster/board/${id}`)); } catch(e) {}
-  loadPlayers(); loadCoaches(); loadBoardMembers();
+window.deleteMember = async (id, type) => {
+  if (!confirm('Delete this member from this season?')) return;
+  await deleteDoc(doc(db, 'roster', currentSeasonId, type + 's', id));
+  try { await deleteObject(ref(storage, `roster/${currentSeasonId}/${type}/${id}`)); } catch(e) {}
+  loadRoster(currentSeasonId);
 };
 
 // ============================================
@@ -387,7 +506,7 @@ async function loadSchedule() {
   const snap = await getDocs(collection(db, 'schedule'));
   const games = [];
   snap.forEach(d => games.push(d.data()));
-  if (games.length === 0) { list.innerHTML = '<div class="empty-state">No games added yet</div>'; return; }
+  if (!games.length) { list.innerHTML = '<div class="empty-state">No games added yet</div>'; return; }
   games.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(g => {
     const dateStr = new Date(g.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
     const item = document.createElement('div'); item.className = 'item';
@@ -480,7 +599,7 @@ async function loadNews() {
   list.innerHTML = '';
   const snap = await getDocs(collection(db, 'news'));
   const posts = []; snap.forEach(d => posts.push(d.data()));
-  if (posts.length === 0) { list.innerHTML = '<div class="empty-state">No posts added yet</div>'; return; }
+  if (!posts.length) { list.innerHTML = '<div class="empty-state">No posts added yet</div>'; return; }
   posts.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(n => {
     const dateStr = new Date(n.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const item = document.createElement('div'); item.className = 'item';

@@ -683,3 +683,46 @@ body {
   font-weight: 700;
   font-size: 1rem;
 }
+
+/* SEASON SELECT */
+.roster-tab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.roster-tab-header h2 {
+  margin-bottom: 0;
+}
+
+.season-select {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  background: white;
+  min-width: 160px;
+}
+
+/* PLAYER SEARCH */
+.search-result-item {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin-top: 0.25rem;
+  cursor: pointer;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: background 0.2s;
+}
+
+.search-result-item:hover {
+  background: #f0f0f0;
+  border-color: var(--primary-maroon);
+}
