@@ -110,17 +110,18 @@
   box-shadow: 0 20px 60px rgba(0,0,0,0.4);
   max-height: 90vh;
   overflow-y: auto;
+  position: relative;
 }
 
-/* Floating close button overlapping image top-right */
+/* Floating close button - on the modal itself, top right corner */
 .modal-close-float {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #5e1825;
-  border: none;
-  color: white;
-  font-size: 1.4rem;
+  background: white;
+  border: 2px solid black;
+  color: black;
+  font-size: 1.2rem;
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -129,11 +130,12 @@
   align-items: center;
   justify-content: center;
   line-height: 1;
-  z-index: 10;
+  z-index: 100;
   box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-  transition: background 0.2s;
+  transition: all 0.2s;
+  font-weight: 700;
 }
-.modal-close-float:hover { background: #3d0f18; }
+.modal-close-float:hover { background: #f0f0f0; }
 
 /* Modal photo wrap - fills entire maroon area */
 .modal-photo-wrap {
@@ -173,7 +175,7 @@
   bottom: 10px;
   left: 12px;
   color: white;
-  font-size: 2.6rem;
+  font-size: 5rem;
   font-weight: 700;
   line-height: 1;
   text-shadow:
