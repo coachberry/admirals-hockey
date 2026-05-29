@@ -274,3 +274,29 @@
     align-items: center;
   }
 }
+
+/* SEASON STATS BAR */
+.season-stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin-top: 1rem;
+  overflow: hidden;
+  width: fit-content;
+}
+
+.stats-bar-item {
+  padding: 0.6rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #5e1825;
+}
+
+.stats-bar-divider {
+  width: 1px;
+  height: 24px;
+  background: #e0e0e0;
+}

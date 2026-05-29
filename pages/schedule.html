@@ -40,6 +40,15 @@
     <select id="seasonSelect" class="season-selector-public"></select>
   </div>
 
+  <!-- Season Stats Bar -->
+  <div class="season-stats-bar" id="seasonStatsBar" style="display:none;">
+    <div class="stats-bar-item" id="statsRecord">Record: -</div>
+    <div class="stats-bar-divider"></div>
+    <div class="stats-bar-item" id="statsGF">GF: -</div>
+    <div class="stats-bar-divider"></div>
+    <div class="stats-bar-item" id="statsGA">GA: -</div>
+  </div>
+
   <!-- Next Game / Last Game -->
   <div class="featured-games-row" id="featuredGames" style="display:none;">
     <div class="featured-game-card" id="nextGameCard" style="display:none;">
@@ -225,6 +234,42 @@
 
     // Sort chronologically
     games.sort((a, b) => new Date(a.date + 'T' + (a.time || '00:00')) - new Date(b.date + 'T' + (b.time || '00:00')));
+
+    // Calculate record and GF/GA
+    let w = 0, l = 0, t = 0, otl = 0, otw = 0, sol = 0, sow = 0, gf = 0, ga = 0;
+    games.forEach(g => {
+      if (!g.result) return;
+      if (g.result === 'W') w++;
+      else if (g.result === 'L') l++;
+      else if (g.result === 'T') t++;
+      else if (g.result === 'OTL') otl++;
+      else if (g.result === 'OTW') otw++;
+      else if (g.result === 'SOL') sol++;
+      else if (g.result === 'SOW') sow++;
+      if (g.teamScore !== null && g.teamScore !== undefined) gf += parseInt(g.teamScore) || 0;
+      if (g.opponentScore !== null && g.opponentScore !== undefined) ga += parseInt(g.opponentScore) || 0;
+    });
+
+    // Build record string - only show OT/SO cols if they exist
+    const hasOT = otl > 0 || otw > 0 || sol > 0 || sow > 0;
+    const totalW = w + otw + sow;
+    const totalL = l + otl + sol;
+    let recordStr = `${totalW}-${totalL}-${t}`;
+    if (hasOT) {
+      const otlTotal = otl + sol;
+      recordStr = `${w}-${l}-${t}-${otlTotal}`;
+    }
+
+    const statsBar = document.getElementById('seasonStatsBar');
+    const hasAnyResult = games.some(g => g.result);
+    if (hasAnyResult) {
+      document.getElementById('statsRecord').textContent = 'Record: ' + recordStr;
+      document.getElementById('statsGF').textContent = 'GF: ' + gf;
+      document.getElementById('statsGA').textContent = 'GA: ' + ga;
+      statsBar.style.display = 'flex';
+    } else {
+      statsBar.style.display = 'none';
+    }
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
