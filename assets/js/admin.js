@@ -1261,7 +1261,7 @@ window.openGameStats = async (gameId, seasonId) => {
           <option value="SOW" ${g.decision==='SOW'?'selected':''}>SOW</option>
           <option value="SOL" ${g.decision==='SOL'?'selected':''}>SOL</option>
         </select>`}</td>
-        <td><input type="number" class="stat-input" data-field="minutesPlayed" value="${g.minutesPlayed || 0}" min="0" step="0.01"></td>
+        <td><input type="number" class="stat-input" data-field="minutesPlayed" value="${g.minutesPlayed || 0}" placeholder="e.g. 19.50" min="0" step="0.01"></td>
         <td><input type="number" class="stat-input" data-field="shotsAgainst" value="${g.shotsAgainst || 0}" min="0"></td>
         <td><input type="number" class="stat-input" data-field="goalsAgainst" value="${g.goalsAgainst || 0}" min="0"></td>
         <td>${isEN ? '-' : `<input type="number" class="stat-input" data-field="assists" value="${g.assists || 0}" min="0">`}</td>

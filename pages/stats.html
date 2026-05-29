@@ -178,6 +178,7 @@
 
   const svPctFmt = (sv, sa) => sa > 0 ? '.' + (sv/sa).toFixed(3).slice(2) : '.000';
   const gaaFmt = (ga, min) => min > 0 ? ((ga * 60) / min).toFixed(2) : '0.00';
+  const minToMMSS = min => { const m = Math.floor(min); const s = Math.round((min - m) * 60); return `${m}:${s.toString().padStart(2, "0")}`; };
   const posAbbr = p => p === 'Forward' ? 'F' : p === 'Defense' ? 'D' : p?.charAt(0) || '-';
   const pct = (n, d) => d > 0 ? ((n/d)*100).toFixed(1) + '%' : '0.0%';
 
@@ -365,7 +366,7 @@
         <td>${isEN ? '-' : g.otl}</td>
         <td>${isEN ? '-' : g.sow}</td>
         <td>${isEN ? '-' : g.sol}</td>
-        <td>${g.min}</td>
+        <td>${minToMMSS(g.min)}</td>
         <td>${g.sa}</td>
         <td>${g.sv}</td>
         <td class="${isEN ? '' : 'stat-pts'}">${isEN ? '-' : svPctFmt(g.sv, g.sa)}</td>
@@ -386,7 +387,7 @@
       <td>${gt.otl}</td>
       <td>${gt.sow}</td>
       <td>${gt.sol}</td>
-      <td>${gt.min}</td>
+      <td>${minToMMSS(gt.min)}</td>
       <td>${gt.sa}</td>
       <td>${gt.sv}</td>
       <td>${svPctFmt(gt.sv, gt.sa)}</td>
