@@ -334,7 +334,8 @@ function buildRosterItem(m) {
   const item = document.createElement('div');
   item.className = 'item';
   const subtitle = m.type === 'player' ? `${m.position} | ${m.grade}` : m.title || '';
-  const label = m.type === 'player' ? `#${m.number} - ${m.name}` : m.name;
+  const captainLabel = m.captain ? ' - Captain' : m.alternate ? ' - Alternate Captain' : '';
+  const label = m.type === 'player' ? `#${m.number} - ${m.name}${captainLabel}` : m.name;
   item.innerHTML = `
     <div class="item-info">
       ${m.photoURL ? `<img src="${m.photoURL}" class="item-photo">` : ''}
