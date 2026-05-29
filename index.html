@@ -12,7 +12,10 @@
   <div class="header-container">
     <div class="logo">ADMIRALS HOCKEY</div>
     <nav>
-      <ul class="nav-links">
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
         <li><a href="/index.html" class="nav-link" data-page="home">Home</a></li>
         <li><a href="/pages/schedule.html" class="nav-link" data-page="schedule">Schedule</a></li>
         <li><a href="/pages/roster.html" class="nav-link" data-page="roster">Roster</a></li>
@@ -171,6 +174,17 @@
     if (href === currentPage) {
       link.classList.add('active');
     }
+  });
+  // Mobile nav toggle
+  document.getElementById('navToggle').addEventListener('click', () => {
+    document.getElementById('navToggle').classList.toggle('open');
+    document.getElementById('navLinks').classList.toggle('open');
+  });
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      document.getElementById('navToggle').classList.remove('open');
+      document.getElementById('navLinks').classList.remove('open');
+    });
   });
 </script>
 

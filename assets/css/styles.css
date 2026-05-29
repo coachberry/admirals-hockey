@@ -63,6 +63,38 @@ header {
   letter-spacing: -0.5px;
 }
 
+/* HAMBURGER BUTTON - hidden on desktop */
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 200;
+}
+
+.nav-toggle span {
+  display: block;
+  width: 26px;
+  height: 2px;
+  background: var(--primary-maroon);
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+
+/* Animate to X when open */
+.nav-toggle.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.nav-toggle.open span:nth-child(2) {
+  opacity: 0;
+}
+.nav-toggle.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
 .nav-links {
   display: flex;
   list-style: none;
@@ -402,25 +434,66 @@ footer {
   opacity: 0.7;
 }
 
+/* ============================================
+   MOBILE NAV
+   ============================================ */
 @media (max-width: 768px) {
-  .hero-title {
-    font-size: 2.2rem;
+  .hero-title { font-size: 2.2rem; }
+  .section-title { font-size: 1.5rem; }
+  .games-grid { grid-template-columns: 1fr; }
+  .roster-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+
+  /* Show hamburger button */
+  .nav-toggle {
+    display: flex;
   }
 
+  /* Hide nav by default on mobile */
   .nav-links {
-    gap: 1.5rem;
-    font-size: 0.85rem;
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    flex-direction: column;
+    gap: 0;
+    border-top: 1px solid #e0e0e0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 150;
   }
 
-  .section-title {
-    font-size: 1.5rem;
+  /* Show nav when open */
+  .nav-links.open {
+    display: flex;
   }
 
-  .games-grid {
-    grid-template-columns: 1fr;
+  .nav-links li {
+    width: 100%;
   }
 
-  .roster-grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  .nav-links a {
+    display: block;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .nav-links a:hover,
+  .nav-links a.active {
+    background: #fdf8f8;
+    color: var(--primary-maroon);
+    border-bottom-color: #f0f0f0;
+  }
+
+  /* Header needs relative positioning for dropdown */
+  header {
+    position: sticky;
+    top: 0;
+  }
+
+  .header-container {
+    position: relative;
   }
 }
