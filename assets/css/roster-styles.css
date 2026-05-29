@@ -128,37 +128,65 @@
   padding: 0;
 }
 
-/* Modal photo - full image visible, no cropping */
+/* Modal photo wrap - fills entire maroon area */
 .modal-photo-wrap {
   width: 100%;
   background: linear-gradient(135deg, #5e1825, #3d0f18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  min-height: 280px;
+  overflow: hidden;
 }
 
+/* Real photo - fills full width */
 .modal-real-photo {
-  max-width: 100%;
-  max-height: 380px;
-  object-fit: contain;
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  object-position: center top;
   display: block;
 }
 
+/* Placeholder logo - centered on maroon */
 .modal-placeholder-logo {
   width: auto;
-  max-height: 240px;
+  height: 220px;
   object-fit: contain;
   display: block;
+  margin: 2rem auto;
   opacity: 0.9;
 }
 
+/* Number badge on modal image - bottom left */
+.modal-number-badge {
+  position: absolute;
+  bottom: 8px;
+  left: 10px;
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow:
+    1px 1px 4px rgba(0,0,0,0.9),
+    -1px -1px 4px rgba(0,0,0,0.9),
+    1px -1px 4px rgba(0,0,0,0.9),
+    -1px 1px 4px rgba(0,0,0,0.9);
+  z-index: 2;
+}
+
+/* Captain/Alternate inline next to name */
+.modal-captain-inline {
+  display: inline-block;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+  text-shadow: none;
+}
+
+.modal-captain-c { color: #d4a574; }
+.modal-captain-a { color: #999; }
+
 .modal-body { padding: 1.5rem; }
-.modal-name { font-size: 1.5rem; font-weight: 700; color: #5e1825; margin-bottom: 0.25rem; }
-.modal-subtitle { color: #666; margin-bottom: 1rem; font-size: 0.95rem; }
+.modal-name { font-size: 1.5rem; font-weight: 700; color: #5e1825; margin-bottom: 0.25rem; display: flex; align-items: center; }
+.modal-subtitle { color: #666; margin-bottom: 0.75rem; font-size: 0.95rem; }
 .modal-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
 .modal-tag { background: #f0f0f0; color: #5e1825; padding: 4px 10px; border-radius: 3px; font-size: 0.8rem; font-weight: 600; }
-.captain-tag { background: #5e1825; color: #d4a574; }
-.alternate-tag { background: #444; color: #ccc; }
 .modal-bio { font-size: 0.9rem; color: #444; line-height: 1.7; }

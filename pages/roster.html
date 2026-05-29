@@ -125,22 +125,56 @@
   modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
 
   function openModal(m) {
+    // Photo wrap - fill entire maroon area, no padding
     const photoWrap = document.getElementById('modalPhotoWrap');
+    photoWrap.innerHTML = '';
+
+    // Photo container (relative so badges can overlay)
+    const photoContainer = document.createElement('div');
+    photoContainer.style.position = 'relative';
+    photoContainer.style.width = '100%';
+
     if (m.photoURL) {
-      photoWrap.innerHTML = `<img src="${m.photoURL}" alt="${m.name}" class="modal-real-photo">`;
+      const img = document.createElement('img');
+      img.src = m.photoURL;
+      img.alt = m.name;
+      img.className = 'modal-real-photo';
+      photoContainer.appendChild(img);
     } else {
-      photoWrap.innerHTML = `<img src="/assets/images/admiral-logo.png" alt="Admiral Logo" class="modal-placeholder-logo">`;
+      const img = document.createElement('img');
+      img.src = '/assets/images/admiral-logo.png';
+      img.alt = 'Admiral Logo';
+      img.className = 'modal-placeholder-logo';
+      photoContainer.appendChild(img);
     }
 
-    document.getElementById('modalName').textContent = m.name;
+    // Number badge bottom-left on image (players only)
+    if (m.type === 'player' && m.number) {
+      const numBadge = document.createElement('div');
+      numBadge.className = 'modal-number-badge';
+      numBadge.textContent = '#' + m.number;
+      photoContainer.appendChild(numBadge);
+    }
+
+    photoWrap.appendChild(photoContainer);
+
+    // Name + captain badge inline
+    const nameEl = document.getElementById('modalName');
+    let captainHTML = '';
+    if (m.type === 'player' && m.captain) {
+      captainHTML = `<span class="modal-captain-inline modal-captain-c">C</span>`;
+    } else if (m.type === 'player' && m.alternate) {
+      captainHTML = `<span class="modal-captain-inline modal-captain-a">A</span>`;
+    }
+    nameEl.innerHTML = m.name + captainHTML;
+
+    // Subtitle = position or title
     document.getElementById('modalSubtitle').textContent = m.type === 'player' ? m.position : (m.title || '');
 
+    // Tags = grade only
     const tags = document.getElementById('modalTags');
     tags.innerHTML = '';
-    if (m.number) tags.innerHTML += `<span class="modal-tag">#${m.number}</span>`;
     if (m.grade) tags.innerHTML += `<span class="modal-tag">${m.grade}</span>`;
-    if (m.captain) tags.innerHTML += `<span class="modal-tag captain-tag">C - Captain</span>`;
-    if (m.alternate) tags.innerHTML += `<span class="modal-tag alternate-tag">A - Alternate Captain</span>`;
 
     document.getElementById('modalBio').textContent = m.bio || 'No bio available.';
     modal.classList.add('active');
@@ -172,7 +206,7 @@
     if (m.type === 'player' && m.number) {
       const numBadge = document.createElement('div');
       numBadge.className = 'card-number-badge';
-      numBadge.textContent = m.number;
+      numBadge.textContent = '#' + m.number;
       frame.appendChild(numBadge);
     }
 
