@@ -1249,8 +1249,8 @@ window.openGameStats = async (gameId, seasonId) => {
       <tr data-player-id="${p.id}" ${isEN ? 'style="background:#f9f9f9;"' : ''}>
         <td style="color:#5e1825;font-weight:700;">${p.number || '-'}</td>
         <td style="font-weight:600;min-width:120px;white-space:nowrap;">${p.name}${isEN ? ' <span style="font-size:0.7rem;color:#999;">(EN)</span>' : ''}</td>
-        <td>${isEN ? `<input type="checkbox" class="stat-checkbox" data-field="gsCheck" ${g.gs ? 'checked' : ''}>` : `<input type="checkbox" class="stat-checkbox" data-field="gsCheck" ${g.gs ? 'checked' : ''}>`}</td>
-        <td>${isEN ? '-' : `<input type="checkbox" class="stat-checkbox" data-field="gpCheck" ${g.gp ? 'checked' : ''}>`}</td>
+        <td>${isEN ? '-' : `<input type="checkbox" class="stat-checkbox" data-field="gsCheck" ${g.gs ? 'checked' : ''}>`}</td>
+        <td><input type="checkbox" class="stat-checkbox" data-field="gpCheck" ${g.gp ? 'checked' : ''}></td>
         <td>${isEN ? '-' : `<select class="stat-input" data-field="decision">
           <option value="" ${!g.decision?'selected':''}>-</option>
           <option value="W" ${g.decision==='W'?'selected':''}>W</option>
