@@ -571,6 +571,7 @@ window.deleteMember = async (id, type) => {
 // SCHEDULE
 // ============================================
 let currentGameId = null;
+let opponentLogoData = null;
 let savedRinks = [];
 let savedLeagues = [];
 let savedTournaments = [];
@@ -778,7 +779,7 @@ function createGameModal() {
   });
 
   // Opponent logo upload
-  let opponentLogoData = null;
+  // opponentLogoData is module-scoped
   document.getElementById('gameOpponentLogo').addEventListener('change', function() {
     const file = this.files[0];
     if (!file) return;
