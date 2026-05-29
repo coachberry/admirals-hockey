@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Roster - Franklin Admirals Hockey</title>
   <link rel="stylesheet" href="/assets/css/styles.css">
+  <link rel="stylesheet" href="/assets/css/roster-styles.css">
   <style>
     .player-card {
       cursor: pointer;
@@ -239,11 +240,11 @@
     // Photo - full image no cropping
     const photoWrap = document.getElementById('modalPhotoWrap');
     if (m.photoURL) {
-      photoWrap.innerHTML = `<img src="${m.photoURL}" alt="${m.name}">`;
+      photoWrap.innerHTML = `<img src="${m.photoURL}" alt="${m.name}" class="real-photo">`;
     } else if (m.type === 'player') {
-      photoWrap.innerHTML = `<div class="modal-photo-placeholder"><span class="placeholder-number">${m.number || m.name.charAt(0)}</span></div>`;
+      photoWrap.innerHTML = `<span class="placeholder-number">${m.number || m.name.charAt(0)}</span>`;
     } else {
-      photoWrap.innerHTML = `<div class="modal-photo-placeholder"><img src="/assets/images/admiral-logo.png" alt="Admiral Logo"></div>`;
+      photoWrap.innerHTML = `<img src="/assets/images/admiral-logo.png" alt="Admiral Logo" class="placeholder-logo">`;
     }
 
     // Name & subtitle

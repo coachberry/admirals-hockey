@@ -1,0 +1,63 @@
+/* CARD PHOTO FRAME - consistent size for all cards */
+.card-photo-frame {
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #5e1825, #3d0f18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Real photo - cover the frame */
+.card-photo-frame img.real-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+/* Placeholder logo - contain so nothing is cut off */
+.card-photo-frame img.placeholder-logo {
+  width: auto;
+  height: 80%;
+  object-fit: contain;
+}
+
+/* Placeholder number */
+.card-photo-frame .placeholder-number {
+  color: white;
+  font-size: 3.5rem;
+  font-weight: 700;
+}
+
+/* MODAL PHOTO - larger, full image visible */
+.modal-photo-wrap {
+  width: 100%;
+  background: linear-gradient(135deg, #5e1825, #3d0f18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  min-height: 300px;
+}
+
+.modal-photo-wrap img.real-photo {
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  display: block;
+}
+
+.modal-photo-wrap img.placeholder-logo {
+  width: auto;
+  max-height: 250px;
+  object-fit: contain;
+}
+
+.modal-photo-wrap .placeholder-number {
+  color: white;
+  font-size: 7rem;
+  font-weight: 700;
+}
