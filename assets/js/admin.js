@@ -142,7 +142,7 @@ function openRosterModal(type, data = null) {
   if (currentPhotoURL) {
     showPhotoConfirmed(currentPhotoURL, preview);
   } else {
-    preview.innerHTML = '';
+    showEmptyPhotoState(preview);
   }
 
   rosterModal.classList.add('active');
@@ -165,26 +165,66 @@ document.getElementById('memberPhoto').addEventListener('change', function() {
   reader.readAsDataURL(file);
 });
 
+// Hide the original file input - we use our own UI
+document.getElementById('memberPhoto').style.display = 'none';
 
+
+
+function showEmptyPhotoState(container) {
+  container.innerHTML = `
+    <div class="photo-preview-layout">
+      <div class="photo-preview-frame photo-preview-empty">
+        <span>No Image</span>
+      </div>
+      <div class="photo-preview-buttons">
+        <label class="btn-secondary photo-btn photo-choose-label">
+          Choose File
+          <input type="file" id="memberPhotoHidden" accept="image/*,.heic,.heif,.HEIC,.HEIF" style="display:none;">
+        </label>
+      </div>
+    </div>
+  `;
+  document.getElementById('memberPhotoHidden').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const src = e.target.result;
+      showFramer(src, container, (dataURL) => {
+        croppedPhoto = dataURL;
+        currentPhotoURL = null;
+        showPhotoConfirmed(dataURL, container, src);
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 function showPhotoConfirmed(dataURL, container, originalSrc = null) {
   container.innerHTML = `
-    <div style="margin-top:0.75rem; display:flex; gap:0.75rem; align-items:flex-start;">
-      <img src="${dataURL}" style="width:120px; min-width:120px; aspect-ratio:7/8; object-fit:cover; border-radius:4px; border:2px solid #5e1825; display:block;">
-      <div style="display:flex; flex-direction:column; gap:0.5rem; flex:1;">
-        ${originalSrc ? `<button type="button" id="reframeBtn" class="btn-secondary" style="font-size:0.8rem; padding:8px 12px; width:100%;">Re-frame</button>` : ''}
-        <button type="button" id="removePhotoBtn" class="btn-delete" style="font-size:0.8rem; padding:8px 12px; width:100%;">Remove Photo</button>
+    <div class="photo-preview-layout">
+      <div class="photo-preview-frame">
+        <img src="${dataURL}" class="photo-preview-img">
+      </div>
+      <div class="photo-preview-buttons">
+        ${originalSrc ? `<button type="button" id="reframeBtn" class="btn-secondary photo-btn">Change Photo</button>` : `<button type="button" id="reframeBtn" class="btn-secondary photo-btn">Change Photo</button>`}
+        <button type="button" id="removePhotoBtn" class="btn-delete photo-btn">Remove Photo</button>
       </div>
     </div>
   `;
 
   if (originalSrc) {
     document.getElementById('reframeBtn')?.addEventListener('click', () => {
-    showFramer(originalSrc, container, (dataURL) => {
-      croppedPhoto = dataURL;
-      currentPhotoURL = null;
-      showPhotoConfirmed(dataURL, container, originalSrc);
-    });
+    if (originalSrc) {
+      showFramer(originalSrc, container, (dataURL) => {
+        croppedPhoto = dataURL;
+        currentPhotoURL = null;
+        showPhotoConfirmed(dataURL, container, originalSrc);
+      });
+    } else {
+      // Trigger file input
+      document.getElementById('memberPhoto').click();
+    }
   });
   }
 
@@ -192,7 +232,7 @@ function showPhotoConfirmed(dataURL, container, originalSrc = null) {
     croppedPhoto = null;
     currentPhotoURL = null;
     document.getElementById('memberPhoto').value = '';
-    container.innerHTML = '';
+    showEmptyPhotoState(container);
   });
 }
 
