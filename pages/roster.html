@@ -274,12 +274,7 @@
     if (m.photoURL) {
       inner.innerHTML = `<img src="${m.photoURL}" alt="${m.name}" class="player-photo">`;
     } else {
-      inner.innerHTML = `<div class="player-photo-placeholder">${m.name.charAt(0)}</div>`;
-    }
-
-    // Number badge for players
-    if (m.number) {
-      inner.innerHTML += `<div class="player-number-badge">#${m.number}</div>`;
+      inner.innerHTML = `<div class="player-photo-placeholder">${m.number || m.name.charAt(0)}</div>`;
     }
 
     card.appendChild(inner);
