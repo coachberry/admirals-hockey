@@ -500,13 +500,13 @@ footer {
 
 /* LOGO IMAGE */
 .logo-img {
-  height: 48px;
+  height: 72px;
   width: auto;
   display: block;
 }
 
 @media (max-width: 768px) {
   .logo-img {
-    height: 36px;
+    height: 52px;
   }
 }
