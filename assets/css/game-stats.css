@@ -26,7 +26,7 @@
 .stats-modal-tabs {
   display: flex;
   border-bottom: 2px solid #e0e0e0;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
 }
 
 .stats-tab-btn {
@@ -48,8 +48,16 @@
   font-weight: 600;
 }
 
-.stats-tab-content { display: none; overflow-x: auto; }
+.stats-tab-content { display: none; }
 .stats-tab-content.active { display: block; }
+
+/* Scrollable table container with sticky header */
+.stats-table-scroll {
+  max-height: 420px;
+  overflow-y: auto;
+  overflow-x: auto;
+  margin-top: 0;
+}
 
 /* GAME STATS TABLE */
 .game-stats-table {
@@ -62,6 +70,9 @@
 .game-stats-table thead {
   background: linear-gradient(135deg, #5e1825, #3d0f18);
   color: white;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .game-stats-table th {
@@ -90,7 +101,21 @@
 
 .game-stats-table td:nth-child(2) { text-align: left; padding-left: 0.5rem; }
 
-/* STAT INPUTS */
+/* GWG highlight */
+.gwg-row {
+  background: #fff8e1 !important;
+}
+
+.gwg-key {
+  font-size: 0.75rem;
+  color: #b8860b;
+  padding: 0.4rem 0.5rem;
+  background: #fff8e1;
+  border-top: 1px solid #f0e0a0;
+  font-style: italic;
+}
+
+/* STAT INPUTS - no spinners */
 .stat-input {
   width: 44px;
   padding: 3px 4px;
@@ -99,6 +124,13 @@
   font-size: 0.8rem;
   text-align: center;
   font-family: inherit;
+  -moz-appearance: textfield;
+}
+
+.stat-input::-webkit-outer-spin-button,
+.stat-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .stat-input:focus {
@@ -110,6 +142,7 @@
 select.stat-input {
   width: 58px;
   padding: 3px 2px;
+  -moz-appearance: auto;
 }
 
 /* Checkbox styling */
@@ -135,12 +168,63 @@ select.stat-input {
 .btn-stats:hover { background: #3d0f18; }
 
 /* Totals row */
-.stats-totals-row {
-  background: #f0e8ea !important;
+.stats-totals-row td {
+  background: #5e1825;
+  color: white;
   font-weight: 700;
-  border-top: 2px solid #5e1825 !important;
 }
 
-.stats-totals-row td {
-  color: #5e1825;
+/* Bench PIM row */
+.bench-pim-row td {
+  background: #f5f5f5;
+  font-style: italic;
+  color: #666;
+}
+
+/* Team stats section */
+.team-stats-section {
+  padding: 1rem 0;
+}
+
+.team-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.team-stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+
+.team-stat-label {
+  font-size: 0.85rem;
+  color: #555;
+  font-weight: 600;
+}
+
+.team-stat-input {
+  width: 70px;
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+
+.team-stat-input::-webkit-outer-spin-button,
+.team-stat-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.team-stat-input:focus {
+  outline: none;
+  border-color: #5e1825;
 }

@@ -39,6 +39,25 @@
     <select id="seasonSelect" class="season-selector-public"></select>
   </div>
 
+  <!-- Team Stats -->
+  <div style="margin-top:2rem; margin-bottom:1rem;">
+    <div class="section-header"><h2 class="section-title">Team Stats</h2></div>
+    <div class="team-stats-bar" id="teamStatsBar">
+      <div class="team-stat-card">
+        <div class="team-stat-card-label">Bench PIM</div>
+        <div class="team-stat-card-value" id="tsBenchPIM">0</div>
+      </div>
+      <div class="team-stat-card">
+        <div class="team-stat-card-label">PP%</div>
+        <div class="team-stat-card-value" id="tsPPPct">0.0%</div>
+      </div>
+      <div class="team-stat-card">
+        <div class="team-stat-card-label">PK%</div>
+        <div class="team-stat-card-value" id="tsPKPct">0.0%</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Skaters -->
   <div style="margin-top:2rem; margin-bottom:3rem;">
     <div class="section-header"><h2 class="section-title">Skaters</h2></div>
@@ -53,11 +72,12 @@
             <th title="Shots on Goal">SOG</th>
             <th title="Goals">G</th>
             <th title="Assists">A</th>
+            <th title="Points">PTS</th>
             <th title="Power Play Goals">PPG</th>
             <th title="Power Play Assists">PPA</th>
             <th title="Short Handed Goals">SHG</th>
             <th title="Short Handed Assists">SHA</th>
-            <th title="Points">PTS</th>
+            <th title="Game Winning Goals">GWG</th>
             <th title="Plus">+</th>
             <th title="Minus">-</th>
             <th title="Plus/Minus">+/-</th>
@@ -65,7 +85,7 @@
           </tr>
         </thead>
         <tbody id="skatersBody">
-          <tr><td colspan="16" class="empty-cell">Loading...</td></tr>
+          <tr><td colspan="17" class="empty-cell">Loading...</td></tr>
         </tbody>
       </table>
     </div>
@@ -95,12 +115,13 @@
             <th title="Save Percentage">SV%</th>
             <th title="Goals Against">GA</th>
             <th title="Goals Against Average">GAA</th>
+            <th title="Shutouts">SO</th>
             <th title="Assists">A</th>
             <th title="Penalty Minutes">PIM</th>
           </tr>
         </thead>
         <tbody id="goaliesBody">
-          <tr><td colspan="19" class="empty-cell">Loading...</td></tr>
+          <tr><td colspan="20" class="empty-cell">Loading...</td></tr>
         </tbody>
       </table>
     </div>
@@ -135,7 +156,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
@@ -155,31 +176,46 @@
     if (href === currentPage) link.classList.add('active');
   });
 
+  const svPctFmt = (sv, sa) => sa > 0 ? '.' + (sv/sa).toFixed(3).slice(2) : '.000';
+  const gaaFmt = (ga, min) => min > 0 ? ((ga * 60) / min).toFixed(2) : '0.00';
+  const posAbbr = p => p === 'Forward' ? 'F' : p === 'Defense' ? 'D' : p?.charAt(0) || '-';
+  const pct = (n, d) => d > 0 ? ((n/d)*100).toFixed(1) + '%' : '0.0%';
+
   async function loadStats(seasonId) {
     const skatersBody = document.getElementById('skatersBody');
     const goaliesBody = document.getElementById('goaliesBody');
-    skatersBody.innerHTML = '<tr><td colspan="16" class="empty-cell">Loading...</td></tr>';
-    goaliesBody.innerHTML = '<tr><td colspan="19" class="empty-cell">Loading...</td></tr>';
+    skatersBody.innerHTML = '<tr><td colspan="17" class="empty-cell">Loading...</td></tr>';
+    goaliesBody.innerHTML = '<tr><td colspan="20" class="empty-cell">Loading...</td></tr>';
 
+    // Load players
     const playersSnap = await getDocs(collection(db, 'roster', seasonId, 'players'));
     const players = [];
     playersSnap.forEach(d => players.push(d.data()));
 
+    // Load all games
     const gamesSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule'));
     const games = [];
     gamesSnap.forEach(d => games.push(d.data()));
 
+    // Initialize stats - all players + EMPTY NET goalie
     const skaterStats = {};
     const goalieStats = {};
 
     players.forEach(p => {
       if (p.position === 'Goaltender') {
-        goalieStats[p.id] = { name: p.name, number: p.number, gs: 0, gp: 0, w: 0, l: 0, t: 0, otw: 0, otl: 0, sow: 0, sol: 0, min: 0, sa: 0, sv: 0, ga: 0, assists: 0, pim: 0 };
+        goalieStats[p.id] = { name: p.name, number: p.number, isEmptyNet: false, gs: 0, gp: 0, w: 0, l: 0, t: 0, otw: 0, otl: 0, sow: 0, sol: 0, min: 0, sa: 0, sv: 0, ga: 0, shutouts: 0, assists: 0, pim: 0 };
       } else {
-        skaterStats[p.id] = { name: p.name, number: p.number, position: p.position, gp: 0, sog: 0, goals: 0, assists: 0, ppg: 0, ppa: 0, shg: 0, sha: 0, plus: 0, minus: 0, pim: 0 };
+        skaterStats[p.id] = { name: p.name, number: p.number, position: p.position, gp: 0, sog: 0, goals: 0, assists: 0, ppg: 0, ppa: 0, shg: 0, sha: 0, gwg: 0, plus: 0, minus: 0, pim: 0 };
       }
     });
 
+    // Always include EMPTY NET
+    goalieStats['EMPTY_NET'] = { name: 'EMPTY NET', number: '0', isEmptyNet: true, gs: 0, gp: 0, w: 0, l: 0, t: 0, otw: 0, otl: 0, sow: 0, sol: 0, min: 0, sa: 0, sv: 0, ga: 0, shutouts: 0, assists: 0, pim: 0 };
+
+    // Team totals
+    let totalBenchPIM = 0, totalPPOpps = 0, totalPPG = 0, totalPKAttempts = 0, totalSuccessfulPKs = 0;
+
+    // Aggregate per game
     for (const game of games) {
       const skaterSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule', game.id, 'skaterstats'));
       skaterSnap.forEach(d => {
@@ -194,6 +230,7 @@
         st.ppa += s.ppa || 0;
         st.shg += s.shg || 0;
         st.sha += s.sha || 0;
+        st.gwg += s.gwg || 0;
         st.plus += s.plus || 0;
         st.minus += s.minus || 0;
         st.pim += s.pim || 0;
@@ -202,145 +239,163 @@
       const goalieSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule', game.id, 'goaliestats'));
       goalieSnap.forEach(d => {
         const g = d.data();
-        if (!goalieStats[g.playerId]) return;
-        const gt = goalieStats[g.playerId];
-        gt.gs += g.gs || 0;
+        const pid = g.playerId;
+        if (!goalieStats[pid]) return;
+        const gt = goalieStats[pid];
         gt.gp += g.gp || 0;
         gt.min += g.minutesPlayed || 0;
         gt.sa += g.shotsAgainst || 0;
         gt.ga += g.goalsAgainst || 0;
         gt.assists += g.assists || 0;
         gt.pim += g.pim || 0;
-        if (g.decision === 'W') gt.w++;
-        else if (g.decision === 'L') gt.l++;
-        else if (g.decision === 'T') gt.t++;
-        else if (g.decision === 'OTW') gt.otw++;
-        else if (g.decision === 'OTL') gt.otl++;
-        else if (g.decision === 'SOW') gt.sow++;
-        else if (g.decision === 'SOL') gt.sol++;
+        if (!g.isEmptyNet) {
+          gt.gs += g.gs || 0;
+          if (g.gs && g.goalsAgainst === 0) gt.shutouts++;
+          if (g.decision === 'W') gt.w++;
+          else if (g.decision === 'L') gt.l++;
+          else if (g.decision === 'T') gt.t++;
+          else if (g.decision === 'OTW') gt.otw++;
+          else if (g.decision === 'OTL') gt.otl++;
+          else if (g.decision === 'SOW') gt.sow++;
+          else if (g.decision === 'SOL') gt.sol++;
+        }
+        gt.sv = Math.max(0, gt.sa - gt.ga);
       });
+
+      // Team stats
+      const tsSnap = await getDoc(doc(db, 'seasons', seasonId, 'schedule', game.id, 'teamstats', 'game'));
+      if (tsSnap.exists()) {
+        const ts = tsSnap.data();
+        totalBenchPIM += ts.benchPIM || 0;
+        totalPPOpps += ts.ppOpps || 0;
+        totalPPG += ts.ppg || 0;
+        totalPKAttempts += ts.pkAttempts || 0;
+        totalSuccessfulPKs += ts.successfulPKs || 0;
+      }
     }
 
-    // Render skaters sorted by points
+    // Render team stats
+    document.getElementById('tsBenchPIM').textContent = totalBenchPIM;
+    document.getElementById('tsPPPct').textContent = pct(totalPPG, totalPPOpps);
+    document.getElementById('tsPKPct').textContent = pct(totalSuccessfulPKs, totalPKAttempts);
+
+    // Render skaters
     const skaters = Object.values(skaterStats).sort((a, b) => {
-      const ptsA = a.goals + a.assists;
-      const ptsB = b.goals + b.assists;
+      const ptsA = a.goals + a.assists, ptsB = b.goals + b.assists;
       return ptsB !== ptsA ? ptsB - ptsA : parseInt(a.number) - parseInt(b.number);
     });
 
-    // Totals
-    const st = { gp:0, sog:0, goals:0, assists:0, ppg:0, ppa:0, shg:0, sha:0, plus:0, minus:0, pim:0 };
+    // Team totals row
+    const tot = { gp:0, sog:0, goals:0, assists:0, ppg:0, ppa:0, shg:0, sha:0, gwg:0, plus:0, minus:0, pim: totalBenchPIM };
     skaters.forEach(s => {
-      st.gp += s.gp; st.sog += s.sog; st.goals += s.goals; st.assists += s.assists;
-      st.ppg += s.ppg; st.ppa += s.ppa; st.shg += s.shg; st.sha += s.sha;
-      st.plus += s.plus; st.minus += s.minus; st.pim += s.pim;
+      tot.gp += s.gp; tot.sog += s.sog; tot.goals += s.goals; tot.assists += s.assists;
+      tot.ppg += s.ppg; tot.ppa += s.ppa; tot.shg += s.shg; tot.sha += s.sha;
+      tot.gwg += s.gwg; tot.plus += s.plus; tot.minus += s.minus; tot.pim += s.pim;
     });
 
-    const posAbbr = p => p === 'Forward' ? 'F' : p === 'Defense' ? 'D' : p?.charAt(0) || '-';
-
-    skatersBody.innerHTML = (!skaters.length
-      ? `<tr><td colspan="16" class="empty-cell">No skaters on roster</td></tr>`
-      : skaters.map(s => {
-          const pts = s.goals + s.assists;
-          const pm = s.plus - s.minus;
-          return `<tr>
-            <td class="col-num">${s.number || '-'}</td>
-            <td class="col-name">${s.name}</td>
-            <td class="col-pos">${posAbbr(s.position)}</td>
-            <td>${s.gp}</td>
-            <td>${s.sog}</td>
-            <td>${s.goals}</td>
-            <td>${s.assists}</td>
-            <td>${s.ppg}</td>
-            <td>${s.ppa}</td>
-            <td>${s.shg}</td>
-            <td>${s.sha}</td>
-            <td class="stat-pts">${pts}</td>
-            <td>${s.plus}</td>
-            <td>${s.minus}</td>
-            <td>${pm > 0 ? '+' + pm : pm}</td>
-            <td>${s.pim}</td>
-          </tr>`;
-        }).join('')
-    ) + `<tr class="stats-totals-row">
-      <td colspan="3" style="text-align:left;padding-left:1rem;">TEAM TOTALS</td>
-      <td>${st.gp}</td>
-      <td>${st.sog}</td>
-      <td>${st.goals}</td>
-      <td>${st.assists}</td>
-      <td>${st.ppg}</td>
-      <td>${st.ppa}</td>
-      <td>${st.shg}</td>
-      <td>${st.sha}</td>
-      <td>${st.goals + st.assists}</td>
-      <td>${st.plus}</td>
-      <td>${st.minus}</td>
-      <td>${st.plus - st.minus > 0 ? '+' + (st.plus - st.minus) : st.plus - st.minus}</td>
-      <td>${st.pim}</td>
+    skatersBody.innerHTML = skaters.map(s => {
+      const pts = s.goals + s.assists;
+      const pm = s.plus - s.minus;
+      return `<tr>
+        <td class="col-num">${s.number || '-'}</td>
+        <td class="col-name">${s.name}</td>
+        <td class="col-pos">${posAbbr(s.position)}</td>
+        <td>${s.gp}</td>
+        <td>${s.sog}</td>
+        <td>${s.goals}</td>
+        <td>${s.assists}</td>
+        <td class="stat-pts">${pts}</td>
+        <td>${s.ppg}</td>
+        <td>${s.ppa}</td>
+        <td>${s.shg}</td>
+        <td>${s.sha}</td>
+        <td>${s.gwg}</td>
+        <td>${s.plus}</td>
+        <td>${s.minus}</td>
+        <td>${pm > 0 ? '+' + pm : pm}</td>
+        <td>${s.pim}</td>
+      </tr>`;
+    }).join('') + `<tr class="stats-totals-row">
+      <td colspan="3">TEAM TOTALS</td>
+      <td>${tot.gp}</td>
+      <td>${tot.sog}</td>
+      <td>${tot.goals}</td>
+      <td>${tot.assists}</td>
+      <td>${tot.goals + tot.assists}</td>
+      <td>${tot.ppg}</td>
+      <td>${tot.ppa}</td>
+      <td>${tot.shg}</td>
+      <td>${tot.sha}</td>
+      <td>${tot.gwg}</td>
+      <td>${tot.plus}</td>
+      <td>${tot.minus}</td>
+      <td>${tot.plus - tot.minus > 0 ? '+' + (tot.plus - tot.minus) : tot.plus - tot.minus}</td>
+      <td>${tot.pim}</td>
     </tr>`;
 
-    // Render goalies
-    const goalies = Object.values(goalieStats).sort((a, b) => parseInt(a.number) - parseInt(b.number));
+    // Render goalies - regular goalies first, then EMPTY NET
+    const regularGoalies = Object.values(goalieStats)
+      .filter(g => !g.isEmptyNet)
+      .sort((a, b) => parseInt(a.number) - parseInt(b.number));
+    const emptyNet = goalieStats['EMPTY_NET'];
+    const allGoalies = [...regularGoalies, emptyNet];
 
-    const gt = { gs:0, gp:0, w:0, l:0, t:0, otw:0, otl:0, sow:0, sol:0, min:0, sa:0, ga:0, assists:0, pim:0 };
-    goalies.forEach(g => {
+    const gt = { gs:0, gp:0, w:0, l:0, t:0, otw:0, otl:0, sow:0, sol:0, min:0, sa:0, sv:0, ga:0, shutouts:0, assists:0, pim:0 };
+    regularGoalies.forEach(g => {
       gt.gs += g.gs; gt.gp += g.gp; gt.w += g.w; gt.l += g.l; gt.t += g.t;
       gt.otw += g.otw; gt.otl += g.otl; gt.sow += g.sow; gt.sol += g.sol;
-      gt.min += g.min; gt.sa += g.sa; gt.ga += g.ga; gt.assists += g.assists; gt.pim += g.pim;
+      gt.min += g.min; gt.sa += g.sa; gt.sv += g.sv; gt.ga += g.ga;
+      gt.shutouts += g.shutouts; gt.assists += g.assists; gt.pim += g.pim;
     });
+    // Add EN to totals
+    gt.min += emptyNet.min; gt.sa += emptyNet.sa; gt.ga += emptyNet.ga;
+    gt.sv = Math.max(0, gt.sa - gt.ga);
 
-    const svPctFmt = (sv, sa) => sa > 0 ? '.' + (sv/sa).toFixed(3).slice(2) : '.000';
-    const gaaFmt = (ga, min) => min > 0 ? ((ga * 60) / min).toFixed(2) : '0.00';
-
-    goaliesBody.innerHTML = (!goalies.length
-      ? `<tr><td colspan="19" class="empty-cell">No goaltenders on roster</td></tr>`
-      : goalies.map(g => {
-          const sv = g.sa - g.ga;
-          return `<tr>
-            <td class="col-num">${g.number || '-'}</td>
-            <td class="col-name">${g.name}</td>
-            <td>${g.gs}</td>
-            <td>${g.gp}</td>
-            <td>${g.w}</td>
-            <td>${g.t}</td>
-            <td>${g.l}</td>
-            <td>${g.otw}</td>
-            <td>${g.otl}</td>
-            <td>${g.sow}</td>
-            <td>${g.sol}</td>
-            <td>${g.min}</td>
-            <td>${g.sa}</td>
-            <td>${sv}</td>
-            <td class="stat-pts">${svPctFmt(sv, g.sa)}</td>
-            <td>${g.ga}</td>
-            <td>${gaaFmt(g.ga, g.min)}</td>
-            <td>${g.assists}</td>
-            <td>${g.pim}</td>
-          </tr>`;
-        }).join('')
-    ) + (() => {
-      const totalSv = gt.sa - gt.ga;
-      return `<tr class="stats-totals-row">
-        <td colspan="2" style="text-align:left;padding-left:1rem;">TOTALS</td>
-        <td>${gt.gs}</td>
-        <td>${gt.gp}</td>
-        <td>${gt.w}</td>
-        <td>${gt.t}</td>
-        <td>${gt.l}</td>
-        <td>${gt.otw}</td>
-        <td>${gt.otl}</td>
-        <td>${gt.sow}</td>
-        <td>${gt.sol}</td>
-        <td>${gt.min}</td>
-        <td>${gt.sa}</td>
-        <td>${totalSv}</td>
-        <td>${svPctFmt(totalSv, gt.sa)}</td>
-        <td>${gt.ga}</td>
-        <td>${gaaFmt(gt.ga, gt.min)}</td>
-        <td>${gt.assists}</td>
-        <td>${gt.pim}</td>
+    goaliesBody.innerHTML = allGoalies.map(g => {
+      const isEN = g.isEmptyNet;
+      return `<tr ${isEN ? 'class="empty-net-row"' : ''}>
+        <td class="col-num">${g.number || '-'}</td>
+        <td class="col-name">${g.name}</td>
+        <td>${isEN ? '-' : g.gs}</td>
+        <td>${isEN ? '-' : g.gp}</td>
+        <td>${isEN ? '-' : g.w}</td>
+        <td>${isEN ? '-' : g.t}</td>
+        <td>${isEN ? '-' : g.l}</td>
+        <td>${isEN ? '-' : g.otw}</td>
+        <td>${isEN ? '-' : g.otl}</td>
+        <td>${isEN ? '-' : g.sow}</td>
+        <td>${isEN ? '-' : g.sol}</td>
+        <td>${g.min}</td>
+        <td>${g.sa}</td>
+        <td>${g.sv}</td>
+        <td class="${isEN ? '' : 'stat-pts'}">${isEN ? '-' : svPctFmt(g.sv, g.sa)}</td>
+        <td>${g.ga}</td>
+        <td>${isEN ? '-' : gaaFmt(g.ga, g.min)}</td>
+        <td>${isEN ? '-' : g.shutouts}</td>
+        <td>${isEN ? '-' : g.assists}</td>
+        <td>${isEN ? '-' : g.pim}</td>
       </tr>`;
-    })();
+    }).join('') + `<tr class="stats-totals-row">
+      <td colspan="2">TOTALS</td>
+      <td>${gt.gs}</td>
+      <td>${gt.gp}</td>
+      <td>${gt.w}</td>
+      <td>${gt.t}</td>
+      <td>${gt.l}</td>
+      <td>${gt.otw}</td>
+      <td>${gt.otl}</td>
+      <td>${gt.sow}</td>
+      <td>${gt.sol}</td>
+      <td>${gt.min}</td>
+      <td>${gt.sa}</td>
+      <td>${gt.sv}</td>
+      <td>${svPctFmt(gt.sv, gt.sa)}</td>
+      <td>${gt.ga}</td>
+      <td>${gaaFmt(gt.ga, gt.min)}</td>
+      <td>${gt.shutouts}</td>
+      <td>${gt.assists}</td>
+      <td>${gt.pim}</td>
+    </tr>`;
   }
 
   async function initSeasons() {

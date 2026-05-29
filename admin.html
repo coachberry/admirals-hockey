@@ -311,7 +311,7 @@
 
 <!-- GAME STATS MODAL -->
 <div id="gameStatsModal" class="modal-overlay">
-  <div class="modal" style="max-width:800px;">
+  <div class="modal" style="max-width:860px;">
     <div class="modal-header">
       <h2 id="gameStatsTitle">Game Stats</h2>
       <button class="modal-close" id="closeGameStatsModal">&times;</button>
@@ -319,48 +319,64 @@
     <div class="modal-body">
       <div id="gameStatsInfo" class="game-stats-info-bar"></div>
       <div class="stats-modal-tabs">
-        <button class="stats-tab-btn active" data-stab="skaters">Skaters</button>
+        <button class="stats-tab-btn active" data-stab="team">Team</button>
+        <button class="stats-tab-btn" data-stab="skaters">Skaters</button>
         <button class="stats-tab-btn" data-stab="goalies">Goaltenders</button>
       </div>
-      <div id="skatersStatsTab" class="stats-tab-content active">
-        <table class="game-stats-table">
-          <thead>
-            <tr>
-              <th>#</th><th>Player</th>
-              <th title="Dressed/Played">GP</th>
-              <th title="Shots on Goal">SOG</th>
-              <th title="Goals">G</th>
-              <th title="Assists">A</th>
-              <th title="Power Play Goals">PPG</th>
-              <th title="Power Play Assists">PPA</th>
-              <th title="Short Handed Goals">SHG</th>
-              <th title="Short Handed Assists">SHA</th>
-              <th title="Plus">+</th>
-              <th title="Minus">-</th>
-              <th title="Penalty Minutes">PIM</th>
-            </tr>
-          </thead>
-          <tbody id="skaterStatsBody"></tbody>
-        </table>
+
+      <!-- TEAM TAB -->
+      <div id="teamStatsTab" class="stats-tab-content active">
+        <div id="teamStatsContent"></div>
       </div>
+
+      <!-- SKATERS TAB -->
+      <div id="skatersStatsTab" class="stats-tab-content">
+        <div class="stats-table-scroll">
+          <table class="game-stats-table">
+            <thead>
+              <tr>
+                <th>#</th><th>Player</th>
+                <th title="Dressed/Played">GP</th>
+                <th title="Shots on Goal">SOG</th>
+                <th title="Goals">G</th>
+                <th title="Assists">A</th>
+                <th title="Power Play Goals">PPG</th>
+                <th title="Power Play Assists">PPA</th>
+                <th title="Short Handed Goals">SHG</th>
+                <th title="Short Handed Assists">SHA</th>
+                <th title="Game Winning Goal">GWG</th>
+                <th title="Plus">+</th>
+                <th title="Minus">-</th>
+                <th title="Penalty Minutes">PIM</th>
+              </tr>
+            </thead>
+            <tbody id="skaterStatsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- GOALIES TAB -->
       <div id="goaliesStatsTab" class="stats-tab-content">
-        <table class="game-stats-table">
-          <thead>
-            <tr>
-              <th>#</th><th>Player</th>
-              <th title="Game Started">GS</th>
-              <th title="Game Played">GP</th>
-              <th title="Decision">DEC</th>
-              <th title="Minutes Played">MIN</th>
-              <th title="Shots Against">SA</th>
-              <th title="Goals Against">GA</th>
-              <th title="Assists">A</th>
-              <th title="Penalty Minutes">PIM</th>
-            </tr>
-          </thead>
-          <tbody id="goalieStatsBody"></tbody>
-        </table>
+        <div class="stats-table-scroll">
+          <table class="game-stats-table">
+            <thead>
+              <tr>
+                <th>#</th><th>Player</th>
+                <th title="Game Started">GS</th>
+                <th title="Game Played">GP</th>
+                <th title="Decision">DEC</th>
+                <th title="Minutes Played">MIN</th>
+                <th title="Shots Against">SA</th>
+                <th title="Goals Against">GA</th>
+                <th title="Assists">A</th>
+                <th title="Penalty Minutes">PIM</th>
+              </tr>
+            </thead>
+            <tbody id="goalieStatsBody"></tbody>
+          </table>
+        </div>
       </div>
+
       <div class="form-buttons" style="margin-top:1.5rem;">
         <button id="saveGameStatsBtn" class="btn-primary">Save Stats</button>
         <button id="cancelGameStatsBtn" class="btn-secondary">Cancel</button>
