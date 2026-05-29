@@ -497,3 +497,16 @@ footer {
     position: relative;
   }
 }
+
+/* LOGO IMAGE */
+.logo-img {
+  height: 48px;
+  width: auto;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .logo-img {
+    height: 36px;
+  }
+}
