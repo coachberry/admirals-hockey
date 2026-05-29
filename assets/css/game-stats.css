@@ -210,11 +210,11 @@ select.stat-input {
 }
 
 .team-stat-input {
-  width: 70px;
-  padding: 4px 8px;
+  width: 50px;
+  padding: 3px 5px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   text-align: center;
   -moz-appearance: textfield;
 }
