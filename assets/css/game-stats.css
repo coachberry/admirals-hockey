@@ -187,20 +187,22 @@ select.stat-input {
 }
 
 .team-stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   margin-bottom: 1rem;
+  align-items: flex-start;
 }
 
 .team-stat-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.75rem;
   padding: 0.5rem 0.75rem;
   background: #f9f9f9;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
+  width: fit-content;
 }
 
 .team-stat-label {
