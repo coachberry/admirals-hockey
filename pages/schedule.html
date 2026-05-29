@@ -109,7 +109,7 @@
             <tbody id="gvmSkatersBody"></tbody>
           </table>
         </div>
-        <div id="gvmGwgKey" class="gwg-key" style="display:none;">⭐ Game Winning Goal scorer</div>
+        <div id="gvmGwgKey" class="gwg-key" style="display:none;">⭐ Game Winning Goal</div>
       </div>
       <div>
         <h3 class="gvm-section-title">Goaltenders</h3>
@@ -318,7 +318,11 @@
     });
 
     const goalieRows = goalies
-      .filter(g => g.gp || g.gs || g.minutesPlayed)
+      .filter(g => {
+        const isEN = g.playerId === 'EMPTY_NET';
+        if (isEN) return g.gp && g.minutesPlayed > 0;
+        return true; // show all non-EN goalies
+      })
       .map(g => {
         const sv = Math.max(0, (g.shotsAgainst||0) - (g.goalsAgainst||0));
         const isEN = g.playerId === 'EMPTY_NET';

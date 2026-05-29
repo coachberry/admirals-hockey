@@ -194,14 +194,14 @@
    FULL SCHEDULE LIST
    ============================================ */
 
-/* List fits its content - no full-width stretch */
+/* List constrained to content - not full container width */
 .schedule-list {
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  min-width: min(100%, 500px);
-  max-width: 100%;
-  width: 100%;
+  width: fit-content;
+  min-width: min(700px, 100%);
+  max-width: 900px;
 }
 
 .game-row {
@@ -216,6 +216,7 @@
   cursor: pointer;
   box-sizing: border-box;
   width: 100%;
+  min-width: 0;
 }
 
 .game-row:hover {
