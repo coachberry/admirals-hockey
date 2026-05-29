@@ -3,62 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stats - Franklin Admirals Hockey</title>
+  <title>Statistics - Franklin Admirals Hockey</title>
   <link rel="stylesheet" href="/assets/css/styles.css">
-  <style>
-    .stats-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 3rem;
-      background: white;
-      border-radius: 4px;
-      overflow: hidden;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-    }
-
-    .stats-table thead {
-      background: #5e1825;
-      color: white;
-    }
-
-    .stats-table th {
-      padding: 1rem;
-      text-align: left;
-      font-weight: 600;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-    }
-
-    .stats-table td {
-      padding: 1rem;
-      border-bottom: 1px solid #e0e0e0;
-    }
-
-    .stats-table tbody tr:hover {
-      background: #f5f5f5;
-    }
-
-    .stats-table tbody tr:last-child td {
-      border-bottom: none;
-    }
-
-    .player-stat-name {
-      font-weight: 600;
-      color: #5e1825;
-    }
-
-    .stats-section {
-      margin-bottom: 2rem;
-    }
-
-    .stats-section h3 {
-      font-size: 1.3rem;
-      color: #5e1825;
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid #d4a574;
-    }
-  </style>
+  <link rel="stylesheet" href="/assets/css/stats-styles.css">
 </head>
 <body>
 
@@ -79,226 +26,75 @@
 
 <section class="hero-section">
   <div class="hero-container">
-    <div class="hero-badge">2024-2025 Season</div>
+    <div class="hero-badge" id="seasonBadge">Loading...</div>
     <h1 class="hero-title">Statistics</h1>
-    <p class="hero-subtitle">Detailed team and player stats</p>
+    <p class="hero-subtitle">Season stats for every player</p>
   </div>
 </section>
 
 <div class="main-container">
 
-  <div style="margin-top: 3rem;">
+  <!-- Season selector -->
+  <div class="season-selector-wrap">
+    <label for="seasonSelect">View Season:</label>
+    <select id="seasonSelect" class="season-selector-public"></select>
+  </div>
+
+  <!-- Skaters -->
+  <div style="margin-top:2rem; margin-bottom:3rem;">
     <div class="section-header">
-      <h2 class="section-title">Team Statistics</h2>
+      <h2 class="section-title">Skaters</h2>
     </div>
-    <div class="stats-container">
-      <div class="stat-card">
-        <div class="stat-number">12</div>
-        <div class="stat-label">Wins</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">4</div>
-        <div class="stat-label">Losses</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">2</div>
-        <div class="stat-label">Ties</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">73</div>
-        <div class="stat-label">Goals For</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">38</div>
-        <div class="stat-label">Goals Against</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">+35</div>
-        <div class="stat-label">Goal Differential</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">4.87</div>
-        <div class="stat-label">Goals Per Game</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">2.53</div>
-        <div class="stat-label">Goals Against Per Game</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">1st</div>
-        <div class="stat-label">Conference Standing</div>
-      </div>
+    <div class="stats-table-wrap">
+      <table class="stats-table" id="skatersTable">
+        <thead>
+          <tr>
+            <th class="col-num">#</th>
+            <th class="col-name">Player</th>
+            <th class="col-pos">POS</th>
+            <th class="col-stat" title="Games Played">GP</th>
+            <th class="col-stat" title="Goals">G</th>
+            <th class="col-stat" title="Assists">A</th>
+            <th class="col-stat" title="Points">PTS</th>
+            <th class="col-stat" title="Penalty Minutes">PIM</th>
+            <th class="col-stat" title="Plus/Minus">+/-</th>
+            <th class="col-stat" title="Shots on Goal">SOG</th>
+          </tr>
+        </thead>
+        <tbody id="skatersBody">
+          <tr><td colspan="10" class="empty-cell">Loading...</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <div style="margin-top: 4rem;">
-    <div class="stats-section">
-      <h3>Top Scorers</h3>
-      <table class="stats-table">
+  <!-- Goalies -->
+  <div style="margin-top:2rem; margin-bottom:3rem;">
+    <div class="section-header">
+      <h2 class="section-title">Goaltenders</h2>
+    </div>
+    <div class="stats-table-wrap">
+      <table class="stats-table" id="goaliesTable">
         <thead>
           <tr>
-            <th>Player</th>
-            <th>Position</th>
-            <th>Goals</th>
-            <th>Assists</th>
-            <th>Points</th>
+            <th class="col-num">#</th>
+            <th class="col-name">Player</th>
+            <th class="col-stat" title="Games Played">GP</th>
+            <th class="col-stat" title="Wins">W</th>
+            <th class="col-stat" title="Losses">L</th>
+            <th class="col-stat" title="Ties">T</th>
+            <th class="col-stat" title="Goals Against">GA</th>
+            <th class="col-stat" title="Shots Against">SA</th>
+            <th class="col-stat" title="Saves">SV</th>
+            <th class="col-stat" title="Save Percentage">SV%</th>
+            <th class="col-stat" title="Goals Against Average">GAA</th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td class="player-stat-name">Marcus Chen</td>
-            <td>Forward</td>
-            <td>18</td>
-            <td>12</td>
-            <td>30</td>
-          </tr>
-          <tr>
-            <td class="player-stat-name">Derek Martinez</td>
-            <td>Forward</td>
-            <td>16</td>
-            <td>10</td>
-            <td>26</td>
-          </tr>
-          <tr>
-            <td class="player-stat-name">Jake Rodriguez</td>
-            <td>Forward</td>
-            <td>14</td>
-            <td>9</td>
-            <td>23</td>
-          </tr>
-          <tr>
-            <td class="player-stat-name">Kevin Walsh</td>
-            <td>Forward</td>
-            <td>12</td>
-            <td>11</td>
-            <td>23</td>
-          </tr>
-          <tr>
-            <td class="player-stat-name">Alex Thompson</td>
-            <td>Defense</td>
-            <td>8</td>
-            <td>7</td>
-            <td>15</td>
-          </tr>
-          <tr>
-            <td class="player-stat-name">Patrick Williams</td>
-            <td>Defense</td>
-            <td>5</td>
-            <td>6</td>
-            <td>11</td>
-          </tr>
-          <tr>
-            <td class="player-stat-name">Ryan Mitchell</td>
-            <td>Forward</td>
-            <td>9</td>
-            <td>5</td>
-            <td>14</td>
-          </tr>
+        <tbody id="goaliesBody">
+          <tr><td colspan="11" class="empty-cell">Loading...</td></tr>
         </tbody>
       </table>
     </div>
-
-    <div class="stats-section">
-      <h3>Goaltender Statistics</h3>
-      <table class="stats-table">
-        <thead>
-          <tr>
-            <th>Goaltender</th>
-            <th>Games Played</th>
-            <th>Wins</th>
-            <th>Losses</th>
-            <th>GAA*</th>
-            <th>Save %</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="player-stat-name">David Park</td>
-            <td>14</td>
-            <td>12</td>
-            <td>2</td>
-            <td>2.14</td>
-            <td>.917</td>
-          </tr>
-          <tr>
-            <td class="player-stat-name">Nathan Brown</td>
-            <td>4</td>
-            <td>0</td>
-            <td>2</td>
-            <td>3.50</td>
-            <td>.889</td>
-          </tr>
-        </tbody>
-      </table>
-      <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">*GAA = Goals Against Average</p>
-    </div>
-
-    <div class="stats-section">
-      <h3>Defenseman Statistics</h3>
-      <table class="stats-table">
-        <thead>
-          <tr>
-            <th>Player</th>
-            <th>Games Played</th>
-            <th>Goals</th>
-            <th>Assists</th>
-            <th>Points</th>
-            <th>Penalties</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="player-stat-name">Alex Thompson</td>
-            <td>18</td>
-            <td>8</td>
-            <td>7</td>
-            <td>15</td>
-            <td>6</td>
-          </tr>
-          <tr>
-            <td class="player-stat-name">Patrick Williams</td>
-            <td>17</td>
-            <td>5</td>
-            <td>6</td>
-            <td>11</td>
-            <td>8</td>
-          </tr>
-          <tr>
-            <td class="player-stat-name">Michael Garcia</td>
-            <td>16</td>
-            <td>4</td>
-            <td>5</td>
-            <td>9</td>
-            <td>4</td>
-          </tr>
-          <tr>
-            <td class="player-stat-name">Tyler Jensen</td>
-            <td>15</td>
-            <td>2</td>
-            <td>3</td>
-            <td>5</td>
-            <td>10</td>
-          </tr>
-          <tr>
-            <td class="player-stat-name">Connor Hayes</td>
-            <td>14</td>
-            <td>3</td>
-            <td>2</td>
-            <td>5</td>
-            <td>12</td>
-          </tr>
-          <tr>
-            <td class="player-stat-name">Justin Davis</td>
-            <td>12</td>
-            <td>1</td>
-            <td>1</td>
-            <td>2</td>
-            <td>7</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
   </div>
 
 </div>
@@ -314,14 +110,12 @@
     </div>
     <div class="footer-section">
       <h3>Contact</h3>
-      <p><strong>Coach:</strong> [Your Name]</p>
-      <p><strong>Email:</strong> coach@franklinhockey.edu</p>
-      <p><strong>Phone:</strong> (615) 555-0147</p>
+      <p><strong>Coach:</strong> Matt Berry</p>
+      <p><strong>Email:</strong> coachberry03@gmail.com</p>
     </div>
     <div class="footer-section">
       <h3>Location</h3>
       <p>Franklin High School</p>
-      <p>Franklin Ice Arena</p>
       <p>Nashville, TN</p>
     </div>
   </div>
@@ -330,14 +124,174 @@
   </div>
 </footer>
 
-<script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
+    authDomain: "admirals-hockey.firebaseapp.com",
+    projectId: "admirals-hockey",
+    storageBucket: "admirals-hockey.firebasestorage.app",
+    messagingSenderId: "783358659334",
+    appId: "1:783358659334:web:5daffd093adca386faec87"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
   document.querySelectorAll('.nav-link').forEach(link => {
     const href = link.getAttribute('href').split('/').pop() || 'index.html';
-    if (href === currentPage) {
-      link.classList.add('active');
-    }
+    if (href === currentPage) link.classList.add('active');
   });
+
+  async function loadStats(seasonId) {
+    const skatersBody = document.getElementById('skatersBody');
+    const goaliesBody = document.getElementById('goaliesBody');
+    skatersBody.innerHTML = '<tr><td colspan="10" class="empty-cell">Loading...</td></tr>';
+    goaliesBody.innerHTML = '<tr><td colspan="11" class="empty-cell">Loading...</td></tr>';
+
+    // Load all players for this season
+    const playersSnap = await getDocs(collection(db, 'roster', seasonId, 'players'));
+    const players = [];
+    playersSnap.forEach(d => players.push(d.data()));
+
+    // Load all games for this season
+    const gamesSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule'));
+    const games = [];
+    gamesSnap.forEach(d => games.push(d.data()));
+
+    // Aggregate stats per player across all games
+    const skaterStats = {}; // playerId -> stats
+    const goalieStats = {}; // playerId -> stats
+
+    // Initialize all players with zeros
+    players.forEach(p => {
+      if (p.position === 'Goaltender') {
+        goalieStats[p.id] = { name: p.name, number: p.number, position: p.position, gp: 0, w: 0, l: 0, t: 0, ga: 0, sa: 0, sv: 0, minutes: 0 };
+      } else {
+        skaterStats[p.id] = { name: p.name, number: p.number, position: p.position, gp: 0, goals: 0, assists: 0, pim: 0, plusMinus: 0, sog: 0 };
+      }
+    });
+
+    // Load game stats and aggregate
+    for (const game of games) {
+      const skaterSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule', game.id, 'skaterstats'));
+      skaterSnap.forEach(d => {
+        const s = d.data();
+        if (skaterStats[s.playerId]) {
+          skaterStats[s.playerId].gp += 1;
+          skaterStats[s.playerId].goals += s.goals || 0;
+          skaterStats[s.playerId].assists += s.assists || 0;
+          skaterStats[s.playerId].pim += s.pim || 0;
+          skaterStats[s.playerId].plusMinus += s.plusMinus || 0;
+          skaterStats[s.playerId].sog += s.sog || 0;
+        }
+      });
+
+      const goalieSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule', game.id, 'goaliestats'));
+      goalieSnap.forEach(d => {
+        const g = d.data();
+        if (goalieStats[g.playerId]) {
+          goalieStats[g.playerId].gp += 1;
+          goalieStats[g.playerId].ga += g.goalsAgainst || 0;
+          goalieStats[g.playerId].sa += g.shotsAgainst || 0;
+          goalieStats[g.playerId].sv += g.saves || 0;
+          goalieStats[g.playerId].minutes += g.minutesPlayed || 0;
+          if (g.decision === 'W') goalieStats[g.playerId].w++;
+          else if (g.decision === 'L') goalieStats[g.playerId].l++;
+          else if (g.decision === 'T') goalieStats[g.playerId].t++;
+        }
+      });
+    }
+
+    // Render skaters - sort by points desc
+    const skaters = Object.values(skaterStats).sort((a, b) => {
+      const ptsA = a.goals + a.assists;
+      const ptsB = b.goals + b.assists;
+      if (ptsB !== ptsA) return ptsB - ptsA;
+      return parseInt(a.number) - parseInt(b.number);
+    });
+
+    if (!skaters.length) {
+      skatersBody.innerHTML = '<tr><td colspan="10" class="empty-cell">No skaters on roster</td></tr>';
+    } else {
+      skatersBody.innerHTML = skaters.map(s => `
+        <tr>
+          <td class="col-num">${s.number || '-'}</td>
+          <td class="col-name">${s.name}</td>
+          <td class="col-pos">${s.position?.charAt(0) || '-'}</td>
+          <td class="col-stat">${s.gp}</td>
+          <td class="col-stat">${s.goals}</td>
+          <td class="col-stat">${s.assists}</td>
+          <td class="col-stat stat-pts">${s.goals + s.assists}</td>
+          <td class="col-stat">${s.pim}</td>
+          <td class="col-stat">${s.plusMinus > 0 ? '+' + s.plusMinus : s.plusMinus}</td>
+          <td class="col-stat">${s.sog}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Render goalies
+    const goalies = Object.values(goalieStats).sort((a, b) => parseInt(a.number) - parseInt(b.number));
+
+    if (!goalies.length) {
+      goaliesBody.innerHTML = '<tr><td colspan="11" class="empty-cell">No goaltenders on roster</td></tr>';
+    } else {
+      goaliesBody.innerHTML = goalies.map(g => {
+        const svPct = g.sa > 0 ? (g.sv / g.sa).toFixed(3) : '.000';
+        const gaa = g.minutes > 0 ? ((g.ga / g.minutes) * 60).toFixed(2) : '0.00';
+        return `
+          <tr>
+            <td class="col-num">${g.number || '-'}</td>
+            <td class="col-name">${g.name}</td>
+            <td class="col-stat">${g.gp}</td>
+            <td class="col-stat">${g.w}</td>
+            <td class="col-stat">${g.l}</td>
+            <td class="col-stat">${g.t}</td>
+            <td class="col-stat">${g.ga}</td>
+            <td class="col-stat">${g.sa}</td>
+            <td class="col-stat">${g.sv}</td>
+            <td class="col-stat stat-pts">${svPct}</td>
+            <td class="col-stat">${gaa}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
+
+  async function initSeasons() {
+    const snap = await getDocs(collection(db, 'seasons'));
+    const seasons = [];
+    snap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
+    seasons.sort((a, b) => b.label.localeCompare(a.label));
+
+    const select = document.getElementById('seasonSelect');
+    select.innerHTML = seasons.map(s =>
+      `<option value="${s.id}" ${s.current ? 'selected' : ''}>${s.label}${s.current ? ' (Current)' : ''}</option>`
+    ).join('');
+
+    const savedSeason = localStorage.getItem('admirals_statsSeasonPublic');
+    const startSeason = (savedSeason && seasons.find(s => s.id === savedSeason))
+      ? seasons.find(s => s.id === savedSeason)
+      : (seasons.find(s => s.current) || seasons[0]);
+
+    if (startSeason) {
+      select.value = startSeason.id;
+      document.getElementById('seasonBadge').textContent = startSeason.label + ' Season';
+      await loadStats(startSeason.id);
+    }
+
+    select.addEventListener('change', async e => {
+      const season = seasons.find(s => s.id === e.target.value);
+      document.getElementById('seasonBadge').textContent = season.label + ' Season';
+      localStorage.setItem('admirals_statsSeasonPublic', e.target.value);
+      await loadStats(e.target.value);
+    });
+  }
+
+  initSeasons();
 </script>
 
 </body>

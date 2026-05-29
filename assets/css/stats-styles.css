@@ -1,0 +1,136 @@
+/* ============================================
+   STATS PAGE STYLES
+   ============================================ */
+
+.season-selector-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  padding: 1rem 1.5rem;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+}
+
+.season-selector-wrap label {
+  font-weight: 600;
+  color: #5e1825;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.season-selector-public {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #111;
+  background: white;
+  min-width: 160px;
+}
+
+/* STATS TABLE */
+.stats-table-wrap {
+  overflow-x: auto;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  font-size: 0.9rem;
+}
+
+.stats-table thead {
+  background: linear-gradient(135deg, #5e1825, #3d0f18);
+  color: white;
+}
+
+.stats-table th {
+  padding: 0.75rem 1rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.stats-table th.col-name {
+  text-align: left;
+}
+
+.stats-table th.col-num {
+  text-align: center;
+  width: 40px;
+}
+
+.stats-table tbody tr {
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.15s;
+}
+
+.stats-table tbody tr:hover {
+  background: #fdf8f8;
+}
+
+.stats-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.stats-table td {
+  padding: 0.65rem 1rem;
+  text-align: center;
+  color: #333;
+}
+
+.stats-table td.col-name {
+  text-align: left;
+  font-weight: 600;
+  color: #111;
+}
+
+.stats-table td.col-num {
+  color: #5e1825;
+  font-weight: 700;
+}
+
+.stats-table td.col-pos {
+  color: #888;
+  font-size: 0.8rem;
+}
+
+.stats-table td.stat-pts {
+  font-weight: 700;
+  color: #5e1825;
+}
+
+.empty-cell {
+  text-align: center !important;
+  color: #999;
+  font-style: italic;
+  padding: 2rem !important;
+}
+
+/* Alternating rows */
+.stats-table tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.stats-table tbody tr:nth-child(even):hover {
+  background: #fdf8f8;
+}
+
+@media (max-width: 768px) {
+  .stats-table {
+    font-size: 0.8rem;
+  }
+  .stats-table th,
+  .stats-table td {
+    padding: 0.5rem 0.6rem;
+  }
+}

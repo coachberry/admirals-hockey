@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - Franklin Admirals Hockey</title>
   <link rel="stylesheet" href="/assets/css/admin.css">
+  <link rel="stylesheet" href="/assets/css/game-stats.css">
 </head>
 <body>
 
@@ -305,6 +306,54 @@
       <button type="submit">Create Account</button>
     </form>
     <p id="signupError" class="error"></p>
+  </div>
+</div>
+
+<!-- GAME STATS MODAL -->
+<div id="gameStatsModal" class="modal-overlay">
+  <div class="modal" style="max-width:700px;">
+    <div class="modal-header">
+      <h2 id="gameStatsTitle">Game Stats</h2>
+      <button class="modal-close" id="closeGameStatsModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="gameStatsInfo" class="game-stats-info-bar"></div>
+      <div class="stats-modal-tabs">
+        <button class="stats-tab-btn active" data-stab="skaters">Skaters</button>
+        <button class="stats-tab-btn" data-stab="goalies">Goaltenders</button>
+      </div>
+      <div id="skatersStatsTab" class="stats-tab-content active">
+        <table class="game-stats-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Player</th>
+              <th title="Goals">G</th><th title="Assists">A</th>
+              <th title="Penalty Minutes">PIM</th><th title="Plus/Minus">+/-</th>
+              <th title="Shots on Goal">SOG</th>
+            </tr>
+          </thead>
+          <tbody id="skaterStatsBody"></tbody>
+        </table>
+      </div>
+      <div id="goaliesStatsTab" class="stats-tab-content">
+        <table class="game-stats-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Player</th>
+              <th title="Shots Against">SA</th><th title="Saves">SV</th>
+              <th title="Goals Against">GA</th><th title="Minutes Played">MIN</th>
+              <th title="Decision">DEC</th>
+            </tr>
+          </thead>
+          <tbody id="goalieStatsBody"></tbody>
+        </table>
+      </div>
+      <div class="form-buttons" style="margin-top:1.5rem;">
+        <button id="saveGameStatsBtn" class="btn-primary">Save Stats</button>
+        <button id="cancelGameStatsBtn" class="btn-secondary">Cancel</button>
+      </div>
+      <p id="gameStatsSaveStatus" class="save-status"></p>
+    </div>
   </div>
 </div>
 
