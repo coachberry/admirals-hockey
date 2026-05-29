@@ -1,3 +1,4 @@
+import { initFramer } from '/assets/js/image-framer.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
@@ -116,22 +117,10 @@ async function uploadPhoto(file, path) {
   return await getDownloadURL(storageRef);
 }
 
-function previewPhoto(inputId, previewId) {
-  const input = document.getElementById(inputId);
-  const preview = document.getElementById(previewId);
-  input.addEventListener('change', () => {
-    const file = input.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = e => { preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`; };
-      reader.readAsDataURL(file);
-    }
-  });
-}
 
-previewPhoto('playerPhoto', 'playerPhotoPreview');
-previewPhoto('coachPhoto', 'coachPhotoPreview');
-previewPhoto('boardPhoto', 'boardPhotoPreview');
+
+
+
 
 // ============================================
 // PLAYERS

@@ -422,3 +422,59 @@ body {
     flex-direction: column;
   }
 }
+
+/* IMAGE FRAMER */
+.framer-wrap {
+  margin-top: 0.75rem;
+}
+
+.framer-instructions {
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.framer-viewport {
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  border-radius: 6px;
+  border: 2px solid #5e1825;
+  cursor: grab;
+  position: relative;
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.framer-viewport img {
+  position: absolute;
+  transform-origin: center center;
+  max-width: none;
+  user-select: none;
+  pointer-events: none;
+}
+
+.framer-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.framer-controls input[type="range"] {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.framer-controls label {
+  font-size: 0.8rem;
+  color: #666;
+  white-space: nowrap;
+}
+
+#framerConfirm {
+  width: 100%;
+  margin-top: 0.75rem;
+}
