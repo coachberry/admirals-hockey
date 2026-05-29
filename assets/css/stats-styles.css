@@ -196,3 +196,23 @@
 .stats-table input[type=number]::-webkit-inner-spin-button {
   -webkit-appearance: none;
 }
+
+/* SORTABLE HEADERS */
+.stats-table th.sortable {
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.stats-table th.sortable:hover {
+  background: #4a1020;
+}
+
+.stats-table th.sort-active {
+  background: #3d0f18;
+}
+
+.sort-arrow {
+  font-size: 0.65rem;
+  opacity: 0.8;
+}

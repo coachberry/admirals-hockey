@@ -62,26 +62,26 @@
   <div style="margin-top:2rem; margin-bottom:3rem;">
     <div class="section-header"><h2 class="section-title">Skaters</h2></div>
     <div class="stats-table-wrap">
-      <table class="stats-table">
+      <table class="stats-table" id="skatersTable">
         <thead>
           <tr>
-            <th class="col-num">#</th>
-            <th class="col-name">Player</th>
-            <th class="col-pos">POS</th>
-            <th title="Games Played">GP</th>
-            <th title="Shots on Goal">SOG</th>
-            <th title="Goals">G</th>
-            <th title="Assists">A</th>
-            <th title="Points">PTS</th>
-            <th title="Power Play Goals">PPG</th>
-            <th title="Power Play Assists">PPA</th>
-            <th title="Short Handed Goals">SHG</th>
-            <th title="Short Handed Assists">SHA</th>
-            <th title="Game Winning Goals">GWG</th>
-            <th title="Plus">+</th>
-            <th title="Minus">-</th>
-            <th title="Plus/Minus">+/-</th>
-            <th title="Penalty Minutes">PIM</th>
+            <th class="col-num sortable" data-col="number" data-type="num"># <span class="sort-arrow"></span></th>
+            <th class="col-name sortable" data-col="name" data-type="str">Player <span class="sort-arrow"></span></th>
+            <th class="col-pos sortable" data-col="position" data-type="str">POS <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="gp" data-type="num" title="Games Played">GP <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="sog" data-type="num" title="Shots on Goal">SOG <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="goals" data-type="num" title="Goals">G <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="assists" data-type="num" title="Assists">A <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="pts" data-type="num" title="Points">PTS <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="ppg" data-type="num" title="Power Play Goals">PPG <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="ppa" data-type="num" title="Power Play Assists">PPA <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="shg" data-type="num" title="Short Handed Goals">SHG <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="sha" data-type="num" title="Short Handed Assists">SHA <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="gwg" data-type="num" title="Game Winning Goals">GWG <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="plus" data-type="num" title="Plus">+ <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="minus" data-type="num" title="Minus">- <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="plusMinus" data-type="num" title="Plus/Minus">+/- <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="pim" data-type="num" title="Penalty Minutes">PIM <span class="sort-arrow"></span></th>
           </tr>
         </thead>
         <tbody id="skatersBody">
@@ -95,29 +95,29 @@
   <div style="margin-top:2rem; margin-bottom:3rem;">
     <div class="section-header"><h2 class="section-title">Goaltenders</h2></div>
     <div class="stats-table-wrap">
-      <table class="stats-table">
+      <table class="stats-table" id="goaliesTable">
         <thead>
           <tr>
-            <th class="col-num">#</th>
-            <th class="col-name">Player</th>
-            <th title="Games Started">GS</th>
-            <th title="Games Played">GP</th>
-            <th title="Wins">W</th>
-            <th title="Ties">T</th>
-            <th title="Losses">L</th>
-            <th title="Overtime Wins">OTW</th>
-            <th title="Overtime Losses">OTL</th>
-            <th title="Shootout Wins">SOW</th>
-            <th title="Shootout Losses">SOL</th>
-            <th title="Minutes Played">MIN</th>
-            <th title="Shots Against">SA</th>
-            <th title="Saves">SV</th>
-            <th title="Save Percentage">SV%</th>
-            <th title="Goals Against">GA</th>
-            <th title="Goals Against Average">GAA</th>
-            <th title="Shutouts">SO</th>
-            <th title="Assists">A</th>
-            <th title="Penalty Minutes">PIM</th>
+            <th class="col-num sortable" data-col="number" data-type="num"># <span class="sort-arrow"></span></th>
+            <th class="col-name sortable" data-col="name" data-type="str">Player <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="gs" data-type="num" title="Games Started">GS <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="gp" data-type="num" title="Games Played">GP <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="w" data-type="num" title="Wins">W <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="t" data-type="num" title="Ties">T <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="l" data-type="num" title="Losses">L <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="otw" data-type="num" title="Overtime Wins">OTW <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="otl" data-type="num" title="Overtime Losses">OTL <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="sow" data-type="num" title="Shootout Wins">SOW <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="sol" data-type="num" title="Shootout Losses">SOL <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="min" data-type="num" title="Minutes Played">MIN <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="sa" data-type="num" title="Shots Against">SA <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="sv" data-type="num" title="Saves">SV <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="svPct" data-type="num" title="Save Percentage">SV% <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="ga" data-type="num" title="Goals Against">GA <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="gaa" data-type="num" title="Goals Against Average">GAA <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="shutouts" data-type="num" title="Shutouts">SO <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="assists" data-type="num" title="Assists">A <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="pim" data-type="num" title="Penalty Minutes">PIM <span class="sort-arrow"></span></th>
           </tr>
         </thead>
         <tbody id="goaliesBody">
@@ -182,180 +182,114 @@
   const posAbbr = p => p === 'Forward' ? 'F' : p === 'Defense' ? 'D' : p?.charAt(0) || '-';
   const pct = (n, d) => d > 0 ? ((n/d)*100).toFixed(1) + '%' : '0.0%';
 
-  async function loadStats(seasonId) {
-    const skatersBody = document.getElementById('skatersBody');
-    const goaliesBody = document.getElementById('goaliesBody');
-    skatersBody.innerHTML = '<tr><td colspan="17" class="empty-cell">Loading...</td></tr>';
-    goaliesBody.innerHTML = '<tr><td colspan="20" class="empty-cell">Loading...</td></tr>';
+  // ============================================
+  // SORT STATE
+  // ============================================
+  const skaterSort = { col: 'pts', dir: 'desc' };
+  const goalieSort = { col: 'gp', dir: 'desc' };
 
-    // Load players
-    const playersSnap = await getDocs(collection(db, 'roster', seasonId, 'players'));
-    const players = [];
-    playersSnap.forEach(d => players.push(d.data()));
+  let currentSkaters = [];
+  let currentGoalies = [];
+  let currentRegularGoalies = [];
+  let currentEmptyNet = null;
+  let currentTotSkater = null;
+  let currentTotGoalie = null;
 
-    // Load all games
-    const gamesSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule'));
-    const games = [];
-    gamesSnap.forEach(d => games.push(d.data()));
-
-    // Initialize stats - all players + EMPTY NET goalie
-    const skaterStats = {};
-    const goalieStats = {};
-
-    players.forEach(p => {
-      if (p.position === 'Goaltender') {
-        goalieStats[p.id] = { name: p.name, number: p.number, isEmptyNet: false, gs: 0, gp: 0, w: 0, l: 0, t: 0, otw: 0, otl: 0, sow: 0, sol: 0, min: 0, sa: 0, sv: 0, ga: 0, shutouts: 0, assists: 0, pim: 0 };
-      } else {
-        skaterStats[p.id] = { name: p.name, number: p.number, position: p.position, gp: 0, sog: 0, goals: 0, assists: 0, ppg: 0, ppa: 0, shg: 0, sha: 0, gwg: 0, plus: 0, minus: 0, pim: 0 };
-      }
-    });
-
-    // Always include EMPTY NET
-    goalieStats['EMPTY_NET'] = { name: 'EMPTY NET', number: '0', isEmptyNet: true, gs: 0, gp: 0, w: 0, l: 0, t: 0, otw: 0, otl: 0, sow: 0, sol: 0, min: 0, sa: 0, sv: 0, ga: 0, shutouts: 0, assists: 0, pim: 0 };
-
-    // Team totals
-    let totalBenchPIM = 0, totalPPOpps = 0, totalPPG = 0, totalPKAttempts = 0, totalSuccessfulPKs = 0;
-
-    // Aggregate per game
-    // Fetch all game stats in parallel
-    await Promise.all(games.map(async game => {
-      const [skaterSnap, goalieSnap, tsSnap] = await Promise.all([
-        getDocs(collection(db, 'seasons', seasonId, 'schedule', game.id, 'skaterstats')),
-        getDocs(collection(db, 'seasons', seasonId, 'schedule', game.id, 'goaliestats')),
-        getDoc(doc(db, 'seasons', seasonId, 'schedule', game.id, 'teamstats', 'game'))
-      ]);
-
-      skaterSnap.forEach(d => {
-        const s = d.data();
-        if (!skaterStats[s.playerId]) return;
-        const st = skaterStats[s.playerId];
-        st.gp += s.gp || 0;
-        st.sog += s.sog || 0;
-        st.goals += s.goals || 0;
-        st.assists += s.assists || 0;
-        st.ppg += s.ppg || 0;
-        st.ppa += s.ppa || 0;
-        st.shg += s.shg || 0;
-        st.sha += s.sha || 0;
-        st.gwg += s.gwg || 0;
-        st.plus += s.plus || 0;
-        st.minus += s.minus || 0;
-        st.pim += s.pim || 0;
-      });
-
-      goalieSnap.forEach(d => {
-        const g = d.data();
-        const pid = g.playerId;
-        if (!goalieStats[pid]) return;
-        const gt = goalieStats[pid];
-        gt.gp += g.gp || 0;
-        gt.min += g.minutesPlayed || 0;
-        gt.sa += g.shotsAgainst || 0;
-        gt.ga += g.goalsAgainst || 0;
-        gt.assists += g.assists || 0;
-        gt.pim += g.pim || 0;
-        if (!g.isEmptyNet) {
-          gt.gs += g.gs || 0;
-          if (g.gs && g.goalsAgainst === 0) gt.shutouts++;
-          if (g.decision === 'W') gt.w++;
-          else if (g.decision === 'L') gt.l++;
-          else if (g.decision === 'T') gt.t++;
-          else if (g.decision === 'OTW') gt.otw++;
-          else if (g.decision === 'OTL') gt.otl++;
-          else if (g.decision === 'SOW') gt.sow++;
-          else if (g.decision === 'SOL') gt.sol++;
+  function setupSortHeaders(tableId, sortState, renderFn) {
+    const table = document.getElementById(tableId);
+    table.querySelectorAll('th.sortable').forEach(th => {
+      th.style.cursor = 'pointer';
+      th.style.userSelect = 'none';
+      th.addEventListener('click', () => {
+        const col = th.dataset.col;
+        if (sortState.col === col) {
+          sortState.dir = sortState.dir === 'desc' ? 'asc' : 'desc';
+        } else {
+          sortState.col = col;
+          sortState.dir = 'desc';
         }
-        gt.sv = Math.max(0, gt.sa - gt.ga);
+        // Update arrows
+        table.querySelectorAll('th.sortable').forEach(h => {
+          h.querySelector('.sort-arrow').textContent = '';
+          h.classList.remove('sort-active');
+        });
+        th.querySelector('.sort-arrow').textContent = sortState.dir === 'desc' ? ' ▼' : ' ▲';
+        th.classList.add('sort-active');
+        renderFn();
       });
+    });
+    // Set default arrow
+    const defaultTh = table.querySelector(`th[data-col="${sortState.col}"]`);
+    if (defaultTh) {
+      defaultTh.querySelector('.sort-arrow').textContent = ' ▼';
+      defaultTh.classList.add('sort-active');
+    }
+  }
 
-      if (tsSnap.exists()) {
-        const ts = tsSnap.data();
-        totalBenchPIM += ts.benchPIM || 0;
-        totalPPOpps += ts.ppOpps || 0;
-        totalPPG += ts.ppg || 0;
-        totalPKAttempts += ts.pkAttempts || 0;
-        totalSuccessfulPKs += ts.successfulPKs || 0;
+  function sortData(arr, col, dir, type) {
+    return [...arr].sort((a, b) => {
+      let va = a[col] ?? 0;
+      let vb = b[col] ?? 0;
+      if (type === 'str') {
+        va = String(va).toLowerCase();
+        vb = String(vb).toLowerCase();
+        return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
       }
-    }));
-
-    // Render team stats
-    document.getElementById('tsBenchPIM').textContent = totalBenchPIM;
-    document.getElementById('tsPPPct').textContent = pct(totalPPG, totalPPOpps);
-    document.getElementById('tsPKPct').textContent = pct(totalSuccessfulPKs, totalPKAttempts);
-
-    // Render skaters
-    const skaters = Object.values(skaterStats).sort((a, b) => {
-      const ptsA = a.goals + a.assists, ptsB = b.goals + b.assists;
-      return ptsB !== ptsA ? ptsB - ptsA : parseInt(a.number) - parseInt(b.number);
+      return dir === 'asc' ? va - vb : vb - va;
     });
+  }
 
-    // Team totals row
-    const tot = { gp:0, sog:0, goals:0, assists:0, ppg:0, ppa:0, shg:0, sha:0, gwg:0, plus:0, minus:0, pim: totalBenchPIM };
-    skaters.forEach(s => {
-      tot.gp += s.gp; tot.sog += s.sog; tot.goals += s.goals; tot.assists += s.assists;
-      tot.ppg += s.ppg; tot.ppa += s.ppa; tot.shg += s.shg; tot.sha += s.sha;
-      tot.gwg += s.gwg; tot.plus += s.plus; tot.minus += s.minus; tot.pim += s.pim;
-    });
+  // ============================================
+  // RENDER SKATERS
+  // ============================================
+  function renderSkaters() {
+    if (!currentSkaters.length) return;
+    const col = skaterSort.col;
+    const dir = skaterSort.dir;
+    const type = col === 'name' || col === 'position' ? 'str' : 'num';
+    const sorted = sortData(currentSkaters, col, dir, type);
+    const tot = currentTotSkater;
 
-    skatersBody.innerHTML = skaters.map(s => {
+    document.getElementById('skatersBody').innerHTML = sorted.map(s => {
       const pts = s.goals + s.assists;
       const pm = s.plus - s.minus;
       return `<tr>
         <td class="col-num">${s.number || '-'}</td>
         <td class="col-name">${s.name}</td>
         <td class="col-pos">${posAbbr(s.position)}</td>
-        <td>${s.gp}</td>
-        <td>${s.sog}</td>
-        <td>${s.goals}</td>
-        <td>${s.assists}</td>
+        <td>${s.gp}</td><td>${s.sog}</td><td>${s.goals}</td><td>${s.assists}</td>
         <td class="stat-pts">${pts}</td>
-        <td>${s.ppg}</td>
-        <td>${s.ppa}</td>
-        <td>${s.shg}</td>
-        <td>${s.sha}</td>
-        <td>${s.gwg}</td>
-        <td>${s.plus}</td>
-        <td>${s.minus}</td>
-        <td>${pm > 0 ? '+' + pm : pm}</td>
+        <td>${s.ppg}</td><td>${s.ppa}</td><td>${s.shg}</td><td>${s.sha}</td><td>${s.gwg}</td>
+        <td>${s.plus}</td><td>${s.minus}</td>
+        <td>${pm > 0 ? '+'+pm : pm}</td>
         <td>${s.pim}</td>
       </tr>`;
     }).join('') + `<tr class="stats-totals-row">
       <td colspan="3">TEAM TOTALS</td>
-      <td>${tot.gp}</td>
-      <td>${tot.sog}</td>
-      <td>${tot.goals}</td>
-      <td>${tot.assists}</td>
-      <td>${tot.goals + tot.assists}</td>
-      <td>${tot.ppg}</td>
-      <td>${tot.ppa}</td>
-      <td>${tot.shg}</td>
-      <td>${tot.sha}</td>
-      <td>${tot.gwg}</td>
-      <td>${tot.plus}</td>
-      <td>${tot.minus}</td>
-      <td>${tot.plus - tot.minus > 0 ? '+' + (tot.plus - tot.minus) : tot.plus - tot.minus}</td>
+      <td>${tot.gp}</td><td>${tot.sog}</td><td>${tot.goals}</td><td>${tot.assists}</td>
+      <td>${tot.goals+tot.assists}</td>
+      <td>${tot.ppg}</td><td>${tot.ppa}</td><td>${tot.shg}</td><td>${tot.sha}</td><td>${tot.gwg}</td>
+      <td>${tot.plus}</td><td>${tot.minus}</td>
+      <td>${tot.plus-tot.minus > 0 ? '+'+(tot.plus-tot.minus) : tot.plus-tot.minus}</td>
       <td>${tot.pim}</td>
     </tr>`;
+  }
 
-    // Render goalies - regular goalies first, then EMPTY NET
-    const regularGoalies = Object.values(goalieStats)
-      .filter(g => !g.isEmptyNet)
-      .sort((a, b) => parseInt(a.number) - parseInt(b.number));
-    const emptyNet = goalieStats['EMPTY_NET'];
-    const allGoalies = [...regularGoalies, emptyNet];
+  // ============================================
+  // RENDER GOALIES
+  // ============================================
+  function renderGoalies() {
+    if (!currentRegularGoalies.length && !currentEmptyNet) return;
+    const col = goalieSort.col;
+    const dir = goalieSort.dir;
+    const type = col === 'name' ? 'str' : 'num';
+    const sorted = sortData(currentRegularGoalies, col, dir, type);
+    const emptyNet = currentEmptyNet;
+    const gt = currentTotGoalie;
 
-    const gt = { gs:0, gp:0, w:0, l:0, t:0, otw:0, otl:0, sow:0, sol:0, min:0, sa:0, sv:0, ga:0, shutouts:0, assists:0, pim:0 };
-    regularGoalies.forEach(g => {
-      gt.gs += g.gs; gt.gp += g.gp; gt.w += g.w; gt.l += g.l; gt.t += g.t;
-      gt.otw += g.otw; gt.otl += g.otl; gt.sow += g.sow; gt.sol += g.sol;
-      gt.min += g.min; gt.sa += g.sa; gt.sv += g.sv; gt.ga += g.ga;
-      gt.shutouts += g.shutouts; gt.assists += g.assists; gt.pim += g.pim;
-    });
-    // Add EN to totals
-    gt.min += emptyNet.min; gt.sa += emptyNet.sa; gt.ga += emptyNet.ga;
-    gt.sv = Math.max(0, gt.sa - gt.ga);
+    const allGoalies = [...sorted, emptyNet].filter(Boolean);
 
-    goaliesBody.innerHTML = allGoalies.map(g => {
+    document.getElementById('goaliesBody').innerHTML = allGoalies.map(g => {
       const isEN = g.isEmptyNet;
       return `<tr ${isEN ? 'class="empty-net-row"' : ''}>
         <td class="col-num">${g.number || '-'}</td>
@@ -370,8 +304,7 @@
         <td>${isEN ? '-' : g.sow}</td>
         <td>${isEN ? '-' : g.sol}</td>
         <td>${minToMMSS(g.min)}</td>
-        <td>${g.sa}</td>
-        <td>${g.sv}</td>
+        <td>${g.sa}</td><td>${g.sv}</td>
         <td class="${isEN ? '' : 'stat-pts'}">${isEN ? '-' : svPctFmt(g.sv, g.sa)}</td>
         <td>${g.ga}</td>
         <td>${isEN ? '-' : gaaFmt(g.ga, g.min)}</td>
@@ -381,27 +314,137 @@
       </tr>`;
     }).join('') + `<tr class="stats-totals-row">
       <td colspan="2">TOTALS</td>
-      <td>${gt.gs}</td>
-      <td>${gt.gp}</td>
-      <td>${gt.w}</td>
-      <td>${gt.t}</td>
-      <td>${gt.l}</td>
-      <td>${gt.otw}</td>
-      <td>${gt.otl}</td>
-      <td>${gt.sow}</td>
-      <td>${gt.sol}</td>
+      <td>${gt.gs}</td><td>${gt.gp}</td><td>${gt.w}</td><td>${gt.t}</td><td>${gt.l}</td>
+      <td>${gt.otw}</td><td>${gt.otl}</td><td>${gt.sow}</td><td>${gt.sol}</td>
       <td>${minToMMSS(gt.min)}</td>
-      <td>${gt.sa}</td>
-      <td>${gt.sv}</td>
+      <td>${gt.sa}</td><td>${gt.sv}</td>
       <td>${svPctFmt(gt.sv, gt.sa)}</td>
-      <td>${gt.ga}</td>
-      <td>${gaaFmt(gt.ga, gt.min)}</td>
-      <td>${gt.shutouts}</td>
-      <td>${gt.assists}</td>
-      <td>${gt.pim}</td>
+      <td>${gt.ga}</td><td>${gaaFmt(gt.ga, gt.min)}</td>
+      <td>${gt.shutouts}</td><td>${gt.assists}</td><td>${gt.pim}</td>
     </tr>`;
   }
 
+  // ============================================
+  // LOAD STATS
+  // ============================================
+  async function loadStats(seasonId) {
+    document.getElementById('skatersBody').innerHTML = '<tr><td colspan="17" class="empty-cell">Loading...</td></tr>';
+    document.getElementById('goaliesBody').innerHTML = '<tr><td colspan="20" class="empty-cell">Loading...</td></tr>';
+
+    const playersSnap = await getDocs(collection(db, 'roster', seasonId, 'players'));
+    const players = [];
+    playersSnap.forEach(d => players.push(d.data()));
+
+    const gamesSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule'));
+    const games = [];
+    gamesSnap.forEach(d => games.push(d.data()));
+
+    const skaterStats = {};
+    const goalieStats = {};
+
+    players.forEach(p => {
+      if (p.position === 'Goaltender') {
+        goalieStats[p.id] = { name: p.name, number: p.number, isEmptyNet: false, gs:0, gp:0, w:0, l:0, t:0, otw:0, otl:0, sow:0, sol:0, min:0, sa:0, sv:0, ga:0, shutouts:0, assists:0, pim:0, svPct:0, gaa:0 };
+      } else {
+        skaterStats[p.id] = { name: p.name, number: p.number, position: p.position, gp:0, sog:0, goals:0, assists:0, ppg:0, ppa:0, shg:0, sha:0, gwg:0, plus:0, minus:0, pim:0, pts:0, plusMinus:0 };
+      }
+    });
+
+    goalieStats['EMPTY_NET'] = { name:'EMPTY NET', number:'0', isEmptyNet:true, gs:0, gp:0, w:0, l:0, t:0, otw:0, otl:0, sow:0, sol:0, min:0, sa:0, sv:0, ga:0, shutouts:0, assists:0, pim:0, svPct:0, gaa:0 };
+
+    let totalBenchPIM=0, totalPPOpps=0, totalPPG=0, totalPKAttempts=0, totalSuccessfulPKs=0;
+
+    await Promise.all(games.map(async game => {
+      const [skaterSnap, goalieSnap, tsSnap] = await Promise.all([
+        getDocs(collection(db, 'seasons', seasonId, 'schedule', game.id, 'skaterstats')),
+        getDocs(collection(db, 'seasons', seasonId, 'schedule', game.id, 'goaliestats')),
+        getDoc(doc(db, 'seasons', seasonId, 'schedule', game.id, 'teamstats', 'game'))
+      ]);
+
+      skaterSnap.forEach(d => {
+        const s = d.data();
+        if (!skaterStats[s.playerId]) return;
+        const st = skaterStats[s.playerId];
+        st.gp += s.gp||0; st.sog += s.sog||0; st.goals += s.goals||0; st.assists += s.assists||0;
+        st.ppg += s.ppg||0; st.ppa += s.ppa||0; st.shg += s.shg||0; st.sha += s.sha||0;
+        st.gwg += s.gwg||0; st.plus += s.plus||0; st.minus += s.minus||0; st.pim += s.pim||0;
+      });
+
+      goalieSnap.forEach(d => {
+        const g = d.data();
+        if (!goalieStats[g.playerId]) return;
+        const gt = goalieStats[g.playerId];
+        gt.gp += g.gp||0; gt.min += g.minutesPlayed||0; gt.sa += g.shotsAgainst||0;
+        gt.ga += g.goalsAgainst||0; gt.assists += g.assists||0; gt.pim += g.pim||0;
+        if (!g.isEmptyNet) {
+          gt.gs += g.gs||0;
+          if (g.gs && g.goalsAgainst === 0) gt.shutouts++;
+          if (g.decision==='W') gt.w++;
+          else if (g.decision==='L') gt.l++;
+          else if (g.decision==='T') gt.t++;
+          else if (g.decision==='OTW') gt.otw++;
+          else if (g.decision==='OTL') gt.otl++;
+          else if (g.decision==='SOW') gt.sow++;
+          else if (g.decision==='SOL') gt.sol++;
+        }
+        gt.sv = Math.max(0, gt.sa - gt.ga);
+      });
+
+      if (tsSnap.exists()) {
+        const ts = tsSnap.data();
+        totalBenchPIM += ts.benchPIM||0; totalPPOpps += ts.ppOpps||0; totalPPG += ts.ppg||0;
+        totalPKAttempts += ts.pkAttempts||0; totalSuccessfulPKs += ts.successfulPKs||0;
+      }
+    }));
+
+    // Compute derived sortable fields for skaters
+    Object.values(skaterStats).forEach(s => {
+      s.pts = s.goals + s.assists;
+      s.plusMinus = s.plus - s.minus;
+    });
+
+    // Compute derived sortable fields for goalies
+    Object.values(goalieStats).forEach(g => {
+      g.sv = Math.max(0, g.sa - g.ga);
+      g.svPct = g.sa > 0 ? g.sv / g.sa : 0;
+      g.gaa = g.min > 0 ? (g.ga * 60) / g.min : 0;
+    });
+
+    document.getElementById('tsBenchPIM').textContent = totalBenchPIM;
+    document.getElementById('tsPPPct').textContent = pct(totalPPG, totalPPOpps);
+    document.getElementById('tsPKPct').textContent = pct(totalSuccessfulPKs, totalPKAttempts);
+
+    currentSkaters = Object.values(skaterStats);
+
+    const tot = { gp:0, sog:0, goals:0, assists:0, ppg:0, ppa:0, shg:0, sha:0, gwg:0, plus:0, minus:0, pim:totalBenchPIM };
+    currentSkaters.forEach(s => {
+      tot.gp+=s.gp; tot.sog+=s.sog; tot.goals+=s.goals; tot.assists+=s.assists;
+      tot.ppg+=s.ppg; tot.ppa+=s.ppa; tot.shg+=s.shg; tot.sha+=s.sha;
+      tot.gwg+=s.gwg; tot.plus+=s.plus; tot.minus+=s.minus; tot.pim+=s.pim;
+    });
+    currentTotSkater = tot;
+
+    currentRegularGoalies = Object.values(goalieStats).filter(g => !g.isEmptyNet);
+    currentEmptyNet = goalieStats['EMPTY_NET'];
+
+    const gt = { gs:0, gp:0, w:0, l:0, t:0, otw:0, otl:0, sow:0, sol:0, min:0, sa:0, sv:0, ga:0, shutouts:0, assists:0, pim:0 };
+    currentRegularGoalies.forEach(g => {
+      gt.gs+=g.gs; gt.gp+=g.gp; gt.w+=g.w; gt.l+=g.l; gt.t+=g.t;
+      gt.otw+=g.otw; gt.otl+=g.otl; gt.sow+=g.sow; gt.sol+=g.sol;
+      gt.min+=g.min; gt.sa+=g.sa; gt.sv+=g.sv; gt.ga+=g.ga;
+      gt.shutouts+=g.shutouts; gt.assists+=g.assists; gt.pim+=g.pim;
+    });
+    gt.min += currentEmptyNet.min; gt.sa += currentEmptyNet.sa; gt.ga += currentEmptyNet.ga;
+    gt.sv = Math.max(0, gt.sa - gt.ga);
+    currentTotGoalie = gt;
+
+    renderSkaters();
+    renderGoalies();
+  }
+
+  // ============================================
+  // SEASONS
+  // ============================================
   async function initSeasons() {
     const snap = await getDocs(collection(db, 'seasons'));
     const seasons = [];
@@ -410,7 +453,7 @@
 
     const select = document.getElementById('seasonSelect');
     select.innerHTML = seasons.map(s =>
-      `<option value="${s.id}" ${s.current ? 'selected' : ''}>${s.label}${s.current ? ' (Current)' : ''}</option>`
+      `<option value="${s.id}" ${s.current?'selected':''}>${s.label}${s.current?' (Current)':''}</option>`
     ).join('');
 
     const savedSeason = localStorage.getItem('admirals_statsSeasonPublic');
@@ -422,6 +465,9 @@
       select.value = startSeason.id;
       document.getElementById('seasonBadge').textContent = startSeason.label + ' Season';
       await loadStats(startSeason.id);
+      // Set up sort after data loads
+      setupSortHeaders('skatersTable', skaterSort, renderSkaters);
+      setupSortHeaders('goaliesTable', goalieSort, renderGoalies);
     }
 
     select.addEventListener('change', async e => {
