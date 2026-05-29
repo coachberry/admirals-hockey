@@ -545,11 +545,17 @@ body {
 /* FRAMER */
 .framer-wrap { margin-top: 0.75rem; }
 .framer-instructions { font-size: 0.8rem; color: #666; margin-bottom: 0.5rem; }
+.framer-outer {
+  display: flex;
+  justify-content: center;
+}
 .framer-viewport {
   width: 100%;
-  height: 200px;
+  /* 7:8 ratio matching card proportions */
+  aspect-ratio: 7 / 8;
+  max-height: 280px;
   overflow: hidden;
-  border-radius: 6px;
+  border-radius: 4px;
   border: 2px solid var(--primary-maroon);
   cursor: grab;
   position: relative;
