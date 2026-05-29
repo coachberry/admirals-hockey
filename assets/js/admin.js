@@ -150,26 +150,35 @@ function openRosterModal(type, data = null) {
 }
 
 // Photo upload with framer
-document.getElementById('memberPhoto').addEventListener('change', function() {
-  const file = this.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const src = e.target.result;
-    const preview = document.getElementById('memberPhotoPreview');
-    showFramer(src, preview, (dataURL) => {
-      croppedPhoto = dataURL;
-      currentPhotoURL = null;
-      showPhotoConfirmed(dataURL, preview, src);
-    });
-  };
-  reader.readAsDataURL(file);
-});
-
-// Hide the original file input - we use our own UI
+// memberPhoto input is hidden - we use triggerPhotoPicker() instead
 document.getElementById('memberPhoto').style.display = 'none';
 
 
+
+function triggerPhotoPicker(container) {
+  // Create a fresh file input each time to avoid browser caching issues
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*,.heic,.heif,.HEIC,.HEIF';
+  input.style.display = 'none';
+  document.body.appendChild(input);
+  input.addEventListener('change', function() {
+    const file = this.files[0];
+    document.body.removeChild(input);
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const src = e.target.result;
+      showFramer(src, container, (dataURL) => {
+        croppedPhoto = dataURL;
+        currentPhotoURL = null;
+        showPhotoConfirmed(dataURL, container);
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+  input.click();
+}
 
 function showEmptyPhotoState(container) {
   container.innerHTML = `
@@ -178,26 +187,12 @@ function showEmptyPhotoState(container) {
         <span>No Image</span>
       </div>
       <div class="photo-preview-buttons">
-        <label class="btn-secondary photo-btn photo-choose-label">
-          Choose File
-          <input type="file" id="memberPhotoHidden" accept="image/*,.heic,.heif,.HEIC,.HEIF" style="display:none;">
-        </label>
+        <button type="button" class="btn-secondary photo-btn" id="photoPickerBtn">Choose File</button>
       </div>
     </div>
   `;
-  document.getElementById('memberPhotoHidden').addEventListener('change', function() {
-    const file = this.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-      const src = e.target.result;
-      showFramer(src, container, (dataURL) => {
-        croppedPhoto = dataURL;
-        currentPhotoURL = null;
-        showPhotoConfirmed(dataURL, container, src);
-      });
-    };
-    reader.readAsDataURL(file);
+  document.getElementById('photoPickerBtn').addEventListener('click', () => {
+    triggerPhotoPicker(container);
   });
 }
 
