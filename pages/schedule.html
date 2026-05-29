@@ -272,18 +272,7 @@
       if (g.opponentScore !== null && g.opponentScore !== undefined) ga += parseInt(g.opponentScore) || 0;
     });
 
-    // Build record string - only show OT/SO cols if they exist
-    const hasOT = otl > 0 || otw > 0 || sol > 0 || sow > 0;
-    const totalW = w + otw + sow;
-    const totalL = l + otl + sol;
-    let recordStr = `${totalW}-${totalL}-${t}`;
-    if (hasOT) {
-      const otlTotal = otl + sol;
-      recordStr = `${w}-${l}-${t}-${otlTotal}`;
-    }
-
     // Separate regular season and playoff records
-    const rsW = 0, rsL = 0, rsT = 0;
     let regW = 0, regL = 0, regT = 0;
     let playoffW = 0, playoffL = 0, playoffT = 0;
     games.forEach(g => {
@@ -298,12 +287,6 @@
         if (win) regW++; else if (loss) regL++; else if (tie) regT++;
       }
     });
-
-    const hasPlayoffs = games.some(g => g.subtype === 'Playoffs' || g.subtype === 'Championship');
-    let recordHTML = `${regW}-${regL}-${regT}`;
-    if (hasPlayoffs) {
-      recordHTML = `RS: ${regW}-${regL}-${regT}<br>PO: ${playoffW}-${playoffL}-${playoffT}`;
-    }
 
     document.getElementById('statsRegRecord').textContent = `${regW}-${regL}-${regT}`;
     document.getElementById('statsPlayoffRecord').textContent = `${playoffW}-${playoffL}-${playoffT}`;
