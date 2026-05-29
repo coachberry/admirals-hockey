@@ -236,6 +236,7 @@
       <input type="hidden" id="memberId">
       <input type="hidden" id="memberType">
       <input type="hidden" id="memberPlayerId">
+      <input type="hidden" id="memberStaffId">
 
       <!-- Player fields -->
       <div id="playerFields">
@@ -280,8 +281,16 @@
 
       <!-- Coach/Board fields -->
       <div id="staffFields" style="display:none;">
+        <div id="returningStaffSection" class="form-section" style="background:#f9f9f9; margin-bottom:1rem;">
+          <h4 style="margin-bottom:0.5rem; color:#5e1825;">Returning Staff Member?</h4>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="staffSearch" placeholder="Search by name from previous seasons..." style="flex:1; margin-bottom:0;">
+            <button type="button" id="staffSearchBtn" class="btn-secondary" style="white-space:nowrap; margin-bottom:0;">Search</button>
+          </div>
+          <div id="staffSearchResults" style="margin-top:0.5rem;"></div>
+        </div>
         <input type="text" id="memberNameStaff" placeholder="Full Name">
-        <input type="text" id="memberTitle" placeholder="Title">
+        <input type="text" id="memberTitle" placeholder="Title (e.g. Head Coach, President)">
       </div>
 
       <div id="bioPart"><textarea id="memberBio" placeholder="Bio" rows="4"></textarea></div>

@@ -224,6 +224,10 @@ function openRosterModal(type, data = null) {
   document.getElementById('playerFields').style.display = isPlayer ? 'block' : 'none';
   document.getElementById('staffFields').style.display = isPlayer ? 'none' : 'block';
   document.getElementById('returningPlayerSection').style.display = isPlayer && !data ? 'block' : 'none';
+  document.getElementById('returningStaffSection').style.display = !isPlayer && !data ? 'block' : 'none';
+  document.getElementById('staffSearch').value = '';
+  document.getElementById('staffSearchResults').innerHTML = '';
+  document.getElementById('memberStaffId').value = data?.staffId || '';
 
   if (isPlayer) {
     document.getElementById('memberName').value = data?.name || '';
@@ -280,6 +284,37 @@ document.getElementById('playerSearchBtn').addEventListener('click', async () =>
     </div>
   `).join('');
 });
+
+// ============================================
+// RETURNING STAFF SEARCH
+// ============================================
+document.getElementById('staffSearchBtn').addEventListener('click', async () => {
+  const q = document.getElementById('staffSearch').value.trim().toLowerCase();
+  if (!q) return;
+  const results = document.getElementById('staffSearchResults');
+  results.innerHTML = '<p style="font-size:0.8rem;color:#666;">Searching...</p>';
+  const type = document.getElementById('memberType').value;
+  const collName = type === 'coach' ? 'coaches' : 'board';
+  const snap = await getDocs(collection(db, collName));
+  const matches = [];
+  snap.forEach(d => { if (d.data().name.toLowerCase().includes(q)) matches.push({id: d.id, ...d.data()}); });
+  if (!matches.length) {
+    results.innerHTML = '<p style="font-size:0.8rem;color:#666;">No matches found. Fill in name below to add new.</p>';
+    return;
+  }
+  results.innerHTML = matches.map(m => `
+    <div class="search-result-item" onclick="selectReturningStaff('${m.id}', '${m.name.replace(/'/g, "\'")}')">
+      <strong>${m.name}</strong>
+    </div>
+  `).join('');
+});
+
+window.selectReturningStaff = (staffId, name) => {
+  document.getElementById('memberStaffId').value = staffId;
+  document.getElementById('memberNameStaff').value = name;
+  document.getElementById('staffSearch').value = name;
+  document.getElementById('staffSearchResults').innerHTML = `<p style="font-size:0.8rem;color:green;">✅ Linked to existing profile: ${name}</p>`;
+};
 
 window.selectReturningPlayer = (playerId, name) => {
   document.getElementById('memberPlayerId').value = playerId;
