@@ -286,8 +286,12 @@ body {
   margin-top: 0.5rem;
 }
 
-.form-buttons button {
+.form-buttons button,
+.modal-body .form-buttons button {
   flex: 1;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 /* ITEMS LIST */
