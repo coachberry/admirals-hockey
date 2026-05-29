@@ -227,24 +227,24 @@
 
 .game-row-result {
   text-align: right;
-  min-width: 80px;
+  min-width: 100px;
 }
 
 .game-result {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
 }
 
 .result-badge {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  line-height: 1;
 }
 
 .result-score {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 700;
 }
 
