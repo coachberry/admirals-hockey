@@ -112,28 +112,40 @@
   overflow-y: auto;
 }
 
-.modal-close-bar {
-  background: linear-gradient(135deg, #5e1825, #3d0f18);
-  display: flex;
-  justify-content: flex-end;
-  padding: 0.5rem 1rem;
-}
-
-.modal-close {
-  background: none;
+/* Floating close button overlapping image top-right */
+.modal-close-float {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #5e1825;
   border: none;
   color: white;
-  font-size: 1.8rem;
+  font-size: 1.4rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
-  padding: 0;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  transition: background 0.2s;
 }
+.modal-close-float:hover { background: #3d0f18; }
 
 /* Modal photo wrap - fills entire maroon area */
 .modal-photo-wrap {
   width: 100%;
   background: linear-gradient(135deg, #5e1825, #3d0f18);
   overflow: hidden;
+  position: relative;
+}
+
+.modal-photo-container {
+  position: relative;
+  width: 100%;
 }
 
 /* Real photo - same 7:8 proportions as card, fills frame */
@@ -158,17 +170,17 @@
 /* Number badge on modal image - bottom left */
 .modal-number-badge {
   position: absolute;
-  bottom: 8px;
-  left: 10px;
+  bottom: 10px;
+  left: 12px;
   color: white;
-  font-size: 2rem;
+  font-size: 2.6rem;
   font-weight: 700;
   line-height: 1;
   text-shadow:
-    1px 1px 4px rgba(0,0,0,0.9),
-    -1px -1px 4px rgba(0,0,0,0.9),
-    1px -1px 4px rgba(0,0,0,0.9),
-    -1px 1px 4px rgba(0,0,0,0.9);
+    2px 2px 6px rgba(0,0,0,0.9),
+    -2px -2px 6px rgba(0,0,0,0.9),
+    2px -2px 6px rgba(0,0,0,0.9),
+    -2px 2px 6px rgba(0,0,0,0.9);
   z-index: 2;
 }
 
@@ -199,7 +211,7 @@
 }
 
 .modal-body { padding: 1.5rem; }
-.modal-name { font-size: 1.5rem; font-weight: 700; color: #5e1825; margin-bottom: 0.25rem; display: flex; align-items: center; }
+.modal-name { font-size: 1.5rem; font-weight: 700; color: #5e1825; margin-bottom: 0.25rem; }
 .modal-subtitle { color: #666; margin-bottom: 0.75rem; font-size: 0.95rem; }
 .modal-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
 .modal-tag { background: #f0f0f0; color: #5e1825; padding: 4px 10px; border-radius: 3px; font-size: 0.8rem; font-weight: 600; }

@@ -58,10 +58,9 @@
 <!-- PROFILE MODAL -->
 <div id="profileModal" class="modal-overlay">
   <div class="modal">
-    <div class="modal-close-bar">
-      <button class="modal-close" id="closeModal">&times;</button>
+    <div id="modalPhotoWrap" class="modal-photo-wrap" style="position:relative;">
+      <button class="modal-close-float" id="closeModal">&times;</button>
     </div>
-    <div id="modalPhotoWrap" class="modal-photo-wrap"></div>
     <div class="modal-body">
       <div id="modalName" class="modal-name"></div>
       <div id="modalSubtitle" class="modal-subtitle"></div>
@@ -131,8 +130,7 @@
 
     // Photo container (relative so badges can overlay)
     const photoContainer = document.createElement('div');
-    photoContainer.style.position = 'relative';
-    photoContainer.style.width = '100%';
+    photoContainer.className = 'modal-photo-container';
 
     if (m.photoURL) {
       const img = document.createElement('img');
@@ -156,17 +154,11 @@
       photoContainer.appendChild(numBadge);
     }
 
+    // Move close button before appending container
     photoWrap.appendChild(photoContainer);
 
-    // Name + captain badge inline
-    const nameEl = document.getElementById('modalName');
-    let captainHTML = '';
-    if (m.type === 'player' && m.captain) {
-      captainHTML = `<span class="modal-captain-inline modal-captain-c">C</span>`;
-    } else if (m.type === 'player' && m.alternate) {
-      captainHTML = `<span class="modal-captain-inline modal-captain-a">A</span>`;
-    }
-    nameEl.innerHTML = m.name + captainHTML;
+    // Name - plain, no C/A badge
+    document.getElementById('modalName').textContent = m.name;
 
     // Subtitle = position or title
     document.getElementById('modalSubtitle').textContent = m.type === 'player' ? m.position : (m.title || '');
@@ -174,7 +166,7 @@
     // Tags - grade + captain identifier if applicable
     const tags = document.getElementById('modalTags');
     tags.innerHTML = '';
-    if (m.grade) tags.innerHTML += `<span class="modal-tag">${m.grade}</span>`;
+    if (m.grade) tags.innerHTML += `<span class="modal-tag">${m.grade.toUpperCase()}</span>`;
     if (m.type === 'player' && m.captain) tags.innerHTML += `<span class="captain-identifier">Captain</span>`;
     if (m.type === 'player' && m.alternate) tags.innerHTML += `<span class="captain-identifier">Alternate Captain</span>`;
 
