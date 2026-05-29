@@ -171,12 +171,22 @@
     // Subtitle = position or title
     document.getElementById('modalSubtitle').textContent = m.type === 'player' ? m.position : (m.title || '');
 
-    // Tags = grade only
+    // Tags - grade + captain identifier if applicable
     const tags = document.getElementById('modalTags');
     tags.innerHTML = '';
     if (m.grade) tags.innerHTML += `<span class="modal-tag">${m.grade}</span>`;
+    if (m.type === 'player' && m.captain) tags.innerHTML += `<span class="captain-identifier">Captain</span>`;
+    if (m.type === 'player' && m.alternate) tags.innerHTML += `<span class="captain-identifier">Alternate Captain</span>`;
 
-    document.getElementById('modalBio').textContent = m.bio || 'No bio available.';
+    // Bio - only for coaches and board members, not players
+    const bioEl = document.getElementById('modalBio');
+    if (m.type === 'player') {
+      bioEl.textContent = '';
+      bioEl.style.display = 'none';
+    } else {
+      bioEl.style.display = 'block';
+      bioEl.textContent = m.bio || 'No bio available.';
+    }
     modal.classList.add('active');
   }
 

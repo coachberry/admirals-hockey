@@ -80,6 +80,7 @@
 /* Alternate captain badge - slightly different color */
 .card-alternate-badge {
   color: #cccccc;
+  font-size: 1.5rem;
 }
 
 /* ============================================
@@ -135,22 +136,22 @@
   overflow: hidden;
 }
 
-/* Real photo - fills full width */
+/* Real photo - same 7:8 proportions as card, fills frame */
 .modal-real-photo {
   width: 100%;
-  height: 280px;
+  aspect-ratio: 7 / 8;
   object-fit: cover;
   object-position: center top;
   display: block;
 }
 
-/* Placeholder logo - centered on maroon */
+/* Placeholder logo - centered on maroon, same proportions */
 .modal-placeholder-logo {
-  width: auto;
-  height: 220px;
+  width: 100%;
+  aspect-ratio: 7 / 8;
   object-fit: contain;
   display: block;
-  margin: 2rem auto;
+  padding: 2rem;
   opacity: 0.9;
 }
 
@@ -174,7 +175,7 @@
 /* Captain/Alternate inline next to name */
 .modal-captain-inline {
   display: inline-block;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   font-weight: 700;
   margin-left: 0.5rem;
   vertical-align: middle;
@@ -182,7 +183,20 @@
 }
 
 .modal-captain-c { color: #d4a574; }
-.modal-captain-a { color: #999; }
+.modal-captain-a { color: #cccccc; }
+
+/* Captain identifier tag - maroon box grey text */
+.captain-identifier {
+  display: inline-block;
+  background: #5e1825;
+  color: #cccccc;
+  padding: 3px 10px;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
 
 .modal-body { padding: 1.5rem; }
 .modal-name { font-size: 1.5rem; font-weight: 700; color: #5e1825; margin-bottom: 0.25rem; display: flex; align-items: center; }
