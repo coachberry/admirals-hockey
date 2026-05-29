@@ -350,6 +350,7 @@ function showPhotoConfirmed(dataURL, container) {
 // SAVE MEMBER
 // ============================================
 document.getElementById('saveMemberBtn').addEventListener('click', async () => {
+  currentSeasonId = document.getElementById('rosterSeasonSelect').value;
   if (!currentSeasonId) { alert('Please select or create a season first.'); return; }
 
   const id = document.getElementById('memberId').value || Date.now().toString();
