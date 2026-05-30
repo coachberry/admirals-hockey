@@ -276,14 +276,18 @@
     }
   }
 
-  // Load next/last game from current season
+  // Load next/last game - falls back to previous season for last game
   async function loadGames() {
     const seasonsSnap = await getDocs(collection(db, 'seasons'));
-    let currentSeasonId = null;
-    seasonsSnap.forEach(d => { if (d.data().current) currentSeasonId = d.id; });
-    if (!currentSeasonId) { document.getElementById('homeNoGames').style.display = 'block'; return; }
+    const seasons = [];
+    seasonsSnap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
+    seasons.sort((a, b) => b.label.localeCompare(a.label));
 
-    const gamesSnap = await getDocs(collection(db, 'seasons', currentSeasonId, 'schedule'));
+    const currentSeason = seasons.find(s => s.current) || seasons[0];
+    if (!currentSeason) { document.getElementById('homeNoGames').style.display = 'block'; return; }
+
+    // Load current season games
+    const gamesSnap = await getDocs(collection(db, 'seasons', currentSeason.id, 'schedule'));
     const games = [];
     gamesSnap.forEach(d => games.push(d.data()));
     games.sort((a, b) => new Date(a.date+'T'+(a.time||'00:00')) - new Date(b.date+'T'+(b.time||'00:00')));
@@ -291,16 +295,46 @@
     const today = new Date(); today.setHours(0,0,0,0);
     const nextGame = games.find(g => !g.result && new Date(g.date+'T12:00:00') >= today);
     const gamesWithResult = games.filter(g => g.result);
-    const lastGame = gamesWithResult.length ? gamesWithResult[gamesWithResult.length-1] : null;
+    let lastGame = gamesWithResult.length ? gamesWithResult[gamesWithResult.length-1] : null;
 
+    // If no games in current season at all, or no results yet, look at previous season
+    if (!lastGame) {
+      const prevSeasons = seasons.filter(s => s.id !== currentSeason.id);
+      for (const prev of prevSeasons) {
+        const prevSnap = await getDocs(collection(db, 'seasons', prev.id, 'schedule'));
+        const prevGames = [];
+        prevSnap.forEach(d => prevGames.push(d.data()));
+        const prevWithResult = prevGames.filter(g => g.result);
+        if (prevWithResult.length) {
+          prevWithResult.sort((a, b) => new Date(a.date) - new Date(b.date));
+          lastGame = prevWithResult[prevWithResult.length - 1];
+          lastGame._fromSeason = prev.label;
+          break;
+        }
+      }
+    }
+
+    // Next game section
     if (nextGame) {
       document.getElementById('homeNextGameCard').innerHTML = buildGameCard(nextGame, false);
       document.getElementById('homeNextGame').style.display = 'block';
+    } else {
+      // Show "no games scheduled" message
+      document.getElementById('homeNextGameCard').innerHTML = `
+        <div style="padding:1.25rem;color:#888;font-style:italic;font-size:0.95rem;">
+          No upcoming games scheduled yet.
+          <br><a href="/pages/schedule.html" onclick="localStorage.removeItem('admirals_scheduleSeasonPublic')" style="color:#5e1825;font-weight:600;font-style:normal;">View Schedule →</a>
+        </div>`;
+      document.getElementById('homeNextGame').style.display = 'block';
     }
+
+    // Last game section
     if (lastGame) {
-      document.getElementById('homeLastGameCard').innerHTML = buildGameCard(lastGame, true);
+      const fromLabel = lastGame._fromSeason ? `<div style="font-size:0.72rem;color:#b8860b;font-weight:600;padding:0.4rem 1.25rem 0;text-transform:uppercase;letter-spacing:0.5px;">${lastGame._fromSeason} Season</div>` : '';
+      document.getElementById('homeLastGameCard').innerHTML = fromLabel + buildGameCard(lastGame, true);
       document.getElementById('homeLastGame').style.display = 'block';
     }
+
     if (!nextGame && !lastGame) {
       document.getElementById('homeNoGames').style.display = 'block';
     }
