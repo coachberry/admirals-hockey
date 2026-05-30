@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News - Franklin Admirals Hockey</title>
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <link rel="stylesheet" href="/assets/css/news-styles.css">
+</head>
+<body>
+
+<header>
+  <div class="header-container">
+    <a href="/index.html"><img src="/assets/images/franklin-admirals-hockey-logo-lowres.png" alt="Franklin Admirals Hockey" class="logo-img"></a>
+    <nav>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/index.html" class="nav-link">Home</a></li>
+        <li><a href="/pages/schedule.html" class="nav-link">Schedule</a></li>
+        <li><a href="/pages/roster.html" class="nav-link">Roster</a></li>
+        <li><a href="/pages/stats.html" class="nav-link">Stats</a></li>
+        <li><a href="/pages/news.html" class="nav-link">News</a></li>
+        <li><a href="/pages/events.html" class="nav-link">Events</a></li>
+        <li><a href="/pages/alumni.html" class="nav-link">Alumni</a></li>
+        <li><a href="/pages/contact.html" class="nav-link">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<section class="hero-section">
+  <div class="hero-container">
+    <div class="hero-badge">Franklin Admirals Hockey</div>
+    <h1 class="hero-title">News & Updates</h1>
+    <p class="hero-subtitle">The latest from the Admirals program</p>
+  </div>
+</section>
+
+<div class="main-container">
+
+  <!-- Category filter -->
+  <div class="news-filter-bar" style="margin-top:2rem;">
+    <button class="news-filter-btn active" data-cat="all">All</button>
+    <button class="news-filter-btn" data-cat="Game Report">Game Reports</button>
+    <button class="news-filter-btn" data-cat="Team Update">Team Updates</button>
+    <button class="news-filter-btn" data-cat="Announcement">Announcements</button>
+    <button class="news-filter-btn" data-cat="Player Spotlight">Player Spotlights</button>
+  </div>
+
+  <div id="newsGrid" class="news-grid" style="margin-top:1.5rem; margin-bottom:3rem;">
+    <p style="color:#666;font-style:italic;">Loading...</p>
+  </div>
+
+</div>
+
+<!-- ARTICLE MODAL -->
+<div id="articleModal" class="article-modal-overlay">
+  <div class="article-modal">
+    <button class="modal-close-float" id="closeArticleModal">&times;</button>
+    <div id="articleModalImg" class="article-modal-img"></div>
+    <div class="article-modal-body">
+      <div id="articleModalCategory" class="article-modal-category"></div>
+      <h1 id="articleModalTitle" class="article-modal-title"></h1>
+      <div id="articleModalDate" class="article-modal-date"></div>
+      <div id="articleModalContent" class="article-modal-content"></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-content">
+    <div class="footer-section">
+      <h3>Quick Links</h3>
+      <p><a href="/index.html">Home</a></p>
+      <p><a href="/pages/schedule.html">Schedule</a></p>
+      <p><a href="/pages/roster.html">Roster</a></p>
+      <p><a href="/pages/news.html">News</a></p>
+      <p><a href="/pages/events.html">Events</a></p>
+      <p><a href="/pages/alumni.html">Alumni</a></p>
+    </div>
+    <div class="footer-section">
+      <h3>Contact</h3>
+      <p><strong>Coach:</strong> Matt Berry</p>
+      <p><strong>Email:</strong> coachberry03@gmail.com</p>
+    </div>
+    <div class="footer-section">
+      <h3>Location</h3>
+      <p>Franklin High School</p>
+      <p>810 Hillsboro Rd</p>
+      <p>Franklin, TN 37064</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2025 Franklin High School Admirals Hockey. All rights reserved.</p>
+  </div>
+</footer>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
+    authDomain: "admirals-hockey.firebaseapp.com",
+    projectId: "admirals-hockey",
+    storageBucket: "admirals-hockey.firebasestorage.app",
+    messagingSenderId: "783358659334",
+    appId: "1:783358659334:web:5daffd093adca386faec87"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const categoryColors = {
+    'Game Report': '#5e1825', 'Team Update': '#1565c0',
+    'Announcement': '#e65100', 'Player Spotlight': '#2e7d32'
+  };
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+  }
+
+  let allPosts = [];
+  let currentFilter = 'all';
+
+  // Article modal
+  const articleModal = document.getElementById('articleModal');
+  document.getElementById('closeArticleModal').addEventListener('click', () => articleModal.classList.remove('active'));
+  articleModal.addEventListener('click', e => { if (e.target === articleModal) articleModal.classList.remove('active'); });
+
+  function openArticle(post) {
+    const color = categoryColors[post.category] || '#5e1825';
+    document.getElementById('articleModalImg').innerHTML = post.imageURL
+      ? `<img src="${post.imageURL}" alt="${post.title}">`
+      : `<div class="article-modal-img-placeholder" style="background:linear-gradient(135deg,${color},#3d0f18);height:200px;"></div>`;
+    document.getElementById('articleModalCategory').textContent = post.category || '';
+    document.getElementById('articleModalCategory').style.background = color;
+    document.getElementById('articleModalTitle').textContent = post.title;
+    document.getElementById('articleModalDate').textContent = formatDate(post.date);
+    document.getElementById('articleModalContent').textContent = post.content || '';
+    articleModal.classList.add('active');
+  }
+  window.openArticle = openArticle;
+
+  function renderGrid(filter) {
+    const grid = document.getElementById('newsGrid');
+    const filtered = filter === 'all' ? allPosts : allPosts.filter(p => p.category === filter);
+    if (!filtered.length) {
+      grid.innerHTML = '<p style="color:#666;font-style:italic;">No posts in this category yet.</p>';
+      return;
+    }
+    grid.innerHTML = filtered.map(p => {
+      const color = categoryColors[p.category] || '#5e1825';
+      const bgStyle = p.imageURL
+        ? `background-image:url('${p.imageURL}');background-size:cover;background-position:center;`
+        : `background:linear-gradient(135deg,${color},#3d0f18);`;
+      return `
+        <div class="news-card" onclick="openArticle(${JSON.stringify(p).replace(/"/g, '&quot;')})">
+          <div class="news-card-img" style="${bgStyle}">
+            <span class="news-category-tag" style="background:${color}">${p.category || ''}</span>
+          </div>
+          <div class="news-card-body">
+            <div class="news-card-date">${formatDate(p.date)}</div>
+            <h3 class="news-card-title">${p.title}</h3>
+            <p class="news-card-excerpt">${(p.content||'').substring(0,100)}${(p.content?.length||0)>100?'...':''}</p>
+            <span class="news-read-more">Read More →</span>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // Category filters
+  document.querySelectorAll('.news-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.news-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.cat;
+      renderGrid(currentFilter);
+    });
+  });
+
+  async function loadNews() {
+    const snap = await getDocs(collection(db, 'news'));
+    allPosts = [];
+    snap.forEach(d => allPosts.push({ id: d.id, ...d.data() }));
+    allPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+    renderGrid('all');
+  }
+
+  loadNews();
+
+  // Mobile nav
+  (function() {
+    var btn = document.getElementById('navToggle');
+    var nav = document.getElementById('navLinks');
+    if (!btn || !nav) return;
+    btn.addEventListener('click', function() { btn.classList.toggle('open'); nav.classList.toggle('open'); });
+    nav.querySelectorAll('a').forEach(function(link) {
+      link.addEventListener('click', function() { btn.classList.remove('open'); nav.classList.remove('open'); });
+    });
+  })();
+</script>
+</body>
+</html>

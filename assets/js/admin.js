@@ -1072,7 +1072,8 @@ async function loadNews() {
   posts.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(n => {
     const dateStr = new Date(n.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const item = document.createElement('div'); item.className = 'item';
-    item.innerHTML = `<div class="item-info"><div><strong>${n.title}</strong><span>${n.category} | ${dateStr}</span></div></div><div><button class="btn-edit" onclick="editNews('${n.id}')">Edit</button><button class="btn-delete" onclick="deleteNews('${n.id}')">Delete</button></div>`;
+    const badges = `${n.featured ? '<span style="background:#5e1825;color:white;font-size:0.65rem;padding:2px 6px;border-radius:3px;margin-left:6px;">⭐ Featured</span>' : ''}${n.homeCard ? '<span style="background:#1565c0;color:white;font-size:0.65rem;padding:2px 6px;border-radius:3px;margin-left:4px;">📌 Home</span>' : ''}`;
+    item.innerHTML = `<div class="item-info"><div><strong>${n.title}${badges}</strong><span>${n.category} | ${dateStr}</span></div></div><div><button class="btn-edit" onclick="editNews('${n.id}')">Edit</button><button class="btn-delete" onclick="deleteNews('${n.id}')">Delete</button></div>`;
     list.appendChild(item);
   });
 }
@@ -1630,9 +1631,6 @@ document.getElementById('exportAlumniBtn').addEventListener('click', async () =>
 // ============================================
 // NEWS - update save to include featured, homeCard, imageURL
 // ============================================
-let newsImageData = null;
-let currentNewsImageURL = null;
-
 document.getElementById('newsImageInput').addEventListener('change', function() {
   const file = this.files[0];
   if (!file) return;
