@@ -37,7 +37,6 @@
   <div class="admin-tabs">
     <button class="tab-btn active" data-tab="roster">Roster</button>
     <button class="tab-btn" data-tab="schedule">Schedule</button>
-    <button class="tab-btn" data-tab="statistics">Statistics</button>
     <button class="tab-btn" data-tab="news">News & Updates</button>
     <button class="tab-btn" data-tab="events">Events</button>
     <button class="tab-btn" data-tab="quickhits">Quick Hits</button>
@@ -80,51 +79,6 @@
       </div>
       <button id="addGameBtn" class="btn-primary">+ Add Game</button>
       <div id="gamesList" class="items-list"><div class="empty-state">No games added yet</div></div>
-    </div>
-
-    <!-- STATISTICS TAB -->
-    <div id="statisticsTab" class="tab-content">
-      <h2>Statistics</h2>
-      <div class="form-section">
-        <h3>Season Record</h3>
-        <div class="form-row">
-          <input type="number" id="wins" placeholder="Wins" min="0">
-          <input type="number" id="losses" placeholder="Losses" min="0">
-          <input type="number" id="ties" placeholder="Ties" min="0">
-        </div>
-        <button id="saveStatsBtn" class="btn-primary">Save Stats</button>
-      </div>
-      <h3 class="list-heading">Scoring Leaders</h3>
-      <button id="addScorerBtn" class="btn-primary">+ Add Scorer</button>
-      <div id="scorerForm" class="form-section" style="display: none;">
-        <input type="hidden" id="scorerId">
-        <div class="form-row">
-          <input type="text" id="scorerName" placeholder="Player Name">
-          <input type="number" id="scorerGoals" placeholder="Goals" min="0">
-          <input type="number" id="scorerAssists" placeholder="Assists" min="0">
-        </div>
-        <div class="form-buttons">
-          <button id="saveScorerBtn" class="btn-primary">Save</button>
-          <button id="cancelScorerBtn" class="btn-secondary">Cancel</button>
-        </div>
-      </div>
-      <div id="scorersList" class="items-list"><div class="empty-state">No scorers added yet</div></div>
-      <h3 class="list-heading">Goaltenders</h3>
-      <button id="addGoaltenderBtn" class="btn-primary">+ Add Goaltender</button>
-      <div id="goaltenderForm" class="form-section" style="display: none;">
-        <input type="hidden" id="goaltenderId">
-        <div class="form-row">
-          <input type="text" id="goaltenderName" placeholder="Player Name">
-          <input type="number" id="goaltenderGames" placeholder="Games Played" min="0">
-          <input type="number" id="goaltenderGAA" placeholder="GAA" step="0.01">
-          <input type="number" id="goaltenderSave" placeholder="Save %" step="0.01">
-        </div>
-        <div class="form-buttons">
-          <button id="saveGoaltenderBtn" class="btn-primary">Save</button>
-          <button id="cancelGoaltenderBtn" class="btn-secondary">Cancel</button>
-        </div>
-      </div>
-      <div id="goaltendersList" class="items-list"><div class="empty-state">No goaltenders added yet</div></div>
     </div>
 
     <!-- NEWS TAB -->
