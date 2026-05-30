@@ -56,7 +56,7 @@
           <input type="email" id="alumniEmail" placeholder="your@email.com">
         </div>
         <div class="alumni-form-group">
-          <label>Graduation Year *</label>
+          <label>Graduation Year</label>
           <input type="number" id="alumniGradYear" placeholder="e.g. 2019" min="1990" max="2030">
         </div>
         <div class="alumni-form-group">
@@ -155,8 +155,6 @@
 
     if (!name) { errorEl.textContent = 'Please enter your name.'; return; }
     if (!email || !email.includes('@')) { errorEl.textContent = 'Please enter a valid email address.'; return; }
-    if (!gradYear) { errorEl.textContent = 'Please enter your graduation year.'; return; }
-
     document.getElementById('alumniSubmitBtn').textContent = 'Submitting...';
     document.getElementById('alumniSubmitBtn').disabled = true;
 
