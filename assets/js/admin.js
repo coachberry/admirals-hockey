@@ -1419,25 +1419,41 @@ function openEventModal(data = null) {
   document.getElementById('eventModalTitle').textContent = data ? 'Edit Event' : 'Add Event';
 
   const preview = document.getElementById('eventImagePreview');
+  const removeBtn = document.getElementById('removeEventImage');
   if (currentEventImageURL) {
-    preview.innerHTML = `<img src="${currentEventImageURL}" style="width:120px;aspect-ratio:16/9;object-fit:cover;border-radius:4px;border:1px solid #ddd;">`;
+    preview.innerHTML = `<img src="${currentEventImageURL}" style="width:100%;height:100%;object-fit:cover;">`;
+    if (removeBtn) removeBtn.style.display = 'inline-block';
   } else {
-    preview.innerHTML = '';
+    preview.textContent = 'No Image';
+    if (removeBtn) removeBtn.style.display = 'none';
   }
 
   document.getElementById('eventModal').classList.add('active');
 }
 
-document.getElementById('eventImagePreview').addEventListener('click', () => document.getElementById('eventImage').click());
 document.getElementById('eventImage').addEventListener('change', function() {
   const file = this.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
     eventImageData = e.target.result;
-    document.getElementById('eventImagePreview').innerHTML = `<img src="${eventImageData}" style="width:120px;aspect-ratio:16/9;object-fit:cover;border-radius:4px;border:1px solid #ddd;">`;
+    const preview = document.getElementById('eventImagePreview');
+    preview.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = eventImageData;
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+    preview.appendChild(img);
+    document.getElementById('removeEventImage').style.display = 'inline-block';
   };
   reader.readAsDataURL(file);
+});
+
+document.getElementById('removeEventImage').addEventListener('click', () => {
+  eventImageData = null;
+  currentEventImageURL = null;
+  document.getElementById('eventImagePreview').textContent = 'No Image';
+  document.getElementById('eventImage').value = '';
+  document.getElementById('removeEventImage').style.display = 'none';
 });
 
 document.getElementById('saveEventBtn').addEventListener('click', async () => {
