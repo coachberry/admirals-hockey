@@ -1,0 +1,69 @@
+/* EVENTS PAGE */
+.events-list { display: flex; flex-direction: column; gap: 1.25rem; }
+.events-list-past { opacity: 0.75; }
+
+.event-card {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.event-card-past { border-left: 4px solid #ccc; }
+
+.event-card-img {
+  height: 180px;
+  background-size: cover;
+  background-position: center;
+}
+
+.event-card-body { padding: 1.25rem; }
+
+.event-card-top {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.event-date-block {
+  background: #5e1825;
+  color: white;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  text-align: center;
+  flex-shrink: 0;
+  min-width: 52px;
+}
+
+.event-month { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.event-day { font-size: 1.6rem; font-weight: 700; line-height: 1; }
+.event-year { font-size: 0.65rem; opacity: 0.8; }
+
+.event-type-tag {
+  display: inline-block;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.2rem 0.6rem;
+  border-radius: 3px;
+  margin-bottom: 0.4rem;
+}
+
+.event-name { font-size: 1.1rem; font-weight: 700; color: #111; margin-bottom: 0.4rem; }
+.event-meta { font-size: 0.85rem; color: #666; margin-bottom: 0.2rem; }
+.event-details { font-size: 0.9rem; color: #444; line-height: 1.6; margin-top: 0.5rem; }
+
+.event-link {
+  display: inline-block;
+  margin-top: 0.75rem;
+  color: #5e1825;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.event-link:hover { text-decoration: underline; }

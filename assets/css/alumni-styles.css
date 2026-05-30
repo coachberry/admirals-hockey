@@ -1,0 +1,122 @@
+/* ALUMNI PAGE */
+.alumni-layout {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+  align-items: start;
+}
+
+.alumni-signup-card {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.alumni-signup-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #5e1825;
+  margin-bottom: 0.75rem;
+}
+
+.alumni-signup-desc {
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.alumni-form { display: flex; flex-direction: column; gap: 1rem; }
+
+.alumni-form-group { display: flex; flex-direction: column; gap: 0.3rem; }
+
+.alumni-form-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.alumni-form-group input,
+.alumni-form-group select {
+  padding: 0.6rem 0.9rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.alumni-form-group input:focus,
+.alumni-form-group select:focus {
+  outline: none;
+  border-color: #5e1825;
+}
+
+.alumni-submit-btn {
+  background: #5e1825;
+  color: white;
+  border: none;
+  padding: 0.9rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 0.5rem;
+}
+
+.alumni-submit-btn:hover { background: #3d0f18; }
+.alumni-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.alumni-error {
+  color: #c62828;
+  font-size: 0.85rem;
+  min-height: 1.2rem;
+}
+
+.alumni-success {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.alumni-success-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+.alumni-success h3 {
+  font-size: 1.4rem;
+  color: #5e1825;
+  margin-bottom: 0.75rem;
+}
+
+.alumni-success p { color: #555; line-height: 1.6; }
+
+/* INFO PANEL */
+.alumni-info-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.alumni-info-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #e0e0e0;
+}
+
+.alumni-info-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
+
+.alumni-info-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #5e1825;
+  margin-bottom: 0.5rem;
+}
+
+.alumni-info-card p { font-size: 0.9rem; color: #555; line-height: 1.5; }
+
+@media (max-width: 768px) {
+  .alumni-layout { grid-template-columns: 1fr; }
+}

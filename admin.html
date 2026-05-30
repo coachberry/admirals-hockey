@@ -143,6 +143,24 @@
           </select>
         </div>
         <textarea id="newsContent" placeholder="Content" rows="6"></textarea>
+        <div class="photo-upload-section">
+          <label class="field-label">Post Image (optional)</label>
+          <div id="newsImagePreview" class="photo-preview"></div>
+          <input type="file" id="newsImage" accept="image/*" style="display:none;">
+          <label class="btn-secondary photo-btn photo-choose-label" style="margin-top:0.5rem;display:inline-block;">
+            Choose Image
+            <input type="file" id="newsImageInput" accept="image/*" style="display:none;">
+          </label>
+          <button type="button" id="removeNewsImage" class="btn-delete photo-btn" style="display:none;">Remove</button>
+        </div>
+        <div class="captain-checkboxes" style="margin-top:0.75rem;">
+          <label class="captain-label">
+            <input type="checkbox" id="newsFeatured"> ⭐ Set as Main Featured Post
+          </label>
+          <label class="captain-label">
+            <input type="checkbox" id="newsHomeCard"> 📌 Show as Supporting Story on Homepage
+          </label>
+        </div>
         <div class="form-buttons">
           <button id="saveNewsBtn" class="btn-primary">Save Post</button>
           <button id="cancelNewsBtn" class="btn-secondary">Cancel</button>
@@ -167,6 +185,31 @@
         </div>
       </div>
       <div id="seasonsList" class="items-list"><div class="empty-state">No seasons added yet</div></div>
+    </div>
+
+    <!-- EVENTS TAB -->
+    <div id="eventsTab" class="tab-content">
+      <h2>Events</h2>
+      <button id="addEventBtn" class="btn-primary">+ Add Event</button>
+      <div id="eventsList" class="items-list"><div class="empty-state">No events added yet</div></div>
+    </div>
+
+    <!-- QUICK HITS TAB -->
+    <div id="quickhitsTab" class="tab-content">
+      <h2>Quick Hits</h2>
+      <p style="color:#666;font-size:0.9rem;margin-bottom:1rem;">Manage the list of links shown on the homepage.</p>
+      <button id="addQuickHitBtn" class="btn-primary">+ Add Link</button>
+      <div id="quickHitsList" class="items-list"><div class="empty-state">No links added yet</div></div>
+    </div>
+
+    <!-- ALUMNI TAB -->
+    <div id="alumniTab" class="tab-content">
+      <h2>Alumni Signups</h2>
+      <div style="display:flex;gap:1rem;align-items:center;margin-bottom:1rem;">
+        <button id="exportAlumniBtn" class="btn-secondary">Export CSV</button>
+        <span id="alumniCount" style="color:#666;font-size:0.9rem;"></span>
+      </div>
+      <div id="alumniList" class="items-list"><div class="empty-state">No alumni signups yet</div></div>
     </div>
 
     <!-- MANAGE USERS TAB -->
@@ -383,6 +426,105 @@
         <button id="cancelGameStatsBtn" class="btn-secondary">Cancel</button>
       </div>
       <p id="gameStatsSaveStatus" class="save-status"></p>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT MODAL -->
+<div id="eventModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="eventModalTitle">Add Event</h2>
+      <button class="modal-close" id="closeEventModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="eventId">
+      <div class="form-label-group">
+        <label class="field-label">Event Name</label>
+        <input type="text" id="eventName" placeholder="e.g. Alumni Night">
+      </div>
+      <div class="form-row">
+        <div class="form-label-group">
+          <label class="field-label">Date</label>
+          <input type="date" id="eventDate">
+        </div>
+        <div class="form-label-group">
+          <label class="field-label">Start Time</label>
+          <input type="time" id="eventTime">
+        </div>
+        <div class="form-label-group">
+          <label class="field-label">End Time</label>
+          <input type="time" id="eventEndTime">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-label-group">
+          <label class="field-label">Event Type</label>
+          <select id="eventType">
+            <option value="">Select...</option>
+            <option value="Team Event">Team Event</option>
+            <option value="Fundraiser">Fundraiser</option>
+            <option value="Community">Community</option>
+            <option value="Alumni">Alumni</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">Location</label>
+        <input type="text" id="eventLocation" placeholder="e.g. Franklin High School">
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">Details</label>
+        <textarea id="eventDetails" placeholder="Event description..." rows="4"></textarea>
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">External Link (optional)</label>
+        <input type="url" id="eventLink" placeholder="https://...">
+      </div>
+      <div class="photo-upload-section">
+        <label class="field-label">Event Image (optional)</label>
+        <div id="eventImagePreview" class="photo-preview"></div>
+        <input type="file" id="eventImage" accept="image/*" style="display:none;">
+      </div>
+      <div class="form-buttons">
+        <button id="saveEventBtn" class="btn-primary">Save Event</button>
+        <button id="cancelEventBtn" class="btn-secondary">Cancel</button>
+      </div>
+      <p id="eventSaveStatus" class="save-status"></p>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK HIT MODAL -->
+<div id="quickHitModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="quickHitModalTitle">Add Quick Hit</h2>
+      <button class="modal-close" id="closeQuickHitModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="quickHitId">
+      <div class="form-label-group">
+        <label class="field-label">Label</label>
+        <input type="text" id="quickHitLabel" placeholder="e.g. Buy Tickets">
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">URL</label>
+        <input type="url" id="quickHitUrl" placeholder="https://...">
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">Emoji (optional)</label>
+        <input type="text" id="quickHitEmoji" placeholder="e.g. 🎟️" maxlength="4">
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">Order</label>
+        <input type="number" id="quickHitOrder" placeholder="1" min="1">
+      </div>
+      <div class="form-buttons">
+        <button id="saveQuickHitBtn" class="btn-primary">Save</button>
+        <button id="cancelQuickHitBtn" class="btn-secondary">Cancel</button>
+      </div>
     </div>
   </div>
 </div>

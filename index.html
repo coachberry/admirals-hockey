@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Franklin High School Hockey - Admirals</title>
   <link rel="stylesheet" href="/assets/css/styles.css">
+  <link rel="stylesheet" href="/assets/css/home-styles.css">
 </head>
 <body>
 
@@ -17,128 +18,66 @@
         <span></span><span></span><span></span>
       </button>
       <ul class="nav-links" id="navLinks">
-        <li><a href="/index.html" class="nav-link" data-page="home">Home</a></li>
-        <li><a href="/pages/schedule.html" class="nav-link" data-page="schedule">Schedule</a></li>
-        <li><a href="/pages/roster.html" class="nav-link" data-page="roster">Roster</a></li>
-        <li><a href="/pages/stats.html" class="nav-link" data-page="stats">Stats</a></li>
-        <li><a href="/pages/contact.html" class="nav-link" data-page="contact">Contact</a></li>
+        <li><a href="/index.html" class="nav-link active">Home</a></li>
+        <li><a href="/pages/schedule.html" class="nav-link">Schedule</a></li>
+        <li><a href="/pages/roster.html" class="nav-link">Roster</a></li>
+        <li><a href="/pages/stats.html" class="nav-link">Stats</a></li>
+        <li><a href="/pages/events.html" class="nav-link">Events</a></li>
+        <li><a href="/pages/alumni.html" class="nav-link">Alumni</a></li>
+        <li><a href="/pages/contact.html" class="nav-link">Contact</a></li>
       </ul>
     </nav>
   </div>
 </header>
 
-<section class="hero-section">
-  <div class="hero-container">
-    <div class="hero-badge">Franklin High School</div>
-    <h1 class="hero-title">Admirals Hockey</h1>
-    <p class="hero-subtitle">Tradition. Excellence. Victory.</p>
-    <a href="/pages/schedule.html" onclick="localStorage.removeItem('admirals_scheduleSeasonPublic')">View Full Schedule</a>
-  </div>
-</section>
+<!-- FEATURED NEWS SECTION -->
+<div id="featuredSection" class="featured-section">
+  <div class="featured-loading">Loading...</div>
+</div>
 
 <div class="main-container">
 
-  <div style="margin-top: 3rem;">
-    <div class="section-header">
-      <h2 class="section-title">Upcoming Games</h2>
-      <a href="/pages/schedule.html" class="view-all">View All →</a>
-    </div>
-    <div class="games-grid">
-      <div class="game-card">
-        <div class="game-header">Regular Season</div>
-        <div class="game-content">
-          <div class="game-date">Friday, January 17, 2025</div>
-          <div class="matchup">
-            <div class="team">
-              <div class="team-name">Admirals</div>
-              <div class="team-record">12-4-2</div>
-            </div>
-            <div class="vs">vs</div>
-            <div class="team">
-              <div class="team-name">Hawks</div>
-              <div class="team-record">8-5-3</div>
-            </div>
-          </div>
-          <div class="game-time">7:00 PM</div>
-          <div class="game-location">Franklin Ice Arena</div>
-        </div>
-      </div>
-
-      <div class="game-card">
-        <div class="game-header">Regular Season</div>
-        <div class="game-content">
-          <div class="game-date">Wednesday, January 22, 2025</div>
-          <div class="matchup">
-            <div class="team">
-              <div class="team-name">Eagles</div>
-              <div class="team-record">10-6-1</div>
-            </div>
-            <div class="vs">vs</div>
-            <div class="team">
-              <div class="team-name">Admirals</div>
-              <div class="team-record">12-4-2</div>
-            </div>
-          </div>
-          <div class="game-time">6:30 PM</div>
-          <div class="game-location">Central Sports Complex</div>
-        </div>
-      </div>
-
-      <div class="game-card">
-        <div class="game-header">Regular Season</div>
-        <div class="game-content">
-          <div class="game-date">Saturday, January 25, 2025</div>
-          <div class="matchup">
-            <div class="team">
-              <div class="team-name">Admirals</div>
-              <div class="team-record">12-4-2</div>
-            </div>
-            <div class="vs">vs</div>
-            <div class="team">
-              <div class="team-name">Tigers</div>
-              <div class="team-record">9-7-2</div>
-            </div>
-          </div>
-          <div class="game-time">8:00 PM</div>
-          <div class="game-location">Franklin Ice Arena</div>
-        </div>
-      </div>
-    </div>
+  <!-- SUPPORTING STORIES -->
+  <div id="storiesSection" style="margin-top:2rem; display:none;">
+    <div id="storiesGrid" class="stories-grid"></div>
   </div>
 
-  <div style="margin-top: 4rem; margin-bottom: 3rem;">
-    <div class="section-header">
-      <h2 class="section-title">Season Statistics</h2>
-      <a href="/pages/stats.html" class="view-all">View Detailed Stats →</a>
-    </div>
-    <div class="stats-container">
-      <div class="stat-card">
-        <div class="stat-number">12</div>
-        <div class="stat-label">Wins</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">4</div>
-        <div class="stat-label">Losses</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">2</div>
-        <div class="stat-label">Ties</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">73</div>
-        <div class="stat-label">Goals For</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">38</div>
-        <div class="stat-label">Goals Against</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">1st</div>
-        <div class="stat-label">Conference</div>
+  <!-- TWO COLUMN: QUICK HITS + UPCOMING EVENTS -->
+  <div class="home-two-col" style="margin-top:3rem;">
+
+    <!-- QUICK HITS -->
+    <div class="quick-hits-section">
+      <h2 class="home-section-title">Quick Hits</h2>
+      <div id="quickHitsList" class="quick-hits-list">
+        <div class="quick-hits-loading">Loading...</div>
       </div>
     </div>
+
+    <!-- UPCOMING EVENTS -->
+    <div class="upcoming-events-section">
+      <h2 class="home-section-title">Upcoming Events</h2>
+      <div id="upcomingEventsList" class="upcoming-events-list">
+        <div class="quick-hits-loading">Loading...</div>
+      </div>
+      <a href="/pages/events.html" class="view-all-link">View All Events →</a>
+    </div>
+
   </div>
 
+</div>
+
+<!-- ARTICLE MODAL -->
+<div id="articleModal" class="article-modal-overlay">
+  <div class="article-modal">
+    <button class="modal-close-float" id="closeArticleModal">&times;</button>
+    <div id="articleModalImg" class="article-modal-img"></div>
+    <div class="article-modal-body">
+      <div id="articleModalCategory" class="article-modal-category"></div>
+      <h1 id="articleModalTitle" class="article-modal-title"></h1>
+      <div id="articleModalDate" class="article-modal-date"></div>
+      <div id="articleModalContent" class="article-modal-content"></div>
+    </div>
+  </div>
 </div>
 
 <footer>
@@ -149,17 +88,17 @@
       <p><a href="/pages/schedule.html">Schedule</a></p>
       <p><a href="/pages/roster.html">Roster</a></p>
       <p><a href="/pages/stats.html">Stats</a></p>
+      <p><a href="/pages/events.html">Events</a></p>
+      <p><a href="/pages/alumni.html">Alumni</a></p>
     </div>
     <div class="footer-section">
       <h3>Contact</h3>
-      <p><strong>Coach:</strong> [Your Name]</p>
-      <p><strong>Email:</strong> coach@franklinhockey.edu</p>
-      <p><strong>Phone:</strong> (615) 555-0147</p>
+      <p><strong>Coach:</strong> Matt Berry</p>
+      <p><strong>Email:</strong> coachberry03@gmail.com</p>
     </div>
     <div class="footer-section">
       <h3>Location</h3>
       <p>Franklin High School</p>
-      <p>Franklin Ice Arena</p>
       <p>Nashville, TN</p>
     </div>
   </div>
@@ -168,29 +107,172 @@
   </div>
 </footer>
 
-<script>
-  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-  document.querySelectorAll('.nav-link').forEach(link => {
-    const href = link.getAttribute('href').split('/').pop() || 'index.html';
-    if (href === currentPage) {
-      link.classList.add('active');
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
+    authDomain: "admirals-hockey.firebaseapp.com",
+    projectId: "admirals-hockey",
+    storageBucket: "admirals-hockey.firebasestorage.app",
+    messagingSenderId: "783358659334",
+    appId: "1:783358659334:web:5daffd093adca386faec87"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const categoryColors = {
+    'Game Report': '#5e1825',
+    'Team Update': '#1565c0',
+    'Announcement': '#e65100',
+    'Player Spotlight': '#2e7d32'
+  };
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  }
+
+  // Article modal
+  const articleModal = document.getElementById('articleModal');
+  document.getElementById('closeArticleModal').addEventListener('click', () => articleModal.classList.remove('active'));
+  articleModal.addEventListener('click', e => { if (e.target === articleModal) articleModal.classList.remove('active'); });
+
+  function openArticle(post) {
+    const color = categoryColors[post.category] || '#5e1825';
+    document.getElementById('articleModalImg').innerHTML = post.imageURL
+      ? `<img src="${post.imageURL}" alt="${post.title}">`
+      : `<div class="article-modal-img-placeholder" style="background:linear-gradient(135deg,${color},#3d0f18);"></div>`;
+    document.getElementById('articleModalCategory').textContent = post.category || '';
+    document.getElementById('articleModalCategory').style.background = color;
+    document.getElementById('articleModalTitle').textContent = post.title;
+    document.getElementById('articleModalDate').textContent = formatDate(post.date);
+    document.getElementById('articleModalContent').textContent = post.content || '';
+    articleModal.classList.add('active');
+  }
+
+  // Load news
+  async function loadNews() {
+    const snap = await getDocs(collection(db, 'news'));
+    const posts = [];
+    snap.forEach(d => posts.push({ id: d.id, ...d.data() }));
+    posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    const mainPost = posts.find(p => p.featured) || posts[0];
+    const pickedPosts = posts.filter(p => p.homeCard && p.id !== mainPost?.id).slice(0, 4);
+    const supportingPosts = pickedPosts.length ? pickedPosts : posts.filter(p => p.id !== mainPost?.id).slice(0, 4);
+
+    // Render main featured post
+    const featuredSection = document.getElementById('featuredSection');
+    if (mainPost) {
+      const color = categoryColors[mainPost.category] || '#5e1825';
+      const bgStyle = mainPost.imageURL
+        ? `background-image:url('${mainPost.imageURL}');background-size:cover;background-position:center;`
+        : `background:linear-gradient(135deg,${color},#3d0f18);`;
+      featuredSection.innerHTML = `
+        <div class="featured-main" style="${bgStyle}" onclick="openArticle(${JSON.stringify(mainPost).replace(/"/g, '&quot;')})">
+          <div class="featured-main-overlay">
+            <span class="featured-category-tag" style="background:${color}">${mainPost.category || ''}</span>
+            <h1 class="featured-main-title">${mainPost.title}</h1>
+            <p class="featured-main-excerpt">${(mainPost.content || '').substring(0, 150)}${mainPost.content?.length > 150 ? '...' : ''}</p>
+            <span class="featured-read-more">Read More →</span>
+          </div>
+        </div>
+      `;
+    } else {
+      featuredSection.innerHTML = `
+        <div class="featured-main featured-main-empty">
+          <div class="featured-main-overlay">
+            <h1 class="featured-main-title">Franklin Admirals Hockey</h1>
+            <p class="featured-main-excerpt">Tradition. Excellence. Victory.</p>
+            <a href="/pages/schedule.html" onclick="localStorage.removeItem('admirals_scheduleSeasonPublic')" class="featured-read-more">View Schedule →</a>
+          </div>
+        </div>
+      `;
     }
-  });
+
+    // Render supporting stories
+    if (supportingPosts.length) {
+      const storiesSection = document.getElementById('storiesSection');
+      const storiesGrid = document.getElementById('storiesGrid');
+      storiesGrid.innerHTML = supportingPosts.map(p => {
+        const color = categoryColors[p.category] || '#5e1825';
+        const bgStyle = p.imageURL
+          ? `background-image:url('${p.imageURL}');background-size:cover;background-position:center;`
+          : `background:linear-gradient(135deg,${color},#3d0f18);`;
+        return `
+          <div class="story-card" onclick="openArticle(${JSON.stringify(p).replace(/"/g, '&quot;')})">
+            <div class="story-card-img" style="${bgStyle}">
+              <span class="story-category-tag" style="background:${color}">${p.category || ''}</span>
+            </div>
+            <div class="story-card-body">
+              <div class="story-card-date">${formatDate(p.date)}</div>
+              <h3 class="story-card-title">${p.title}</h3>
+            </div>
+          </div>
+        `;
+      }).join('');
+      storiesSection.style.display = 'block';
+    }
+  }
+
+  // Load quick hits
+  async function loadQuickHits() {
+    const snap = await getDocs(collection(db, 'quickhits'));
+    const hits = [];
+    snap.forEach(d => hits.push({ id: d.id, ...d.data() }));
+    hits.sort((a, b) => (a.order || 0) - (b.order || 0));
+    const list = document.getElementById('quickHitsList');
+    if (!hits.length) { list.innerHTML = '<p style="color:#999;font-size:0.9rem;">No links yet</p>'; return; }
+    list.innerHTML = hits.map(h => `
+      <a href="${h.url || '#'}" target="_blank" rel="noopener" class="quick-hit-item">
+        ${h.emoji ? `<span class="quick-hit-emoji">${h.emoji}</span>` : ''}
+        <span>${h.label}</span>
+        <span class="quick-hit-arrow">→</span>
+      </a>
+    `).join('');
+  }
+
+  // Load upcoming events
+  async function loadUpcomingEvents() {
+    const snap = await getDocs(collection(db, 'events'));
+    const events = [];
+    const today = new Date().toISOString().split('T')[0];
+    snap.forEach(d => { const e = { id: d.id, ...d.data() }; if (e.date >= today) events.push(e); });
+    events.sort((a, b) => a.date.localeCompare(b.date));
+    const list = document.getElementById('upcomingEventsList');
+    if (!events.length) { list.innerHTML = '<p style="color:#999;font-size:0.9rem;">No upcoming events</p>'; return; }
+    list.innerHTML = events.slice(0, 3).map(e => `
+      <a href="/pages/events.html" class="upcoming-event-item">
+        <div class="upcoming-event-date">
+          <div class="upcoming-event-month">${new Date(e.date+'T12:00:00').toLocaleDateString('en-US',{month:'short'})}</div>
+          <div class="upcoming-event-day">${new Date(e.date+'T12:00:00').getDate()}</div>
+        </div>
+        <div class="upcoming-event-info">
+          <div class="upcoming-event-name">${e.name}</div>
+          <div class="upcoming-event-location">${e.location || ''}</div>
+        </div>
+      </a>
+    `).join('');
+  }
+
+  // Make openArticle global
+  window.openArticle = openArticle;
+
+  loadNews();
+  loadQuickHits();
+  loadUpcomingEvents();
 
   // Mobile nav toggle
   (function() {
     var btn = document.getElementById('navToggle');
     var nav = document.getElementById('navLinks');
     if (!btn || !nav) return;
-    btn.addEventListener('click', function() {
-      btn.classList.toggle('open');
-      nav.classList.toggle('open');
-    });
+    btn.addEventListener('click', function() { btn.classList.toggle('open'); nav.classList.toggle('open'); });
     nav.querySelectorAll('a').forEach(function(link) {
-      link.addEventListener('click', function() {
-        btn.classList.remove('open');
-        nav.classList.remove('open');
-      });
+      link.addEventListener('click', function() { btn.classList.remove('open'); nav.classList.remove('open'); });
     });
   })();
 </script>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Events - Franklin Admirals Hockey</title>
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <link rel="stylesheet" href="/assets/css/events-styles.css">
+</head>
+<body>
+
+<header>
+  <div class="header-container">
+    <a href="/index.html"><img src="/assets/images/franklin-admirals-hockey-logo-lowres.png" alt="Franklin Admirals Hockey" class="logo-img"></a>
+    <nav>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/index.html" class="nav-link">Home</a></li>
+        <li><a href="/pages/schedule.html" class="nav-link">Schedule</a></li>
+        <li><a href="/pages/roster.html" class="nav-link">Roster</a></li>
+        <li><a href="/pages/stats.html" class="nav-link">Stats</a></li>
+        <li><a href="/pages/events.html" class="nav-link active">Events</a></li>
+        <li><a href="/pages/alumni.html" class="nav-link">Alumni</a></li>
+        <li><a href="/pages/contact.html" class="nav-link">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<section class="hero-section">
+  <div class="hero-container">
+    <div class="hero-badge">Franklin Admirals Hockey</div>
+    <h1 class="hero-title">Events</h1>
+    <p class="hero-subtitle">Team events, fundraisers & community activities</p>
+  </div>
+</section>
+
+<div class="main-container">
+
+  <div style="margin-top:2rem; margin-bottom:3rem;">
+    <div class="section-header">
+      <h2 class="section-title">Upcoming Events</h2>
+    </div>
+    <div id="upcomingEvents" class="events-list">
+      <p style="color:#666;font-style:italic;">Loading...</p>
+    </div>
+
+    <div class="section-header" style="margin-top:3rem;">
+      <h2 class="section-title">Past Events</h2>
+    </div>
+    <div id="pastEvents" class="events-list events-list-past">
+      <p style="color:#666;font-style:italic;">Loading...</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-content">
+    <div class="footer-section">
+      <h3>Quick Links</h3>
+      <p><a href="/index.html">Home</a></p>
+      <p><a href="/pages/schedule.html">Schedule</a></p>
+      <p><a href="/pages/roster.html">Roster</a></p>
+      <p><a href="/pages/events.html">Events</a></p>
+      <p><a href="/pages/alumni.html">Alumni</a></p>
+    </div>
+    <div class="footer-section">
+      <h3>Contact</h3>
+      <p><strong>Coach:</strong> Matt Berry</p>
+      <p><strong>Email:</strong> coachberry03@gmail.com</p>
+    </div>
+    <div class="footer-section">
+      <h3>Location</h3>
+      <p>Franklin High School</p>
+      <p>Nashville, TN</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2025 Franklin High School Admirals Hockey. All rights reserved.</p>
+  </div>
+</footer>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
+    authDomain: "admirals-hockey.firebaseapp.com",
+    projectId: "admirals-hockey",
+    storageBucket: "admirals-hockey.firebasestorage.app",
+    messagingSenderId: "783358659334",
+    appId: "1:783358659334:web:5daffd093adca386faec87"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const typeColors = {
+    'Team Event': '#5e1825', 'Fundraiser': '#e65100',
+    'Community': '#2e7d32', 'Alumni': '#1565c0', 'Other': '#555'
+  };
+
+  function formatDate(dateStr) {
+    return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  }
+
+  function formatTime(time) {
+    if (!time) return '';
+    const [h, m] = time.split(':');
+    const hour = parseInt(h);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    return `${hour % 12 || 12}:${m} ${ampm}`;
+  }
+
+  function buildEventCard(e, isPast) {
+    const color = typeColors[e.type] || '#5e1825';
+    const d = new Date(e.date + 'T12:00:00');
+    return `
+      <div class="event-card ${isPast ? 'event-card-past' : ''}">
+        ${e.imageURL ? `<div class="event-card-img" style="background-image:url('${e.imageURL}');"></div>` : ''}
+        <div class="event-card-body">
+          <div class="event-card-top">
+            <div class="event-date-block">
+              <div class="event-month">${d.toLocaleDateString('en-US',{month:'short'})}</div>
+              <div class="event-day">${d.getDate()}</div>
+              <div class="event-year">${d.getFullYear()}</div>
+            </div>
+            <div class="event-info">
+              <span class="event-type-tag" style="background:${color}">${e.type || 'Event'}</span>
+              <h3 class="event-name">${e.name}</h3>
+              ${e.time ? `<div class="event-meta">🕐 ${formatTime(e.time)}${e.endTime ? ' – ' + formatTime(e.endTime) : ''}</div>` : ''}
+              ${e.location ? `<div class="event-meta">📍 ${e.location}</div>` : ''}
+            </div>
+          </div>
+          ${e.details ? `<p class="event-details">${e.details}</p>` : ''}
+          ${e.link ? `<a href="${e.link}" target="_blank" rel="noopener" class="event-link">More Info →</a>` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadEvents() {
+    const snap = await getDocs(collection(db, 'events'));
+    const events = [];
+    snap.forEach(d => events.push({ id: d.id, ...d.data() }));
+    events.sort((a, b) => a.date.localeCompare(b.date));
+
+    const today = new Date().toISOString().split('T')[0];
+    const upcoming = events.filter(e => e.date >= today);
+    const past = events.filter(e => e.date < today).reverse();
+
+    const upcomingEl = document.getElementById('upcomingEvents');
+    const pastEl = document.getElementById('pastEvents');
+
+    upcomingEl.innerHTML = upcoming.length
+      ? upcoming.map(e => buildEventCard(e, false)).join('')
+      : '<p style="color:#666;font-style:italic;">No upcoming events</p>';
+
+    pastEl.innerHTML = past.length
+      ? past.map(e => buildEventCard(e, true)).join('')
+      : '<p style="color:#666;font-style:italic;">No past events</p>';
+  }
+
+  loadEvents();
+
+  // Mobile nav
+  (function() {
+    var btn = document.getElementById('navToggle');
+    var nav = document.getElementById('navLinks');
+    if (!btn || !nav) return;
+    btn.addEventListener('click', function() { btn.classList.toggle('open'); nav.classList.toggle('open'); });
+    nav.querySelectorAll('a').forEach(function(link) {
+      link.addEventListener('click', function() { btn.classList.remove('open'); nav.classList.remove('open'); });
+    });
+  })();
+</script>
+</body>
+</html>

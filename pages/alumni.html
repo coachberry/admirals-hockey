@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alumni - Franklin Admirals Hockey</title>
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <link rel="stylesheet" href="/assets/css/alumni-styles.css">
+</head>
+<body>
+
+<header>
+  <div class="header-container">
+    <a href="/index.html"><img src="/assets/images/franklin-admirals-hockey-logo-lowres.png" alt="Franklin Admirals Hockey" class="logo-img"></a>
+    <nav>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/index.html" class="nav-link">Home</a></li>
+        <li><a href="/pages/schedule.html" class="nav-link">Schedule</a></li>
+        <li><a href="/pages/roster.html" class="nav-link">Roster</a></li>
+        <li><a href="/pages/stats.html" class="nav-link">Stats</a></li>
+        <li><a href="/pages/events.html" class="nav-link">Events</a></li>
+        <li><a href="/pages/alumni.html" class="nav-link active">Alumni</a></li>
+        <li><a href="/pages/contact.html" class="nav-link">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<section class="hero-section">
+  <div class="hero-container">
+    <div class="hero-badge">Franklin Admirals Hockey</div>
+    <h1 class="hero-title">Alumni Network</h1>
+    <p class="hero-subtitle">Once an Admiral, always an Admiral</p>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="alumni-layout">
+
+    <!-- Signup form -->
+    <div class="alumni-signup-card" id="signupCard">
+      <h2 class="alumni-signup-title">Stay Connected</h2>
+      <p class="alumni-signup-desc">Sign up to receive news, event invitations, and updates from the Franklin Admirals Hockey program. We'd love to stay in touch with our alumni family.</p>
+
+      <div id="signupForm" class="alumni-form">
+        <div class="alumni-form-group">
+          <label>Full Name *</label>
+          <input type="text" id="alumniName" placeholder="Your full name">
+        </div>
+        <div class="alumni-form-group">
+          <label>Email Address *</label>
+          <input type="email" id="alumniEmail" placeholder="your@email.com">
+        </div>
+        <div class="alumni-form-group">
+          <label>Graduation Year *</label>
+          <input type="number" id="alumniGradYear" placeholder="e.g. 2019" min="1990" max="2030">
+        </div>
+        <div class="alumni-form-group">
+          <label>Position Played</label>
+          <select id="alumniPosition">
+            <option value="">Select position...</option>
+            <option value="Forward">Forward</option>
+            <option value="Defense">Defense</option>
+            <option value="Goaltender">Goaltender</option>
+            <option value="Other / Not Sure">Other / Not Sure</option>
+          </select>
+        </div>
+        <button class="alumni-submit-btn" id="alumniSubmitBtn">Join the Alumni Network</button>
+        <p id="alumniError" class="alumni-error"></p>
+      </div>
+
+      <div id="signupSuccess" class="alumni-success" style="display:none;">
+        <div class="alumni-success-icon">🏒</div>
+        <h3>Welcome back, Admiral!</h3>
+        <p>You're now part of the Franklin Admirals Alumni Network. We'll be in touch with updates and events.</p>
+      </div>
+    </div>
+
+    <!-- Info panel -->
+    <div class="alumni-info-panel">
+      <div class="alumni-info-card">
+        <div class="alumni-info-icon">📬</div>
+        <h3>Stay Informed</h3>
+        <p>Receive news about current team results, player achievements, and program updates.</p>
+      </div>
+      <div class="alumni-info-card">
+        <div class="alumni-info-icon">🎟️</div>
+        <h3>Event Invitations</h3>
+        <p>Get invited to alumni nights, fundraisers, and special events throughout the year.</p>
+      </div>
+      <div class="alumni-info-card">
+        <div class="alumni-info-icon">🤝</div>
+        <h3>Give Back</h3>
+        <p>Opportunities to mentor current players and support the next generation of Admirals.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-content">
+    <div class="footer-section">
+      <h3>Quick Links</h3>
+      <p><a href="/index.html">Home</a></p>
+      <p><a href="/pages/schedule.html">Schedule</a></p>
+      <p><a href="/pages/roster.html">Roster</a></p>
+      <p><a href="/pages/events.html">Events</a></p>
+      <p><a href="/pages/alumni.html">Alumni</a></p>
+    </div>
+    <div class="footer-section">
+      <h3>Contact</h3>
+      <p><strong>Coach:</strong> Matt Berry</p>
+      <p><strong>Email:</strong> coachberry03@gmail.com</p>
+    </div>
+    <div class="footer-section">
+      <h3>Location</h3>
+      <p>Franklin High School</p>
+      <p>Nashville, TN</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2025 Franklin High School Admirals Hockey. All rights reserved.</p>
+  </div>
+</footer>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
+    authDomain: "admirals-hockey.firebaseapp.com",
+    projectId: "admirals-hockey",
+    storageBucket: "admirals-hockey.firebasestorage.app",
+    messagingSenderId: "783358659334",
+    appId: "1:783358659334:web:5daffd093adca386faec87"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  document.getElementById('alumniSubmitBtn').addEventListener('click', async () => {
+    const name = document.getElementById('alumniName').value.trim();
+    const email = document.getElementById('alumniEmail').value.trim();
+    const gradYear = document.getElementById('alumniGradYear').value.trim();
+    const position = document.getElementById('alumniPosition').value;
+    const errorEl = document.getElementById('alumniError');
+
+    errorEl.textContent = '';
+
+    if (!name) { errorEl.textContent = 'Please enter your name.'; return; }
+    if (!email || !email.includes('@')) { errorEl.textContent = 'Please enter a valid email address.'; return; }
+    if (!gradYear) { errorEl.textContent = 'Please enter your graduation year.'; return; }
+
+    document.getElementById('alumniSubmitBtn').textContent = 'Submitting...';
+    document.getElementById('alumniSubmitBtn').disabled = true;
+
+    try {
+      // Check for duplicate email
+      const existing = await getDocs(query(collection(db, 'alumni'), where('email', '==', email)));
+      if (!existing.empty) {
+        errorEl.textContent = 'This email is already registered.';
+        document.getElementById('alumniSubmitBtn').textContent = 'Join the Alumni Network';
+        document.getElementById('alumniSubmitBtn').disabled = false;
+        return;
+      }
+
+      await addDoc(collection(db, 'alumni'), {
+        name, email,
+        gradYear: parseInt(gradYear),
+        position: position || '',
+        signedUpAt: new Date().toISOString()
+      });
+
+      document.getElementById('signupForm').style.display = 'none';
+      document.getElementById('signupSuccess').style.display = 'block';
+    } catch(e) {
+      errorEl.textContent = 'Something went wrong. Please try again.';
+      document.getElementById('alumniSubmitBtn').textContent = 'Join the Alumni Network';
+      document.getElementById('alumniSubmitBtn').disabled = false;
+    }
+  });
+
+  // Mobile nav
+  (function() {
+    var btn = document.getElementById('navToggle');
+    var nav = document.getElementById('navLinks');
+    if (!btn || !nav) return;
+    btn.addEventListener('click', function() { btn.classList.toggle('open'); nav.classList.toggle('open'); });
+    nav.querySelectorAll('a').forEach(function(link) {
+      link.addEventListener('click', function() { btn.classList.remove('open'); nav.classList.remove('open'); });
+    });
+  })();
+</script>
+</body>
+</html>
