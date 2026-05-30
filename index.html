@@ -42,24 +42,40 @@
     <div id="storiesGrid" class="stories-grid"></div>
   </div>
 
-  <!-- TWO COLUMN: QUICK HITS + UPCOMING EVENTS -->
-  <div class="home-two-col" style="margin-top:3rem;">
+  <!-- TWO COLUMN: LEFT=NEXT/LAST GAME | RIGHT=QUICK HITS + EVENTS -->
+  <div class="home-two-col" style="margin-top:2rem;">
 
-    <!-- QUICK HITS -->
-    <div class="quick-hits-section">
-      <h2 class="home-section-title">Quick Hits</h2>
-      <div id="quickHitsList" class="quick-hits-list">
-        <div class="quick-hits-loading">Loading...</div>
+    <!-- LEFT: NEXT GAME + LAST GAME -->
+    <div class="home-games-col">
+      <div id="homeNextGame" style="display:none;">
+        <h2 class="home-section-title">Next Game</h2>
+        <div id="homeNextGameCard" class="home-game-card home-game-upcoming"></div>
+      </div>
+      <div id="homeLastGame" style="display:none; margin-top:1.5rem;">
+        <h2 class="home-section-title">Last Game</h2>
+        <div id="homeLastGameCard" class="home-game-card home-game-past"></div>
+      </div>
+      <div id="homeNoGames" style="display:none;">
+        <a href="/pages/schedule.html" onclick="localStorage.removeItem('admirals_scheduleSeasonPublic')" class="view-all-link">View Full Schedule →</a>
       </div>
     </div>
 
-    <!-- UPCOMING EVENTS -->
-    <div class="upcoming-events-section">
-      <h2 class="home-section-title">Upcoming Events</h2>
-      <div id="upcomingEventsList" class="upcoming-events-list">
-        <div class="quick-hits-loading">Loading...</div>
+    <!-- RIGHT: QUICK HITS + UPCOMING EVENTS -->
+    <div class="home-right-col">
+      <div class="quick-hits-section">
+        <h2 class="home-section-title">Quick Hits</h2>
+        <div id="quickHitsList" class="quick-hits-list">
+          <div class="quick-hits-loading">Loading...</div>
+        </div>
       </div>
-      <a href="/pages/events.html" class="view-all-link">View All Events →</a>
+
+      <div class="upcoming-events-section" style="margin-top:2rem;">
+        <h2 class="home-section-title">Upcoming Events</h2>
+        <div id="upcomingEventsList" class="upcoming-events-list">
+          <div class="quick-hits-loading">Loading...</div>
+        </div>
+        <a href="/pages/events.html" class="view-all-link">View All Events →</a>
+      </div>
     </div>
 
   </div>
@@ -109,7 +125,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
@@ -124,15 +140,62 @@
   const db = getFirestore(app);
 
   const categoryColors = {
-    'Game Report': '#5e1825',
-    'Team Update': '#1565c0',
-    'Announcement': '#e65100',
-    'Player Spotlight': '#2e7d32'
+    'Game Report': '#5e1825', 'Team Update': '#1565c0',
+    'Announcement': '#e65100', 'Player Spotlight': '#2e7d32'
   };
+
+  const resultColors = { W:'#2e7d32', OTW:'#2e7d32', SOW:'#2e7d32', L:'#c62828', OTL:'#c62828', SOL:'#c62828', T:'#f57c00' };
 
   function formatDate(dateStr) {
     if (!dateStr) return '';
-    return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+  }
+
+  function formatDateShort(dateStr) {
+    if (!dateStr) return '';
+    return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+  }
+
+  function formatTime(time, timezone) {
+    if (!time) return '';
+    const [h, m] = time.split(':');
+    const hour = parseInt(h);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    return `${hour % 12 || 12}:${m} ${ampm}${timezone ? ' ' + timezone : ''}`;
+  }
+
+  function opponentLogoHTML(game, size=36) {
+    if (game.opponentLogo) return `<img src="${game.opponentLogo}" style="width:${size}px;height:${size}px;object-fit:contain;border-radius:4px;background:#f5f5f5;padding:2px;flex-shrink:0;" alt="${game.opponent}">`;
+    return `<div style="width:${size}px;height:${size}px;background:#f0f0f0;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">🏒</div>`;
+  }
+
+  function buildGameCard(game, showResult) {
+    const homeAway = game.homeAway === 'Home' ? 'vs.' : '@';
+    const typeLabel = (() => {
+      let l = game.gameType || '';
+      if (game.gameType === 'League' && game.leagueName) l = game.leagueName;
+      if (game.gameType === 'Tournament' && game.tournamentName) l = game.tournamentName;
+      if (game.subtype) l += ' · ' + game.subtype;
+      return l;
+    })();
+
+    const resultHTML = showResult && game.result
+      ? `<div style="font-size:1.6rem;font-weight:700;color:${resultColors[game.result]||'#333'};margin-top:0.75rem;">${game.result} ${game.teamScore}-${game.opponentScore}</div>`
+      : '';
+
+    return `
+      <div style="padding:1rem 1.25rem;">
+        <div style="font-size:0.72rem;color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem;">${typeLabel}</div>
+        <div style="font-size:0.85rem;color:#555;margin-bottom:0.75rem;">${formatDateShort(game.date)} · ${formatTime(game.time, game.timezone)}</div>
+        <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem;">
+          <span style="font-weight:700;color:#5e1825;font-size:0.95rem;min-width:24px;">${homeAway}</span>
+          ${opponentLogoHTML(game)}
+          <span style="font-weight:700;font-size:1.05rem;color:#111;">${game.opponent}</span>
+        </div>
+        <div style="font-size:0.8rem;color:#888;">${game.rinkName || ''}${game.rinkAddress ? ' · ' + game.rinkAddress : ''}</div>
+        ${resultHTML}
+      </div>
+    `;
   }
 
   // Article modal
@@ -152,6 +215,7 @@
     document.getElementById('articleModalContent').textContent = post.content || '';
     articleModal.classList.add('active');
   }
+  window.openArticle = openArticle;
 
   // Load news
   async function loadNews() {
@@ -164,7 +228,6 @@
     const pickedPosts = posts.filter(p => p.homeCard && p.id !== mainPost?.id).slice(0, 4);
     const supportingPosts = pickedPosts.length ? pickedPosts : posts.filter(p => p.id !== mainPost?.id).slice(0, 4);
 
-    // Render main featured post
     const featuredSection = document.getElementById('featuredSection');
     if (mainPost) {
       const color = categoryColors[mainPost.category] || '#5e1825';
@@ -176,11 +239,10 @@
           <div class="featured-main-overlay">
             <span class="featured-category-tag" style="background:${color}">${mainPost.category || ''}</span>
             <h1 class="featured-main-title">${mainPost.title}</h1>
-            <p class="featured-main-excerpt">${(mainPost.content || '').substring(0, 150)}${mainPost.content?.length > 150 ? '...' : ''}</p>
+            <p class="featured-main-excerpt">${(mainPost.content || '').substring(0, 150)}${(mainPost.content?.length||0) > 150 ? '...' : ''}</p>
             <span class="featured-read-more">Read More →</span>
           </div>
-        </div>
-      `;
+        </div>`;
     } else {
       featuredSection.innerHTML = `
         <div class="featured-main featured-main-empty">
@@ -189,13 +251,10 @@
             <p class="featured-main-excerpt">Tradition. Excellence. Victory.</p>
             <a href="/pages/schedule.html" onclick="localStorage.removeItem('admirals_scheduleSeasonPublic')" class="featured-read-more">View Schedule →</a>
           </div>
-        </div>
-      `;
+        </div>`;
     }
 
-    // Render supporting stories
     if (supportingPosts.length) {
-      const storiesSection = document.getElementById('storiesSection');
       const storiesGrid = document.getElementById('storiesGrid');
       storiesGrid.innerHTML = supportingPosts.map(p => {
         const color = categoryColors[p.category] || '#5e1825';
@@ -211,10 +270,39 @@
               <div class="story-card-date">${formatDate(p.date)}</div>
               <h3 class="story-card-title">${p.title}</h3>
             </div>
-          </div>
-        `;
+          </div>`;
       }).join('');
-      storiesSection.style.display = 'block';
+      document.getElementById('storiesSection').style.display = 'block';
+    }
+  }
+
+  // Load next/last game from current season
+  async function loadGames() {
+    const seasonsSnap = await getDocs(collection(db, 'seasons'));
+    let currentSeasonId = null;
+    seasonsSnap.forEach(d => { if (d.data().current) currentSeasonId = d.id; });
+    if (!currentSeasonId) { document.getElementById('homeNoGames').style.display = 'block'; return; }
+
+    const gamesSnap = await getDocs(collection(db, 'seasons', currentSeasonId, 'schedule'));
+    const games = [];
+    gamesSnap.forEach(d => games.push(d.data()));
+    games.sort((a, b) => new Date(a.date+'T'+(a.time||'00:00')) - new Date(b.date+'T'+(b.time||'00:00')));
+
+    const today = new Date(); today.setHours(0,0,0,0);
+    const nextGame = games.find(g => !g.result && new Date(g.date+'T12:00:00') >= today);
+    const gamesWithResult = games.filter(g => g.result);
+    const lastGame = gamesWithResult.length ? gamesWithResult[gamesWithResult.length-1] : null;
+
+    if (nextGame) {
+      document.getElementById('homeNextGameCard').innerHTML = buildGameCard(nextGame, false);
+      document.getElementById('homeNextGame').style.display = 'block';
+    }
+    if (lastGame) {
+      document.getElementById('homeLastGameCard').innerHTML = buildGameCard(lastGame, true);
+      document.getElementById('homeLastGame').style.display = 'block';
+    }
+    if (!nextGame && !lastGame) {
+      document.getElementById('homeNoGames').style.display = 'block';
     }
   }
 
@@ -223,16 +311,15 @@
     const snap = await getDocs(collection(db, 'quickhits'));
     const hits = [];
     snap.forEach(d => hits.push({ id: d.id, ...d.data() }));
-    hits.sort((a, b) => (a.order || 0) - (b.order || 0));
+    hits.sort((a, b) => (a.order||0) - (b.order||0));
     const list = document.getElementById('quickHitsList');
     if (!hits.length) { list.innerHTML = '<p style="color:#999;font-size:0.9rem;">No links yet</p>'; return; }
     list.innerHTML = hits.map(h => `
-      <a href="${h.url || '#'}" target="_blank" rel="noopener" class="quick-hit-item">
+      <a href="${h.url||'#'}" target="_blank" rel="noopener" class="quick-hit-item">
         ${h.emoji ? `<span class="quick-hit-emoji">${h.emoji}</span>` : ''}
         <span>${h.label}</span>
         <span class="quick-hit-arrow">→</span>
-      </a>
-    `).join('');
+      </a>`).join('');
   }
 
   // Load upcoming events
@@ -252,16 +339,13 @@
         </div>
         <div class="upcoming-event-info">
           <div class="upcoming-event-name">${e.name}</div>
-          <div class="upcoming-event-location">${e.location || ''}</div>
+          <div class="upcoming-event-location">${e.location||''}</div>
         </div>
-      </a>
-    `).join('');
+      </a>`).join('');
   }
 
-  // Make openArticle global
-  window.openArticle = openArticle;
-
   loadNews();
+  loadGames();
   loadQuickHits();
   loadUpcomingEvents();
 

@@ -339,3 +339,34 @@
 @media (max-width: 480px) {
   .stories-grid { grid-template-columns: 1fr; }
 }
+
+/* HOME GAME CARDS */
+.home-games-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-right-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-game-card {
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.home-game-upcoming {
+  border-left: 4px solid #5e1825;
+}
+
+.home-game-past {
+  border-left: 4px solid #ccc;
+}
+
+@media (max-width: 768px) {
+  .home-games-col { margin-bottom: 2rem; }
+}
