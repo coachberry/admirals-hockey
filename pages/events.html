@@ -104,7 +104,7 @@
   const db = getFirestore(app);
 
   const typeColors = {
-    'Team Event': '#5e1825', 'Fundraiser': '#e65100',
+    'Team Event': '#5D1725', 'Fundraiser': '#e65100',
     'Community': '#2e7d32', 'Alumni': '#1565c0', 'Other': '#555'
   };
 
@@ -121,7 +121,7 @@
   }
 
   function buildEventCard(e, isPast) {
-    const color = typeColors[e.type] || '#5e1825';
+    const color = typeColors[e.type] || '#5D1725';
     const d = new Date(e.date + 'T12:00:00');
     return `
       <div class="event-card ${isPast ? 'event-card-past' : ''}">

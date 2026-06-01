@@ -19,7 +19,7 @@
 .alumni-signup-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #5e1825;
+  color: #5D1725;
   margin-bottom: 0.75rem;
 }
 
@@ -52,11 +52,11 @@
 .alumni-form-group input:focus,
 .alumni-form-group select:focus {
   outline: none;
-  border-color: #5e1825;
+  border-color: #5D1725;
 }
 
 .alumni-submit-btn {
-  background: #5e1825;
+  background: #5D1725;
   color: white;
   border: none;
   padding: 0.9rem 1.5rem;
@@ -68,7 +68,7 @@
   margin-top: 0.5rem;
 }
 
-.alumni-submit-btn:hover { background: #3d0f18; }
+.alumni-submit-btn:hover { background: #3c0f17; }
 .alumni-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .alumni-error {
@@ -86,7 +86,7 @@
 
 .alumni-success h3 {
   font-size: 1.4rem;
-  color: #5e1825;
+  color: #5D1725;
   margin-bottom: 0.75rem;
 }
 
@@ -111,7 +111,7 @@
 .alumni-info-card h3 {
   font-size: 1rem;
   font-weight: 700;
-  color: #5e1825;
+  color: #5D1725;
   margin-bottom: 0.5rem;
 }
 

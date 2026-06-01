@@ -299,11 +299,11 @@
         const isGWG = s.gwg === 1;
         if (isGWG) hasGWG = true;
         return `<tr class="${isGWG ? 'gwg-row' : ''}">
-          <td style="color:#5e1825;font-weight:700;">${s.number}</td>
+          <td style="color:#5D1725;font-weight:700;">${s.number}</td>
           <td style="font-weight:600;">${s.name}${isGWG ? ' ⭐' : ''}</td>
           <td>${s.goals||0}</td>
           <td>${s.assists||0}</td>
-          <td style="font-weight:700;color:#5e1825;">${pts}</td>
+          <td style="font-weight:700;color:#5D1725;">${pts}</td>
           <td>${s.ppg||0}</td><td>${s.ppa||0}</td>
           <td>${s.shg||0}</td><td>${s.sha||0}</td>
           <td>${s.plus||0}</td><td>${s.minus||0}</td>
@@ -342,7 +342,7 @@
         const sv = Math.max(0, (g.shotsAgainst||0) - (g.goalsAgainst||0));
         const isEN = g.playerId === 'EMPTY_NET';
         return `<tr ${isEN ? 'style="background:#f5f5f5;font-style:italic;"' : ''}>
-          <td style="color:#5e1825;font-weight:700;">${g.number}</td>
+          <td style="color:#5D1725;font-weight:700;">${g.number}</td>
           <td style="font-weight:600;">${g.name}</td>
           <td>${isEN ? '-' : (g.decision||'-')}</td>
           <td>${minToMMSS(g.minutesPlayed||0)}</td>

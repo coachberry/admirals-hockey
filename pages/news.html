@@ -116,7 +116,7 @@
   const db = getFirestore(app);
 
   const categoryColors = {
-    'Game Report': '#5e1825', 'Team Update': '#1565c0',
+    'Game Report': '#5D1725', 'Team Update': '#1565c0',
     'Announcement': '#e65100', 'Player Spotlight': '#2e7d32'
   };
 
@@ -134,10 +134,10 @@
   articleModal.addEventListener('click', e => { if (e.target === articleModal) articleModal.classList.remove('active'); });
 
   function openArticle(post) {
-    const color = categoryColors[post.category] || '#5e1825';
+    const color = categoryColors[post.category] || '#5D1725';
     document.getElementById('articleModalImg').innerHTML = post.imageURL
       ? `<img src="${post.imageURL}" alt="${post.title}">`
-      : `<div class="article-modal-img-placeholder" style="background:linear-gradient(135deg,${color},#3d0f18);height:200px;"></div>`;
+      : `<div class="article-modal-img-placeholder" style="background:linear-gradient(135deg,${color},#3c0f17);height:200px;"></div>`;
     document.getElementById('articleModalCategory').textContent = post.category || '';
     document.getElementById('articleModalCategory').style.background = color;
     document.getElementById('articleModalTitle').textContent = post.title;
@@ -166,10 +166,10 @@
       return;
     }
     grid.innerHTML = filtered.map(p => {
-      const color = categoryColors[p.category] || '#5e1825';
+      const color = categoryColors[p.category] || '#5D1725';
       const bgStyle = p.imageURL
         ? `background-image:url('${p.imageURL}');background-size:cover;background-position:center;`
-        : `background:linear-gradient(135deg,${color},#3d0f18);`;
+        : `background:linear-gradient(135deg,${color},#3c0f17);`;
       return `
         <div class="news-card" onclick="openArticleById('${p.id}')">
           <div class="news-card-img" style="${bgStyle}">

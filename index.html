@@ -128,14 +128,14 @@
 
   function openArticleModal(post) {
     var colors = {
-      'Game Report': '#5e1825', 'Team Update': '#1565c0',
+      'Game Report': '#5D1725', 'Team Update': '#1565c0',
       'Announcement': '#e65100', 'Player Spotlight': '#2e7d32'
     };
-    var color = colors[post.category] || '#5e1825';
+    var color = colors[post.category] || '#5D1725';
     var modal = document.getElementById('articleModal');
     document.getElementById('articleModalImg').innerHTML = post.imageURL
       ? '<img src="' + post.imageURL + '" alt="' + post.title + '">'
-      : '<div class="article-modal-img-placeholder" style="background:linear-gradient(135deg,' + color + ',#3d0f18);height:200px;"></div>';
+      : '<div class="article-modal-img-placeholder" style="background:linear-gradient(135deg,' + color + ',#3c0f17);height:200px;"></div>';
     document.getElementById('articleModalCategory').textContent = post.category || '';
     document.getElementById('articleModalCategory').style.background = color;
     document.getElementById('articleModalTitle').textContent = post.title;
@@ -183,7 +183,7 @@
   const db = getFirestore(app);
 
   const categoryColors = {
-    'Game Report': '#5e1825', 'Team Update': '#1565c0',
+    'Game Report': '#5D1725', 'Team Update': '#1565c0',
     'Announcement': '#e65100', 'Player Spotlight': '#2e7d32'
   };
   const resultColors = { W:'#2e7d32', OTW:'#2e7d32', SOW:'#2e7d32', L:'#c62828', OTL:'#c62828', SOL:'#c62828', T:'#f57c00' };
@@ -218,7 +218,7 @@
       <div style="font-size:0.72rem;color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem;">${typeLabel}</div>
       <div style="font-size:0.85rem;color:#555;margin-bottom:0.75rem;">${formatDateShort(game.date)} · ${formatTime(game.time, game.timezone)}</div>
       <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem;">
-        <span style="font-weight:700;color:#5e1825;font-size:0.95rem;min-width:24px;">${homeAway}</span>
+        <span style="font-weight:700;color:#5D1725;font-size:0.95rem;min-width:24px;">${homeAway}</span>
         ${opponentLogoHTML(game)}
         <span style="font-weight:700;font-size:1.05rem;color:#111;">${game.opponent}</span>
       </div>
@@ -245,10 +245,10 @@
 
     const featuredSection = document.getElementById('featuredSection');
     if (mainPost) {
-      const color = categoryColors[mainPost.category] || '#5e1825';
+      const color = categoryColors[mainPost.category] || '#5D1725';
       const bgStyle = mainPost.imageURL
         ? `background-image:url('${mainPost.imageURL}');background-size:cover;background-position:center;`
-        : `background:linear-gradient(135deg,${color},#3d0f18);`;
+        : `background:linear-gradient(135deg,${color},#3c0f17);`;
       featuredSection.innerHTML = `
         <div class="featured-main" style="${bgStyle}" data-postid="${mainPost.id}" id="featuredMainCard">
           <div class="featured-main-overlay">
@@ -274,10 +274,10 @@
       const storiesGrid = document.getElementById('storiesGrid');
       storiesGrid.innerHTML = '';
       supportingPosts.forEach(p => {
-        const color = categoryColors[p.category] || '#5e1825';
+        const color = categoryColors[p.category] || '#5D1725';
         const bgStyle = p.imageURL
           ? `background-image:url('${p.imageURL}');background-size:cover;background-position:center;`
-          : `background:linear-gradient(135deg,${color},#3d0f18);`;
+          : `background:linear-gradient(135deg,${color},#3c0f17);`;
         const card = document.createElement('div');
         card.className = 'story-card';
         card.innerHTML = `
@@ -332,7 +332,7 @@
       document.getElementById('homeNextGameCard').innerHTML = buildGameCard(nextGame, false);
       document.getElementById('homeNextGame').style.display = 'block';
     } else {
-      document.getElementById('homeNextGameCard').innerHTML = `<div style="padding:1.25rem;color:#888;font-style:italic;font-size:0.95rem;">No upcoming games scheduled yet.<br><a href="/pages/schedule.html" onclick="localStorage.removeItem('admirals_scheduleSeasonPublic')" style="color:#5e1825;font-weight:600;font-style:normal;">View Schedule →</a></div>`;
+      document.getElementById('homeNextGameCard').innerHTML = `<div style="padding:1.25rem;color:#888;font-style:italic;font-size:0.95rem;">No upcoming games scheduled yet.<br><a href="/pages/schedule.html" onclick="localStorage.removeItem('admirals_scheduleSeasonPublic')" style="color:#5D1725;font-weight:600;font-style:normal;">View Schedule →</a></div>`;
       document.getElementById('homeNextGame').style.display = 'block';
     }
 

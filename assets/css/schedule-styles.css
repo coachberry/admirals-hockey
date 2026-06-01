@@ -15,7 +15,7 @@
 
 .season-selector-wrap label {
   font-weight: 600;
-  color: #5e1825;
+  color: #5D1725;
   font-size: 0.95rem;
   white-space: nowrap;
 }
@@ -32,7 +32,7 @@
 
 .season-selector-public:focus {
   outline: none;
-  border-color: #5e1825;
+  border-color: #5D1725;
 }
 
 /* ============================================
@@ -70,7 +70,7 @@
 .stats-bar-value {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #5e1825;
+  color: #5D1725;
   text-align: center;
   line-height: 1.4;
 }
@@ -103,7 +103,7 @@
 }
 
 .featured-label {
-  background: linear-gradient(135deg, #5e1825, #3d0f18);
+  background: linear-gradient(135deg, #5D1725, #3c0f17);
   color: white;
   padding: 0.6rem 1.25rem;
   font-size: 0.8rem;
@@ -113,7 +113,7 @@
 }
 
 .featured-result-card .featured-label {
-  background: linear-gradient(135deg, #3d0f18, #5e1825);
+  background: linear-gradient(135deg, #3c0f17, #5D1725);
 }
 
 .featured-content { padding: 1.25rem; }
@@ -147,7 +147,7 @@
 .featured-homeaway {
   font-size: 1rem;
   font-weight: 700;
-  color: #5e1825;
+  color: #5D1725;
   min-width: 24px;
 }
 
@@ -221,12 +221,12 @@
 
 .game-row:hover {
   box-shadow: 0 2px 12px rgba(94,24,37,0.15);
-  border-color: #5e1825;
+  border-color: #5D1725;
   transform: translateY(-1px);
 }
 
 .game-past { border-left: 4px solid #ccc; }
-.game-upcoming { border-left: 4px solid #5e1825; }
+.game-upcoming { border-left: 4px solid #5D1725; }
 
 .game-playoff {
   border-left: 4px solid #d4a574;
@@ -289,7 +289,7 @@
 
 .game-row-homeaway {
   font-weight: 700;
-  color: #5e1825;
+  color: #5D1725;
   font-size: 0.95rem;
   min-width: 20px;
 }
@@ -387,7 +387,7 @@
 }
 
 .gvm-header {
-  background: linear-gradient(135deg, #5e1825, #3d0f18);
+  background: linear-gradient(135deg, #5D1725, #3c0f17);
   padding: 1.25rem 1.5rem;
   color: white;
 }
@@ -470,13 +470,13 @@
 .gvm-ts-value {
   font-size: 1rem;
   font-weight: 700;
-  color: #5e1825;
+  color: #5D1725;
 }
 
 .gvm-section-title {
   font-size: 1rem;
   font-weight: 700;
-  color: #5e1825;
+  color: #5D1725;
   margin: 0 0 0.75rem 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;

@@ -736,7 +736,7 @@ function createGameModal() {
         </div>
 
         <div class="form-label-group" style="margin-top:1rem;">
-          <label class="field-label" style="color:#5e1825;">Result</label>
+          <label class="field-label" style="color:#5D1725;">Result</label>
           <select id="gameResult">
             <option value="">No Result Yet</option>
             <option value="W">W - Win</option>
@@ -1054,7 +1054,7 @@ async function loadNews() {
   posts.forEach(n => {
     const dateStr = new Date(n.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const item = document.createElement('div'); item.className = 'item';
-    const badges = `${n.featured ? '<span style="background:#5e1825;color:white;font-size:0.65rem;padding:2px 6px;border-radius:3px;margin-left:6px;">⭐ Featured</span>' : ''}${n.homeCard ? '<span style="background:#1565c0;color:white;font-size:0.65rem;padding:2px 6px;border-radius:3px;margin-left:4px;">📌 Home</span>' : ''}`;
+    const badges = `${n.featured ? '<span style="background:#5D1725;color:white;font-size:0.65rem;padding:2px 6px;border-radius:3px;margin-left:6px;">⭐ Featured</span>' : ''}${n.homeCard ? '<span style="background:#1565c0;color:white;font-size:0.65rem;padding:2px 6px;border-radius:3px;margin-left:4px;">📌 Home</span>' : ''}`;
     item.innerHTML = `<div class="item-info"><div><strong>${n.title}${badges}</strong><span>${n.category} | ${dateStr}</span></div></div><div><button class="btn-edit" onclick="editNews('${n.id}')">Edit</button><button class="btn-delete" onclick="deleteNews('${n.id}')">Delete</button></div>`;
     list.appendChild(item);
   });
@@ -1262,7 +1262,7 @@ window.openGameStats = async (gameId, seasonId) => {
       const s = existingSkaterStats[p.id] || {};
       return `
         <tr data-player-id="${p.id}">
-          <td style="color:#5e1825;font-weight:700;">${p.number || '-'}</td>
+          <td style="color:#5D1725;font-weight:700;">${p.number || '-'}</td>
           <td style="font-weight:600;min-width:120px;white-space:nowrap;">${p.name}</td>
           <td><input type="checkbox" class="stat-checkbox" data-field="gpCheck" ${s.gp ? 'checked' : ''}></td>
           <td><input type="number" class="stat-input" data-field="sog" value="${s.sog || 0}" min="0"></td>
@@ -1288,7 +1288,7 @@ window.openGameStats = async (gameId, seasonId) => {
     const isEN = p.isEmptyNet;
     return `
       <tr data-player-id="${p.id}" ${isEN ? 'style="background:#f9f9f9;"' : ''}>
-        <td style="color:#5e1825;font-weight:700;">${p.number || '-'}</td>
+        <td style="color:#5D1725;font-weight:700;">${p.number || '-'}</td>
         <td style="font-weight:600;min-width:120px;white-space:nowrap;">${p.name}${isEN ? ' <span style="font-size:0.7rem;color:#999;">(EN)</span>' : ''}</td>
         <td>${isEN ? '-' : `<input type="checkbox" class="stat-checkbox" data-field="gsCheck" ${g.gs ? 'checked' : ''}>`}</td>
         <td><input type="checkbox" class="stat-checkbox" data-field="gpCheck" ${g.gp ? 'checked' : ''}></td>
@@ -1821,7 +1821,7 @@ function renderSummerRoster() {
     <div style="display:flex;align-items:center;gap:0.5rem;padding:4px 8px;background:white;border:1px solid #eee;border-radius:4px;font-size:0.85rem;">
       <span style="font-weight:700;min-width:28px;">#${p.number}</span>
       <span style="flex:1;">${p.name}</span>
-      <span style="color:${p.position === 'Goalie' ? '#5e1825' : '#666'};font-size:0.75rem;font-weight:600;">${p.position === 'Goalie' ? 'G' : ''}</span>
+      <span style="color:${p.position === 'Goalie' ? '#5D1725' : '#666'};font-size:0.75rem;font-weight:600;">${p.position === 'Goalie' ? 'G' : ''}</span>
       <button onclick="removeSummerPlayer(${i})" style="background:none;border:none;color:#c62828;cursor:pointer;font-size:1rem;padding:0 4px;">×</button>
     </div>`).join('');
 }

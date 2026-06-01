@@ -117,7 +117,7 @@ window.openGameStats = async (gameId, seasonId) => {
       const s = existingSkaterStats[p.id] || {};
       return `
         <tr data-player-id="${p.id}">
-          <td style="color:#5e1825;font-weight:700;">${p.number || '-'}</td>
+          <td style="color:#5D1725;font-weight:700;">${p.number || '-'}</td>
           <td style="font-weight:600;min-width:120px;white-space:nowrap;">${p.name}</td>
           <td><input type="checkbox" class="stat-checkbox" data-field="gpCheck" ${s.gp ? 'checked' : ''}></td>
           <td><input type="number" class="stat-input" data-field="sog" value="${s.sog || 0}" min="0"></td>
@@ -143,7 +143,7 @@ window.openGameStats = async (gameId, seasonId) => {
     const isEN = p.isEmptyNet;
     return `
       <tr data-player-id="${p.id}" ${isEN ? 'style="background:#f9f9f9;"' : ''}>
-        <td style="color:#5e1825;font-weight:700;">${p.number || '-'}</td>
+        <td style="color:#5D1725;font-weight:700;">${p.number || '-'}</td>
         <td style="font-weight:600;min-width:120px;white-space:nowrap;">${p.name}${isEN ? ' <span style="font-size:0.7rem;color:#999;">(EN)</span>' : ''}</td>
         <td>${isEN ? `<input type="checkbox" class="stat-checkbox" data-field="gsCheck" ${g.gs ? 'checked' : ''}>` : `<input type="checkbox" class="stat-checkbox" data-field="gsCheck" ${g.gs ? 'checked' : ''}>`}</td>
         <td>${isEN ? '-' : `<input type="checkbox" class="stat-checkbox" data-field="gpCheck" ${g.gp ? 'checked' : ''}>`}</td>

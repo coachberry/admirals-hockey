@@ -24,8 +24,8 @@
   color: #555;
 }
 
-.summer-filter-btn:hover { border-color: #5e1825; color: #5e1825; }
-.summer-filter-btn.active { background: #5e1825; color: white; border-color: #5e1825; }
+.summer-filter-btn:hover { border-color: #5D1725; color: #5D1725; }
+.summer-filter-btn.active { background: #5D1725; color: white; border-color: #5D1725; }
 .summer-filter-btn.active .btn-dot { border: 2px solid white; }
 
 .btn-dot {
@@ -49,7 +49,7 @@
 }
 
 .summer-standings-table th {
-  background: #5e1825;
+  background: #5D1725;
   color: white;
   padding: 0.6rem 0.75rem;
   text-align: center;
@@ -111,7 +111,7 @@
 }
 
 .game-played { border-left: 4px solid #ccc; }
-.game-upcoming { border-left: 4px solid #5e1825; }
+.game-upcoming { border-left: 4px solid #5D1725; }
 
 .summer-game-date {
   min-width: 110px;

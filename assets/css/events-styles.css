@@ -28,7 +28,7 @@
 }
 
 .event-date-block {
-  background: #5e1825;
+  background: #5D1725;
   color: white;
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
@@ -60,7 +60,7 @@
 .event-link {
   display: inline-block;
   margin-top: 0.75rem;
-  color: #5e1825;
+  color: #5D1725;
   font-weight: 600;
   font-size: 0.9rem;
   text-decoration: none;

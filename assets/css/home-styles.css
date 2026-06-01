@@ -26,7 +26,7 @@
 }
 
 .featured-main-empty {
-  background: linear-gradient(135deg, #5e1825, #3d0f18);
+  background: linear-gradient(135deg, #5D1725, #3c0f17);
 }
 
 .featured-main-overlay {
@@ -142,10 +142,10 @@
 .home-section-title {
   font-size: 1.3rem;
   font-weight: 700;
-  color: #5e1825;
+  color: #5D1725;
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid #5e1825;
+  border-bottom: 2px solid #5D1725;
 }
 
 /* QUICK HITS */
@@ -168,7 +168,7 @@
 }
 
 .quick-hit-item:last-child { border-bottom: none; }
-.quick-hit-item:hover { color: #5e1825; }
+.quick-hit-item:hover { color: #5D1725; }
 
 .quick-hit-emoji { font-size: 1.1rem; }
 
@@ -178,7 +178,7 @@
   font-size: 0.9rem;
 }
 
-.quick-hit-item:hover .quick-hit-arrow { color: #5e1825; }
+.quick-hit-item:hover .quick-hit-arrow { color: #5D1725; }
 
 /* UPCOMING EVENTS */
 .upcoming-events-list {
@@ -201,12 +201,12 @@
 }
 
 .upcoming-event-item:hover {
-  border-color: #5e1825;
+  border-color: #5D1725;
   box-shadow: 0 2px 8px rgba(94,24,37,0.1);
 }
 
 .upcoming-event-date {
-  background: #5e1825;
+  background: #5D1725;
   color: white;
   border-radius: 4px;
   padding: 0.4rem 0.6rem;
@@ -242,7 +242,7 @@
 .view-all-link {
   display: inline-block;
   margin-top: 0.75rem;
-  color: #5e1825;
+  color: #5D1725;
   font-weight: 600;
   font-size: 0.9rem;
   text-decoration: none;
@@ -359,7 +359,7 @@
 }
 
 .home-game-upcoming {
-  border-left: 4px solid #5e1825;
+  border-left: 4px solid #5D1725;
 }
 
 .home-game-past {

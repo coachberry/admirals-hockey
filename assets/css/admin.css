@@ -5,8 +5,8 @@
 }
 
 :root {
-  --primary-maroon: #5e1825;
-  --dark-maroon: #3d0f18;
+  --primary-maroon: #5D1725;
+  --dark-maroon: #3c0f17;
   --white: #FFFFFF;
   --light-gray: #f5f5f5;
   --border: #e0e0e0;
@@ -365,7 +365,7 @@ body {
 
 /* LIST HEADING */
 .list-heading {
-  color: #5e1825;
+  color: #5D1725;
   font-size: 1.1rem;
   margin: 2rem 0 1rem;
   padding-bottom: 0.5rem;
@@ -410,7 +410,7 @@ body {
 }
 
 .photo-preview-empty {
-  background: linear-gradient(135deg, #5e1825, #3d0f18);
+  background: linear-gradient(135deg, #5D1725, #3c0f17);
   color: white;
   font-size: 0.8rem;
   font-weight: 600;
@@ -457,7 +457,7 @@ body {
   border-radius: 50%;
   object-fit: cover;
   margin-right: 0.75rem;
-  border: 2px solid #5e1825;
+  border: 2px solid #5D1725;
 }
 
 .item-info {
@@ -497,7 +497,7 @@ body {
   height: 220px;
   overflow: hidden;
   border-radius: 6px;
-  border: 2px solid #5e1825;
+  border: 2px solid #5D1725;
   cursor: grab;
   position: relative;
   background: #111;
@@ -760,9 +760,9 @@ body {
 }
 
 .news-editor-tab.active {
-  background: #5e1825;
+  background: #5D1725;
   color: white;
-  border-color: #5e1825;
+  border-color: #5D1725;
 }
 
 .editor-toolbar {
@@ -808,7 +808,7 @@ body {
   background: white;
 }
 
-.editor-visual:focus { border-color: #5e1825; }
+.editor-visual:focus { border-color: #5D1725; }
 
 .editor-html {
   width: 100%;
@@ -821,7 +821,7 @@ body {
   resize: vertical;
 }
 
-.editor-html:focus { outline: none; border-color: #5e1825; }
+.editor-html:focus { outline: none; border-color: #5D1725; }
 
 /* HOME ORDER LIST */
 .home-order-list {
@@ -851,7 +851,7 @@ body {
 }
 
 .home-order-num {
-  background: #5e1825;
+  background: #5D1725;
   color: white;
   border-radius: 50%;
   width: 22px;

@@ -15,7 +15,7 @@
 
 .season-selector-wrap label {
   font-weight: 600;
-  color: #5e1825;
+  color: #5D1725;
   font-size: 0.95rem;
   white-space: nowrap;
 }
@@ -45,7 +45,7 @@
 }
 
 .stats-table thead {
-  background: linear-gradient(135deg, #5e1825, #3d0f18);
+  background: linear-gradient(135deg, #5D1725, #3c0f17);
   color: white;
 }
 
@@ -95,7 +95,7 @@
 }
 
 .stats-table td.col-num {
-  color: #5e1825;
+  color: #5D1725;
   font-weight: 700;
 }
 
@@ -106,7 +106,7 @@
 
 .stats-table td.stat-pts {
   font-weight: 700;
-  color: #5e1825;
+  color: #5D1725;
 }
 
 .empty-cell {
@@ -165,12 +165,12 @@
 .team-stat-card-value {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #5e1825;
+  color: #5D1725;
 }
 
 /* Totals row - maroon bg white text */
 .stats-totals-row td {
-  background: #5e1825 !important;
+  background: #5D1725 !important;
   color: white !important;
   font-weight: 700 !important;
 }
@@ -209,7 +209,7 @@
 }
 
 .stats-table th.sort-active {
-  background: #3d0f18;
+  background: #3c0f17;
 }
 
 .sort-arrow {
