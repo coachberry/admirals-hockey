@@ -970,6 +970,9 @@ window.deleteGame = async (id) => {
 // ============================================
 // NEWS
 // ============================================
+let newsImageData = null;       // ADD THIS
+let currentNewsImageURL = null; // ADD THIS
+
 document.getElementById('addNewsBtn').addEventListener('click', () => {
   ['newsId','newsTitle','newsDate','newsCategory','newsContent'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   if (document.getElementById('newsSummary')) document.getElementById('newsSummary').value = '';
