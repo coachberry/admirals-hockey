@@ -1764,6 +1764,106 @@ window.insertLink = window.insertLink || function() {
 
 let summerCurrentSeasonId = null;
 let summerTeams = {};
+let summerTeamLogoData = null;
+let summerCurrentTeamLogoURL = null;
+let summerRoster = []; // temp roster while editing team modal
+
+// Logo helpers
+function resetSummerLogoPreview() {
+  const preview = document.getElementById('summerTeamLogoPreview');
+  const removeBtn = document.getElementById('removeSummerTeamLogo');
+  if (!preview) return;
+  if (summerCurrentTeamLogoURL) {
+    preview.innerHTML = `<img src="${summerCurrentTeamLogoURL}" style="width:100%;height:100%;object-fit:contain;">`;
+    if (removeBtn) removeBtn.style.display = 'inline-block';
+  } else {
+    preview.textContent = 'No Logo';
+    if (removeBtn) removeBtn.style.display = 'none';
+  }
+}
+
+// Logo file input
+const summerTeamLogoInput = document.getElementById('summerTeamLogo');
+if (summerTeamLogoInput) {
+  summerTeamLogoInput.addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      summerTeamLogoData = e.target.result;
+      summerCurrentTeamLogoURL = null;
+      const preview = document.getElementById('summerTeamLogoPreview');
+      preview.innerHTML = `<img src="${summerTeamLogoData}" style="width:100%;height:100%;object-fit:contain;">`;
+      document.getElementById('removeSummerTeamLogo').style.display = 'inline-block';
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+const removeSummerTeamLogoBtn = document.getElementById('removeSummerTeamLogo');
+if (removeSummerTeamLogoBtn) {
+  removeSummerTeamLogoBtn.addEventListener('click', () => {
+    summerTeamLogoData = null;
+    summerCurrentTeamLogoURL = null;
+    resetSummerLogoPreview();
+  });
+}
+
+// Roster helpers
+function renderSummerRoster() {
+  const list = document.getElementById('summerRosterList');
+  if (!list) return;
+  if (!summerRoster.length) {
+    list.innerHTML = '<div style="color:#999;font-size:0.85rem;font-style:italic;">No players added yet</div>';
+    return;
+  }
+  list.innerHTML = summerRoster.map((p, i) => `
+    <div style="display:flex;align-items:center;gap:0.5rem;padding:4px 8px;background:white;border:1px solid #eee;border-radius:4px;font-size:0.85rem;">
+      <span style="font-weight:700;min-width:28px;">#${p.number}</span>
+      <span style="flex:1;">${p.name}</span>
+      <span style="color:${p.position === 'Goalie' ? '#5e1825' : '#666'};font-size:0.75rem;font-weight:600;">${p.position === 'Goalie' ? 'G' : ''}</span>
+      <button onclick="removeSummerPlayer(${i})" style="background:none;border:none;color:#c62828;cursor:pointer;font-size:1rem;padding:0 4px;">×</button>
+    </div>`).join('');
+}
+
+window.removeSummerPlayer = function(index) {
+  summerRoster.splice(index, 1);
+  renderSummerRoster();
+};
+
+const addSummerPlayerBtn = document.getElementById('addSummerPlayerBtn');
+if (addSummerPlayerBtn) {
+  addSummerPlayerBtn.addEventListener('click', () => {
+    document.getElementById('summerPlayerNumber').value = '';
+    document.getElementById('summerPlayerName').value = '';
+    document.getElementById('summerPlayerPosition').value = 'Skater';
+    document.getElementById('summerPlayerForm').style.display = 'block';
+    document.getElementById('summerPlayerName').focus();
+  });
+}
+
+const cancelSummerPlayerBtn = document.getElementById('cancelSummerPlayerBtn');
+if (cancelSummerPlayerBtn) {
+  cancelSummerPlayerBtn.addEventListener('click', () => {
+    document.getElementById('summerPlayerForm').style.display = 'none';
+  });
+}
+
+const saveSummerPlayerBtn = document.getElementById('saveSummerPlayerBtn');
+if (saveSummerPlayerBtn) {
+  saveSummerPlayerBtn.addEventListener('click', () => {
+    const name = document.getElementById('summerPlayerName').value.trim();
+    if (!name) return;
+    summerRoster.push({
+      number: document.getElementById('summerPlayerNumber').value || '0',
+      name,
+      position: document.getElementById('summerPlayerPosition').value
+    });
+    summerRoster.sort((a, b) => parseInt(a.number) - parseInt(b.number));
+    renderSummerRoster();
+    document.getElementById('summerPlayerForm').style.display = 'none';
+  });
+}
 
 // Season management
 async function loadSummerSeasons() {
@@ -1841,9 +1941,12 @@ function renderSummerTeams() {
     <div class="item">
       <div class="item-info">
         <div style="display:flex;align-items:center;gap:0.5rem;">
-          <span style="width:16px;height:16px;border-radius:50%;background:${t.color || '#999'};display:inline-block;flex-shrink:0;"></span>
+          ${t.logoURL
+            ? `<img src="${t.logoURL}" style="width:28px;height:28px;object-fit:contain;border-radius:3px;flex-shrink:0;">`
+            : `<span style="width:16px;height:16px;border-radius:50%;background:${t.color || '#999'};display:inline-block;flex-shrink:0;"></span>`}
           <strong>${t.name}</strong>
           <span>${t.abbreviation || ''}</span>
+          <span style="color:#999;font-size:0.8rem;">${Array.isArray(t.roster) ? t.roster.length + ' players' : ''}</span>
         </div>
       </div>
       <div>
@@ -1861,6 +1964,11 @@ if (addSummerTeamBtn) {
     document.getElementById('summerTeamAbbr').value = '';
     document.getElementById('summerTeamColor').value = '#c00000';
     document.getElementById('summerTeamModalTitle').textContent = 'Add Team';
+    summerTeamLogoData = null;
+    summerCurrentTeamLogoURL = null;
+    summerRoster = [];
+    resetSummerLogoPreview();
+    renderSummerRoster();
     document.getElementById('summerTeamModal').classList.add('active');
   });
 }
@@ -1876,11 +1984,21 @@ if (saveSummerTeamBtn) {
     const id = document.getElementById('summerTeamId').value || Date.now().toString();
     const name = document.getElementById('summerTeamName').value.trim();
     if (!name || !summerCurrentSeasonId) return;
+    let logoURL = summerCurrentTeamLogoURL || '';
+    if (summerTeamLogoData) {
+      try {
+        const logoRef = ref(storage, `summer/teams/${id}`);
+        await uploadString(logoRef, summerTeamLogoData, 'data_url');
+        logoURL = await getDownloadURL(logoRef);
+      } catch(e) { console.error(e); }
+    }
     await setDoc(doc(db, 'summer', summerCurrentSeasonId, 'teams', id), {
       id,
       name,
       abbreviation: document.getElementById('summerTeamAbbr').value.trim().toUpperCase(),
-      color: document.getElementById('summerTeamColor').value
+      color: document.getElementById('summerTeamColor').value,
+      logoURL,
+      roster: summerRoster
     });
     document.getElementById('summerTeamModal').classList.remove('active');
     await loadSummerTeams();
@@ -1895,6 +2013,11 @@ window.editSummerTeam = function(id) {
   document.getElementById('summerTeamAbbr').value = t.abbreviation || '';
   document.getElementById('summerTeamColor').value = t.color || '#c00000';
   document.getElementById('summerTeamModalTitle').textContent = 'Edit Team';
+  summerTeamLogoData = null;
+  summerCurrentTeamLogoURL = t.logoURL || null;
+  summerRoster = Array.isArray(t.roster) ? [...t.roster] : [];
+  resetSummerLogoPreview();
+  renderSummerRoster();
   document.getElementById('summerTeamModal').classList.add('active');
 };
 
