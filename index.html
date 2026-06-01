@@ -218,6 +218,10 @@
     articleModal.classList.add('active');
   }
   window.openArticle = openArticle;
+  window.openArticleById = function(id) {
+    const post = (window._allPosts || []).find(p => p.id === id);
+    if (post) openArticle(post);
+  };
 
   // Load news
   async function loadNews() {
@@ -258,13 +262,14 @@
 
     if (supportingPosts.length) {
       const storiesGrid = document.getElementById('storiesGrid');
+      window._allPosts = posts;
       storiesGrid.innerHTML = supportingPosts.map(p => {
         const color = categoryColors[p.category] || '#5e1825';
         const bgStyle = p.imageURL
           ? `background-image:url('${p.imageURL}');background-size:cover;background-position:center;`
           : `background:linear-gradient(135deg,${color},#3d0f18);`;
         return `
-          <div class="story-card" onclick="openArticle(${JSON.stringify(p).replace(/"/g, '&quot;')})">
+          <div class="story-card" onclick="openArticleById('${p.id}')">
             <div class="story-card-img" style="${bgStyle}">
               <span class="story-category-tag" style="background:${color}">${p.category || ''}</span>
             </div>

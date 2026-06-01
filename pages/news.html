@@ -145,6 +145,12 @@
     articleModal.classList.add('active');
   }
   window.openArticle = openArticle;
+  window.openArticleById = function(id) {
+    const post = (window._newsPosts || []).find(p => p.id === id);
+    if (post) openArticle(post);
+  };
+
+  window._newsPosts = [];
 
   function renderGrid(filter) {
     const grid = document.getElementById('newsGrid');
@@ -188,6 +194,7 @@
     allPosts = [];
     snap.forEach(d => allPosts.push({ id: d.id, ...d.data() }));
     allPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+    window._newsPosts = allPosts;
     renderGrid('all');
   }
 
