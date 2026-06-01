@@ -72,12 +72,10 @@
 .summer-standings-table td.col-team {
   text-align: left;
   font-weight: 600;
-}
-
-.summer-standings-table td.col-team img,
-.summer-standings-table td.col-team span.team-color-dot {
-  vertical-align: middle;
-  margin-right: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 140px;
 }
 
 .summer-standings-table tr:last-child td { border-bottom: none; }
