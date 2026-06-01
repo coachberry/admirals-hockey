@@ -42,6 +42,7 @@
     <button class="tab-btn" data-tab="quickhits">Quick Hits</button>
     <button class="tab-btn" data-tab="alumni">Alumni</button>
     <button class="tab-btn" data-tab="seasons">Seasons</button>
+    <button class="tab-btn" data-tab="summer">Summer Hockey</button>
     <button class="tab-btn" data-tab="users">Manage Users</button>
     <button class="tab-btn" data-tab="settings">Settings</button>
   </div>
@@ -233,6 +234,38 @@
         <span id="alumniCount" style="color:#666;font-size:0.9rem;"></span>
       </div>
       <div id="alumniList" class="items-list"><div class="empty-state">No alumni signups yet</div></div>
+    </div>
+
+    <!-- SUMMER HOCKEY TAB -->
+    <div id="summerTab" class="tab-content">
+      <h2>Summer Hockey</h2>
+
+      <div style="display:flex;gap:1rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
+        <select id="summerAdminSeasonSelect" class="season-select" style="min-width:120px;"></select>
+        <button id="addSummerSeasonBtn" class="btn-secondary">+ New Season</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:2rem;">
+
+        <!-- TEAMS -->
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+            <h3>Teams</h3>
+            <button id="addSummerTeamBtn" class="btn-primary" style="font-size:0.85rem;padding:6px 12px;">+ Add Team</button>
+          </div>
+          <div id="summerTeamsList" class="items-list"><div class="empty-state">No teams yet</div></div>
+        </div>
+
+        <!-- GAMES -->
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+            <h3>Games</h3>
+            <button id="addSummerGameBtn" class="btn-primary" style="font-size:0.85rem;padding:6px 12px;">+ Add Game</button>
+          </div>
+          <div id="summerGamesList" class="items-list"><div class="empty-state">No games yet</div></div>
+        </div>
+
+      </div>
     </div>
 
     <!-- MANAGE USERS TAB -->
@@ -547,6 +580,114 @@
       <div class="form-buttons">
         <button id="saveQuickHitBtn" class="btn-primary">Save</button>
         <button id="cancelQuickHitBtn" class="btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SUMMER TEAM MODAL -->
+<div id="summerTeamModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="summerTeamModalTitle">Add Team</h2>
+      <button class="modal-close" id="closeSummerTeamModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="summerTeamId">
+      <div class="form-label-group">
+        <label class="field-label">Team Name</label>
+        <input type="text" id="summerTeamName" placeholder="e.g. Team USA">
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">Abbreviation</label>
+        <input type="text" id="summerTeamAbbr" placeholder="e.g. USA" maxlength="4">
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">Team Color</label>
+        <input type="color" id="summerTeamColor" value="#c00000">
+      </div>
+      <div class="form-buttons">
+        <button id="saveSummerTeamBtn" class="btn-primary">Save Team</button>
+        <button id="cancelSummerTeamBtn" class="btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SUMMER GAME MODAL -->
+<div id="summerGameModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="summerGameModalTitle">Add Game</h2>
+      <button class="modal-close" id="closeSummerGameModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="summerGameId">
+      <div class="form-row">
+        <div class="form-label-group">
+          <label class="field-label">Date</label>
+          <input type="date" id="summerGameDate">
+        </div>
+        <div class="form-label-group">
+          <label class="field-label">Time</label>
+          <input type="time" id="summerGameTime">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-label-group">
+          <label class="field-label">Home Team</label>
+          <select id="summerGameHomeTeam"></select>
+        </div>
+        <div class="form-label-group">
+          <label class="field-label">Away Team</label>
+          <select id="summerGameAwayTeam"></select>
+        </div>
+      </div>
+      <div class="captain-checkboxes">
+        <label class="captain-label">
+          <input type="checkbox" id="summerGamePlayed"> Game has been played
+        </label>
+      </div>
+      <div id="summerScoreFields" style="display:none;">
+        <div class="form-row">
+          <div class="form-label-group">
+            <label class="field-label" id="homeScoreLabel">Home Score</label>
+            <input type="number" id="summerHomeScore" min="0" placeholder="0">
+          </div>
+          <div class="form-label-group">
+            <label class="field-label" id="awayScoreLabel">Away Score</label>
+            <input type="number" id="summerAwayScore" min="0" placeholder="0">
+          </div>
+        </div>
+      </div>
+      <div class="form-buttons">
+        <button id="saveSummerGameBtn" class="btn-primary">Save Game</button>
+        <button id="cancelSummerGameBtn" class="btn-secondary">Cancel</button>
+      </div>
+      <p id="summerGameStatus" class="save-status"></p>
+    </div>
+  </div>
+</div>
+
+<!-- SUMMER SEASON MODAL -->
+<div id="summerSeasonModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Add Season</h2>
+      <button class="modal-close" id="closeSummerSeasonModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-label-group">
+        <label class="field-label">Season Year</label>
+        <input type="text" id="summerSeasonYear" placeholder="e.g. 2027">
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">Label</label>
+        <input type="text" id="summerSeasonLabel" placeholder="e.g. Summer 2027">
+      </div>
+      <div class="form-buttons">
+        <button id="saveSummerSeasonBtn" class="btn-primary">Create Season</button>
+        <button id="cancelSummerSeasonBtn" class="btn-secondary">Cancel</button>
       </div>
     </div>
   </div>

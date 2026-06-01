@@ -1,0 +1,185 @@
+/* ============================================
+   SUMMER HOCKEY PAGE
+   ============================================ */
+
+.summer-filter-bar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.summer-filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #555;
+}
+
+.summer-filter-btn:hover { border-color: #5e1825; color: #5e1825; }
+.summer-filter-btn.active { background: #5e1825; color: white; border-color: #5e1825; }
+.summer-filter-btn.active .btn-dot { border: 2px solid white; }
+
+.btn-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* STANDINGS */
+.summer-table-wrap { overflow-x: auto; }
+
+.summer-standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  background: white;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.summer-standings-table th {
+  background: #5e1825;
+  color: white;
+  padding: 0.6rem 0.75rem;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.summer-standings-table th.col-team { text-align: left; min-width: 120px; }
+
+.summer-standings-table td {
+  padding: 0.65rem 0.75rem;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.9rem;
+}
+
+.summer-standings-table td.col-team {
+  text-align: left;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.summer-standings-table tr:last-child td { border-bottom: none; }
+.summer-standings-table tr:hover td { background: #fdf8f8; }
+.standings-leader td { background: #fdf8f8; }
+
+.team-color-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* SCHEDULE */
+.summer-schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.summer-game-row {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.game-played { border-left: 4px solid #ccc; }
+.game-upcoming { border-left: 4px solid #5e1825; }
+
+.summer-game-date {
+  min-width: 110px;
+  flex-shrink: 0;
+}
+
+.summer-date-str {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: #111;
+}
+
+.summer-time-str {
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 2px;
+}
+
+.summer-game-matchup {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.summer-team {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.away-team { justify-content: flex-end; flex-direction: row-reverse; }
+
+.summer-team-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #111;
+}
+
+.team-winner .summer-team-name { color: #2e7d32; }
+
+.summer-score {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #111;
+  min-width: 70px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+
+.score-vs { font-size: 0.85rem; color: #999; font-weight: 500; }
+.score-sep { font-size: 1rem; color: #ccc; }
+
+.summer-game-final {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #999;
+  min-width: 40px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .summer-game-row { flex-wrap: wrap; gap: 0.5rem; }
+  .summer-game-date { width: 100%; border-bottom: 1px solid #f0f0f0; padding-bottom: 0.4rem; }
+  .summer-game-final { display: none; }
+}

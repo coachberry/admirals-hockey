@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Summer Hockey - Franklin Admirals</title>
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <link rel="stylesheet" href="/assets/css/summer-styles.css">
+</head>
+<body>
+
+<header>
+  <div class="header-container">
+    <a href="/index.html"><img src="/assets/images/franklin-admirals-hockey-logo-lowres.png" alt="Franklin Admirals Hockey" class="logo-img"></a>
+    <nav>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/index.html" class="nav-link">Home</a></li>
+        <li><a href="/pages/schedule.html" class="nav-link">Schedule</a></li>
+        <li><a href="/pages/roster.html" class="nav-link">Roster</a></li>
+        <li><a href="/pages/stats.html" class="nav-link">Stats</a></li>
+        <li><a href="/pages/summer.html" class="nav-link active">Summer Hockey</a></li>
+        <li><a href="/pages/news.html" class="nav-link">News</a></li>
+        <li><a href="/pages/events.html" class="nav-link">Events</a></li>
+        <li><a href="/pages/alumni.html" class="nav-link">Alumni</a></li>
+        <li><a href="/pages/contact.html" class="nav-link">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<section class="hero-section">
+  <div class="hero-container">
+    <div class="hero-badge">Franklin Admirals Hockey</div>
+    <h1 class="hero-title">Summer Hockey</h1>
+    <p class="hero-subtitle">In-house summer league — alumni, current players & friends</p>
+  </div>
+</section>
+
+<div class="main-container">
+
+  <div class="season-selector-wrap" style="margin-top:2rem;">
+    <label for="summerSeasonSelect">Season:</label>
+    <select id="summerSeasonSelect" class="season-selector-public"></select>
+  </div>
+
+  <!-- STANDINGS -->
+  <div style="margin-top:2rem; margin-bottom:2rem;">
+    <div class="section-header"><h2 class="section-title">Standings</h2></div>
+    <div class="summer-table-wrap">
+      <table class="summer-standings-table" id="standingsTable">
+        <thead>
+          <tr>
+            <th class="col-team">Team</th>
+            <th title="Games Played">GP</th>
+            <th title="Wins">W</th>
+            <th title="Losses">L</th>
+            <th title="Ties">T</th>
+            <th title="Points">PTS</th>
+            <th title="Goals For">GF</th>
+            <th title="Goals Against">GA</th>
+            <th title="Goal Differential">DIFF</th>
+          </tr>
+        </thead>
+        <tbody id="standingsBody">
+          <tr><td colspan="9" class="empty-cell">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SCHEDULE -->
+  <div style="margin-bottom:3rem;">
+    <div class="section-header"><h2 class="section-title">Schedule & Scores</h2></div>
+
+    <!-- Team filter -->
+    <div class="summer-filter-bar" id="teamFilterBar"></div>
+
+    <div id="summerScheduleList" class="summer-schedule-list" style="margin-top:1rem;">
+      <p style="color:#666;font-style:italic;">Loading...</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-content">
+    <div class="footer-section">
+      <h3>Quick Links</h3>
+      <p><a href="/index.html">Home</a></p>
+      <p><a href="/pages/schedule.html">Schedule</a></p>
+      <p><a href="/pages/summer.html">Summer Hockey</a></p>
+      <p><a href="/pages/events.html">Events</a></p>
+    </div>
+    <div class="footer-section">
+      <h3>Contact</h3>
+      <p><strong>Coach:</strong> Matt Berry</p>
+      <p><strong>Email:</strong> coachberry03@gmail.com</p>
+    </div>
+    <div class="footer-section">
+      <h3>Location</h3>
+      <p>Franklin High School</p>
+      <p>810 Hillsboro Rd</p>
+      <p>Franklin, TN 37064</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2025 Franklin High School Admirals Hockey. All rights reserved.</p>
+  </div>
+</footer>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
+    authDomain: "admirals-hockey.firebaseapp.com",
+    projectId: "admirals-hockey",
+    storageBucket: "admirals-hockey.firebasestorage.app",
+    messagingSenderId: "783358659334",
+    appId: "1:783358659334:web:5daffd093adca386faec87"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  let allGames = [];
+  let allTeams = {};
+  let activeFilter = 'all';
+
+  function formatDate(dateStr) {
+    return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+  }
+
+  function formatTime(time) {
+    if (!time) return '';
+    const [h, m] = time.split(':');
+    const hour = parseInt(h);
+    return `${hour % 12 || 12}:${m} ${hour >= 12 ? 'PM' : 'AM'}`;
+  }
+
+  function buildStandings(games, teams) {
+    const standings = {};
+    Object.keys(teams).forEach(id => {
+      standings[id] = { id, name: teams[id].name, color: teams[id].color, abbr: teams[id].abbreviation, gp:0, w:0, l:0, t:0, pts:0, gf:0, ga:0 };
+    });
+
+    games.filter(g => g.played).forEach(g => {
+      const home = standings[g.homeTeamId];
+      const away = standings[g.awayTeamId];
+      if (!home || !away) return;
+
+      const hs = parseInt(g.homeScore) || 0;
+      const as = parseInt(g.awayScore) || 0;
+
+      home.gp++; away.gp++;
+      home.gf += hs; home.ga += as;
+      away.gf += as; away.ga += hs;
+
+      if (hs > as) { home.w++; home.pts+=2; away.l++; }
+      else if (as > hs) { away.w++; away.pts+=2; home.l++; }
+      else { home.t++; home.pts++; away.t++; away.pts++; }
+    });
+
+    return Object.values(standings).sort((a, b) =>
+      b.pts !== a.pts ? b.pts - a.pts :
+      (b.gf - b.ga) !== (a.gf - a.ga) ? (b.gf - b.ga) - (a.gf - a.ga) :
+      b.gf - a.gf
+    );
+  }
+
+  function renderStandings(games, teams) {
+    const sorted = buildStandings(games, teams);
+    document.getElementById('standingsBody').innerHTML = sorted.map((t, i) => `
+      <tr class="${i === 0 && t.gp > 0 ? 'standings-leader' : ''}">
+        <td class="col-team">
+          <span class="team-color-dot" style="background:${t.color || '#999'};"></span>
+          ${t.name}
+        </td>
+        <td>${t.gp}</td>
+        <td>${t.w}</td>
+        <td>${t.l}</td>
+        <td>${t.t}</td>
+        <td><strong>${t.pts}</strong></td>
+        <td>${t.gf}</td>
+        <td>${t.ga}</td>
+        <td>${t.gf - t.ga > 0 ? '+' + (t.gf - t.ga) : t.gf - t.ga}</td>
+      </tr>
+    `).join('');
+  }
+
+  function renderSchedule(filter) {
+    const list = document.getElementById('summerScheduleList');
+    const filtered = filter === 'all'
+      ? allGames
+      : allGames.filter(g => g.homeTeamId === filter || g.awayTeamId === filter);
+
+    if (!filtered.length) {
+      list.innerHTML = '<p style="color:#666;font-style:italic;">No games found.</p>';
+      return;
+    }
+
+    list.innerHTML = filtered.map(g => {
+      const home = allTeams[g.homeTeamId] || { name: g.homeTeamId, color: '#999' };
+      const away = allTeams[g.awayTeamId] || { name: g.awayTeamId, color: '#999' };
+      const played = g.played;
+      const hs = g.homeScore ?? '';
+      const as = g.awayScore ?? '';
+
+      let resultClass = '';
+      if (played) {
+        if (parseInt(hs) > parseInt(as)) resultClass = 'home-win';
+        else if (parseInt(as) > parseInt(hs)) resultClass = 'away-win';
+        else resultClass = 'tie';
+      }
+
+      return `
+        <div class="summer-game-row ${played ? 'game-played' : 'game-upcoming'}">
+          <div class="summer-game-date">
+            <div class="summer-date-str">${formatDate(g.date)}</div>
+            <div class="summer-time-str">${formatTime(g.time)}</div>
+          </div>
+          <div class="summer-game-matchup">
+            <div class="summer-team ${resultClass === 'home-win' ? 'team-winner' : ''}">
+              <span class="team-color-dot" style="background:${home.color || '#999'};"></span>
+              <span class="summer-team-name">${home.name}</span>
+            </div>
+            <div class="summer-score ${played ? 'score-final' : 'score-vs'}">
+              ${played ? `<span>${hs}</span><span class="score-sep">-</span><span>${as}</span>` : 'vs'}
+            </div>
+            <div class="summer-team away-team ${resultClass === 'away-win' ? 'team-winner' : ''}">
+              <span class="team-color-dot" style="background:${away.color || '#999'};"></span>
+              <span class="summer-team-name">${away.name}</span>
+            </div>
+          </div>
+          ${played ? '<div class="summer-game-final">FINAL</div>' : '<div class="summer-game-final"></div>'}
+        </div>
+      `;
+    }).join('');
+  }
+
+  function buildTeamFilter(teams) {
+    const bar = document.getElementById('teamFilterBar');
+    const teamList = Object.values(teams);
+    bar.innerHTML = `<button class="summer-filter-btn active" data-team="all">All Games</button>` +
+      teamList.map(t => `
+        <button class="summer-filter-btn" data-team="${t.id}" style="--team-color:${t.color || '#999'}">
+          <span class="btn-dot" style="background:${t.color || '#999'};"></span>
+          ${t.name}
+        </button>
+      `).join('');
+
+    bar.querySelectorAll('.summer-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        bar.querySelectorAll('.summer-filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilter = btn.dataset.team;
+        renderSchedule(activeFilter);
+      });
+    });
+  }
+
+  async function loadSeason(seasonId) {
+    const [teamsSnap, gamesSnap] = await Promise.all([
+      getDocs(collection(db, 'summer', seasonId, 'teams')),
+      getDocs(collection(db, 'summer', seasonId, 'games'))
+    ]);
+
+    allTeams = {};
+    teamsSnap.forEach(d => { allTeams[d.id] = { id: d.id, ...d.data() }; });
+
+    allGames = [];
+    gamesSnap.forEach(d => allGames.push({ id: d.id, ...d.data() }));
+    allGames.sort((a, b) => a.date.localeCompare(b.date));
+
+    buildTeamFilter(allTeams);
+    renderStandings(allGames, allTeams);
+    renderSchedule('all');
+  }
+
+  async function initSeasons() {
+    const snap = await getDocs(collection(db, 'summer'));
+    const seasons = [];
+    snap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
+    seasons.sort((a, b) => b.id.localeCompare(a.id));
+
+    const select = document.getElementById('summerSeasonSelect');
+    if (!seasons.length) {
+      select.innerHTML = '<option>No seasons yet</option>';
+      document.getElementById('standingsBody').innerHTML = '<tr><td colspan="9" class="empty-cell">No data yet</td></tr>';
+      document.getElementById('summerScheduleList').innerHTML = '<p style="color:#666;font-style:italic;">No seasons added yet.</p>';
+      return;
+    }
+
+    select.innerHTML = seasons.map(s =>
+      `<option value="${s.id}">${s.label || s.id}</option>`
+    ).join('');
+
+    await loadSeason(seasons[0].id);
+
+    select.addEventListener('change', e => loadSeason(e.target.value));
+  }
+
+  initSeasons();
+
+  // Mobile nav
+  (function() {
+    var btn = document.getElementById('navToggle');
+    var nav = document.getElementById('navLinks');
+    if (!btn || !nav) return;
+    btn.addEventListener('click', function() { btn.classList.toggle('open'); nav.classList.toggle('open'); });
+    nav.querySelectorAll('a').forEach(function(link) {
+      link.addEventListener('click', function() { btn.classList.remove('open'); nav.classList.remove('open'); });
+    });
+  })();
+</script>
+</body>
+</html>
