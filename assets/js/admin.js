@@ -1655,27 +1655,27 @@ function insertLink() {
 }
 
 // Toggle visual/html editor
-const visualBtn = document.getElementById('editorVisualBtn');
-const htmlBtn = document.getElementById('editorHtmlBtn');
-if (visualBtn && htmlBtn) {
-  visualBtn.addEventListener('click', () => {
+const editorVisualBtnEl = document.getElementById('editorVisualBtn');
+const editorHtmlBtnEl = document.getElementById('editorHtmlBtn');
+if (visualBtn && editorHtmlBtnEl) {
+  editorVisualBtnEl.addEventListener('click', () => {
     const html = document.getElementById('newsContent').value;
     document.getElementById('newsContentVisual').innerHTML = html;
     document.getElementById('newsContentVisual').style.display = 'block';
     document.getElementById('newsContent').style.display = 'none';
     document.getElementById('editorToolbar').style.display = 'flex';
-    visualBtn.classList.add('active');
-    htmlBtn.classList.remove('active');
+    editorVisualBtnEl.classList.add('active');
+    editorHtmlBtnEl.classList.remove('active');
   });
 
-  htmlBtn.addEventListener('click', () => {
+  editorHtmlBtnEl.addEventListener('click', () => {
     const visual = document.getElementById('newsContentVisual').innerHTML;
     document.getElementById('newsContent').value = visual;
     document.getElementById('newsContent').style.display = 'block';
     document.getElementById('newsContentVisual').style.display = 'none';
     document.getElementById('editorToolbar').style.display = 'none';
-    htmlBtn.classList.add('active');
-    visualBtn.classList.remove('active');
+    editorHtmlBtnEl.classList.add('active');
+    editorVisualBtnEl.classList.remove('active');
   });
 }
 
