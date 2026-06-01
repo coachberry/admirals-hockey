@@ -1743,3 +1743,13 @@ if (toggleBtn) {
     toggleBtn.textContent = hidden ? 'Hide' : 'Show';
   });
 }
+
+// Expose to window for HTML onclick attributes
+window.execCmd = window.execCmd || function(cmd, val) {
+  const el = document.getElementById('newsContentVisual');
+  if (el) { el.focus(); document.execCommand(cmd, false, val || null); }
+};
+window.insertLink = window.insertLink || function() {
+  const url = prompt('Enter URL:');
+  if (url) document.execCommand('createLink', false, url);
+};

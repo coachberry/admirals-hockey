@@ -145,6 +145,11 @@
     articleModal.classList.add('active');
   }
   window.openArticle = openArticle;
+  window._newsPosts = [];
+  window.openArticleById = function(id) {
+    const post = window._newsPosts.find(p => p.id === id);
+    if (post) openArticle(post);
+  };
   window.openArticleById = function(id) {
     const post = (window._newsPosts || []).find(p => p.id === id);
     if (post) openArticle(post);
@@ -165,7 +170,7 @@
         ? `background-image:url('${p.imageURL}');background-size:cover;background-position:center;`
         : `background:linear-gradient(135deg,${color},#3d0f18);`;
       return `
-        <div class="news-card" onclick="openArticle(${JSON.stringify(p).replace(/"/g, '&quot;')})">
+        <div class="news-card" onclick="openArticleById('${p.id}')">
           <div class="news-card-img" style="${bgStyle}">
             <span class="news-category-tag" style="background:${color}">${p.category || ''}</span>
           </div>
@@ -194,6 +199,7 @@
     allPosts = [];
     snap.forEach(d => allPosts.push({ id: d.id, ...d.data() }));
     allPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+    window._newsPosts = allPosts;
     window._newsPosts = allPosts;
     renderGrid('all');
   }

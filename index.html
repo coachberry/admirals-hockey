@@ -218,6 +218,11 @@
     articleModal.classList.add('active');
   }
   window.openArticle = openArticle;
+  window._allPosts = [];
+  window.openArticleById = function(id) {
+    const post = window._allPosts.find(p => p.id === id);
+    if (post) openArticle(post);
+  };
   window.openArticleById = function(id) {
     const post = (window._allPosts || []).find(p => p.id === id);
     if (post) openArticle(post);
@@ -230,6 +235,7 @@
     snap.forEach(d => posts.push({ id: d.id, ...d.data() }));
     posts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
+    window._allPosts = posts;
     const mainPost = posts.find(p => p.featured) || posts[0];
     const pickedPosts = posts.filter(p => p.homeCard && p.id !== mainPost?.id).sort((a,b) => (a.homeOrder||99)-(b.homeOrder||99)).slice(0, 4);
     const supportingPosts = pickedPosts.length ? pickedPosts : posts.filter(p => p.id !== mainPost?.id).slice(0, 4);
@@ -241,7 +247,7 @@
         ? `background-image:url('${mainPost.imageURL}');background-size:cover;background-position:center;`
         : `background:linear-gradient(135deg,${color},#3d0f18);`;
       featuredSection.innerHTML = `
-        <div class="featured-main" style="${bgStyle}" onclick="openArticle(${JSON.stringify(mainPost).replace(/"/g, '&quot;')})">
+        <div class="featured-main" style="${bgStyle}" onclick="openArticleById('${mainPost.id}')">
           <div class="featured-main-overlay">
             <span class="featured-category-tag" style="background:${color}">${mainPost.category || ''}</span>
             <h1 class="featured-main-title">${mainPost.title}</h1>
