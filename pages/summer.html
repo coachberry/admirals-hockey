@@ -215,9 +215,7 @@
     document.getElementById('standingsBody').innerHTML = sorted.map((t, i) => `
       <tr class="${i === 0 && t.gp > 0 ? 'standings-leader' : ''}">
         <td class="col-team">
-          ${t.logoURL
-            ? `<img src="${t.logoURL}" style="width:22px;height:22px;object-fit:contain;border-radius:3px;flex-shrink:0;">`
-            : `<span class="team-color-dot" style="background:${t.color || '#999'};"></span>`}
+          ${teamLogoHTML(t, 22)}
           ${t.name}
         </td>
         <td>${t.gp}</td>
@@ -232,11 +230,18 @@
     `).join('');
   }
 
+  function teamLogoHTML(team, size=24) {
+    if (!team) return '';
+    if (team.logoURL) return `<img src="${team.logoURL}" style="width:${size}px;height:${size}px;object-fit:contain;border-radius:3px;flex-shrink:0;">`;
+    return `<span style="width:${size}px;height:${size}px;border-radius:50%;background:${team.color||'#999'};display:inline-block;flex-shrink:0;"></span>`;
+  }
+
   function renderSchedule(filter) {
     const list = document.getElementById('summerScheduleList');
-    const filtered = filter === 'all'
-      ? allGames
-      : allGames.filter(g => g.homeTeamId === filter || g.awayTeamId === filter);
+    const isFiltered = filter !== 'all';
+    const filtered = isFiltered
+      ? allGames.filter(g => g.homeTeamId === filter || g.awayTeamId === filter)
+      : allGames;
 
     if (!filtered.length) {
       list.innerHTML = '<p style="color:#666;font-style:italic;">No games found.</p>';
@@ -244,12 +249,48 @@
     }
 
     list.innerHTML = filtered.map(g => {
-      const home = allTeams[g.homeTeamId] || { name: g.homeTeamId, color: '#999' };
-      const away = allTeams[g.awayTeamId] || { name: g.awayTeamId, color: '#999' };
+      const home = allTeams[g.homeTeamId] || { name: g.homeTeamId || '?', color: '#999' };
+      const away = allTeams[g.awayTeamId] || { name: g.awayTeamId || '?', color: '#999' };
       const played = g.played;
       const hs = g.homeScore ?? '';
       const as = g.awayScore ?? '';
 
+      // When filtered by team, determine opponent and result from that team's perspective
+      if (isFiltered) {
+        const myTeam = allTeams[filter];
+        const isHome = g.homeTeamId === filter;
+        const opponent = isHome ? away : home;
+        const myScore = isHome ? hs : as;
+        const oppScore = isHome ? as : hs;
+        let result = '';
+        if (played) {
+          const ms = parseInt(myScore), os = parseInt(oppScore);
+          if (ms > os) result = 'W';
+          else if (os > ms) result = 'L';
+          else result = 'T';
+        }
+        const resultColor = result === 'W' ? '#2e7d32' : result === 'L' ? '#c62828' : result === 'T' ? '#f57c00' : '';
+
+        return `
+          <div class="summer-game-row ${played ? 'game-played' : 'game-upcoming'}">
+            <div class="summer-game-date">
+              <div class="summer-date-str">${formatDate(g.date)}</div>
+              <div class="summer-time-str">${formatTime(g.time)}</div>
+            </div>
+            <div class="summer-game-matchup" style="justify-content:flex-start;gap:0.75rem;">
+              ${teamLogoHTML(opponent, 28)}
+              <span class="summer-team-name">vs. ${opponent.name}</span>
+            </div>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:0.75rem;">
+              ${played
+                ? `<span style="font-size:1.2rem;font-weight:700;color:${resultColor};">${result} ${myScore}-${oppScore}</span>
+                   <span class="summer-game-final">FINAL</span>`
+                : ''}
+            </div>
+          </div>`;
+      }
+
+      // All games view - show both teams
       let resultClass = '';
       if (played) {
         if (parseInt(hs) > parseInt(as)) resultClass = 'home-win';
@@ -265,22 +306,19 @@
           </div>
           <div class="summer-game-matchup">
             <div class="summer-team ${resultClass === 'home-win' ? 'team-winner' : ''}">
-              <span class="team-color-dot" style="background:${home.color || '#999'};"></span>
+              ${teamLogoHTML(home)}
               <span class="summer-team-name">${home.name}</span>
             </div>
             <div class="summer-score ${played ? 'score-final' : 'score-vs'}">
               ${played ? `<span>${hs}</span><span class="score-sep">-</span><span>${as}</span>` : 'vs'}
             </div>
             <div class="summer-team away-team ${resultClass === 'away-win' ? 'team-winner' : ''}">
-              ${away.logoURL
-              ? `<img src="${away.logoURL}" style="width:24px;height:24px;object-fit:contain;border-radius:3px;flex-shrink:0;">`
-              : `<span class="team-color-dot" style="background:${away.color || '#999'};"></span>`}
+              ${teamLogoHTML(away)}
               <span class="summer-team-name">${away.name}</span>
             </div>
           </div>
           ${played ? '<div class="summer-game-final">FINAL</div>' : '<div class="summer-game-final"></div>'}
-        </div>
-      `;
+        </div>`;
     }).join('');
   }
 
