@@ -1657,7 +1657,7 @@ function insertLink() {
 // Toggle visual/html editor
 const editorVisualBtnEl = document.getElementById('editorVisualBtn');
 const editorHtmlBtnEl = document.getElementById('editorHtmlBtn');
-if (visualBtn && editorHtmlBtnEl) {
+if (editorVisualBtnEl && editorHtmlBtnEl) {
   editorVisualBtnEl.addEventListener('click', () => {
     const html = document.getElementById('newsContent').value;
     document.getElementById('newsContentVisual').innerHTML = html;
