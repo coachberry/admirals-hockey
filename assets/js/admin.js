@@ -968,58 +968,6 @@ window.deleteGame = async (id) => {
 };
 
 // ============================================
-// STATISTICS
-// ============================================
-// REMOVED: document.getElementById('saveStatsBtn').addEventListener('click', async () => {
-  await setDoc(doc(db, 'stats', 'record'), { wins: parseInt(document.getElementById('wins').value) || 0, losses: parseInt(document.getElementById('losses').value) || 0, ties: parseInt(document.getElementById('ties').value) || 0 });
-  alert('Stats saved!');
-});
-
-// REMOVED: document.getElementById('addScorerBtn').addEventListener('click', () => { ['scorerId','scorerName','scorerGoals','scorerAssists'].forEach(id => document.getElementById(id).value = ''); document.getElementById('scorerForm').style.display = 'block'; });
-// REMOVED: document.getElementById('cancelScorerBtn').addEventListener('click', () => document.getElementById('scorerForm').style.display = 'none');
-// REMOVED: document.getElementById('saveScorerBtn').addEventListener('click', async () => {
-  const id = document.getElementById('scorerId').value || Date.now().toString();
-  await setDoc(doc(db, 'scorers', id), { id, name: document.getElementById('scorerName').value, goals: parseInt(document.getElementById('scorerGoals').value) || 0, assists: parseInt(document.getElementById('scorerAssists').value) || 0 });
-  document.getElementById('scorerForm').style.display = 'none';
-});
-
-// REMOVED: document.getElementById('addGoaltenderBtn').addEventListener('click', () => { ['goaltenderId','goaltenderName','goaltenderGames','goaltenderGAA','goaltenderSave'].forEach(id => document.getElementById(id).value = ''); document.getElementById('goaltenderForm').style.display = 'block'; });
-// REMOVED: document.getElementById('cancelGoaltenderBtn').addEventListener('click', () => document.getElementById('goaltenderForm').style.display = 'none');
-// REMOVED: document.getElementById('saveGoaltenderBtn').addEventListener('click', async () => {
-  const id = document.getElementById('goaltenderId').value || Date.now().toString();
-  await setDoc(doc(db, 'goaltenders', id), { id, name: document.getElementById('goaltenderName').value, games: parseInt(document.getElementById('goaltenderGames').value) || 0, gaa: parseFloat(document.getElementById('goaltenderGAA').value) || 0, save: parseFloat(document.getElementById('goaltenderSave').value) || 0 });
-  document.getElementById('goaltenderForm').style.display = 'none';
-});
-
-async function loadStats() {
-  const recordSnap = await getDoc(doc(db, 'stats', 'record'));
-  if (recordSnap.exists()) { const r = recordSnap.data(); document.getElementById('wins').value = r.wins; document.getElementById('losses').value = r.losses; document.getElementById('ties').value = r.ties; }
-  const scorersSnap = await getDocs(collection(db, 'scorers'));
-  const scorers = []; scorersSnap.forEach(d => scorers.push(d.data()));
-  const scorersList = document.getElementById('scorersList');
-  scorersList.innerHTML = scorers.length === 0 ? '<div class="empty-state">No scorers added yet</div>' : '';
-  scorers.sort((a, b) => (b.goals + b.assists) - (a.goals + a.assists)).forEach(s => {
-    const item = document.createElement('div'); item.className = 'item';
-    item.innerHTML = `<div class="item-info"><div><strong>${s.name}</strong><span>${s.goals}G | ${s.assists}A | ${s.goals + s.assists}PTS</span></div></div><div><button class="btn-edit" onclick="editScorer('${s.id}')">Edit</button><button class="btn-delete" onclick="deleteScorer('${s.id}')">Delete</button></div>`;
-    scorersList.appendChild(item);
-  });
-  const goalSnap = await getDocs(collection(db, 'goaltenders'));
-  const goalies = []; goalSnap.forEach(d => goalies.push(d.data()));
-  const goaliesList = document.getElementById('goaltendersList');
-  goaliesList.innerHTML = goalies.length === 0 ? '<div class="empty-state">No goaltenders added yet</div>' : '';
-  goalies.forEach(g => {
-    const item = document.createElement('div'); item.className = 'item';
-    item.innerHTML = `<div class="item-info"><div><strong>${g.name}</strong><span>${g.games}GP | ${g.gaa} GAA | ${g.save}% SV</span></div></div><div><button class="btn-edit" onclick="editGoaltender('${g.id}')">Edit</button><button class="btn-delete" onclick="deleteGoaltender('${g.id}')">Delete</button></div>`;
-    goaliesList.appendChild(item);
-  });
-}
-
-window.editScorer = async (id) => { const snap = await getDoc(doc(db, 'scorers', id)); const s = snap.data(); document.getElementById('scorerId').value = s.id; document.getElementById('scorerName').value = s.name; document.getElementById('scorerGoals').value = s.goals; document.getElementById('scorerAssists').value = s.assists; document.getElementById('scorerForm').style.display = 'block'; };
-window.deleteScorer = async (id) => { if (!confirm('Delete?')) return; await deleteDoc(doc(db, 'scorers', id)); loadStats(); };
-window.editGoaltender = async (id) => { const snap = await getDoc(doc(db, 'goaltenders', id)); const g = snap.data(); document.getElementById('goaltenderId').value = g.id; document.getElementById('goaltenderName').value = g.name; document.getElementById('goaltenderGames').value = g.games; document.getElementById('goaltenderGAA').value = g.gaa; document.getElementById('goaltenderSave').value = g.save; document.getElementById('goaltenderForm').style.display = 'block'; };
-window.deleteGoaltender = async (id) => { if (!confirm('Delete?')) return; await deleteDoc(doc(db, 'goaltenders', id)); loadStats(); };
-
-// ============================================
 // NEWS
 // ============================================
 document.getElementById('addNewsBtn').addEventListener('click', () => {
