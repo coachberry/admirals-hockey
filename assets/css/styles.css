@@ -502,21 +502,36 @@ footer {
 
   .header-container {
     position: relative;
-    display: grid;
-    grid-template-columns: 44px 1fr 44px;
+    display: flex;
+    flex-direction: row;
     align-items: center;
     padding: 0 1rem;
   }
 
+  /* Spacer on left to balance hamburger on right */
+  .header-container::before {
+    content: "";
+    width: 40px;
+    flex-shrink: 0;
+  }
+
+  /* Logo centered */
   .header-container a:first-child {
-    grid-column: 2;
+    flex: 1;
     display: flex;
     justify-content: center;
   }
 
+  /* Nav element takes no space - dropdown only */
+  .header-container nav {
+    position: static;
+    flex-shrink: 0;
+  }
+
+  /* Hamburger on far right */
   .nav-toggle {
-    grid-column: 3;
-    justify-self: end;
+    display: flex !important;
+    flex-shrink: 0;
   }
 }
 
@@ -529,6 +544,6 @@ footer {
 
 @media (max-width: 768px) {
   .logo-img {
-    height: 72px;
+    height: 52px;
   }
 }
