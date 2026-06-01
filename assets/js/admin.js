@@ -1757,7 +1757,6 @@ window.insertLink = window.insertLink || function() {
   if (url) document.execCommand('createLink', false, url);
 };
 
-});
 
 // ============================================
 // SUMMER HOCKEY ADMIN
@@ -2028,3 +2027,5 @@ window.deleteSummerGame = async function(id) {
 
 // Load on init
 loadSummerSeasons();
+
+});
