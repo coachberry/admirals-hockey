@@ -72,6 +72,12 @@
     </div>
   </div>
 
+  <!-- TEAM ROSTERS -->
+  <div id="rostersSection" style="margin-bottom:2rem;display:none;">
+    <div class="section-header"><h2 class="section-title">Team Rosters</h2></div>
+    <div id="rostersGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.5rem;"></div>
+  </div>
+
   <!-- SCHEDULE -->
   <div style="margin-bottom:3rem;">
     <div class="section-header"><h2 class="section-title">Schedule & Scores</h2></div>
@@ -143,6 +149,37 @@
     return `${hour % 12 || 12}:${m} ${hour >= 12 ? 'PM' : 'AM'}`;
   }
 
+  function renderRosters(teams) {
+    const section = document.getElementById('rostersSection');
+    const grid = document.getElementById('rostersGrid');
+    if (!section || !grid) return;
+    const teamList = Object.values(teams);
+    if (!teamList.length) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    grid.innerHTML = teamList.map(t => {
+      const roster = Array.isArray(t.roster) ? t.roster : [];
+      const headerBg = t.color || '#5e1825';
+      const logoHTML = t.logoURL
+        ? `<img src="${t.logoURL}" style="width:48px;height:48px;object-fit:contain;margin-bottom:0.5rem;">`
+        : `<div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.3);margin-bottom:0.5rem;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">🏒</div>`;
+      const players = [...roster].sort((a,b) => parseInt(a.number)-parseInt(b.number))
+        .map(p => `<div style="display:flex;align-items:center;gap:0.5rem;padding:4px 0;border-bottom:1px solid #f5f5f5;font-size:0.85rem;">
+          <span style="font-weight:700;min-width:28px;color:#5e1825;">#${p.number}</span>
+          <span style="flex:1;">${p.name}</span>
+          ${p.position==='Goalie'?'<span style="background:#5e1825;color:white;font-size:0.65rem;font-weight:700;padding:1px 6px;border-radius:3px;">G</span>':''}
+        </div>`).join('');
+      return `<div style="background:white;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+        <div style="background:${headerBg};padding:1rem;text-align:center;color:white;">
+          ${logoHTML}
+          <div style="font-weight:700;font-size:1rem;">${t.name}</div>
+        </div>
+        <div style="padding:0.75rem;">
+          ${players||'<div style="color:#999;font-size:0.85rem;font-style:italic;">No roster added</div>'}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
   function buildStandings(games, teams) {
     const standings = {};
     Object.keys(teams).forEach(id => {
@@ -178,7 +215,9 @@
     document.getElementById('standingsBody').innerHTML = sorted.map((t, i) => `
       <tr class="${i === 0 && t.gp > 0 ? 'standings-leader' : ''}">
         <td class="col-team">
-          <span class="team-color-dot" style="background:${t.color || '#999'};"></span>
+          ${t.logoURL
+            ? `<img src="${t.logoURL}" style="width:22px;height:22px;object-fit:contain;border-radius:3px;flex-shrink:0;">`
+            : `<span class="team-color-dot" style="background:${t.color || '#999'};"></span>`}
           ${t.name}
         </td>
         <td>${t.gp}</td>
@@ -233,7 +272,9 @@
               ${played ? `<span>${hs}</span><span class="score-sep">-</span><span>${as}</span>` : 'vs'}
             </div>
             <div class="summer-team away-team ${resultClass === 'away-win' ? 'team-winner' : ''}">
-              <span class="team-color-dot" style="background:${away.color || '#999'};"></span>
+              ${away.logoURL
+              ? `<img src="${away.logoURL}" style="width:24px;height:24px;object-fit:contain;border-radius:3px;flex-shrink:0;">`
+              : `<span class="team-color-dot" style="background:${away.color || '#999'};"></span>`}
               <span class="summer-team-name">${away.name}</span>
             </div>
           </div>
@@ -279,6 +320,7 @@
 
     buildTeamFilter(allTeams);
     renderStandings(allGames, allTeams);
+    renderRosters(allTeams);
     renderSchedule('all');
   }
 

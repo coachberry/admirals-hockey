@@ -2152,3 +2152,71 @@ window.deleteSummerGame = async function(id) {
 loadSummerSeasons();
 
 });
+
+// Quick Schedule Generator
+const quickScheduleBtn = document.getElementById('quickScheduleBtn');
+if (quickScheduleBtn) {
+  quickScheduleBtn.addEventListener('click', () => {
+    document.getElementById('quickSchedulePanel').style.display = 'block';
+    document.getElementById('quickScheduleStatus').textContent = '';
+  });
+}
+
+const cancelQuickScheduleBtn = document.getElementById('cancelQuickScheduleBtn');
+if (cancelQuickScheduleBtn) {
+  cancelQuickScheduleBtn.addEventListener('click', () => {
+    document.getElementById('quickSchedulePanel').style.display = 'none';
+  });
+}
+
+const generateScheduleBtn = document.getElementById('generateScheduleBtn');
+if (generateScheduleBtn) {
+  generateScheduleBtn.addEventListener('click', async () => {
+    const startDateStr = document.getElementById('quickScheduleStart').value;
+    const count = parseInt(document.getElementById('quickScheduleCount').value) || 10;
+    const firstTime = document.getElementById('quickScheduleFirstTime').value;
+    const status = document.getElementById('quickScheduleStatus');
+
+    if (!startDateStr) { status.textContent = 'Please pick a start date.'; status.style.color = 'red'; return; }
+    if (!summerCurrentSeasonId) { status.textContent = 'No season selected.'; status.style.color = 'red'; return; }
+
+    const times = firstTime === '18:30' ? ['18:30', '20:00'] : ['20:00', '18:30'];
+    const startDate = new Date(startDateStr + 'T12:00:00');
+
+    // Make sure it's a Tuesday (day 2)
+    const day = startDate.getDay();
+    if (day !== 2) {
+      status.textContent = 'Start date must be a Tuesday.';
+      status.style.color = 'red';
+      return;
+    }
+
+    status.textContent = 'Generating...';
+    status.style.color = '#555';
+
+    for (let i = 0; i < count; i++) {
+      const gameDate = new Date(startDate);
+      gameDate.setDate(startDate.getDate() + (i * 7));
+      const dateStr = gameDate.toISOString().split('T')[0];
+      const time = times[i % 2];
+      const id = Date.now().toString() + i;
+      await setDoc(doc(db, 'summer', summerCurrentSeasonId, 'games', id), {
+        id,
+        date: dateStr,
+        time,
+        homeTeamId: '',
+        awayTeamId: '',
+        played: false,
+        homeScore: null,
+        awayScore: null
+      });
+      // Small delay to avoid timestamp collision
+      await new Promise(r => setTimeout(r, 50));
+    }
+
+    status.textContent = `✅ ${count} games generated! Now edit each to assign teams.`;
+    status.style.color = 'green';
+    document.getElementById('quickSchedulePanel').style.display = 'none';
+    await loadSummerGames();
+  });
+}

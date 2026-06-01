@@ -260,7 +260,36 @@
         <div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
             <h3>Games</h3>
-            <button id="addSummerGameBtn" class="btn-primary" style="font-size:0.85rem;padding:6px 12px;">+ Add Game</button>
+            <div style="display:flex;gap:0.5rem;">
+              <button id="quickScheduleBtn" class="btn-secondary" style="font-size:0.85rem;padding:6px 12px;">⚡ Quick Schedule</button>
+              <button id="addSummerGameBtn" class="btn-primary" style="font-size:0.85rem;padding:6px 12px;">+ Add Game</button>
+            </div>
+          </div>
+          <!-- Quick Schedule Panel -->
+          <div id="quickSchedulePanel" style="display:none;background:#f9f9f9;border:1px solid #e0e0e0;border-radius:6px;padding:1rem;margin-bottom:1rem;">
+            <p style="font-size:0.85rem;color:#555;margin-bottom:0.75rem;">Generate all Tuesday games for the season. Times alternate 6:30 PM / 8:00 PM starting with the first game.</p>
+            <div class="form-row">
+              <div class="form-label-group">
+                <label class="field-label">First Tuesday</label>
+                <input type="date" id="quickScheduleStart">
+              </div>
+              <div class="form-label-group">
+                <label class="field-label">Number of Games</label>
+                <input type="number" id="quickScheduleCount" value="10" min="1" max="20" style="width:80px;">
+              </div>
+              <div class="form-label-group">
+                <label class="field-label">First Game Time</label>
+                <select id="quickScheduleFirstTime">
+                  <option value="18:30">6:30 PM</option>
+                  <option value="20:00">8:00 PM</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex;gap:0.5rem;margin-top:0.75rem;">
+              <button id="generateScheduleBtn" class="btn-primary" style="font-size:0.85rem;">Generate Games</button>
+              <button id="cancelQuickScheduleBtn" class="btn-secondary" style="font-size:0.85rem;">Cancel</button>
+            </div>
+            <p id="quickScheduleStatus" style="margin-top:0.5rem;font-size:0.85rem;color:green;"></p>
           </div>
           <div id="summerGamesList" class="items-list"><div class="empty-state">No games yet</div></div>
         </div>
