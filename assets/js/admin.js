@@ -1688,8 +1688,42 @@ if (editorVisualBtnEl && editorHtmlBtnEl) {
 // Show/hide homeOrder when homeCard toggled
 const homeCardChk = document.getElementById('newsHomeCard');
 if (homeCardChk) {
-  homeCardChk.addEventListener('change', () => {
+  homeCardChk.addEventListener('change', async () => {
+    if (homeCardChk.checked) {
+      // Count existing homeCard posts excluding current post
+      const currentId = document.getElementById('newsId').value;
+      const snap = await getDocs(collection(db, 'news'));
+      let count = 0;
+      snap.forEach(d => {
+        const n = d.data();
+        if (n.homeCard && d.id !== currentId) count++;
+      });
+      if (count >= 4) {
+        alert('You already have 4 supporting stories on the homepage. Remove one before adding another.');
+        homeCardChk.checked = false;
+        return;
+      }
+    }
     document.getElementById('homeCardOrder').style.display = homeCardChk.checked ? 'block' : 'none';
+  });
+}
+
+// Limit featured to 1 - warn if already set
+const featuredChk = document.getElementById('newsFeatured');
+if (featuredChk) {
+  featuredChk.addEventListener('change', async () => {
+    if (featuredChk.checked) {
+      const currentId = document.getElementById('newsId').value;
+      const snap = await getDocs(collection(db, 'news'));
+      let existing = null;
+      snap.forEach(d => {
+        if (d.data().featured && d.id !== currentId) existing = d.data().title;
+      });
+      if (existing) {
+        const ok = confirm(`"${existing}" is currently the main featured post. Setting this post as featured will replace it. Continue?`);
+        if (!ok) { featuredChk.checked = false; }
+      }
+    }
   });
 }
 
