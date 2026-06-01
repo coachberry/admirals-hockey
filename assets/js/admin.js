@@ -1832,15 +1832,11 @@ window.removeSummerPlayer = function(index) {
 };
 
 // Bulk roster table
-function addBulkRow(num='', name='', pos='Skater') {
+function addBulkRow(name='', pos='Skater') {
   const tbody = document.getElementById('bulkRosterBody');
   if (!tbody) return;
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td style="border:1px solid #ddd;padding:2px;">
-      <input type="number" placeholder="#" min="0" max="99" value="${num}"
-        style="width:48px;border:none;padding:3px 4px;font-size:0.85rem;">
-    </td>
     <td style="border:1px solid #ddd;padding:2px;">
       <input type="text" placeholder="First Last" value="${name}"
         style="width:100%;border:none;padding:3px 4px;font-size:0.85rem;">
@@ -1857,7 +1853,7 @@ function addBulkRow(num='', name='', pos='Skater') {
     </td>`;
   tbody.appendChild(tr);
   // Focus the number field
-  tr.querySelector('input[type="number"]').focus();
+  tr.querySelector('input[type="text"]').focus();
 }
 
 function initBulkTable() {
@@ -1879,15 +1875,13 @@ if (addAllPlayersBtn) {
     const rows = document.querySelectorAll('#bulkRosterBody tr');
     let added = 0;
     rows.forEach(row => {
-      const inputs = row.querySelectorAll('input');
+      const input = row.querySelector('input');
       const select = row.querySelector('select');
-      const name = inputs[1]?.value.trim();
+      const name = input?.value.trim();
       if (!name) return;
-      const num = inputs[0]?.value || '0';
       const pos = select?.value || 'Skater';
-      // Avoid duplicates
-      if (!summerRoster.find(p => p.name === name && p.number === num)) {
-        summerRoster.push({ number: num, name, position: pos });
+      if (!summerRoster.find(p => p.name === name)) {
+        summerRoster.push({ name, position: pos });
         added++;
       }
     });
