@@ -3,6 +3,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, getDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
+document.addEventListener('DOMContentLoaded', () => {
+
 const firebaseConfig = {
   apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
   authDomain: "admirals-hockey.firebaseapp.com",
@@ -1437,12 +1439,13 @@ document.getElementById('eventImage').addEventListener('change', function() {
   reader.readAsDataURL(file);
 });
 
-document.getElementById('removeEventImage').addEventListener('click', () => {
+const removeEventImageBtn = document.getElementById('removeEventImage');
+if (removeEventImageBtn) removeEventImageBtn.addEventListener('click', () => {
   eventImageData = null;
   currentEventImageURL = null;
   document.getElementById('eventImagePreview').textContent = 'No Image';
   document.getElementById('eventImage').value = '';
-  document.getElementById('removeEventImage').style.display = 'none';
+  removeEventImageBtn.style.display = 'none';
 });
 
 document.getElementById('saveEventBtn').addEventListener('click', async () => {
@@ -1753,3 +1756,5 @@ window.insertLink = window.insertLink || function() {
   const url = prompt('Enter URL:');
   if (url) document.execCommand('createLink', false, url);
 };
+
+});
