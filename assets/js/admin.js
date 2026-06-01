@@ -74,7 +74,6 @@ async function showDashboard() {
   document.getElementById('settingsUsername').textContent = currentUser;
   document.getElementById('settingsEmail').value = users[currentUser]?.email || '';
   await loadSeasons();
-  loadStats();
   loadNews();
   loadUsers();
 
@@ -971,27 +970,25 @@ window.deleteGame = async (id) => {
 // ============================================
 // STATISTICS
 // ============================================
-document.getElementById('saveStatsBtn').addEventListener('click', async () => {
+// REMOVED: document.getElementById('saveStatsBtn').addEventListener('click', async () => {
   await setDoc(doc(db, 'stats', 'record'), { wins: parseInt(document.getElementById('wins').value) || 0, losses: parseInt(document.getElementById('losses').value) || 0, ties: parseInt(document.getElementById('ties').value) || 0 });
   alert('Stats saved!');
 });
 
-document.getElementById('addScorerBtn').addEventListener('click', () => { ['scorerId','scorerName','scorerGoals','scorerAssists'].forEach(id => document.getElementById(id).value = ''); document.getElementById('scorerForm').style.display = 'block'; });
-document.getElementById('cancelScorerBtn').addEventListener('click', () => document.getElementById('scorerForm').style.display = 'none');
-document.getElementById('saveScorerBtn').addEventListener('click', async () => {
+// REMOVED: document.getElementById('addScorerBtn').addEventListener('click', () => { ['scorerId','scorerName','scorerGoals','scorerAssists'].forEach(id => document.getElementById(id).value = ''); document.getElementById('scorerForm').style.display = 'block'; });
+// REMOVED: document.getElementById('cancelScorerBtn').addEventListener('click', () => document.getElementById('scorerForm').style.display = 'none');
+// REMOVED: document.getElementById('saveScorerBtn').addEventListener('click', async () => {
   const id = document.getElementById('scorerId').value || Date.now().toString();
   await setDoc(doc(db, 'scorers', id), { id, name: document.getElementById('scorerName').value, goals: parseInt(document.getElementById('scorerGoals').value) || 0, assists: parseInt(document.getElementById('scorerAssists').value) || 0 });
   document.getElementById('scorerForm').style.display = 'none';
-  loadStats();
 });
 
-document.getElementById('addGoaltenderBtn').addEventListener('click', () => { ['goaltenderId','goaltenderName','goaltenderGames','goaltenderGAA','goaltenderSave'].forEach(id => document.getElementById(id).value = ''); document.getElementById('goaltenderForm').style.display = 'block'; });
-document.getElementById('cancelGoaltenderBtn').addEventListener('click', () => document.getElementById('goaltenderForm').style.display = 'none');
-document.getElementById('saveGoaltenderBtn').addEventListener('click', async () => {
+// REMOVED: document.getElementById('addGoaltenderBtn').addEventListener('click', () => { ['goaltenderId','goaltenderName','goaltenderGames','goaltenderGAA','goaltenderSave'].forEach(id => document.getElementById(id).value = ''); document.getElementById('goaltenderForm').style.display = 'block'; });
+// REMOVED: document.getElementById('cancelGoaltenderBtn').addEventListener('click', () => document.getElementById('goaltenderForm').style.display = 'none');
+// REMOVED: document.getElementById('saveGoaltenderBtn').addEventListener('click', async () => {
   const id = document.getElementById('goaltenderId').value || Date.now().toString();
   await setDoc(doc(db, 'goaltenders', id), { id, name: document.getElementById('goaltenderName').value, games: parseInt(document.getElementById('goaltenderGames').value) || 0, gaa: parseFloat(document.getElementById('goaltenderGAA').value) || 0, save: parseFloat(document.getElementById('goaltenderSave').value) || 0 });
   document.getElementById('goaltenderForm').style.display = 'none';
-  loadStats();
 });
 
 async function loadStats() {
