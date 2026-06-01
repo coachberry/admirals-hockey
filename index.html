@@ -214,7 +214,7 @@
     document.getElementById('articleModalCategory').style.background = color;
     document.getElementById('articleModalTitle').textContent = post.title;
     document.getElementById('articleModalDate').textContent = formatDate(post.date);
-    document.getElementById('articleModalContent').textContent = post.content || '';
+    document.getElementById('articleModalContent').innerHTML = post.content || '';
     articleModal.classList.add('active');
   }
   window.openArticle = openArticle;
@@ -227,7 +227,7 @@
     posts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     const mainPost = posts.find(p => p.featured) || posts[0];
-    const pickedPosts = posts.filter(p => p.homeCard && p.id !== mainPost?.id).slice(0, 4);
+    const pickedPosts = posts.filter(p => p.homeCard && p.id !== mainPost?.id).sort((a,b) => (a.homeOrder||99)-(b.homeOrder||99)).slice(0, 4);
     const supportingPosts = pickedPosts.length ? pickedPosts : posts.filter(p => p.id !== mainPost?.id).slice(0, 4);
 
     const featuredSection = document.getElementById('featuredSection');
@@ -241,7 +241,7 @@
           <div class="featured-main-overlay">
             <span class="featured-category-tag" style="background:${color}">${mainPost.category || ''}</span>
             <h1 class="featured-main-title">${mainPost.title}</h1>
-            <p class="featured-main-excerpt">${(mainPost.content || '').substring(0, 150)}${(mainPost.content?.length||0) > 150 ? '...' : ''}</p>
+            <p class="featured-main-excerpt">${mainPost.summary || (mainPost.content||'').replace(/<[^>]*>/g,'').substring(0,150) + ((mainPost.content?.length||0)>150?'...':'')}</p>
             <span class="featured-read-more">Read More →</span>
           </div>
         </div>`;

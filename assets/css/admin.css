@@ -747,18 +747,119 @@ body {
   object-fit: contain;
 }
 
-/* FORM LABEL GROUPS */
-.form-label-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  flex: 1;
+/* NEWS EDITOR */
+.news-editor-tab {
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 3px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: #555;
+  transition: all 0.2s;
 }
 
-.field-label {
+.news-editor-tab.active {
+  background: #5e1825;
+  color: white;
+  border-color: #5e1825;
+}
+
+.editor-toolbar {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  padding: 0.4rem 0.5rem;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  flex-wrap: wrap;
+}
+
+.editor-toolbar button {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  padding: 3px 8px;
   font-size: 0.8rem;
-  font-weight: 600;
-  color: #555;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
+  cursor: pointer;
+  min-width: 28px;
+  transition: background 0.15s;
+}
+
+.editor-toolbar button:hover { background: #e8e8e8; }
+
+.toolbar-sep {
+  width: 1px;
+  height: 18px;
+  background: #ddd;
+  margin: 0 0.25rem;
+}
+
+.editor-visual {
+  min-height: 160px;
+  border: 1px solid #ddd;
+  border-radius: 0 0 4px 4px;
+  padding: 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  outline: none;
+  background: white;
+}
+
+.editor-visual:focus { border-color: #5e1825; }
+
+.editor-html {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.75rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.editor-html:focus { outline: none; border-color: #5e1825; }
+
+/* HOME ORDER LIST */
+.home-order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.home-order-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: grab;
+  font-size: 0.85rem;
+}
+
+.home-order-item:active { cursor: grabbing; }
+
+.home-order-handle {
+  color: #ccc;
+  font-size: 1rem;
+  cursor: grab;
+}
+
+.home-order-num {
+  background: #5e1825;
+  color: white;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
 }

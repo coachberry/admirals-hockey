@@ -88,18 +88,65 @@
       <div id="newsForm" class="form-section" style="display: none;">
         <h3>Add / Edit Post</h3>
         <input type="hidden" id="newsId">
-        <input type="text" id="newsTitle" placeholder="Title">
-        <div class="form-row">
-          <input type="date" id="newsDate">
-          <select id="newsCategory">
-            <option value="">Select Category</option>
-            <option value="Game Report">Game Report</option>
-            <option value="Team Update">Team Update</option>
-            <option value="Player Spotlight">Player Spotlight</option>
-            <option value="Announcement">Announcement</option>
-          </select>
+
+        <div class="form-label-group">
+          <label class="field-label">Title</label>
+          <input type="text" id="newsTitle" placeholder="Post title">
         </div>
-        <textarea id="newsContent" placeholder="Content" rows="6"></textarea>
+
+        <div class="form-row">
+          <div class="form-label-group">
+            <label class="field-label">Date</label>
+            <input type="date" id="newsDate">
+          </div>
+          <div class="form-label-group">
+            <label class="field-label">Category</label>
+            <select id="newsCategory">
+              <option value="">Select Category</option>
+              <option value="Game Report">Game Report</option>
+              <option value="Team Update">Team Update</option>
+              <option value="Player Spotlight">Player Spotlight</option>
+              <option value="Announcement">Announcement</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-label-group">
+          <label class="field-label">Summary <span style="font-weight:400;color:#999;">(preview text shown on homepage)</span></label>
+          <textarea id="newsSummary" placeholder="Short summary shown as preview on homepage..." rows="2" style="resize:vertical;"></textarea>
+        </div>
+
+        <div class="form-label-group">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+            <label class="field-label" style="margin-bottom:0;">Body Content</label>
+            <div style="display:flex;gap:0.5rem;align-items:center;">
+              <button type="button" id="editorVisualBtn" class="news-editor-tab active">Visual</button>
+              <button type="button" id="editorHtmlBtn" class="news-editor-tab">HTML</button>
+            </div>
+          </div>
+
+          <!-- Visual editor toolbar -->
+          <div id="editorToolbar" class="editor-toolbar">
+            <button type="button" onclick="execCmd('bold')" title="Bold"><b>B</b></button>
+            <button type="button" onclick="execCmd('italic')" title="Italic"><i>I</i></button>
+            <button type="button" onclick="execCmd('underline')" title="Underline"><u>U</u></button>
+            <span class="toolbar-sep"></span>
+            <button type="button" onclick="execCmd('insertUnorderedList')" title="Bullet List">• List</button>
+            <button type="button" onclick="execCmd('insertOrderedList')" title="Numbered List">1. List</button>
+            <span class="toolbar-sep"></span>
+            <button type="button" onclick="execCmd('formatBlock', 'h2')" title="Heading">H2</button>
+            <button type="button" onclick="execCmd('formatBlock', 'p')" title="Paragraph">¶</button>
+            <span class="toolbar-sep"></span>
+            <button type="button" onclick="insertLink()" title="Link">🔗</button>
+          </div>
+
+          <!-- Visual editor -->
+          <div id="newsContentVisual" class="editor-visual" contenteditable="true"></div>
+
+          <!-- HTML editor -->
+          <textarea id="newsContent" class="editor-html" style="display:none;" placeholder="<p>Write your HTML content here...</p>" rows="10"></textarea>
+        </div>
+
         <div class="photo-upload-section">
           <label class="field-label">Post Image (optional)</label>
           <div id="newsImagePreview" class="photo-preview"></div>
@@ -110,6 +157,7 @@
           </label>
           <button type="button" id="removeNewsImage" class="btn-delete photo-btn" style="display:none;">Remove</button>
         </div>
+
         <div class="captain-checkboxes" style="margin-top:0.75rem;">
           <label class="captain-label">
             <input type="checkbox" id="newsFeatured"> ⭐ Set as Main Featured Post
@@ -117,12 +165,30 @@
           <label class="captain-label">
             <input type="checkbox" id="newsHomeCard"> 📌 Show as Supporting Story on Homepage
           </label>
+          <div id="homeCardOrder" style="display:none;margin-top:0.5rem;margin-left:1.5rem;">
+            <label class="field-label" style="display:inline;">Homepage Order: </label>
+            <input type="number" id="newsHomeOrder" min="1" max="4" placeholder="1-4" style="width:60px;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:0.85rem;">
+            <span style="font-size:0.8rem;color:#999;margin-left:0.5rem;">(1 = first story shown)</span>
+          </div>
         </div>
+
         <div class="form-buttons">
           <button id="saveNewsBtn" class="btn-primary">Save Post</button>
           <button id="cancelNewsBtn" class="btn-secondary">Cancel</button>
         </div>
+        <p id="newsSaveStatus" class="save-status"></p>
       </div>
+
+      <!-- Homepage order manager -->
+      <div id="homeOrderManager" style="margin-bottom:1rem;padding:1rem;background:#f9f9f9;border:1px solid #e0e0e0;border-radius:6px;display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+          <strong style="color:#5e1825;">Homepage Story Order</strong>
+          <button id="toggleOrderManager" class="btn-secondary" style="font-size:0.8rem;padding:4px 10px;">Hide</button>
+        </div>
+        <p style="font-size:0.8rem;color:#666;margin-bottom:0.75rem;">Drag to reorder supporting stories shown on homepage.</p>
+        <div id="homeOrderList" class="home-order-list"></div>
+      </div>
+
       <div id="newsList" class="items-list"><div class="empty-state">No posts added yet</div></div>
     </div>
 

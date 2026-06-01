@@ -1026,9 +1026,13 @@ window.deleteGoaltender = async (id) => { if (!confirm('Delete?')) return; await
 // NEWS
 // ============================================
 document.getElementById('addNewsBtn').addEventListener('click', () => {
-  ['newsId','newsTitle','newsDate','newsCategory','newsContent'].forEach(id => document.getElementById(id).value = '');
+  ['newsId','newsTitle','newsDate','newsCategory','newsContent'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  if (document.getElementById('newsSummary')) document.getElementById('newsSummary').value = '';
+  if (document.getElementById('newsContentVisual')) document.getElementById('newsContentVisual').innerHTML = '';
   if (document.getElementById('newsFeatured')) document.getElementById('newsFeatured').checked = false;
   if (document.getElementById('newsHomeCard')) document.getElementById('newsHomeCard').checked = false;
+  if (document.getElementById('homeCardOrder')) document.getElementById('homeCardOrder').style.display = 'none';
+  if (document.getElementById('newsHomeOrder')) document.getElementById('newsHomeOrder').value = '';
   newsImageData = null;
   currentNewsImageURL = null;
   document.getElementById('newsImagePreview').innerHTML = '';
@@ -1049,7 +1053,18 @@ document.getElementById('saveNewsBtn').addEventListener('click', async () => {
   }
   const isFeatured = document.getElementById('newsFeatured')?.checked || false;
   const isHomeCard = document.getElementById('newsHomeCard')?.checked || false;
-  // If setting as featured, unset others
+  const homeOrder = parseInt(document.getElementById('newsHomeOrder')?.value) || 99;
+  const summary = document.getElementById('newsSummary')?.value || '';
+
+  // Get content from whichever editor is active
+  const htmlBtn = document.getElementById('editorHtmlBtn');
+  let bodyContent = '';
+  if (htmlBtn && htmlBtn.classList.contains('active')) {
+    bodyContent = document.getElementById('newsContent').value;
+  } else {
+    bodyContent = document.getElementById('newsContentVisual')?.innerHTML || '';
+  }
+
   if (isFeatured) {
     const allNews = await getDocs(collection(db, 'news'));
     for (const d of allNews.docs) {
@@ -1058,9 +1073,24 @@ document.getElementById('saveNewsBtn').addEventListener('click', async () => {
       }
     }
   }
-  await setDoc(doc(db, 'news', id), { id, title: document.getElementById('newsTitle').value, date: document.getElementById('newsDate').value, category: document.getElementById('newsCategory').value, content: document.getElementById('newsContent').value, imageURL: newsImgURL, featured: isFeatured, homeCard: isHomeCard });
-  document.getElementById('newsForm').style.display = 'none';
-  loadNews();
+  await setDoc(doc(db, 'news', id), {
+    id,
+    title: document.getElementById('newsTitle').value,
+    date: document.getElementById('newsDate').value,
+    category: document.getElementById('newsCategory').value,
+    summary,
+    content: bodyContent,
+    imageURL: newsImgURL,
+    featured: isFeatured,
+    homeCard: isHomeCard,
+    homeOrder: isHomeCard ? homeOrder : 99
+  });
+  const status = document.getElementById('newsSaveStatus');
+  if (status) { status.textContent = '✅ Saved!'; status.style.color = 'green'; }
+  setTimeout(() => {
+    document.getElementById('newsForm').style.display = 'none';
+    loadNews();
+  }, 600);
 });
 
 async function loadNews() {
@@ -1069,7 +1099,9 @@ async function loadNews() {
   const snap = await getDocs(collection(db, 'news'));
   const posts = []; snap.forEach(d => posts.push(d.data()));
   if (!posts.length) { list.innerHTML = '<div class="empty-state">No posts added yet</div>'; return; }
-  posts.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(n => {
+  posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+  loadHomeOrderManager();
+  posts.forEach(n => {
     const dateStr = new Date(n.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const item = document.createElement('div'); item.className = 'item';
     const badges = `${n.featured ? '<span style="background:#5e1825;color:white;font-size:0.65rem;padding:2px 6px;border-radius:3px;margin-left:6px;">⭐ Featured</span>' : ''}${n.homeCard ? '<span style="background:#1565c0;color:white;font-size:0.65rem;padding:2px 6px;border-radius:3px;margin-left:4px;">📌 Home</span>' : ''}`;
@@ -1087,7 +1119,15 @@ window.editNews = async (id) => {
   document.getElementById('newsCategory').value = n.category;
   document.getElementById('newsContent').value = n.content;
   if (document.getElementById('newsFeatured')) document.getElementById('newsFeatured').checked = n.featured || false;
-  if (document.getElementById('newsHomeCard')) document.getElementById('newsHomeCard').checked = n.homeCard || false;
+  if (document.getElementById('newsHomeCard')) {
+    document.getElementById('newsHomeCard').checked = n.homeCard || false;
+    document.getElementById('homeCardOrder').style.display = n.homeCard ? 'block' : 'none';
+  }
+  if (document.getElementById('newsHomeOrder')) document.getElementById('newsHomeOrder').value = n.homeOrder || '';
+  if (document.getElementById('newsSummary')) document.getElementById('newsSummary').value = n.summary || '';
+  // Load content into visual editor
+  if (document.getElementById('newsContentVisual')) document.getElementById('newsContentVisual').innerHTML = n.content || '';
+  if (document.getElementById('newsContent')) document.getElementById('newsContent').value = n.content || '';
   currentNewsImageURL = n.imageURL || null;
   newsImageData = null;
   const preview = document.getElementById('newsImagePreview');
@@ -1655,3 +1695,103 @@ document.getElementById('removeNewsImage').addEventListener('click', () => {
 loadEvents();
 loadQuickHits();
 loadAlumni();
+
+// ============================================
+// NEWS EDITOR
+// ============================================
+function execCmd(cmd, val) {
+  document.getElementById('newsContentVisual').focus();
+  document.execCommand(cmd, false, val || null);
+}
+
+function insertLink() {
+  const url = prompt('Enter URL:');
+  if (url) document.execCommand('createLink', false, url);
+}
+
+// Toggle visual/html editor
+const visualBtn = document.getElementById('editorVisualBtn');
+const htmlBtn = document.getElementById('editorHtmlBtn');
+if (visualBtn && htmlBtn) {
+  visualBtn.addEventListener('click', () => {
+    const html = document.getElementById('newsContent').value;
+    document.getElementById('newsContentVisual').innerHTML = html;
+    document.getElementById('newsContentVisual').style.display = 'block';
+    document.getElementById('newsContent').style.display = 'none';
+    document.getElementById('editorToolbar').style.display = 'flex';
+    visualBtn.classList.add('active');
+    htmlBtn.classList.remove('active');
+  });
+
+  htmlBtn.addEventListener('click', () => {
+    const visual = document.getElementById('newsContentVisual').innerHTML;
+    document.getElementById('newsContent').value = visual;
+    document.getElementById('newsContent').style.display = 'block';
+    document.getElementById('newsContentVisual').style.display = 'none';
+    document.getElementById('editorToolbar').style.display = 'none';
+    htmlBtn.classList.add('active');
+    visualBtn.classList.remove('active');
+  });
+}
+
+// Show/hide homeOrder when homeCard toggled
+const homeCardChk = document.getElementById('newsHomeCard');
+if (homeCardChk) {
+  homeCardChk.addEventListener('change', () => {
+    document.getElementById('homeCardOrder').style.display = homeCardChk.checked ? 'block' : 'none';
+  });
+}
+
+// Homepage order manager
+async function loadHomeOrderManager() {
+  const snap = await getDocs(collection(db, 'news'));
+  const homeCards = [];
+  snap.forEach(d => { const n = d.data(); if (n.homeCard) homeCards.push({ id: d.id, ...n }); });
+  homeCards.sort((a, b) => (a.homeOrder || 99) - (b.homeOrder || 99));
+
+  const list = document.getElementById('homeOrderList');
+  const manager = document.getElementById('homeOrderManager');
+  if (!list || !manager) return;
+
+  if (homeCards.length) {
+    manager.style.display = 'block';
+    list.innerHTML = homeCards.map((p, i) => `
+      <div class="home-order-item" draggable="true" data-id="${p.id}" data-order="${i+1}">
+        <span class="home-order-handle">⋮⋮</span>
+        <span class="home-order-num">${i+1}</span>
+        <span>${p.title}</span>
+      </div>
+    `).join('');
+    setupDragSort(list, homeCards);
+  } else {
+    manager.style.display = 'none';
+  }
+}
+
+function setupDragSort(list, items) {
+  let dragged = null;
+  list.querySelectorAll('.home-order-item').forEach(item => {
+    item.addEventListener('dragstart', () => { dragged = item; item.style.opacity = '0.5'; });
+    item.addEventListener('dragend', () => { item.style.opacity = '1'; saveHomeOrder(); });
+    item.addEventListener('dragover', e => { e.preventDefault(); const rect = item.getBoundingClientRect(); const mid = rect.top + rect.height/2; if (e.clientY < mid) list.insertBefore(dragged, item); else list.insertBefore(dragged, item.nextSibling); });
+  });
+}
+
+async function saveHomeOrder() {
+  const items = document.querySelectorAll('.home-order-item');
+  for (let i = 0; i < items.length; i++) {
+    const id = items[i].dataset.id;
+    items[i].querySelector('.home-order-num').textContent = i + 1;
+    await setDoc(doc(db, 'news', id), { homeOrder: i + 1 }, { merge: true });
+  }
+}
+
+const toggleBtn = document.getElementById('toggleOrderManager');
+if (toggleBtn) {
+  toggleBtn.addEventListener('click', () => {
+    const list = document.getElementById('homeOrderList');
+    const hidden = list.style.display === 'none';
+    list.style.display = hidden ? 'flex' : 'none';
+    toggleBtn.textContent = hidden ? 'Hide' : 'Show';
+  });
+}

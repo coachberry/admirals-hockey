@@ -141,7 +141,7 @@
     document.getElementById('articleModalCategory').style.background = color;
     document.getElementById('articleModalTitle').textContent = post.title;
     document.getElementById('articleModalDate').textContent = formatDate(post.date);
-    document.getElementById('articleModalContent').textContent = post.content || '';
+    document.getElementById('articleModalContent').innerHTML = post.content || '';
     articleModal.classList.add('active');
   }
   window.openArticle = openArticle;
@@ -166,7 +166,7 @@
           <div class="news-card-body">
             <div class="news-card-date">${formatDate(p.date)}</div>
             <h3 class="news-card-title">${p.title}</h3>
-            <p class="news-card-excerpt">${(p.content||'').substring(0,100)}${(p.content?.length||0)>100?'...':''}</p>
+            <p class="news-card-excerpt">${p.summary || (p.content||'').replace(/<[^>]*>/g,'').substring(0,100) + ((p.content?.length||0)>100?'...':'')}</p>
             <span class="news-read-more">Read More →</span>
           </div>
         </div>`;
