@@ -1831,37 +1831,76 @@ window.removeSummerPlayer = function(index) {
   renderSummerRoster();
 };
 
-const addSummerPlayerBtn = document.getElementById('addSummerPlayerBtn');
-if (addSummerPlayerBtn) {
-  addSummerPlayerBtn.addEventListener('click', () => {
-    document.getElementById('summerPlayerNumber').value = '';
-    document.getElementById('summerPlayerName').value = '';
-    document.getElementById('summerPlayerPosition').value = 'Skater';
-    document.getElementById('summerPlayerForm').style.display = 'block';
-    document.getElementById('summerPlayerName').focus();
-  });
+// Bulk roster table
+function addBulkRow(num='', name='', pos='Skater') {
+  const tbody = document.getElementById('bulkRosterBody');
+  if (!tbody) return;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td style="border:1px solid #ddd;padding:2px;">
+      <input type="number" placeholder="#" min="0" max="99" value="${num}"
+        style="width:48px;border:none;padding:3px 4px;font-size:0.85rem;">
+    </td>
+    <td style="border:1px solid #ddd;padding:2px;">
+      <input type="text" placeholder="First Last" value="${name}"
+        style="width:100%;border:none;padding:3px 4px;font-size:0.85rem;">
+    </td>
+    <td style="border:1px solid #ddd;padding:2px;">
+      <select style="border:none;padding:3px 4px;font-size:0.85rem;width:100%;">
+        <option value="Skater" ${pos==='Skater'?'selected':''}>Skater</option>
+        <option value="Goalie" ${pos==='Goalie'?'selected':''}>Goalie</option>
+      </select>
+    </td>
+    <td style="border:1px solid #ddd;padding:2px;text-align:center;">
+      <button type="button" onclick="this.closest('tr').remove()"
+        style="background:none;border:none;color:#c62828;cursor:pointer;font-size:1rem;padding:0 4px;">×</button>
+    </td>`;
+  tbody.appendChild(tr);
+  // Focus the number field
+  tr.querySelector('input[type="number"]').focus();
 }
 
-const cancelSummerPlayerBtn = document.getElementById('cancelSummerPlayerBtn');
-if (cancelSummerPlayerBtn) {
-  cancelSummerPlayerBtn.addEventListener('click', () => {
-    document.getElementById('summerPlayerForm').style.display = 'none';
-  });
+function initBulkTable() {
+  const tbody = document.getElementById('bulkRosterBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  // Start with 5 empty rows
+  for (let i = 0; i < 5; i++) addBulkRow();
 }
 
-const saveSummerPlayerBtn = document.getElementById('saveSummerPlayerBtn');
-if (saveSummerPlayerBtn) {
-  saveSummerPlayerBtn.addEventListener('click', () => {
-    const name = document.getElementById('summerPlayerName').value.trim();
-    if (!name) return;
-    summerRoster.push({
-      number: document.getElementById('summerPlayerNumber').value || '0',
-      name,
-      position: document.getElementById('summerPlayerPosition').value
+const addBulkRowBtn = document.getElementById('addBulkRowBtn');
+if (addBulkRowBtn) {
+  addBulkRowBtn.addEventListener('click', () => addBulkRow());
+}
+
+const addAllPlayersBtn = document.getElementById('addAllPlayersBtn');
+if (addAllPlayersBtn) {
+  addAllPlayersBtn.addEventListener('click', () => {
+    const rows = document.querySelectorAll('#bulkRosterBody tr');
+    let added = 0;
+    rows.forEach(row => {
+      const inputs = row.querySelectorAll('input');
+      const select = row.querySelector('select');
+      const name = inputs[1]?.value.trim();
+      if (!name) return;
+      const num = inputs[0]?.value || '0';
+      const pos = select?.value || 'Skater';
+      // Avoid duplicates
+      if (!summerRoster.find(p => p.name === name && p.number === num)) {
+        summerRoster.push({ number: num, name, position: pos });
+        added++;
+      }
     });
     summerRoster.sort((a, b) => parseInt(a.number) - parseInt(b.number));
     renderSummerRoster();
-    document.getElementById('summerPlayerForm').style.display = 'none';
+    // Clear the bulk table rows
+    initBulkTable();
+    if (added > 0) {
+      const btn = document.getElementById('addAllPlayersBtn');
+      const orig = btn.textContent;
+      btn.textContent = `✅ Added ${added} player${added>1?'s':''}`;
+      setTimeout(() => { btn.textContent = orig; }, 2000);
+    }
   });
 }
 
@@ -1969,6 +2008,7 @@ if (addSummerTeamBtn) {
     summerRoster = [];
     resetSummerLogoPreview();
     renderSummerRoster();
+    initBulkTable();
     document.getElementById('summerTeamModal').classList.add('active');
   });
 }
@@ -2018,6 +2058,7 @@ window.editSummerTeam = function(id) {
   summerRoster = Array.isArray(t.roster) ? [...t.roster] : [];
   resetSummerLogoPreview();
   renderSummerRoster();
+  initBulkTable();
   document.getElementById('summerTeamModal').classList.add('active');
 };
 
