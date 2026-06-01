@@ -183,7 +183,7 @@
   function buildStandings(games, teams) {
     const standings = {};
     Object.keys(teams).forEach(id => {
-      standings[id] = { id, name: teams[id].name, color: teams[id].color, abbr: teams[id].abbreviation, gp:0, w:0, l:0, t:0, pts:0, gf:0, ga:0 };
+      standings[id] = { id, name: teams[id].name, color: teams[id].color, logoURL: teams[id].logoURL || '', abbr: teams[id].abbreviation, gp:0, w:0, l:0, t:0, pts:0, gf:0, ga:0 };
     });
 
     games.filter(g => g.played).forEach(g => {
@@ -278,8 +278,9 @@
               <div class="summer-time-str">${formatTime(g.time)}</div>
             </div>
             <div class="summer-game-matchup" style="justify-content:flex-start;gap:0.75rem;">
+              <span style="color:#999;font-size:0.85rem;font-weight:500;flex-shrink:0;">vs.</span>
               ${teamLogoHTML(opponent, 28)}
-              <span class="summer-team-name">vs. ${opponent.name}</span>
+              <span class="summer-team-name">${opponent.name}</span>
             </div>
             <div style="margin-left:auto;display:flex;align-items:center;gap:0.75rem;">
               ${played
