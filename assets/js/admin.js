@@ -2151,7 +2151,6 @@ window.deleteSummerGame = async function(id) {
 // Load on init
 loadSummerSeasons();
 
-});
 
 // Quick Schedule Generator
 const quickScheduleBtn = document.getElementById('quickScheduleBtn');
@@ -2220,3 +2219,5 @@ if (generateScheduleBtn) {
     await loadSummerGames();
   });
 }
+
+});
