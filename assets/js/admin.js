@@ -2289,7 +2289,6 @@ if (generateScheduleBtn) {
   });
 }
 
-});
 
 // ============================================
 // PAGE VISIBILITY
@@ -2357,3 +2356,5 @@ if (savePageVisibilityBtn) {
 }
 
 loadPageVisibility();
+
+});
