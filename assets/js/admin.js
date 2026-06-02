@@ -2290,3 +2290,70 @@ if (generateScheduleBtn) {
 }
 
 });
+
+// ============================================
+// PAGE VISIBILITY
+// ============================================
+const pagesList = [
+  { id: 'schedule',    label: 'Schedule',      path: '/pages/schedule.html' },
+  { id: 'roster',      label: 'Roster',        path: '/pages/roster.html' },
+  { id: 'stats',       label: 'Stats',         path: '/pages/stats.html' },
+  { id: 'news',        label: 'News',          path: '/pages/news.html' },
+  { id: 'events',      label: 'Events',        path: '/pages/events.html' },
+  { id: 'summer',      label: 'Summer Hockey', path: '/pages/summer.html' },
+  { id: 'alumni',      label: 'Alumni',        path: '/pages/alumni.html' },
+  { id: 'tryouts',     label: 'Tryouts',       path: '/pages/tryouts.html' },
+  { id: 'contact',     label: 'Contact',       path: '/pages/contact.html' },
+];
+
+let pageVisibility = {};
+
+async function loadPageVisibility() {
+  const snap = await getDoc(doc(db, 'settings', 'pages'));
+  pageVisibility = snap.exists() ? snap.data() : {};
+  const list = document.getElementById('pagesToggleList');
+  if (!list) return;
+  list.innerHTML = pagesList.map(p => {
+    const isOn = pageVisibility[p.id] !== false;
+    return `
+      <div style="display:flex;align-items:center;justify-content:space-between;background:white;border:1px solid #e0e0e0;border-radius:6px;padding:0.85rem 1.25rem;">
+        <div>
+          <div style="font-weight:600;color:#111;">${p.label}</div>
+          <div style="font-size:0.8rem;color:#999;">${p.path}</div>
+        </div>
+        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+          <span style="font-size:0.85rem;color:${isOn ? '#2e7d32' : '#c62828'};font-weight:600;" id="pageLabel_${p.id}">${isOn ? 'Visible' : 'Hidden'}</span>
+          <div style="position:relative;width:44px;height:24px;">
+            <input type="checkbox" id="pageToggle_${p.id}" ${isOn ? 'checked' : ''} style="opacity:0;width:0;height:0;position:absolute;" onchange="updatePageToggle('${p.id}', this.checked)">
+            <div id="pageTrack_${p.id}" style="position:absolute;top:0;left:0;right:0;bottom:0;border-radius:12px;background:${isOn ? '#2e7d32' : '#ccc'};transition:background 0.2s;cursor:pointer;" onclick="document.getElementById('pageToggle_${p.id}').click()">
+              <div style="position:absolute;top:2px;left:${isOn ? '22px' : '2px'};width:20px;height:20px;border-radius:50%;background:white;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);" id="pageThumb_${p.id}"></div>
+            </div>
+          </div>
+        </label>
+      </div>`;
+  }).join('');
+}
+
+window.updatePageToggle = function(id, isOn) {
+  pageVisibility[id] = isOn;
+  const label = document.getElementById('pageLabel_' + id);
+  const track = document.getElementById('pageTrack_' + id);
+  const thumb = document.getElementById('pageThumb_' + id);
+  if (label) { label.textContent = isOn ? 'Visible' : 'Hidden'; label.style.color = isOn ? '#2e7d32' : '#c62828'; }
+  if (track) track.style.background = isOn ? '#2e7d32' : '#ccc';
+  if (thumb) thumb.style.left = isOn ? '22px' : '2px';
+};
+
+const savePageVisibilityBtn = document.getElementById('savePageVisibilityBtn');
+if (savePageVisibilityBtn) {
+  savePageVisibilityBtn.addEventListener('click', async () => {
+    const status = document.getElementById('pagesSaveStatus');
+    status.textContent = 'Saving...';
+    await setDoc(doc(db, 'settings', 'pages'), pageVisibility);
+    status.textContent = '✅ Saved!';
+    status.style.color = 'green';
+    setTimeout(() => { status.textContent = ''; }, 3000);
+  });
+}
+
+loadPageVisibility();
