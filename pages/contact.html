@@ -206,31 +206,22 @@
 
     </div>
 
-    <form class="contact-form" id="contactForm">
+    <div class="contact-form">
       <h3>Send us a Message</h3>
-
-      <div class="form-group">
-        <label class="form-label" for="name">Name *</label>
-        <input type="text" id="name" class="form-input" placeholder="Your name" required>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="email">Email *</label>
-        <input type="email" id="email" class="form-input" placeholder="your@email.com" required>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="subject">Subject *</label>
-        <input type="text" id="subject" class="form-input" placeholder="What is this about?" required>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="message">Message *</label>
-        <textarea id="message" class="form-textarea" placeholder="Tell us what you'd like to discuss..." required></textarea>
-      </div>
-
-      <button type="submit" class="form-submit">Send Message</button>
-    </form>
+      <iframe
+        id="JotFormIFrame-261493555170156"
+        title="Contact Us"
+        onload="window.parent.scrollTo(0,0)"
+        allowtransparency="true"
+        allow="geolocation; microphone; camera; fullscreen; payment"
+        src="https://form.jotform.com/261493555170156"
+        frameborder="0"
+        style="min-width:100%;max-width:100%;height:539px;border:none;"
+        scrolling="no"
+      ></iframe>
+      <script src='https://cdn.jotfor.ms/s/umd/latest/for-form-embed-handler.js'></script>
+      <script>window.jotformEmbedHandler("iframe[id='JotFormIFrame-261493555170156']", "https://form.jotform.com/")</script>
+    </div>
 
   </div>
 </div>
@@ -306,15 +297,7 @@
   loadBoardMembers();
 
   // Form submission
-  document.getElementById('contactForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    const subject = document.getElementById('subject').value;
-    const message = document.getElementById('message').value;
-    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
-    window.location.href = `mailto:coachberry03@gmail.com?subject=${encodeURIComponent(subject)}&body=${body}`;
-  });
+
 
   // Mobile nav
   (function() {
