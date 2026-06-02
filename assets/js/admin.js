@@ -2322,15 +2322,23 @@ async function loadPageVisibility() {
         </div>
         <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
           <span style="font-size:0.85rem;color:${isOn ? '#2e7d32' : '#c62828'};font-weight:600;" id="pageLabel_${p.id}">${isOn ? 'Visible' : 'Hidden'}</span>
-          <div style="position:relative;width:44px;height:24px;">
-            <input type="checkbox" id="pageToggle_${p.id}" ${isOn ? 'checked' : ''} style="opacity:0;width:0;height:0;position:absolute;" onchange="updatePageToggle('${p.id}', this.checked)">
-            <div id="pageTrack_${p.id}" style="position:absolute;top:0;left:0;right:0;bottom:0;border-radius:12px;background:${isOn ? '#2e7d32' : '#ccc'};transition:background 0.2s;cursor:pointer;" onclick="document.getElementById('pageToggle_${p.id}').click()">
-              <div style="position:absolute;top:2px;left:${isOn ? '22px' : '2px'};width:20px;height:20px;border-radius:50%;background:white;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);" id="pageThumb_${p.id}"></div>
-            </div>
+          <div style="position:relative;width:44px;height:24px;cursor:pointer;" id="pageTrack_${p.id}" data-page="${p.id}">
+            <div style="position:absolute;top:0;left:0;right:0;bottom:0;border-radius:12px;background:${isOn ? '#2e7d32' : '#ccc'};transition:background 0.2s;"></div>
+            <div style="position:absolute;top:2px;left:${isOn ? '22px' : '2px'};width:20px;height:20px;border-radius:50%;background:white;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);" id="pageThumb_${p.id}"></div>
           </div>
         </label>
       </div>`;
   }).join('');
+
+  // Attach click listeners after rendering
+  pagesList.forEach(p => {
+    const track = document.getElementById('pageTrack_' + p.id);
+    if (!track) return;
+    track.addEventListener('click', () => {
+      const currentlyOn = pageVisibility[p.id] !== false;
+      window.updatePageToggle(p.id, !currentlyOn);
+    });
+  });
 }
 
 window.updatePageToggle = function(id, isOn) {
