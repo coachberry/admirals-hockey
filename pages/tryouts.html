@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tryouts - Franklin Admirals Hockey</title>
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <style>
+    .tryouts-hero {
+      background: linear-gradient(135deg, #5D1725 0%, #3c0f17 100%);
+      color: white;
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+
+    .tryouts-hero .hero-badge {
+      background: rgba(255,255,255,0.15);
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      border-radius: 3px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 1rem;
+    }
+
+    .tryouts-hero h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      letter-spacing: -1px;
+    }
+
+    .tryouts-hero p {
+      font-size: 1.15rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .tryouts-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 3rem;
+      margin-top: 3rem;
+      margin-bottom: 3rem;
+      align-items: start;
+    }
+
+    .tryouts-info { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .info-card {
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .info-card-header {
+      background: linear-gradient(135deg, #5D1725, #3c0f17);
+      color: white;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-card-body { padding: 1.25rem; }
+
+    .info-card-body p {
+      font-size: 0.95rem;
+      color: #444;
+      line-height: 1.7;
+      margin-bottom: 0.75rem;
+    }
+
+    .info-card-body p:last-child { margin-bottom: 0; }
+
+    .detail-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #f5f5f5;
+      font-size: 0.92rem;
+    }
+
+    .detail-row:last-child { border-bottom: none; }
+
+    .detail-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+    .detail-label {
+      font-weight: 700;
+      color: #5D1725;
+      min-width: 80px;
+      flex-shrink: 0;
+    }
+
+    .detail-value { color: #333; }
+
+    .placeholder {
+      background: #fff8e1;
+      border: 1px dashed #f0c040;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-style: italic;
+      color: #888;
+      font-size: 0.85rem;
+    }
+
+    .eligibility-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .eligibility-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      font-size: 0.92rem;
+      color: #333;
+      line-height: 1.5;
+    }
+
+    .eligibility-list li::before {
+      content: "✓";
+      color: #2e7d32;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid #f0f0f0;
+      padding: 0.85rem 0;
+    }
+
+    .faq-item:last-child { border-bottom: none; }
+
+    .faq-q {
+      font-weight: 700;
+      color: #5D1725;
+      font-size: 0.92rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .faq-a {
+      font-size: 0.88rem;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    .form-section {
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 80px;
+    }
+
+    .form-section-header {
+      background: linear-gradient(135deg, #5D1725, #3c0f17);
+      color: white;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .form-section-header h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .form-section-header p {
+      font-size: 0.85rem;
+      opacity: 0.85;
+    }
+
+    .form-section-body { padding: 1.25rem; }
+
+    .notice-banner {
+      background: #e8f5e9;
+      border: 1px solid #a5d6a7;
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      color: #2e7d32;
+      margin-bottom: 1rem;
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 900px) {
+      .tryouts-layout { grid-template-columns: 1fr; }
+      .form-section { position: static; }
+      .tryouts-hero h1 { font-size: 2.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-container">
+    <a href="/index.html"><img src="/assets/images/franklin-admirals-hockey-logo-lowres.png" alt="Franklin Admirals Hockey" class="logo-img"></a>
+    <nav>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/index.html" class="nav-link">Home</a></li>
+        <li><a href="/pages/schedule.html" class="nav-link">Schedule</a></li>
+        <li><a href="/pages/roster.html" class="nav-link">Roster</a></li>
+        <li><a href="/pages/stats.html" class="nav-link">Stats</a></li>
+        <li><a href="/pages/news.html" class="nav-link">News</a></li>
+        <li><a href="/pages/events.html" class="nav-link">Events</a></li>
+        <li><a href="/pages/summer.html" class="nav-link">Summer Hockey</a></li>
+        <li><a href="/pages/alumni.html" class="nav-link">Alumni</a></li>
+        <li><a href="/pages/tryouts.html" class="nav-link active">Tryouts</a></li>
+        <li><a href="/pages/contact.html" class="nav-link">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<div class="tryouts-hero">
+  <div class="hero-badge">2026–27 Season</div>
+  <h1>Admirals Hockey Tryouts</h1>
+  <p>Join one of Tennessee's premier high school hockey programs. We welcome new players, returning players, and anyone ready to compete at the next level.</p>
+</div>
+
+<div class="main-container">
+  <div class="tryouts-layout">
+
+    <!-- LEFT: INFO -->
+    <div class="tryouts-info">
+
+      <!-- Tryout Details -->
+      <div class="info-card">
+        <div class="info-card-header">📅 Tryout Details</div>
+        <div class="info-card-body">
+          <div class="detail-row">
+            <span class="detail-icon">📆</span>
+            <span class="detail-label">Date</span>
+            <span class="detail-value"><span class="placeholder">TBD — Check back for updates</span></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-icon">🕐</span>
+            <span class="detail-label">Time</span>
+            <span class="detail-value"><span class="placeholder">TBD</span></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-icon">📍</span>
+            <span class="detail-label">Location</span>
+            <span class="detail-value"><span class="placeholder">TBD</span></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-icon">🏒</span>
+            <span class="detail-label">Equipment</span>
+            <span class="detail-value">Full hockey gear required. No loaner equipment available.</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-icon">💰</span>
+            <span class="detail-label">Cost</span>
+            <span class="detail-value"><span class="placeholder">TBD</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Who Should Try Out -->
+      <div class="info-card">
+        <div class="info-card-header">🏒 Who Should Try Out?</div>
+        <div class="info-card-body">
+          <p>We welcome players of all experience levels who attend or are eligible to attend Franklin High School. Whether you've been skating your whole life or are newer to the sport, we encourage you to come out and show us what you've got.</p>
+          <ul class="eligibility-list">
+            <li>Current Franklin High School students in grades 9–12</li>
+            <li>Incoming freshmen for the 2026–27 school year</li>
+            <li>Returning players from last season's roster</li>
+            <li>Transfer students who meet TSSAA eligibility requirements</li>
+            <li>All positions — forwards, defensemen, and goaltenders</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- What to Expect -->
+      <div class="info-card">
+        <div class="info-card-header">⭐ What to Expect</div>
+        <div class="info-card-body">
+          <p>Tryouts are designed to evaluate skating ability, hockey sense, compete level, and coachability. We look for players who bring energy, work hard, and are committed to the team.</p>
+          <div class="detail-row">
+            <span class="detail-icon">⛸️</span>
+            <span class="detail-label">Skating</span>
+            <span class="detail-value">Edge work, speed, agility, and backward skating drills</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-icon">🏒</span>
+            <span class="detail-label">Puck Skills</span>
+            <span class="detail-value">Stickhandling, passing, and shooting evaluation</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-icon">🎯</span>
+            <span class="detail-label">Compete</span>
+            <span class="detail-value">Small-area games and competitive drills</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-icon">📋</span>
+            <span class="detail-label">Results</span>
+            <span class="detail-value"><span class="placeholder">Roster decisions communicated TBD</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="info-card">
+        <div class="info-card-header">❓ Frequently Asked Questions</div>
+        <div class="info-card-body">
+          <div class="faq-item">
+            <div class="faq-q">Do I need to register before tryouts?</div>
+            <div class="faq-a">Yes — please complete the registration form on this page before attending tryouts. This helps us plan ice time and ensure we have your information on file.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">I've never played organized hockey before. Can I still try out?</div>
+            <div class="faq-a">Absolutely. We evaluate players based on their potential and work ethic, not just experience. If you can skate and love the game, come out and give it a shot.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">I played last season. Do I still need to register?</div>
+            <div class="faq-a">Yes — all players, returning and new, must complete the registration form and attend tryouts.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">Who do I contact with questions?</div>
+            <div class="faq-a">Reach out to Coach Matt Berry at <a href="mailto:coachberry03@gmail.com" style="color:#5D1725;">coachberry03@gmail.com</a></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: FORM -->
+    <div>
+      <div class="form-section">
+        <div class="form-section-header">
+          <h2>Tryout Registration</h2>
+          <p>Complete this form to register for the 2026–27 tryouts</p>
+        </div>
+        <div class="form-section-body">
+          <div class="notice-banner">
+            ✅ Submitting this form does not guarantee a roster spot — it registers you for tryouts.
+          </div>
+          <iframe
+            id="JotFormIFrame-261519024119149"
+            title="Tryout Registration"
+            onload="window.parent.scrollTo(0,0)"
+            allowtransparency="true"
+            allow="geolocation; microphone; camera; fullscreen; payment"
+            src="https://form.jotform.com/261519024119149"
+            frameborder="0"
+            style="min-width:100%;max-width:100%;height:539px;border:none;"
+            scrolling="no"
+          ></iframe>
+          <script src='https://cdn.jotfor.ms/s/umd/latest/for-form-embed-handler.js'></script>
+          <script>window.jotformEmbedHandler("iframe[id='JotFormIFrame-261519024119149']", "https://form.jotform.com/")</script>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-content">
+    <div class="footer-section">
+      <h3>Quick Links</h3>
+      <p><a href="/index.html">Home</a></p>
+      <p><a href="/pages/schedule.html">Schedule</a></p>
+      <p><a href="/pages/roster.html">Roster</a></p>
+      <p><a href="/pages/tryouts.html">Tryouts</a></p>
+      <p><a href="/pages/contact.html">Contact</a></p>
+    </div>
+    <div class="footer-section">
+      <h3>Contact</h3>
+      <p><strong>Coach:</strong> Matt Berry</p>
+      <p><strong>Email:</strong> coachberry03@gmail.com</p>
+    </div>
+    <div class="footer-section">
+      <h3>Location</h3>
+      <p>Franklin High School</p>
+      <p>810 Hillsboro Rd</p>
+      <p>Franklin, TN 37064</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2025 Franklin High School Admirals Hockey. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+  (function() {
+    var btn = document.getElementById('navToggle');
+    var nav = document.getElementById('navLinks');
+    if (!btn || !nav) return;
+    btn.addEventListener('click', function() { btn.classList.toggle('open'); nav.classList.toggle('open'); });
+    nav.querySelectorAll('a').forEach(function(link) {
+      link.addEventListener('click', function() { btn.classList.remove('open'); nav.classList.remove('open'); });
+    });
+  })();
+</script>
+
+</body>
+</html>
