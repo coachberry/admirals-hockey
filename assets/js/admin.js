@@ -2346,8 +2346,15 @@ window.updatePageToggle = function(id, isOn) {
   const label = document.getElementById('pageLabel_' + id);
   const track = document.getElementById('pageTrack_' + id);
   const thumb = document.getElementById('pageThumb_' + id);
-  if (label) { label.textContent = isOn ? 'Visible' : 'Hidden'; label.style.color = isOn ? '#2e7d32' : '#c62828'; }
-  if (track) track.style.background = isOn ? '#2e7d32' : '#ccc';
+  if (label) {
+    label.textContent = isOn ? 'Visible' : 'Hidden';
+    label.style.color = isOn ? '#2e7d32' : '#c62828';
+  }
+  if (track) {
+    // Update the background div (first child)
+    const bg = track.querySelector('div');
+    if (bg) bg.style.background = isOn ? '#2e7d32' : '#ccc';
+  }
   if (thumb) thumb.style.left = isOn ? '22px' : '2px';
 };
 
