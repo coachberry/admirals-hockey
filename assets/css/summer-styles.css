@@ -184,32 +184,34 @@
 
 @media (max-width: 600px) {
   .summer-game-row {
-    flex-wrap: wrap;
-    gap: 0.4rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 0.35rem 0.5rem;
     padding: 0.65rem 0.85rem;
   }
 
-  /* Date row: date/time left, FINAL right - same line */
   .summer-game-date {
-    flex: 1;
-    border-bottom: none;
-    padding-bottom: 0;
+    grid-column: 1;
+    grid-row: 1;
   }
 
   .summer-game-final {
-    flex-shrink: 0;
+    grid-column: 2;
+    grid-row: 1;
     font-size: 0.7rem;
     font-weight: 700;
     color: #999;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     align-self: center;
+    white-space: nowrap;
   }
 
-  /* Matchup takes full width below date/FINAL row */
   .summer-game-matchup {
-    width: 100%;
+    grid-column: 1 / -1;
+    grid-row: 2;
     border-top: 1px solid #f0f0f0;
-    padding-top: 0.4rem;
+    padding-top: 0.35rem;
   }
 }
