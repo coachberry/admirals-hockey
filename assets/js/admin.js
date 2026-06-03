@@ -1852,25 +1852,36 @@ function renderSummerRoster() {
     return;
   }
   list.innerHTML = summerRoster.map((p, i) => `
-    <div style="display:flex;align-items:center;gap:0.4rem;padding:4px 8px;background:white;border:1px solid #eee;border-radius:4px;font-size:0.85rem;">
-      <div style="display:flex;flex-direction:column;gap:1px;">
-        <button onclick="moveSummerPlayer(${i},-1)" style="background:none;border:none;cursor:pointer;color:#999;font-size:0.65rem;padding:0;line-height:1;" ${i===0?'disabled style="opacity:0.3;"':''}>▲</button>
-        <button onclick="moveSummerPlayer(${i},1)" style="background:none;border:none;cursor:pointer;color:#999;font-size:0.65rem;padding:0;line-height:1;" ${i===summerRoster.length-1?'disabled style="opacity:0.3;"':''}>▼</button>
-      </div>
+    <div draggable="true" data-index="${i}" style="display:flex;align-items:center;gap:0.5rem;padding:5px 8px;background:white;border:1px solid #eee;border-radius:4px;font-size:0.85rem;cursor:grab;user-select:none;">
+      <span style="color:#ccc;font-size:1rem;flex-shrink:0;">⋮⋮</span>
       <span style="flex:1;">${p.name}</span>
       <span style="color:#5D1725;font-size:0.75rem;font-weight:600;">${p.position === 'Goalie' ? 'G' : ''}</span>
-      <button onclick="removeSummerPlayer(${i})" style="background:none;border:none;color:#c62828;cursor:pointer;font-size:1rem;padding:0 4px;">×</button>
+      <button onclick="removeSummerPlayer(${i})" style="background:none;border:none;color:#c62828;cursor:pointer;font-size:1rem;padding:0 4px;flex-shrink:0;">×</button>
     </div>`).join('');
-}
 
-window.moveSummerPlayer = function(index, direction) {
-  const newIndex = index + direction;
-  if (newIndex < 0 || newIndex >= summerRoster.length) return;
-  const temp = summerRoster[index];
-  summerRoster[index] = summerRoster[newIndex];
-  summerRoster[newIndex] = temp;
-  renderSummerRoster();
-};
+  // Set up drag-to-reorder
+  let dragged = null;
+  list.querySelectorAll('[draggable]').forEach(row => {
+    row.addEventListener('dragstart', () => { dragged = row; row.style.opacity = '0.4'; });
+    row.addEventListener('dragend', () => {
+      row.style.opacity = '1';
+      // Rebuild summerRoster from current DOM order
+      const newOrder = [];
+      list.querySelectorAll('[draggable]').forEach(r => {
+        newOrder.push(summerRoster[parseInt(r.dataset.index)]);
+      });
+      summerRoster.length = 0;
+      newOrder.forEach(p => summerRoster.push(p));
+      renderSummerRoster();
+    });
+    row.addEventListener('dragover', e => {
+      e.preventDefault();
+      const rect = row.getBoundingClientRect();
+      if (e.clientY < rect.top + rect.height / 2) list.insertBefore(dragged, row);
+      else list.insertBefore(dragged, row.nextSibling);
+    });
+  });
+}
 
 window.removeSummerPlayer = function(index) {
   summerRoster.splice(index, 1);
