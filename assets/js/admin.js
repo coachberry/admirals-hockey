@@ -2141,6 +2141,8 @@ function openSummerGameModal(game = null) {
   document.getElementById('summerGamePlayed').checked = game?.played || false;
   document.getElementById('summerHomeScore').value = game?.homeScore ?? '';
   document.getElementById('summerAwayScore').value = game?.awayScore ?? '';
+  if (document.getElementById('summerGameOT')) document.getElementById('summerGameOT').checked = game?.ot || false;
+  if (document.getElementById('summerGameSO')) document.getElementById('summerGameSO').checked = game?.so || false;
   document.getElementById('summerScoreFields').style.display = game?.played ? 'block' : 'none';
   document.getElementById('summerGameStatus').textContent = '';
   document.getElementById('summerGameModalTitle').textContent = game ? 'Edit Game' : 'Add Game';
@@ -2196,6 +2198,8 @@ if (saveSummerGameBtn) {
       played,
       homeScore: played ? parseInt(document.getElementById('summerHomeScore').value) || 0 : null,
       awayScore: played ? parseInt(document.getElementById('summerAwayScore').value) || 0 : null,
+      ot: played ? (document.getElementById('summerGameOT')?.checked || false) : false,
+      so: played ? (document.getElementById('summerGameSO')?.checked || false) : false,
     });
     status.textContent = '✅ Saved!';
     status.style.color = 'green';

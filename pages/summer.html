@@ -320,7 +320,7 @@
               <span class="summer-team-name">${away.name}</span>
             </div>
           </div>
-          ${played ? '<div class="summer-game-final">FINAL</div>' : '<div class="summer-game-final"></div>'}
+          ${played ? `<div class="summer-game-final">FINAL${g.so ? '/SO' : g.ot ? '/OT' : ''}</div>` : '<div class="summer-game-final"></div>'}
         </div>`;
     }).join('');
   }

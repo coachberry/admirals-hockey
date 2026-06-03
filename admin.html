@@ -769,6 +769,14 @@
             <input type="number" id="summerAwayScore" min="0" placeholder="0">
           </div>
         </div>
+        <div class="captain-checkboxes" style="margin-top:0.5rem;">
+          <label class="captain-label">
+            <input type="checkbox" id="summerGameOT" onchange="if(this.checked)document.getElementById('summerGameSO').checked=false;"> Overtime (OT)
+          </label>
+          <label class="captain-label">
+            <input type="checkbox" id="summerGameSO" onchange="if(this.checked)document.getElementById('summerGameOT').checked=false;"> Shootout (SO)
+          </label>
+        </div>
       </div>
       <div class="form-buttons">
         <button id="saveSummerGameBtn" class="btn-primary">Save Game</button>
