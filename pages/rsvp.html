@@ -406,22 +406,30 @@
 
     if (!teamGames.length) { list.innerHTML = '<div class="loading">No games scheduled yet.</div>'; return; }
 
+    list.innerHTML = '<div class="loading">Loading games...</div>';
+
+    // Fetch all RSVP counts in parallel
+    const rsvpCounts = await Promise.all(teamGames.map(async g => {
+      const snap = await getDocs(collection(db, 'summer', seasonId, 'games', g.id, 'rsvps'));
+      let yes = 0, no = 0;
+      snap.forEach(d => { if (d.data().response === 'yes') yes++; else no++; });
+      return { gameId: g.id, yes, no };
+    }));
+    const countMap = {};
+    rsvpCounts.forEach(r => { countMap[r.gameId] = r; });
+
     list.innerHTML = '';
-    for (const g of teamGames) {
+    teamGames.forEach(g => {
       const opponent = allTeams[g.homeTeamId === team.id ? g.awayTeamId : g.homeTeamId];
       const oppName = opponent?.name || 'TBD';
-
-      // Load RSVP counts
-      const rsvpSnap = await getDocs(collection(db, 'summer', seasonId, 'games', g.id, 'rsvps'));
-      let yesCount = 0, noCount = 0;
-      rsvpSnap.forEach(d => { if (d.data().response === 'yes') yesCount++; else noCount++; });
+      const counts = countMap[g.id] || { yes: 0, no: 0 };
 
       const row = document.createElement('div');
       row.className = `game-rsvp-row ${g.played ? 'game-played' : 'game-upcoming'}`;
 
       const countsHTML = `<div class="game-rsvp-counts">
-        <span class="count-yes">✅ ${yesCount} In</span> &nbsp;
-        <span class="count-no">❌ ${noCount} Out</span>
+        <span class="count-yes">✅ ${counts.yes} In</span> &nbsp;
+        <span class="count-no">❌ ${counts.no} Out</span>
       </div>`;
 
       row.innerHTML = `
@@ -438,7 +446,7 @@
         row.querySelector('.rsvp-btn').addEventListener('click', () => openRsvp(g, opponent));
       }
       list.appendChild(row);
-    }
+    });
   }
 
   // VIEW 3: RSVP FORM
