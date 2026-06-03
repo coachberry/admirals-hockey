@@ -183,7 +183,15 @@
 }
 
 @media (max-width: 600px) {
-  .summer-game-row { flex-wrap: wrap; gap: 0.5rem; }
-  .summer-game-date { width: 100%; border-bottom: 1px solid #f0f0f0; padding-bottom: 0.4rem; }
-  .summer-game-final { display: none; }
+  .summer-game-row { flex-wrap: wrap; gap: 0.4rem; padding: 0.65rem 0.85rem; }
+  .summer-game-date { flex-shrink: 0; }
+  .summer-game-matchup { flex: 1; min-width: 0; }
+  .summer-game-final {
+    width: 100%;
+    text-align: left;
+    font-size: 0.72rem;
+    color: #888;
+    padding-top: 0.25rem;
+    border-top: 1px solid #f0f0f0;
+  }
 }
