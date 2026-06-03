@@ -1852,13 +1852,25 @@ function renderSummerRoster() {
     return;
   }
   list.innerHTML = summerRoster.map((p, i) => `
-    <div style="display:flex;align-items:center;gap:0.5rem;padding:4px 8px;background:white;border:1px solid #eee;border-radius:4px;font-size:0.85rem;">
-      <span style="font-weight:700;min-width:28px;">#${p.number}</span>
+    <div style="display:flex;align-items:center;gap:0.4rem;padding:4px 8px;background:white;border:1px solid #eee;border-radius:4px;font-size:0.85rem;">
+      <div style="display:flex;flex-direction:column;gap:1px;">
+        <button onclick="moveSummerPlayer(${i},-1)" style="background:none;border:none;cursor:pointer;color:#999;font-size:0.65rem;padding:0;line-height:1;" ${i===0?'disabled style="opacity:0.3;"':''}>▲</button>
+        <button onclick="moveSummerPlayer(${i},1)" style="background:none;border:none;cursor:pointer;color:#999;font-size:0.65rem;padding:0;line-height:1;" ${i===summerRoster.length-1?'disabled style="opacity:0.3;"':''}>▼</button>
+      </div>
       <span style="flex:1;">${p.name}</span>
-      <span style="color:${p.position === 'Goalie' ? '#5D1725' : '#666'};font-size:0.75rem;font-weight:600;">${p.position === 'Goalie' ? 'G' : ''}</span>
+      <span style="color:#5D1725;font-size:0.75rem;font-weight:600;">${p.position === 'Goalie' ? 'G' : ''}</span>
       <button onclick="removeSummerPlayer(${i})" style="background:none;border:none;color:#c62828;cursor:pointer;font-size:1rem;padding:0 4px;">×</button>
     </div>`).join('');
 }
+
+window.moveSummerPlayer = function(index, direction) {
+  const newIndex = index + direction;
+  if (newIndex < 0 || newIndex >= summerRoster.length) return;
+  const temp = summerRoster[index];
+  summerRoster[index] = summerRoster[newIndex];
+  summerRoster[newIndex] = temp;
+  renderSummerRoster();
+};
 
 window.removeSummerPlayer = function(index) {
   summerRoster.splice(index, 1);
