@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="/assets/css/styles.css">
   <link rel="stylesheet" href="/assets/css/summer-styles.css">
   <script src="/assets/js/page-guard.js"></script>
-  <script type="module" src="/assets/js/member-auth.js"></script>
 </head>
 <body>
 
@@ -406,7 +405,8 @@
     });
   })();
 </script>
-<!-- MEMBER MODAL - paste before </body> on every page -->
+<!-- MEMBER MODAL - paste before   <script type="module" src="/assets/js/member-auth.js"></script>
+</body> on every page -->
 <div id="memberModal" class="modal-overlay" style="z-index:2000;">
   <div class="modal" style="max-width:440px;max-height:90vh;overflow-y:auto;">
     <button class="modal-close-float" onclick="hideMemberModal()">&times;</button>

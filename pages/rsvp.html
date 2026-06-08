@@ -253,7 +253,6 @@
     .loading { text-align:center; padding:2rem; color:#888; font-style:italic; }
     .error-msg { background:#ffebee; border:1px solid #ffcdd2; color:#c62828; border-radius:6px; padding:0.75rem 1rem; font-size:0.9rem; margin-bottom:1rem; }
   </style>
-  <script type="module" src="/assets/js/member-auth.js"></script>
 </head>
 <body>
 
@@ -555,7 +554,8 @@
 
   init();
 </script>
-<!-- MEMBER MODAL - paste before </body> on every page -->
+<!-- MEMBER MODAL - paste before   <script type="module" src="/assets/js/member-auth.js"></script>
+</body> on every page -->
 <div id="memberModal" class="modal-overlay" style="z-index:2000;">
   <div class="modal" style="max-width:440px;max-height:90vh;overflow-y:auto;">
     <button class="modal-close-float" onclick="hideMemberModal()">&times;</button>
