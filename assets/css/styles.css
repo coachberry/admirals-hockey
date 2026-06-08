@@ -547,3 +547,28 @@ footer {
     height: 52px;
   }
 }
+
+/* MEMBER LOGIN BUTTON */
+.member-nav-btn {
+  background: #5D1725;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.member-nav-btn:hover {
+  background: #3c0f17;
+}
+
+@media (max-width: 1024px) {
+  .member-nav-btn {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.6rem;
+  }
+}
