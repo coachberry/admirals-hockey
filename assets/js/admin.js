@@ -2502,4 +2502,151 @@ async function loadRsvpGamesList(seasonId) {
 
 loadRsvpSeasons();
 
+
+// ============================================
+// MEMBERS ADMIN TAB
+// ============================================
+
+async function loadMembersTab() {
+  const list = document.getElementById('membersList');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-state">Loading...</div>';
+
+  const snap = await getDocs(collection(db, 'members'));
+  const members = [];
+  snap.forEach(d => members.push({ id: d.id, ...d.data() }));
+  members.sort((a, b) => (a.displayName||'').localeCompare(b.displayName||''));
+
+  document.getElementById('membersCount').textContent = `${members.length} member${members.length !== 1 ? 's' : ''}`;
+
+  if (!members.length) { list.innerHTML = '<div class="empty-state">No members yet</div>'; return; }
+
+  const roleColors = { player:'#2e7d32', family:'#1565c0', alumni:'#e65100', member:'#666' };
+
+  list.innerHTML = members.map(m => `
+    <div class="item">
+      <div class="item-info">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          ${m.photoURL ? `<img src="${m.photoURL}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">` : `<div style="width:32px;height:32px;border-radius:50%;background:#5D1725;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;">${(m.displayName||'?').charAt(0)}</div>`}
+          <div>
+            <strong>${m.displayName || 'Unknown'}</strong>
+            <span>${m.email}</span>
+          </div>
+          <span style="background:${roleColors[m.role]||'#666'};color:white;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:0.25rem;">${m.role}</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.5rem;align-items:center;">
+        <select onchange="updateMemberRole('${m.id}', this.value)" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:0.8rem;">
+          <option value="member" ${m.role==='member'?'selected':''}>Member</option>
+          <option value="player" ${m.role==='player'?'selected':''}>Player</option>
+          <option value="family" ${m.role==='family'?'selected':''}>Family</option>
+          <option value="alumni" ${m.role==='alumni'?'selected':''}>Alumni</option>
+        </select>
+        <button class="btn-delete" onclick="deleteMember('${m.id}')">Remove</button>
+      </div>
+    </div>`).join('');
+}
+
+window.updateMemberRole = async function(uid, role) {
+  await setDoc(doc(db, 'members', uid), { role }, { merge: true });
+  loadMembersTab();
+};
+
+window.deleteMember = async function(uid) {
+  if (!confirm('Remove this member?')) return;
+  await deleteDoc(doc(db, 'members', uid));
+  loadMembersTab();
+};
+
+// ============================================
+// ROLE REQUESTS TAB
+// ============================================
+async function loadRoleRequestsTab() {
+  const list = document.getElementById('roleRequestsList');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-state">Loading...</div>';
+
+  const snap = await getDocs(collection(db, 'roleRequests'));
+  const requests = [];
+  snap.forEach(d => requests.push({ id: d.id, ...d.data() }));
+  requests.sort((a, b) => {
+    const order = { pending: 0, approved: 1, rejected: 2 };
+    return (order[a.status]||0) - (order[b.status]||0);
+  });
+
+  const pending = requests.filter(r => r.status === 'pending').length;
+  const badge = document.getElementById('roleRequestsBadge');
+  if (badge) { badge.textContent = pending > 0 ? pending : ''; badge.style.display = pending > 0 ? 'inline' : 'none'; }
+
+  if (!requests.length) { list.innerHTML = '<div class="empty-state">No role requests yet</div>'; return; }
+
+  const statusColors = { pending:'#856404', approved:'#2e7d32', rejected:'#c62828' };
+  const statusBg = { pending:'#fff8e1', approved:'#e8f5e9', rejected:'#ffebee' };
+
+  list.innerHTML = requests.map(r => {
+    let details = '';
+    if (r.requestedRole === 'player') details = `Grad: ${r.gradYear} · ${r.position}`;
+    else if (r.requestedRole === 'family') details = `Player: ${r.playerName} · ${r.relationship}`;
+    else if (r.requestedRole === 'alumni') details = `Grad: ${r.gradYear} · Played: ${r.yearsPlayed}`;
+
+    return `
+      <div class="item" style="background:${statusBg[r.status]||'white'};">
+        <div class="item-info">
+          <div>
+            <strong>${r.memberName}</strong>
+            <span>${r.email} · Requesting: <strong>${r.requestedRole}</strong>${details ? ' · ' + details : ''}</span>
+            <span style="color:${statusColors[r.status]};font-weight:600;font-size:0.8rem;">${r.status.toUpperCase()}</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+          ${r.status === 'pending' ? `
+            <button class="btn-primary" style="font-size:0.8rem;padding:5px 10px;" onclick="approveRoleRequest('${r.id}','${r.uid}','${r.requestedRole}')">Approve</button>
+            <button class="btn-delete" style="font-size:0.8rem;padding:5px 10px;" onclick="rejectRoleRequest('${r.id}')">Reject</button>
+          ` : ''}
+          <button class="btn-secondary" style="font-size:0.8rem;padding:5px 10px;" onclick="deleteRoleRequest('${r.id}')">Delete</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+window.approveRoleRequest = async function(requestId, uid, role) {
+  await setDoc(doc(db, 'members', uid), { role }, { merge: true });
+  await setDoc(doc(db, 'roleRequests', requestId), { status: 'approved' }, { merge: true });
+  loadRoleRequestsTab();
+  loadMembersTab();
+};
+
+window.rejectRoleRequest = async function(requestId) {
+  await setDoc(doc(db, 'roleRequests', requestId), { status: 'rejected' }, { merge: true });
+  loadRoleRequestsTab();
+};
+
+window.deleteRoleRequest = async function(requestId) {
+  if (!confirm('Delete this request?')) return;
+  await deleteDoc(doc(db, 'roleRequests', requestId));
+  loadRoleRequestsTab();
+};
+
+// ============================================
+// EXPORT MEMBERS CSV
+// ============================================
+const exportMembersBtn = document.getElementById('exportMembersBtn');
+if (exportMembersBtn) {
+  exportMembersBtn.addEventListener('click', async () => {
+    const snap = await getDocs(collection(db, 'members'));
+    const rows = [['Name', 'Email', 'Role', 'Joined']];
+    snap.forEach(d => {
+      const m = d.data();
+      rows.push([m.displayName || '', m.email || '', m.role || 'member', m.createdAt || '']);
+    });
+    const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'admirals-members.csv'; a.click();
+  });
+}
+
+loadMembersTab();
+loadRoleRequestsTab();
+
 });
