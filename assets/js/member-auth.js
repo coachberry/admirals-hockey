@@ -187,6 +187,7 @@ async function loadMemberDashboard(member) {
 // ============================================
 onAuthStateChanged(auth, async (user) => {
   const btn = document.getElementById('memberNavBtn');
+  const signupBtn = document.getElementById('memberSignupBtn');
   if (user) {
     const profile = await ensureMemberProfile(user);
     window.currentMember = { ...profile, uid: user.uid };
@@ -194,11 +195,16 @@ onAuthStateChanged(auth, async (user) => {
       btn.textContent = user.displayName?.split(' ')[0] || 'Account';
       btn.onclick = () => { showMemberView('dashboard'); showMemberModal('dashboard'); loadMemberDashboard(window.currentMember); };
     }
+    if (signupBtn) signupBtn.style.display = 'none';
   } else {
     window.currentMember = null;
     if (btn) {
-      btn.textContent = 'Member Login';
+      btn.textContent = 'Login';
       btn.onclick = () => showMemberModal('login');
+    }
+    if (signupBtn) {
+      signupBtn.style.display = '';
+      signupBtn.onclick = () => showMemberModal('signup');
     }
   }
 });
@@ -214,5 +220,18 @@ window.memberSignIn = memberSignIn;
 window.memberGoogleSignIn = memberGoogleSignIn;
 window.memberSignOut = memberSignOut;
 window.submitRoleRequest = submitRoleRequest;
+
+// Wire up modal overlay click to close
+document.addEventListener('DOMContentLoaded', () => {
+  const modal = document.getElementById('memberModal');
+  if (modal) {
+    modal.addEventListener('click', e => { if (e.target === modal) hideMemberModal(); });
+  }
+  // Wire buttons using event listeners (not onclick attrs)
+  const loginBtn = document.getElementById('memberNavBtn');
+  const signupBtn = document.getElementById('memberSignupBtn');
+  if (loginBtn) loginBtn.addEventListener('click', () => showMemberModal('login'));
+  if (signupBtn) signupBtn.addEventListener('click', () => showMemberModal('signup'));
+});
 
 export { auth, db, currentMember };

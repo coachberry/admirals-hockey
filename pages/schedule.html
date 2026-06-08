@@ -16,7 +16,10 @@
 <header>
   <div class="header-container">
     <a href="/index.html"><img src="/assets/images/franklin-admirals-hockey-logo-lowres.png" alt="Franklin Admirals Hockey" class="logo-img"></a>
-    <button id="memberNavBtn" onclick="showMemberModal('login')" class="member-nav-btn">Member Login</button>
+    <div style="display:flex;gap:0.4rem;flex-shrink:0;">
+      <button id="memberNavBtn" class="member-nav-btn">Login</button>
+      <button id="memberSignupBtn" class="member-nav-btn" style="background:white;color:#5D1725;border:1px solid #5D1725;">Sign Up</button>
+    </div>
     <nav>
       <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
         <span></span><span></span><span></span>
