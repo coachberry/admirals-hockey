@@ -189,6 +189,17 @@ onAuthStateChanged(auth, async (user) => {
       loginBtn.onclick = () => { window.location.href = '/pages/profile.html'; };
     }
     if (signupBtn) signupBtn.style.display = 'none';
+
+    // Show Admin Dashboard button for admins/superadmins
+    const adminBtn = document.getElementById('adminDashboardBtn');
+    if (adminBtn) {
+      const role = profile.role || 'member';
+      if (role === 'admin' || role === 'superadmin') {
+        adminBtn.style.display = 'inline-block';
+      } else {
+        adminBtn.style.display = 'none';
+      }
+    }
   } else {
     window.currentMember = null;
     if (loginBtn) {
@@ -196,6 +207,8 @@ onAuthStateChanged(auth, async (user) => {
       loginBtn.onclick = () => showMemberModal('login');
     }
     if (signupBtn) signupBtn.style.display = '';
+    const adminBtn = document.getElementById('adminDashboardBtn');
+    if (adminBtn) adminBtn.style.display = 'none';
   }
 });
 

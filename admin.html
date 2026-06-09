@@ -914,43 +914,5 @@
     });
   });
 </script>
-<script type="module">
-  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-  const SUPER_ADMIN_EMAIL = 'coachberry03@gmail.com';
-  const app = getApps().length ? getApps()[0] : initializeApp({
-    apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
-    authDomain: "admirals-hockey.firebaseapp.com",
-    projectId: "admirals-hockey",
-    storageBucket: "admirals-hockey.firebasestorage.app",
-    messagingSenderId: "783358659334",
-    appId: "1:783358659334:web:5daffd093adca386faec87"
-  });
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) return;
-    if (user.email === SUPER_ADMIN_EMAIL) {
-      await setDoc(doc(db, 'members', user.uid), {
-        role: 'superadmin', status: 'active',
-        email: user.email, displayName: user.displayName || 'Coach Berry'
-      }, { merge: true });
-      return;
-    }
-    const snap = await getDoc(doc(db, 'members', user.uid));
-    if (!snap.exists()) return;
-    const profile = snap.data();
-    if (profile.role !== 'admin') return;
-    const perms = profile.adminPermissions || {};
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      const tab = btn.dataset.tab;
-      if (!tab) return;
-      if (!perms[tab]) btn.style.display = 'none';
-    });
-  });
-</script>
 </body>
 </html>
