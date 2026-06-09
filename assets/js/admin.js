@@ -1856,6 +1856,7 @@ function renderSummerRoster() {
       <span style="color:#ccc;font-size:1rem;flex-shrink:0;">⋮⋮</span>
       <span style="flex:1;">${p.name}</span>
       <span style="color:#5D1725;font-size:0.75rem;font-weight:600;">${p.position === 'Goalie' ? 'G' : ''}</span>
+      <button onclick="linkMemberToPlayer(${i})" style="background:none;border:1px solid #999;border-radius:3px;color:${p.memberUid ? '#2e7d32' : '#999'};cursor:pointer;font-size:0.7rem;padding:1px 5px;flex-shrink:0;" title="${p.memberUid ? 'Linked: ' + (p.memberName||p.memberUid) : 'Link to member account'}">${p.memberUid ? '🔗' : 'Link'}</button>
       <button onclick="removeSummerPlayer(${i})" style="background:none;border:none;color:#c62828;cursor:pointer;font-size:1rem;padding:0 4px;flex-shrink:0;">×</button>
     </div>`).join('');
 
@@ -1882,6 +1883,52 @@ function renderSummerRoster() {
     });
   });
 }
+
+window.linkMemberToPlayer = async function(index) {
+  // Load all members and show a picker
+  const snap = await getDocs(collection(db, 'members'));
+  const members = [];
+  snap.forEach(d => members.push({ id: d.id, ...d.data() }));
+  members.sort((a,b) => (a.displayName||'').localeCompare(b.displayName||''));
+
+  const current = summerRoster[index];
+  const options = members.map(m => `<option value="${m.id}" data-name="${m.displayName||m.email}" ${current.memberUid===m.id?'selected':''}>${m.displayName||m.email} (${m.role})</option>`).join('');
+
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:white;border-radius:8px;padding:1.5rem;max-width:400px;width:90%;">
+      <h3 style="margin-bottom:1rem;">Link "${current.name}" to a Member</h3>
+      <select id="memberPickerSelect" style="width:100%;padding:0.6rem;border:1px solid #ddd;border-radius:6px;font-size:0.9rem;margin-bottom:1rem;">
+        <option value="">-- No link --</option>
+        ${options}
+      </select>
+      <div style="display:flex;gap:0.5rem;">
+        <button id="memberPickerSave" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.6rem 1.2rem;cursor:pointer;font-weight:600;">Save</button>
+        <button id="memberPickerCancel" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:0.6rem 1.2rem;cursor:pointer;">Cancel</button>
+        ${current.memberUid ? '<button id="memberPickerUnlink" style="background:white;color:#c62828;border:1px solid #c62828;border-radius:6px;padding:0.6rem 1.2rem;cursor:pointer;margin-left:auto;">Unlink</button>' : ''}
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+
+  modal.querySelector('#memberPickerCancel').onclick = () => modal.remove();
+  modal.querySelector('#memberPickerSave').onclick = () => {
+    const sel = modal.querySelector('#memberPickerSelect');
+    const uid = sel.value;
+    const name = uid ? sel.options[sel.selectedIndex].dataset.name : '';
+    summerRoster[index].memberUid = uid || null;
+    summerRoster[index].memberName = name || null;
+    modal.remove();
+    renderSummerRoster();
+  };
+  const unlinkBtn = modal.querySelector('#memberPickerUnlink');
+  if (unlinkBtn) unlinkBtn.onclick = () => {
+    summerRoster[index].memberUid = null;
+    summerRoster[index].memberName = null;
+    modal.remove();
+    renderSummerRoster();
+  };
+};
 
 window.removeSummerPlayer = function(index) {
   summerRoster.splice(index, 1);
