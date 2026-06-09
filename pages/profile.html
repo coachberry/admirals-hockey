@@ -783,12 +783,13 @@ function showSection(name) {
 
           const yesActive = existing === 'yes';
           const noActive = existing === 'no';
-          html += `<div class="game-rsvp-item">
+          const rowId = 'rsvprow_' + gameDoc.id;
+          html += `<div class="game-rsvp-item" id="${rowId}">
             <div>
               <div style="font-weight:600;font-size:0.9rem;">${team.name} vs. ${oppName}</div>
               <div style="font-size:0.82rem;color:#666;">${dateStr} · ${timeStr} · ${season.label || season.id}</div>
             </div>
-            <div style="display:flex;gap:0.5rem;">
+            <div id="btns_${gameDoc.id}" style="display:flex;gap:0.5rem;">
               <button onclick="toggleSummerRsvp('${season.id}','${gameDoc.id}','${currentUser.uid}','yes',${yesActive})"
                 style="border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:${yesActive ? '#2e7d32' : 'white'};color:${yesActive ? 'white' : '#2e7d32'};">
                 ✅ In
@@ -810,7 +811,6 @@ function showSection(name) {
   window.toggleSummerRsvp = async function(seasonId, gameId, uid, response, isActive) {
     const { deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
     if (isActive) {
-      // Clicking active button = deselect
       await deleteDoc(doc(db, 'summer', seasonId, 'games', gameId, 'rsvps', uid));
     } else {
       await setDoc(doc(db, 'summer', seasonId, 'games', gameId, 'rsvps', uid), {
@@ -819,7 +819,21 @@ function showSection(name) {
         timestamp: new Date().toISOString()
       });
     }
-    loadMyGames();
+    // Update just the buttons for this game without reloading the whole list
+    const newYesActive = !isActive && response === 'yes';
+    const newNoActive = !isActive && response === 'no';
+    const btns = document.getElementById('btns_' + gameId);
+    if (btns) {
+      btns.innerHTML = `
+        <button onclick="toggleSummerRsvp('${seasonId}','${gameId}','${uid}','yes',${newYesActive})"
+          style="border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:${newYesActive ? '#2e7d32' : 'white'};color:${newYesActive ? 'white' : '#2e7d32'};">
+          ✅ In
+        </button>
+        <button onclick="toggleSummerRsvp('${seasonId}','${gameId}','${uid}','no',${newNoActive})"
+          style="border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:${newNoActive ? '#c62828' : 'white'};color:${newNoActive ? 'white' : '#c62828'};">
+          ❌ Out
+        </button>`;
+    }
   };
 
   window.doSignOutAndRedirect = async function() {
