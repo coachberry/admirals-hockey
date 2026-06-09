@@ -222,16 +222,14 @@ window.memberSignOut = memberSignOut;
 window.submitRoleRequest = submitRoleRequest;
 
 // Wire up modal overlay click to close
-document.addEventListener('DOMContentLoaded', () => {
-  const modal = document.getElementById('memberModal');
-  if (modal) {
-    modal.addEventListener('click', e => { if (e.target === modal) hideMemberModal(); });
-  }
-  // Wire buttons using event listeners (not onclick attrs)
-  const loginBtn = document.getElementById('memberNavBtn');
-  const signupBtn = document.getElementById('memberSignupBtn');
-  if (loginBtn) loginBtn.addEventListener('click', () => showMemberModal('login'));
-  if (signupBtn) signupBtn.addEventListener('click', () => showMemberModal('signup'));
-});
+// Script is at end of body so DOM is already ready - attach directly
+const modal = document.getElementById('memberModal');
+if (modal) {
+  modal.addEventListener('click', e => { if (e.target === modal) hideMemberModal(); });
+}
+const loginBtn = document.getElementById('memberNavBtn');
+const signupBtn = document.getElementById('memberSignupBtn');
+if (loginBtn) loginBtn.addEventListener('click', () => showMemberModal('login'));
+if (signupBtn) signupBtn.addEventListener('click', () => showMemberModal('signup'));
 
 export { auth, db, currentMember };
