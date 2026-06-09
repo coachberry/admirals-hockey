@@ -46,6 +46,7 @@
     <button class="tab-btn" data-tab="rsvp">RSVP Links</button>
     <button class="tab-btn" data-tab="sponsors">Sponsors</button>
     <button class="tab-btn" data-tab="gallery">Gallery</button>
+    <button class="tab-btn" data-tab="applications">Applications <span id="applicationsBadge" style="display:none;background:#c62828;color:white;border-radius:50%;padding:1px 6px;font-size:0.7rem;margin-left:4px;"></span></button>
     <button class="tab-btn" data-tab="members">Members</button>
     <button class="tab-btn" data-tab="roleRequests">Role Requests <span id="roleRequestsBadge" style="display:none;background:#c62828;color:white;border-radius:50%;padding:1px 6px;font-size:0.7rem;margin-left:4px;"></span></button>
     <button class="tab-btn" data-tab="users">Manage Users</button>
@@ -374,6 +375,13 @@
         <button id="addAlbumBtn" class="btn-primary">+ Add Album</button>
       </div>
       <div id="galleryAlbumsList" class="items-list"><div class="empty-state">Select or create a season</div></div>
+    </div>
+
+    <!-- APPLICATIONS TAB -->
+    <div id="applicationsTab" class="tab-content">
+      <h2>Member Applications</h2>
+      <p style="color:#666;font-size:0.9rem;margin-bottom:1rem;">Review and approve or deny membership applications.</p>
+      <div id="applicationsList" class="items-list"><div class="empty-state">No applications yet</div></div>
     </div>
 
     <!-- MEMBERS TAB -->

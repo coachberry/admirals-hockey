@@ -1,5 +1,5 @@
 // ============================================
-// MEMBER AUTH
+// MEMBER AUTH v2
 // ============================================
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -53,44 +53,8 @@ function setError(id, msg) {
 }
 
 // ============================================
-// AUTH
+// SIGN IN
 // ============================================
-async function ensureProfile(user) {
-  const ref = doc(db, 'members', user.uid);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) {
-    await setDoc(ref, {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName || user.email.split('@')[0],
-      photoURL: user.photoURL || '',
-      role: 'member',
-      status: 'active',
-      createdAt: new Date().toISOString()
-    });
-  }
-  return (await getDoc(ref)).data();
-}
-
-async function doSignUp() {
-  const name = document.getElementById('signupName')?.value.trim();
-  const email = document.getElementById('signupEmail')?.value.trim();
-  const password = document.getElementById('signupPassword')?.value;
-  const confirm = document.getElementById('signupConfirm')?.value;
-  if (!name) { setError('signupError', 'Please enter your name.'); return; }
-  if (!email) { setError('signupError', 'Please enter your email.'); return; }
-  if (!password || password.length < 6) { setError('signupError', 'Password must be at least 6 characters.'); return; }
-  if (password !== confirm) { setError('signupError', 'Passwords do not match.'); return; }
-  try {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(cred.user, { displayName: name });
-    await ensureProfile({ ...cred.user, displayName: name });
-    hideMemberModal();
-  } catch(e) {
-    setError('signupError', e.code === 'auth/email-already-in-use' ? 'Email already in use.' : e.message);
-  }
-}
-
 async function doSignIn() {
   const email = document.getElementById('loginEmail')?.value.trim();
   const password = document.getElementById('loginPassword')?.value;
@@ -106,8 +70,17 @@ async function doSignIn() {
 async function doGoogleSignIn() {
   try {
     const cred = await signInWithPopup(auth, googleProvider);
-    await ensureProfile(cred.user);
-    hideMemberModal();
+    // Check if they have a profile already
+    const snap = await getDoc(doc(db, 'members', cred.user.uid));
+    if (!snap.exists()) {
+      // New Google user - send to apply flow
+      window._pendingGoogleUser = cred.user;
+      showMemberView('apply');
+      if (document.getElementById('applyName')) document.getElementById('applyName').value = cred.user.displayName || '';
+      if (document.getElementById('applyEmail')) document.getElementById('applyEmail').value = cred.user.email || '';
+    } else {
+      hideMemberModal();
+    }
   } catch(e) {
     setError('loginError', e.message);
   }
@@ -115,58 +88,87 @@ async function doGoogleSignIn() {
 
 async function doSignOut() {
   await signOut(auth);
+  window.currentMember = null;
 }
 
 // ============================================
-// ROLE REQUEST
+// APPLY (new account creation)
 // ============================================
-async function doRoleRequest() {
-  if (!window.currentMember) return;
-  const role = document.getElementById('roleRequestType')?.value;
-  if (!role) { setError('roleRequestError', 'Please select a role.'); return; }
+async function doApply() {
+  const name = document.getElementById('applyName')?.value.trim();
+  const email = document.getElementById('applyEmail')?.value.trim();
+  const password = document.getElementById('applyPassword')?.value;
+  const confirm = document.getElementById('applyConfirm')?.value;
+  const roleType = document.getElementById('applyRoleType')?.value;
+  const phone = document.getElementById('applyPhone')?.value.trim();
 
-  const data = {
-    uid: window.currentMember.uid,
-    memberName: window.currentMember.displayName,
-    email: window.currentMember.email,
-    requestedRole: role,
+  if (!name) { setError('applyError', 'Please enter your name.'); return; }
+  if (!email) { setError('applyError', 'Please enter your email.'); return; }
+
+  // If not Google sign-in, validate password
+  if (!window._pendingGoogleUser) {
+    if (!password || password.length < 6) { setError('applyError', 'Password must be at least 6 characters.'); return; }
+    if (password !== confirm) { setError('applyError', 'Passwords do not match.'); return; }
+  }
+
+  const applicationData = {
+    displayName: name,
+    email,
+    phone: phone || '',
+    requestedRole: roleType || 'member',
     status: 'pending',
     createdAt: new Date().toISOString()
   };
 
-  if (role === 'player') {
-    data.gradYear = document.getElementById('roleGradYear')?.value;
-    data.position = document.getElementById('rolePosition')?.value;
-    if (!data.gradYear || !data.position) { setError('roleRequestError', 'Please fill in all fields.'); return; }
-  } else if (role === 'family') {
-    data.playerName = document.getElementById('rolePlayerName')?.value.trim();
-    data.relationship = document.getElementById('roleRelationship')?.value;
-    if (!data.playerName || !data.relationship) { setError('roleRequestError', 'Please fill in all fields.'); return; }
-  } else if (role === 'alumni') {
-    data.gradYear = document.getElementById('roleAlumniGradYear')?.value;
-    data.yearsPlayed = document.getElementById('roleYearsPlayed')?.value.trim();
-    if (!data.gradYear || !data.yearsPlayed) { setError('roleRequestError', 'Please fill in all fields.'); return; }
+  if (roleType === 'player') {
+    const gradYear = document.getElementById('applyGradYear')?.value;
+    const position = document.getElementById('applyPosition')?.value;
+    if (!gradYear || !position) { setError('applyError', 'Please fill in all required fields.'); return; }
+    applicationData.gradYear = gradYear;
+    applicationData.position = position;
+  } else if (roleType === 'alumni') {
+    const gradYear = document.getElementById('applyAlumniGradYear')?.value;
+    const yearsPlayed = document.getElementById('applyYearsPlayed')?.value.trim();
+    if (!gradYear || !yearsPlayed) { setError('applyError', 'Please fill in all required fields.'); return; }
+    applicationData.gradYear = gradYear;
+    applicationData.yearsPlayed = yearsPlayed;
   }
 
-  await addDoc(collection(db, 'roleRequests'), data);
-  showMemberView('dashboard');
-  loadDashboard(window.currentMember);
-}
+  try {
+    let uid;
+    let displayName = name;
 
-// ============================================
-// DASHBOARD
-// ============================================
-async function loadDashboard(member) {
-  const nameEl = document.getElementById('dashboardName');
-  const roleEl = document.getElementById('dashboardRole');
-  const pendingEl = document.getElementById('dashboardPending');
-  if (nameEl) nameEl.textContent = member.displayName;
-  if (roleEl) roleEl.textContent = member.role.charAt(0).toUpperCase() + member.role.slice(1);
-  if (pendingEl) {
-    const q = query(collection(db, 'roleRequests'), where('uid', '==', member.uid), where('status', '==', 'pending'));
-    const snap = await getDocs(q);
-    pendingEl.textContent = snap.empty ? '' : '⏳ Role request pending approval';
-    pendingEl.style.display = snap.empty ? 'none' : 'block';
+    if (window._pendingGoogleUser) {
+      uid = window._pendingGoogleUser.uid;
+      await updateProfile(window._pendingGoogleUser, { displayName: name });
+      window._pendingGoogleUser = null;
+    } else {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(cred.user, { displayName: name });
+      uid = cred.user.uid;
+    }
+
+    // Create member profile with pending status
+    await setDoc(doc(db, 'members', uid), {
+      uid,
+      email,
+      displayName: name,
+      phone: phone || '',
+      role: 'member',
+      status: 'pending',
+      requestedRole: roleType || 'member',
+      createdAt: new Date().toISOString()
+    });
+
+    // Also create an application record
+    await addDoc(collection(db, 'applications'), {
+      uid,
+      ...applicationData
+    });
+
+    hideMemberModal();
+  } catch(e) {
+    setError('applyError', e.code === 'auth/email-already-in-use' ? 'Email already in use. Try logging in.' : e.message);
   }
 }
 
@@ -178,8 +180,10 @@ onAuthStateChanged(auth, async (user) => {
   const signupBtn = document.getElementById('memberSignupBtn');
 
   if (user) {
-    const profile = await ensureProfile(user);
+    const snap = await getDoc(doc(db, 'members', user.uid));
+    const profile = snap.exists() ? snap.data() : { role: 'member', status: 'pending', displayName: user.displayName };
     window.currentMember = { ...profile, uid: user.uid };
+
     if (loginBtn) {
       loginBtn.textContent = user.displayName?.split(' ')[0] || 'Account';
       loginBtn.onclick = () => { window.location.href = '/pages/profile.html'; };
@@ -201,18 +205,23 @@ onAuthStateChanged(auth, async (user) => {
 window.showMemberModal = showMemberModal;
 window.hideMemberModal = hideMemberModal;
 window.showMemberView = showMemberView;
-window.memberSignUp = doSignUp;
 window.memberSignIn = doSignIn;
 window.memberGoogleSignIn = doGoogleSignIn;
 window.memberSignOut = doSignOut;
-window.submitRoleRequest = doRoleRequest;
+window.memberApply = doApply;
 
-// Modal overlay click to close
+// Show/hide role-specific fields in apply form
+window.showApplyFields = function(role) {
+  ['player', 'alumni'].forEach(r => {
+    const el = document.getElementById('applyFields_' + r);
+    if (el) el.style.display = r === role ? 'block' : 'none';
+  });
+};
+
+// Modal overlay close
 const modal = document.getElementById('memberModal');
 if (modal) modal.addEventListener('click', e => { if (e.target === modal) hideMemberModal(); });
 
-// Set button actions - will be overridden by onAuthStateChanged when user logs in
-const loginBtnInit = document.getElementById('memberNavBtn');
-const signupBtnInit = document.getElementById('memberSignupBtn');
-if (loginBtnInit && !loginBtnInit.onclick) loginBtnInit.onclick = () => showMemberModal('login');
-if (signupBtnInit) signupBtnInit.onclick = () => showMemberModal('signup');
+// Button listeners
+const signupBtn = document.getElementById('memberSignupBtn');
+if (signupBtn) signupBtn.onclick = () => showMemberModal('apply');

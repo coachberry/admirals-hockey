@@ -339,161 +339,101 @@
   })();
 </script>
 
-<!-- MEMBER MODAL -->
-  <script type="module" src="/assets/js/member-auth.js"></script>
-</body> on every page -->
+<!-- MEMBER MODAL v2 -->
 <div id="memberModal" class="modal-overlay" style="z-index:2000;">
-  <div class="modal" style="max-width:440px;max-height:90vh;overflow-y:auto;">
+  <div class="modal" style="max-width:480px;max-height:90vh;overflow-y:auto;">
     <button class="modal-close-float" onclick="hideMemberModal()">&times;</button>
 
     <!-- LOGIN VIEW -->
     <div class="member-view" id="memberView_login" style="display:block;">
       <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;text-align:center;">
         <h2 style="font-size:1.3rem;font-weight:700;">Member Login</h2>
-        <p style="font-size:0.85rem;opacity:0.85;margin-top:0.25rem;">Sign in to access your account</p>
+        <p style="font-size:0.82rem;opacity:0.85;margin-top:0.25rem;">Sign in to access your account</p>
       </div>
-      <div style="padding:1.5rem;">
-        <button onclick="memberGoogleSignIn()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.75rem;border:1px solid #ddd;border-radius:6px;background:white;font-size:0.95rem;font-weight:500;cursor:pointer;margin-bottom:1rem;">
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px;height:20px;">
-          Continue with Google
+      <div style="padding:1.5rem;display:flex;flex-direction:column;gap:0.75rem;">
+        <button onclick="memberGoogleSignIn()" style="display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.75rem;border:1px solid #ddd;border-radius:6px;background:white;font-size:0.95rem;cursor:pointer;">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px;">Continue with Google
         </button>
-        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
-          <hr style="flex:1;border:none;border-top:1px solid #eee;">
-          <span style="font-size:0.8rem;color:#999;">or</span>
-          <hr style="flex:1;border:none;border-top:1px solid #eee;">
-        </div>
-        <div style="display:flex;flex-direction:column;gap:0.75rem;">
-          <input type="email" id="loginEmail" placeholder="Email address" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
-          <input type="password" id="loginPassword" placeholder="Password" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
-          <p id="loginError" class="member-error" style="color:#c62828;font-size:0.85rem;min-height:1rem;"></p>
-          <button onclick="memberSignIn()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-size:1rem;font-weight:600;cursor:pointer;">Sign In</button>
-        </div>
-        <p style="text-align:center;margin-top:1rem;font-size:0.88rem;color:#555;">
-          Don't have an account? <a href="#" onclick="showMemberView('signup')" style="color:#5D1725;font-weight:600;">Sign up</a>
+        <div style="display:flex;align-items:center;gap:0.5rem;"><hr style="flex:1;border:none;border-top:1px solid #eee;"><span style="font-size:0.8rem;color:#999;">or</span><hr style="flex:1;border:none;border-top:1px solid #eee;"></div>
+        <input type="email" id="loginEmail" placeholder="Email address" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <input type="password" id="loginPassword" placeholder="Password" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <p id="loginError" class="member-error" style="color:#c62828;font-size:0.85rem;min-height:1rem;"></p>
+        <button onclick="memberSignIn()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-size:1rem;font-weight:600;cursor:pointer;">Sign In</button>
+        <p style="text-align:center;font-size:0.85rem;color:#555;">
+          Player or Alumni? <a href="#" onclick="showMemberView('apply')" style="color:#5D1725;font-weight:600;">Apply for access →</a>
         </p>
       </div>
     </div>
 
-    <!-- SIGNUP VIEW -->
-    <div class="member-view" id="memberView_signup" style="display:none;">
-      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;text-align:center;">
-        <h2 style="font-size:1.3rem;font-weight:700;">Create Account</h2>
-        <p style="font-size:0.85rem;opacity:0.85;margin-top:0.25rem;">Join the Admirals community</p>
+    <!-- APPLY VIEW -->
+    <div class="member-view" id="memberView_apply" style="display:none;">
+      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;">
+        <h2 style="font-size:1.2rem;font-weight:700;">Join the Admirals Community</h2>
+        <p style="font-size:0.82rem;opacity:0.85;margin-top:0.3rem;">For current players, alumni, and summer league participants. All applications are reviewed by Coach Berry.</p>
       </div>
-      <div style="padding:1.5rem;">
-        <button onclick="memberGoogleSignIn()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.75rem;border:1px solid #ddd;border-radius:6px;background:white;font-size:0.95rem;font-weight:500;cursor:pointer;margin-bottom:1rem;">
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px;height:20px;">
-          Sign up with Google
+      <div style="padding:1.5rem;display:flex;flex-direction:column;gap:0.75rem;">
+        <button onclick="memberGoogleSignIn()" style="display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.75rem;border:1px solid #ddd;border-radius:6px;background:white;font-size:0.95rem;cursor:pointer;">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px;">Apply with Google
         </button>
-        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
-          <hr style="flex:1;border:none;border-top:1px solid #eee;">
-          <span style="font-size:0.8rem;color:#999;">or</span>
-          <hr style="flex:1;border:none;border-top:1px solid #eee;">
+        <div style="display:flex;align-items:center;gap:0.5rem;"><hr style="flex:1;border:none;border-top:1px solid #eee;"><span style="font-size:0.8rem;color:#999;">or</span><hr style="flex:1;border:none;border-top:1px solid #eee;"></div>
+
+        <input type="text" id="applyName" placeholder="Full name *" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <input type="email" id="applyEmail" placeholder="Email address *" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <input type="password" id="applyPassword" placeholder="Password (min 6 characters) *" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <input type="password" id="applyConfirm" placeholder="Confirm password *" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <input type="tel" id="applyPhone" placeholder="Phone number (optional)" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+
+        <div>
+          <label style="font-size:0.85rem;font-weight:600;color:#333;display:block;margin-bottom:0.4rem;">I am a... *</label>
+          <select id="applyRoleType" onchange="showApplyFields(this.value)" style="width:100%;padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+            <option value="">Select...</option>
+            <option value="player">Current FHS Hockey Player</option>
+            <option value="alumni">FHS Hockey Alumni</option>
+            <option value="member">Summer League / Other</option>
+          </select>
         </div>
-        <div style="display:flex;flex-direction:column;gap:0.75rem;">
-          <input type="text" id="signupName" placeholder="Full name" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
-          <input type="email" id="signupEmail" placeholder="Email address" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
-          <input type="password" id="signupPassword" placeholder="Password (min 6 characters)" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
-          <input type="password" id="signupConfirm" placeholder="Confirm password" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
-          <p id="signupError" class="member-error" style="color:#c62828;font-size:0.85rem;min-height:1rem;"></p>
-          <button onclick="memberSignUp()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-size:1rem;font-weight:600;cursor:pointer;">Create Account</button>
+
+        <!-- Player fields -->
+        <div id="applyFields_player" style="display:none;flex-direction:column;gap:0.75rem;">
+          <input type="number" id="applyGradYear" placeholder="Graduation year *" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+          <select id="applyPosition" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+            <option value="">Position *</option>
+            <option value="Forward">Forward</option>
+            <option value="Defense">Defense</option>
+            <option value="Goaltender">Goaltender</option>
+          </select>
         </div>
-        <p style="text-align:center;margin-top:1rem;font-size:0.88rem;color:#555;">
+
+        <!-- Alumni fields -->
+        <div id="applyFields_alumni" style="display:none;flex-direction:column;gap:0.75rem;">
+          <input type="number" id="applyAlumniGradYear" placeholder="Graduation year *" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+          <input type="text" id="applyYearsPlayed" placeholder="Years played (e.g. 2019-2022) *" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        </div>
+
+        <p id="applyError" class="member-error" style="color:#c62828;font-size:0.85rem;min-height:1rem;"></p>
+        <button onclick="memberApply()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-size:1rem;font-weight:600;cursor:pointer;">Submit Application</button>
+        <p style="text-align:center;font-size:0.85rem;color:#555;">
           Already have an account? <a href="#" onclick="showMemberView('login')" style="color:#5D1725;font-weight:600;">Sign in</a>
         </p>
       </div>
     </div>
 
-    <!-- DASHBOARD VIEW -->
-    <div class="member-view" id="memberView_dashboard" style="display:none;">
+    <!-- PENDING VIEW -->
+    <div class="member-view" id="memberView_pending" style="display:none;">
       <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;text-align:center;">
-        <div style="font-size:2rem;margin-bottom:0.5rem;">👤</div>
-        <h2 id="dashboardName" style="font-size:1.2rem;font-weight:700;"></h2>
-        <p id="dashboardRole" style="font-size:0.85rem;opacity:0.85;margin-top:0.2rem;"></p>
+        <h2 style="font-size:1.2rem;font-weight:700;">Application Pending</h2>
       </div>
-      <div style="padding:1.5rem;display:flex;flex-direction:column;gap:0.75rem;">
-        <div id="dashboardPending" style="display:none;background:#fff8e1;border:1px solid #f0c040;border-radius:6px;padding:0.6rem 1rem;font-size:0.85rem;color:#856404;"></div>
-        <button onclick="showMemberView('roleRequest')" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:0.75rem;font-size:0.9rem;font-weight:600;cursor:pointer;text-align:left;">
-          🏷️ Request a Role
-        </button>
-        <button onclick="memberSignOut();hideMemberModal();" style="background:white;color:#c62828;border:1px solid #c62828;border-radius:6px;padding:0.75rem;font-size:0.9rem;font-weight:600;cursor:pointer;">
-          Sign Out
-        </button>
-      </div>
-    </div>
-
-    <!-- ROLE REQUEST VIEW -->
-    <div class="member-view" id="memberView_roleRequest" style="display:none;">
-      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;">
-        <button onclick="showMemberView('dashboard')" style="background:none;border:none;color:white;cursor:pointer;font-size:0.85rem;opacity:0.8;padding:0;margin-bottom:0.5rem;">← Back</button>
-        <h2 style="font-size:1.2rem;font-weight:700;">Request a Role</h2>
-        <p style="font-size:0.82rem;opacity:0.85;margin-top:0.2rem;">Role requests are reviewed by admins</p>
-      </div>
-      <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
-        <div>
-          <label style="font-size:0.85rem;font-weight:600;color:#333;display:block;margin-bottom:0.4rem;">I am a...</label>
-          <select id="roleRequestType" onchange="showRoleFields(this.value)" style="width:100%;padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
-            <option value="">Select role...</option>
-            <option value="player">Player</option>
-            <option value="family">Family Member</option>
-            <option value="alumni">Alumni</option>
-          </select>
-        </div>
-
-        <!-- Player fields -->
-        <div id="roleFields_player" style="display:none;flex-direction:column;gap:0.75rem;">
-          <div>
-            <label style="font-size:0.85rem;font-weight:600;color:#333;display:block;margin-bottom:0.4rem;">Graduation Year</label>
-            <input type="number" id="roleGradYear" placeholder="e.g. 2027" style="width:100%;padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
-          </div>
-          <div>
-            <label style="font-size:0.85rem;font-weight:600;color:#333;display:block;margin-bottom:0.4rem;">Position</label>
-            <select id="rolePosition" style="width:100%;padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
-              <option value="">Select...</option>
-              <option value="Forward">Forward</option>
-              <option value="Defense">Defense</option>
-              <option value="Goaltender">Goaltender</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Family fields -->
-        <div id="roleFields_family" style="display:none;flex-direction:column;gap:0.75rem;">
-          <div>
-            <label style="font-size:0.85rem;font-weight:600;color:#333;display:block;margin-bottom:0.4rem;">Player's Name</label>
-            <input type="text" id="rolePlayerName" placeholder="Your child's full name" style="width:100%;padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
-          </div>
-          <div>
-            <label style="font-size:0.85rem;font-weight:600;color:#333;display:block;margin-bottom:0.4rem;">Relationship</label>
-            <select id="roleRelationship" style="width:100%;padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
-              <option value="">Select...</option>
-              <option value="Mother">Mother</option>
-              <option value="Father">Father</option>
-              <option value="Guardian">Guardian</option>
-              <option value="Family Member">Family Member</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Alumni fields -->
-        <div id="roleFields_alumni" style="display:none;flex-direction:column;gap:0.75rem;">
-          <div>
-            <label style="font-size:0.85rem;font-weight:600;color:#333;display:block;margin-bottom:0.4rem;">Graduation Year</label>
-            <input type="number" id="roleAlumniGradYear" placeholder="e.g. 2022" style="width:100%;padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
-          </div>
-          <div>
-            <label style="font-size:0.85rem;font-weight:600;color:#333;display:block;margin-bottom:0.4rem;">Years Played</label>
-            <input type="text" id="roleYearsPlayed" placeholder="e.g. 2019-2022" style="width:100%;padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
-          </div>
-        </div>
-
-        <p id="roleRequestError" class="member-error" style="color:#c62828;font-size:0.85rem;min-height:1rem;"></p>
-        <button onclick="submitRoleRequest()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-size:1rem;font-weight:600;cursor:pointer;">Submit Request</button>
+      <div style="padding:2rem;text-align:center;">
+        <div style="font-size:3rem;margin-bottom:1rem;">⏳</div>
+        <p style="font-weight:600;color:#111;margin-bottom:0.5rem;">Your application is under review</p>
+        <p style="font-size:0.88rem;color:#555;line-height:1.6;margin-bottom:1.5rem;">Coach Berry will review your application and approve your account. You'll be able to access your profile once approved.</p>
+        <button onclick="memberSignOut();hideMemberModal();" style="background:white;color:#c62828;border:1px solid #c62828;border-radius:6px;padding:0.65rem 1.5rem;font-size:0.9rem;font-weight:600;cursor:pointer;">Sign Out</button>
       </div>
     </div>
 
   </div>
 </div>
+
 
 <script>
 function showRoleFields(role) {
