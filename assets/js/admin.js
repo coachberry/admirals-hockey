@@ -23,6 +23,17 @@ const storage = getStorage(app);
 // ============================================
 const users = JSON.parse(localStorage.getItem('admirals_users')) || { admin: { password: 'admin', email: 'coachberry03@gmail.com' } };
 let currentUser = localStorage.getItem('admirals_currentUser');
+
+// If no localStorage user, wait briefly for Firebase auto-login to set it
+if (!currentUser) {
+  setTimeout(() => {
+    currentUser = localStorage.getItem('admirals_currentUser');
+    if (currentUser) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+    }
+  }, 1500);
+}
 function saveUsers() { localStorage.setItem('admirals_users', JSON.stringify(users)); }
 
 document.getElementById('loginForm').addEventListener('submit', e => {
