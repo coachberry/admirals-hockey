@@ -95,9 +95,8 @@
     <button class="tab-btn" data-tab="sponsors">Sponsors</button>
     <button class="tab-btn" data-tab="gallery">Gallery</button>
     <button class="tab-btn" data-tab="applications">Applications <span id="applicationsBadge" style="display:none;background:#c62828;color:white;border-radius:50%;padding:1px 6px;font-size:0.7rem;margin-left:4px;"></span></button>
-    <button class="tab-btn" data-tab="members">Members</button>
+    <button class="tab-btn" data-tab="members">Manage Users</button>
     <button class="tab-btn" data-tab="roleRequests">Role Requests <span id="roleRequestsBadge" style="display:none;background:#c62828;color:white;border-radius:50%;padding:1px 6px;font-size:0.7rem;margin-left:4px;"></span></button>
-    <button class="tab-btn" data-tab="users">Manage Users</button>
     <button class="tab-btn" data-tab="pages">Pages</button>
     <button class="tab-btn" data-tab="settings">Settings</button>
   </div>
@@ -353,25 +352,7 @@
     </div>
 
     <!-- MANAGE USERS TAB -->
-    <div id="usersTab" class="tab-content">
-      <h2>Manage Users</h2>
-      <button id="inviteUserBtn" class="btn-primary">+ Invite User</button>
-      <div id="inviteForm" class="form-section" style="display: none;">
-        <h3>Invite New Admin</h3>
-        <input type="email" id="inviteEmail" placeholder="Email Address">
-        <div class="form-buttons">
-          <button id="generateInviteBtn" class="btn-primary">Generate Invite Link</button>
-          <button id="cancelInviteBtn" class="btn-secondary">Cancel</button>
-        </div>
-      </div>
-      <div id="inviteResult" class="form-section" style="display: none;">
-        <h3>Share This Link</h3>
-        <input type="text" id="inviteLink" readonly>
-        <button id="copyLinkBtn" class="btn-primary" style="margin-top: 0.75rem;">Copy Link</button>
-      </div>
-      <h3 class="list-heading">Current Admins</h3>
-      <div id="usersList" class="items-list"></div>
-    </div>
+
 
     <!-- RSVP TAB -->
     <div id="rsvpTab" class="tab-content">
@@ -434,7 +415,7 @@
 
     <!-- MEMBERS TAB -->
     <div id="membersTab" class="tab-content">
-      <h2>Members</h2>
+      <h2>Manage Users</h2>
       <div style="display:flex;gap:1rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
         <span id="membersCount" style="color:#666;font-size:0.9rem;"></span>
         <button id="exportMembersBtn" class="btn-secondary">Export CSV</button>
@@ -564,19 +545,7 @@
 </div>
 
 <!-- SIGNUP SCREEN -->
-<div id="signupScreen" class="login-container" style="display: none;">
-  <div class="login-box">
-    <h1>⚓ Franklin Admirals</h1>
-    <h2>Create Your Account</h2>
-    <form id="signupForm">
-      <input type="email" id="signupEmail" placeholder="Email" readonly>
-      <input type="password" id="signupPassword" placeholder="Create Password">
-      <input type="password" id="signupConfirm" placeholder="Confirm Password">
-      <button type="submit">Create Account</button>
-    </form>
-    <p id="signupError" class="error"></p>
-  </div>
-</div>
+
 
 <!-- GAME STATS MODAL -->
 <div id="gameStatsModal" class="modal-overlay">
