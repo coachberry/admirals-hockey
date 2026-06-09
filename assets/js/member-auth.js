@@ -180,11 +180,17 @@ onAuthStateChanged(auth, async (user) => {
   if (user) {
     const profile = await ensureProfile(user);
     window.currentMember = { ...profile, uid: user.uid };
-    if (loginBtn) loginBtn.textContent = user.displayName?.split(' ')[0] || 'Account';
+    if (loginBtn) {
+      loginBtn.textContent = user.displayName?.split(' ')[0] || 'Account';
+      loginBtn.onclick = () => { showMemberModal('dashboard'); loadDashboard(window.currentMember); };
+    }
     if (signupBtn) signupBtn.style.display = 'none';
   } else {
     window.currentMember = null;
-    if (loginBtn) loginBtn.textContent = 'Login';
+    if (loginBtn) {
+      loginBtn.textContent = 'Login';
+      loginBtn.onclick = () => showMemberModal('login');
+    }
     if (signupBtn) signupBtn.style.display = '';
   }
 });
