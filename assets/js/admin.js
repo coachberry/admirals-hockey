@@ -2371,10 +2371,13 @@ const pagesList = [
   { id: 'schedule',    label: 'Schedule',      path: '/pages/schedule.html' },
   { id: 'roster',      label: 'Roster',        path: '/pages/roster.html' },
   { id: 'stats',       label: 'Stats',         path: '/pages/stats.html' },
+  { id: 'leaderboard', label: 'Leaderboard',   path: '/pages/leaderboard.html' },
   { id: 'news',        label: 'News',          path: '/pages/news.html' },
   { id: 'events',      label: 'Events',        path: '/pages/events.html' },
+  { id: 'gallery',     label: 'Gallery',       path: '/pages/gallery.html' },
   { id: 'summer',      label: 'Summer Hockey', path: '/pages/summer.html' },
   { id: 'alumni',      label: 'Alumni',        path: '/pages/alumni.html' },
+  { id: 'sponsors',    label: 'Sponsors',      path: '/pages/sponsors.html' },
   { id: 'tryouts',     label: 'Tryouts',       path: '/pages/tryouts.html' },
   { id: 'contact',     label: 'Contact',       path: '/pages/contact.html' },
 ];
