@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - Franklin Admirals Hockey</title>
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <script src="/assets/js/page-guard.js"></script>
+  <style>
+    .profile-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+      margin-bottom: 3rem;
+      align-items: start;
+    }
+
+    .profile-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .profile-card {
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .profile-card-header {
+      background: linear-gradient(135deg, #5D1725, #3c0f17);
+      padding: 1.5rem;
+      text-align: center;
+      color: white;
+    }
+
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid rgba(255,255,255,0.3);
+      margin: 0 auto 0.75rem;
+      display: block;
+      cursor: pointer;
+    }
+
+    .profile-avatar-placeholder {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      border: 3px solid rgba(255,255,255,0.3);
+      margin: 0 auto 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+    }
+
+    .profile-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .profile-email {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    .role-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+      padding: 0.2rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+      text-transform: capitalize;
+    }
+
+    .profile-card-body {
+      padding: 1rem;
+    }
+
+    .profile-nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.7rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #333;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      transition: background 0.15s;
+    }
+
+    .profile-nav-btn:hover { background: #f5f5f5; }
+    .profile-nav-btn.active { background: #fdf0f2; color: #5D1725; font-weight: 600; }
+
+    .profile-main { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .profile-section {
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      overflow: hidden;
+    }
+
+    .profile-section-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .profile-section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #5D1725;
+    }
+
+    .profile-section-body { padding: 1.25rem; }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-field:last-child { margin-bottom: 0; }
+
+    .form-field label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #555;
+    }
+
+    .form-field input {
+      padding: 0.6rem 0.9rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+
+    .form-field input:focus {
+      outline: none;
+      border-color: #5D1725;
+    }
+
+    .btn-save {
+      background: #5D1725;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.65rem 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-save:hover { background: #3c0f17; }
+
+    .btn-secondary-small {
+      background: white;
+      color: #5D1725;
+      border: 1px solid #5D1725;
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-danger {
+      background: white;
+      color: #c62828;
+      border: 1px solid #c62828;
+      border-radius: 6px;
+      padding: 0.65rem 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .status-msg {
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      min-height: 1.2rem;
+    }
+
+    .role-request-card {
+      background: #f9f9f9;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .role-request-card:last-child { margin-bottom: 0; }
+
+    .status-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 10px;
+      text-transform: uppercase;
+    }
+
+    .status-pending { background: #fff8e1; color: #856404; }
+    .status-approved { background: #e8f5e9; color: #2e7d32; }
+    .status-rejected { background: #ffebee; color: #c62828; }
+
+    .game-rsvp-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #f5f5f5;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .game-rsvp-item:last-child { border-bottom: none; }
+
+    .rsvp-yes-btn {
+      background: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .rsvp-no-btn {
+      background: white;
+      color: #c62828;
+      border: 1px solid #c62828;
+      border-radius: 4px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .rsvp-done {
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.4rem 0.9rem;
+      border-radius: 4px;
+    }
+
+    .rsvp-done.yes { background: #e8f5e9; color: #2e7d32; }
+    .rsvp-done.no { background: #ffebee; color: #c62828; }
+
+    .not-logged-in {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .not-logged-in h2 { color: #5D1725; margin-bottom: 0.75rem; }
+    .not-logged-in p { color: #666; margin-bottom: 1.5rem; }
+
+    @media (max-width: 768px) {
+      .profile-layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-container">
+    <a href="/index.html"><img src="/assets/images/franklin-admirals-hockey-logo-lowres.png" alt="Franklin Admirals Hockey" class="logo-img"></a>
+    <button id="memberNavBtn" class="member-nav-btn">Login</button>
+    <nav>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/index.html" class="nav-link">Home</a></li>
+        <li><a href="/pages/schedule.html" class="nav-link">Schedule</a></li>
+        <li><a href="/pages/roster.html" class="nav-link">Roster</a></li>
+        <li><a href="/pages/stats.html" class="nav-link">Stats</a></li>
+        <li><a href="/pages/news.html" class="nav-link">News</a></li>
+        <li><a href="/pages/events.html" class="nav-link">Events</a></li>
+        <li><a href="/pages/summer.html" class="nav-link">Summer Hockey</a></li>
+        <li><a href="/pages/alumni.html" class="nav-link">Alumni</a></li>
+        <li><a href="/pages/tryouts.html" class="nav-link">Tryouts</a></li>
+        <li><a href="/pages/contact.html" class="nav-link">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<section class="hero-section">
+  <div class="hero-container">
+    <div class="hero-badge">Franklin Admirals Hockey</div>
+    <h1 class="hero-title">My Profile</h1>
+    <p class="hero-subtitle">Manage your account and RSVP for games</p>
+  </div>
+</section>
+
+<div class="main-container">
+
+  <!-- NOT LOGGED IN -->
+  <div id="notLoggedIn" class="not-logged-in" style="display:none;">
+    <h2>Please log in to view your profile</h2>
+    <p>You need to be logged in to access your profile page.</p>
+    <button onclick="showMemberModal('login')" class="btn-save">Login</button>
+    &nbsp;
+    <button onclick="showMemberModal('signup')" class="btn-secondary-small">Sign Up</button>
+  </div>
+
+  <!-- PROFILE LAYOUT -->
+  <div id="profileLayout" class="profile-layout" style="display:none;">
+
+    <!-- SIDEBAR -->
+    <div class="profile-sidebar">
+      <div class="profile-card">
+        <div class="profile-card-header">
+          <div id="profileAvatarContainer">
+            <div class="profile-avatar-placeholder" id="profileAvatarPlaceholder" onclick="document.getElementById('avatarInput').click()">?</div>
+          </div>
+          <input type="file" id="avatarInput" accept="image/*" style="display:none;">
+          <div class="profile-name" id="profileDisplayName">Loading...</div>
+          <div class="profile-email" id="profileEmailDisplay"></div>
+          <div class="role-badge" id="profileRoleBadge">Member</div>
+        </div>
+        <div class="profile-card-body">
+          <button class="profile-nav-btn active" onclick="showSection('info')" id="navInfo">👤 My Info</button>
+          <button class="profile-nav-btn" onclick="showSection('roles')" id="navRoles">🏷️ Roles</button>
+          <button class="profile-nav-btn" onclick="showSection('rsvp')" id="navRsvp">📅 My Games</button>
+          <hr style="margin:0.5rem 0;border:none;border-top:1px solid #f0f0f0;">
+          <button class="profile-nav-btn" onclick="doSignOutAndRedirect()" style="color:#c62828;">🚪 Sign Out</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="profile-main">
+
+      <!-- INFO SECTION -->
+      <div class="profile-section" id="sectionInfo">
+        <div class="profile-section-header">
+          <span class="profile-section-title">My Information</span>
+        </div>
+        <div class="profile-section-body">
+          <div class="form-field">
+            <label>Full Name</label>
+            <input type="text" id="editDisplayName" placeholder="Your full name">
+          </div>
+          <div class="form-field">
+            <label>Email Address</label>
+            <input type="email" id="editEmail" placeholder="your@email.com">
+          </div>
+          <div class="form-field">
+            <label>New Password <span style="font-weight:400;color:#999;">(leave blank to keep current)</span></label>
+            <input type="password" id="editPassword" placeholder="New password">
+          </div>
+          <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+            <button class="btn-save" onclick="saveProfileInfo()">Save Changes</button>
+            <p id="infoStatus" class="status-msg" style="color:green;margin:0;"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROLES SECTION -->
+      <div class="profile-section" id="sectionRoles" style="display:none;">
+        <div class="profile-section-header">
+          <span class="profile-section-title">My Roles</span>
+          <button class="btn-secondary-small" onclick="showSection('requestRole')">+ Request Role</button>
+        </div>
+        <div class="profile-section-body">
+          <div id="myRolesList"></div>
+          <div id="myRequestsList" style="margin-top:1rem;"></div>
+        </div>
+      </div>
+
+      <!-- REQUEST ROLE SECTION -->
+      <div class="profile-section" id="sectionRequestRole" style="display:none;">
+        <div class="profile-section-header">
+          <span class="profile-section-title">Request a Role</span>
+          <button class="btn-secondary-small" onclick="showSection('roles')">← Back</button>
+        </div>
+        <div class="profile-section-body">
+          <div class="form-field">
+            <label>I am a...</label>
+            <select id="roleRequestType" onchange="showRoleFields(this.value)" style="padding:0.6rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+              <option value="">Select role...</option>
+              <option value="player">Player</option>
+              <option value="family">Family Member</option>
+              <option value="alumni">Alumni</option>
+            </select>
+          </div>
+          <div id="roleFields_player" style="display:none;">
+            <div class="form-field">
+              <label>Graduation Year</label>
+              <input type="number" id="roleGradYear" placeholder="e.g. 2027">
+            </div>
+            <div class="form-field">
+              <label>Position</label>
+              <select id="rolePosition" style="padding:0.6rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+                <option value="">Select...</option>
+                <option value="Forward">Forward</option>
+                <option value="Defense">Defense</option>
+                <option value="Goaltender">Goaltender</option>
+              </select>
+            </div>
+          </div>
+          <div id="roleFields_family" style="display:none;">
+            <div class="form-field">
+              <label>Player's Name</label>
+              <input type="text" id="rolePlayerName" placeholder="Your child's full name">
+            </div>
+            <div class="form-field">
+              <label>Relationship</label>
+              <select id="roleRelationship" style="padding:0.6rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+                <option value="">Select...</option>
+                <option value="Mother">Mother</option>
+                <option value="Father">Father</option>
+                <option value="Guardian">Guardian</option>
+                <option value="Family Member">Family Member</option>
+              </select>
+            </div>
+          </div>
+          <div id="roleFields_alumni" style="display:none;">
+            <div class="form-field">
+              <label>Graduation Year</label>
+              <input type="number" id="roleAlumniGradYear" placeholder="e.g. 2022">
+            </div>
+            <div class="form-field">
+              <label>Years Played</label>
+              <input type="text" id="roleYearsPlayed" placeholder="e.g. 2019-2022">
+            </div>
+          </div>
+          <p id="roleRequestError" style="color:#c62828;font-size:0.85rem;min-height:1rem;"></p>
+          <button class="btn-save" onclick="submitRoleRequest()">Submit Request</button>
+        </div>
+      </div>
+
+      <!-- MY GAMES SECTION -->
+      <div class="profile-section" id="sectionRsvp" style="display:none;">
+        <div class="profile-section-header">
+          <span class="profile-section-title">My Upcoming Games</span>
+        </div>
+        <div class="profile-section-body">
+          <div id="myGamesList"><p style="color:#999;font-style:italic;">Loading games...</p></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-content">
+    <div class="footer-section">
+      <h3>Quick Links</h3>
+      <p><a href="/index.html">Home</a></p>
+      <p><a href="/pages/schedule.html">Schedule</a></p>
+      <p><a href="/pages/summer.html">Summer Hockey</a></p>
+      <p><a href="/pages/contact.html">Contact</a></p>
+    </div>
+    <div class="footer-section">
+      <h3>Contact</h3>
+      <p><strong>Coach:</strong> Matt Berry</p>
+      <p><strong>Email:</strong> coachberry03@gmail.com</p>
+    </div>
+    <div class="footer-section">
+      <h3>Location</h3>
+      <p>Franklin High School</p>
+      <p>810 Hillsboro Rd</p>
+      <p>Franklin, TN 37064</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2025 Franklin High School Admirals Hockey. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- MEMBER MODAL -->
+<div id="memberModal" class="modal-overlay" style="z-index:2000;">
+  <div class="modal" style="max-width:440px;max-height:90vh;overflow-y:auto;">
+    <button class="modal-close-float" onclick="hideMemberModal()">&times;</button>
+    <div class="member-view" id="memberView_login" style="display:block;">
+      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;text-align:center;">
+        <h2 style="font-size:1.3rem;font-weight:700;">Member Login</h2>
+      </div>
+      <div style="padding:1.5rem;">
+        <button onclick="memberGoogleSignIn()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.75rem;border:1px solid #ddd;border-radius:6px;background:white;font-size:0.95rem;font-weight:500;cursor:pointer;margin-bottom:1rem;">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px;height:20px;">
+          Continue with Google
+        </button>
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+          <input type="email" id="loginEmail" placeholder="Email" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+          <input type="password" id="loginPassword" placeholder="Password" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+          <p id="loginError" class="member-error" style="color:#c62828;font-size:0.85rem;min-height:1rem;"></p>
+          <button onclick="memberSignIn()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-size:1rem;font-weight:600;cursor:pointer;">Sign In</button>
+        </div>
+        <p style="text-align:center;margin-top:1rem;font-size:0.88rem;">Don't have an account? <a href="#" onclick="showMemberView('signup')" style="color:#5D1725;font-weight:600;">Sign up</a></p>
+      </div>
+    </div>
+    <div class="member-view" id="memberView_signup" style="display:none;">
+      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;text-align:center;">
+        <h2 style="font-size:1.3rem;font-weight:700;">Create Account</h2>
+      </div>
+      <div style="padding:1.5rem;">
+        <button onclick="memberGoogleSignIn()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.75rem;border:1px solid #ddd;border-radius:6px;background:white;font-size:0.95rem;font-weight:500;cursor:pointer;margin-bottom:1rem;">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px;height:20px;">
+          Sign up with Google
+        </button>
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+          <input type="text" id="signupName" placeholder="Full name" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+          <input type="email" id="signupEmail" placeholder="Email" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+          <input type="password" id="signupPassword" placeholder="Password (min 6 chars)" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+          <input type="password" id="signupConfirm" placeholder="Confirm password" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+          <p id="signupError" class="member-error" style="color:#c62828;font-size:0.85rem;min-height:1rem;"></p>
+          <button onclick="memberSignUp()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-size:1rem;font-weight:600;cursor:pointer;">Create Account</button>
+        </div>
+        <p style="text-align:center;margin-top:1rem;font-size:0.88rem;">Have an account? <a href="#" onclick="showMemberView('login')" style="color:#5D1725;font-weight:600;">Sign in</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showRoleFields(role) {
+  ['player','family','alumni'].forEach(r => {
+    const el = document.getElementById('roleFields_' + r);
+    if (el) el.style.display = r === role ? 'block' : 'none';
+  });
+}
+
+function showSection(name) {
+  ['info','roles','requestRole','rsvp'].forEach(s => {
+    const el = document.getElementById('section' + s.charAt(0).toUpperCase() + s.slice(1));
+    if (el) el.style.display = s === name ? 'block' : 'none';
+  });
+  ['info','roles','rsvp'].forEach(s => {
+    const btn = document.getElementById('nav' + s.charAt(0).toUpperCase() + s.slice(1));
+    if (btn) btn.classList.toggle('active', s === name);
+  });
+  if (name === 'rsvp') loadMyGames();
+  if (name === 'roles') loadMyRoles();
+}
+</script>
+
+<script type="module" src="/assets/js/member-auth.js"></script>
+<script type="module">
+  import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
+    authDomain: "admirals-hockey.firebaseapp.com",
+    projectId: "admirals-hockey",
+    storageBucket: "admirals-hockey.firebasestorage.app",
+    messagingSenderId: "783358659334",
+    appId: "1:783358659334:web:5daffd093adca386faec87"
+  };
+
+  const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  let currentUser = null;
+  let currentProfile = null;
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      currentUser = user;
+      const snap = await getDoc(doc(db, 'members', user.uid));
+      currentProfile = snap.exists() ? snap.data() : {};
+      showProfile(user, currentProfile);
+    } else {
+      document.getElementById('notLoggedIn').style.display = 'block';
+      document.getElementById('profileLayout').style.display = 'none';
+    }
+  });
+
+  function showProfile(user, profile) {
+    document.getElementById('notLoggedIn').style.display = 'none';
+    document.getElementById('profileLayout').style.display = 'grid';
+
+    document.getElementById('profileDisplayName').textContent = user.displayName || 'Member';
+    document.getElementById('profileEmailDisplay').textContent = user.email;
+    document.getElementById('profileRoleBadge').textContent = profile.role || 'member';
+    document.getElementById('editDisplayName').value = user.displayName || '';
+    document.getElementById('editEmail').value = user.email || '';
+
+    // Avatar
+    const container = document.getElementById('profileAvatarContainer');
+    if (user.photoURL) {
+      container.innerHTML = `<img src="${user.photoURL}" class="profile-avatar" onclick="document.getElementById('avatarInput').click()" alt="Profile photo">`;
+    } else {
+      document.getElementById('profileAvatarPlaceholder').textContent = (user.displayName || '?').charAt(0).toUpperCase();
+    }
+  }
+
+  // Avatar upload
+  document.getElementById('avatarInput').addEventListener('change', async function() {
+    const file = this.files[0];
+    if (!file || !currentUser) return;
+    const reader = new FileReader();
+    reader.onload = async e => {
+      const data = e.target.result;
+      const storageRef = ref(storage, `avatars/${currentUser.uid}`);
+      await uploadString(storageRef, data, 'data_url');
+      const url = await getDownloadURL(storageRef);
+      await updateProfile(currentUser, { photoURL: url });
+      await setDoc(doc(db, 'members', currentUser.uid), { photoURL: url }, { merge: true });
+      document.getElementById('profileAvatarContainer').innerHTML = `<img src="${url}" class="profile-avatar" onclick="document.getElementById('avatarInput').click()" alt="Profile photo">`;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Save profile info
+  window.saveProfileInfo = async function() {
+    const name = document.getElementById('editDisplayName').value.trim();
+    const email = document.getElementById('editEmail').value.trim();
+    const password = document.getElementById('editPassword').value;
+    const status = document.getElementById('infoStatus');
+    status.textContent = 'Saving...';
+    status.style.color = '#555';
+    try {
+      if (name !== currentUser.displayName) {
+        await updateProfile(currentUser, { displayName: name });
+        await setDoc(doc(db, 'members', currentUser.uid), { displayName: name }, { merge: true });
+        document.getElementById('profileDisplayName').textContent = name;
+      }
+      if (email !== currentUser.email) {
+        await updateEmail(currentUser, email);
+        await setDoc(doc(db, 'members', currentUser.uid), { email }, { merge: true });
+      }
+      if (password) {
+        await updatePassword(currentUser, password);
+        document.getElementById('editPassword').value = '';
+      }
+      status.textContent = '✅ Saved!';
+      status.style.color = 'green';
+      setTimeout(() => { status.textContent = ''; }, 3000);
+    } catch(e) {
+      status.textContent = e.message;
+      status.style.color = '#c62828';
+    }
+  };
+
+  // Load roles and requests
+  window.loadMyRoles = async function() {
+    if (!currentUser) return;
+    const rolesList = document.getElementById('myRolesList');
+    const requestsList = document.getElementById('myRequestsList');
+
+    const profile = (await getDoc(doc(db, 'members', currentUser.uid))).data();
+    const role = profile?.role || 'member';
+    const roleColors = { player:'#2e7d32', family:'#1565c0', alumni:'#e65100', member:'#666' };
+    rolesList.innerHTML = `
+      <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:#f9f9f9;border-radius:6px;margin-bottom:0.5rem;">
+        <span style="font-size:1.5rem;">🏒</span>
+        <div>
+          <div style="font-weight:600;text-transform:capitalize;">${role}</div>
+          <div style="font-size:0.8rem;color:#666;">Your current role</div>
+        </div>
+        <span style="margin-left:auto;background:${roleColors[role]||'#666'};color:white;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:10px;text-transform:capitalize;">${role}</span>
+      </div>`;
+
+    const q = query(collection(db, 'roleRequests'), where('uid', '==', currentUser.uid));
+    const snap = await getDocs(q);
+    const requests = [];
+    snap.forEach(d => requests.push({ id: d.id, ...d.data() }));
+
+    if (requests.length) {
+      requestsList.innerHTML = `<p style="font-weight:600;color:#555;font-size:0.85rem;margin-bottom:0.5rem;">Role Requests:</p>` +
+        requests.map(r => `
+          <div class="role-request-card">
+            <div>
+              <div style="font-weight:600;text-transform:capitalize;">${r.requestedRole}</div>
+              <div style="font-size:0.8rem;color:#666;">${r.createdAt ? new Date(r.createdAt).toLocaleDateString() : ''}</div>
+            </div>
+            <span class="status-pill status-${r.status}">${r.status}</span>
+          </div>`).join('');
+    } else {
+      requestsList.innerHTML = '<p style="color:#999;font-style:italic;font-size:0.85rem;">No role requests yet.</p>';
+    }
+  };
+
+  // Submit role request
+  window.submitRoleRequest = async function() {
+    if (!currentUser) return;
+    const role = document.getElementById('roleRequestType')?.value;
+    const errorEl = document.getElementById('roleRequestError');
+    if (!role) { errorEl.textContent = 'Please select a role.'; return; }
+
+    const data = {
+      uid: currentUser.uid,
+      memberName: currentUser.displayName,
+      email: currentUser.email,
+      requestedRole: role,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+
+    if (role === 'player') {
+      data.gradYear = document.getElementById('roleGradYear')?.value;
+      data.position = document.getElementById('rolePosition')?.value;
+      if (!data.gradYear || !data.position) { errorEl.textContent = 'Please fill in all fields.'; return; }
+    } else if (role === 'family') {
+      data.playerName = document.getElementById('rolePlayerName')?.value.trim();
+      data.relationship = document.getElementById('roleRelationship')?.value;
+      if (!data.playerName || !data.relationship) { errorEl.textContent = 'Please fill in all fields.'; return; }
+    } else if (role === 'alumni') {
+      data.gradYear = document.getElementById('roleAlumniGradYear')?.value;
+      data.yearsPlayed = document.getElementById('roleYearsPlayed')?.value.trim();
+      if (!data.gradYear || !data.yearsPlayed) { errorEl.textContent = 'Please fill in all fields.'; return; }
+    }
+
+    await addDoc(collection(db, 'roleRequests'), data);
+    errorEl.textContent = '';
+    showSection('roles');
+    loadMyRoles();
+  };
+
+  // Load my games (summer + season)
+  window.loadMyGames = async function() {
+    if (!currentUser || !currentProfile) return;
+    const list = document.getElementById('myGamesList');
+    list.innerHTML = '<p style="color:#999;font-style:italic;">Loading...</p>';
+
+    const today = new Date().toISOString().split('T')[0];
+    let html = '';
+
+    // Summer games - find teams this member is on
+    const summerSnap = await getDocs(collection(db, 'summer'));
+    const seasons = [];
+    summerSnap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
+
+    for (const season of seasons) {
+      const teamsSnap = await getDocs(collection(db, 'summer', season.id, 'teams'));
+      for (const teamDoc of teamsSnap.docs) {
+        const team = teamDoc.data();
+        const roster = Array.isArray(team.roster) ? team.roster : [];
+        const isOnTeam = roster.some(p => p.memberUid === currentUser.uid || p.name === currentProfile.displayName);
+        if (!isOnTeam) continue;
+
+        const gamesSnap = await getDocs(collection(db, 'summer', season.id, 'games'));
+        for (const gameDoc of gamesSnap.docs) {
+          const g = gameDoc.data();
+          if (g.played || g.date < today) continue;
+          if (g.homeTeamId !== teamDoc.id && g.awayTeamId !== teamDoc.id) continue;
+
+          const oppTeamDoc = teamsSnap.docs.find(d => d.id === (g.homeTeamId === teamDoc.id ? g.awayTeamId : g.homeTeamId));
+          const oppName = oppTeamDoc?.data()?.name || 'TBD';
+          const dateStr = new Date(g.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+          const timeStr = g.time ? (() => { const [h,m] = g.time.split(':'); const hr = parseInt(h); return `${hr%12||12}:${m} ${hr>=12?'PM':'AM'}`; })() : '';
+
+          // Check existing RSVP
+          const rsvpDoc = await getDoc(doc(db, 'summer', season.id, 'games', gameDoc.id, 'rsvps', currentUser.uid));
+          const existing = rsvpDoc.exists() ? rsvpDoc.data().response : null;
+
+          html += `<div class="game-rsvp-item">
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;">${team.name} vs. ${oppName}</div>
+              <div style="font-size:0.82rem;color:#666;">${dateStr} · ${timeStr} · ${season.label || season.id}</div>
+            </div>
+            <div style="display:flex;gap:0.5rem;">
+              ${existing
+                ? `<span class="rsvp-done ${existing}">${existing === 'yes' ? '✅ In' : '❌ Out'}</span>
+                   <button class="btn-secondary-small" style="font-size:0.78rem;padding:3px 8px;" onclick="changeSummerRsvp('${season.id}','${gameDoc.id}','${currentUser.uid}')">Change</button>`
+                : `<button class="rsvp-yes-btn" onclick="doSummerRsvp('${season.id}','${gameDoc.id}','${currentUser.uid}','yes')">✅ In</button>
+                   <button class="rsvp-no-btn" onclick="doSummerRsvp('${season.id}','${gameDoc.id}','${currentUser.uid}','no')">❌ Out</button>`}
+            </div>
+          </div>`;
+        }
+      }
+    }
+
+    if (!html) html = '<p style="color:#999;font-style:italic;">No upcoming games found. Make sure you\'re added to a team roster by your admin.</p>';
+    list.innerHTML = html;
+  };
+
+  window.doSummerRsvp = async function(seasonId, gameId, uid, response) {
+    await setDoc(doc(db, 'summer', seasonId, 'games', gameId, 'rsvps', uid), {
+      name: currentProfile.displayName,
+      response,
+      timestamp: new Date().toISOString()
+    });
+    loadMyGames();
+  };
+
+  window.changeSummerRsvp = function(seasonId, gameId, uid) {
+    window.doSummerRsvp(seasonId, gameId, uid, 'yes');
+  };
+
+  window.doSignOutAndRedirect = async function() {
+    const { signOut } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+    await signOut(auth);
+    window.location.href = '/index.html';
+  };
+
+  // Mobile nav
+  (function() {
+    var btn = document.getElementById('navToggle');
+    var nav = document.getElementById('navLinks');
+    if (!btn || !nav) return;
+    btn.addEventListener('click', function() { btn.classList.toggle('open'); nav.classList.toggle('open'); });
+    nav.querySelectorAll('a').forEach(function(link) {
+      link.addEventListener('click', function() { btn.classList.remove('open'); nav.classList.remove('open'); });
+    });
+  })();
+</script>
+
+</body>
+</html>
