@@ -34,7 +34,7 @@ if (!currentUser) {
   // Poll for Firebase auth up to 5 seconds
   let attempts = 0;
   const authCheck = setInterval(() => {
-    currentUser = localStorage.getItem('admirals_currentUser');
+    currentUser = localStorage.getItem('admirals_currentUser') || window._firebaseAdminUser;
     attempts++;
     if (currentUser) {
       clearInterval(authCheck);

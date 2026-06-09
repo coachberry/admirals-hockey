@@ -11,6 +11,54 @@
 <body>
 
 <!-- LOGIN SCREEN -->
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const SUPER_ADMIN_EMAIL = 'coachberry03@gmail.com';
+  const app = getApps().length ? getApps()[0] : initializeApp({
+    apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
+    authDomain: "admirals-hockey.firebaseapp.com",
+    projectId: "admirals-hockey",
+    storageBucket: "admirals-hockey.firebasestorage.app",
+    messagingSenderId: "783358659334",
+    appId: "1:783358659334:web:5daffd093adca386faec87"
+  });
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+
+    // Check if superadmin or admin
+    const isSuperAdmin = user.email === SUPER_ADMIN_EMAIL;
+    let isAdmin = isSuperAdmin;
+
+    if (!isSuperAdmin) {
+      const snap = await getDoc(doc(db, 'members', user.uid));
+      if (snap.exists()) {
+        const role = snap.data().role;
+        isAdmin = role === 'admin' || role === 'superadmin';
+      }
+    }
+
+    if (isAdmin) {
+      // Set global flag that admin.js polling will detect
+      window._firebaseAdminUser = isSuperAdmin ? 'admin' : user.email.split('@')[0];
+      localStorage.setItem('admirals_currentUser', window._firebaseAdminUser);
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+    } else if (user) {
+      // Logged in but not an admin - show message
+      const loginBox = document.querySelector('.login-box');
+      if (loginBox) {
+        loginBox.innerHTML = '<h1>⚓ Franklin Admirals</h1><p style="color:#c62828;margin-top:1rem;">You do not have admin access.</p><p style="margin-top:0.5rem;font-size:0.85rem;color:#666;">Contact Coach Berry to request admin permissions.</p>';
+      }
+    }
+  });
+</script>
+
 <div id="loginScreen" class="login-container">
   <div class="login-box">
     <h1>⚓ Franklin Admirals</h1>
