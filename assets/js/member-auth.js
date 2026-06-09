@@ -182,7 +182,7 @@ onAuthStateChanged(auth, async (user) => {
     window.currentMember = { ...profile, uid: user.uid };
     if (loginBtn) {
       loginBtn.textContent = user.displayName?.split(' ')[0] || 'Account';
-      loginBtn.onclick = () => { showMemberModal('dashboard'); loadDashboard(window.currentMember); };
+      loginBtn.onclick = () => { window.location.href = '/pages/profile.html'; };
     }
     if (signupBtn) signupBtn.style.display = 'none';
   } else {
