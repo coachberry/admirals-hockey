@@ -207,11 +207,10 @@ window.memberGoogleSignIn = doGoogleSignIn;
 window.memberSignOut = doSignOut;
 window.submitRoleRequest = doRoleRequest;
 
-// Attach button listeners
-const loginBtn = document.getElementById('memberNavBtn');
+// Only attach signup and modal listeners here
+// loginBtn onclick is set dynamically in onAuthStateChanged
 const signupBtn = document.getElementById('memberSignupBtn');
 const modal = document.getElementById('memberModal');
 
-if (loginBtn) loginBtn.addEventListener('click', () => showMemberModal('login'));
 if (signupBtn) signupBtn.addEventListener('click', () => showMemberModal('signup'));
 if (modal) modal.addEventListener('click', e => { if (e.target === modal) hideMemberModal(); });
