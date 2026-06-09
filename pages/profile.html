@@ -305,8 +305,10 @@
         <li><a href="/pages/leaderboard.html" class="nav-link">Leaderboard</a></li>
         <li><a href="/pages/news.html" class="nav-link">News</a></li>
         <li><a href="/pages/events.html" class="nav-link">Events</a></li>
+        <li><a href="/pages/gallery.html" class="nav-link">Gallery</a></li>
         <li><a href="/pages/summer.html" class="nav-link">Summer Hockey</a></li>
         <li><a href="/pages/alumni.html" class="nav-link">Alumni</a></li>
+        <li><a href="/pages/sponsors.html" class="nav-link">Sponsors</a></li>
         <li><a href="/pages/tryouts.html" class="nav-link">Tryouts</a></li>
         <li><a href="/pages/contact.html" class="nav-link">Contact</a></li>
       </ul>
@@ -809,33 +811,7 @@ function showSection(name) {
     list.innerHTML = html;
   };
 
-  window.toggleSummerRsvp = async function(seasonId, gameId, uid, response, isActive) {
-    const { deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    if (isActive) {
-      await deleteDoc(doc(db, 'summer', seasonId, 'games', gameId, 'rsvps', uid));
-    } else {
-      await setDoc(doc(db, 'summer', seasonId, 'games', gameId, 'rsvps', uid), {
-        name: currentProfile.displayName,
-        response,
-        timestamp: new Date().toISOString()
-      });
-    }
-    // Update just the buttons for this game without reloading the whole list
-    const newYesActive = !isActive && response === 'yes';
-    const newNoActive = !isActive && response === 'no';
-    const btns = document.getElementById('btns_' + gameId);
-    if (btns) {
-      btns.innerHTML = `
-        <button onclick="toggleSummerRsvp('${seasonId}','${gameId}','${uid}','yes',${newYesActive})"
-          style="border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:${newYesActive ? '#2e7d32' : 'white'};color:${newYesActive ? 'white' : '#2e7d32'};">
-          ✅ In
-        </button>
-        <button onclick="toggleSummerRsvp('${seasonId}','${gameId}','${uid}','no',${newNoActive})"
-          style="border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:${newNoActive ? '#c62828' : 'white'};color:${newNoActive ? 'white' : '#c62828'};">
-          ❌ Out
-        </button>`;
-    }
-  };
+
 
   window.doSignOutAndRedirect = async function() {
     const { signOut } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");

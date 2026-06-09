@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Day - Franklin Admirals Hockey</title>
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <style>
+    body { background: #f0f0f0; }
+
+    .gameday-hero {
+      background: linear-gradient(135deg, #5D1725, #3c0f17);
+      color: white;
+      padding: 1.5rem 1rem;
+      text-align: center;
+    }
+
+    .gameday-hero h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .gameday-hero p { font-size: 0.88rem; opacity: 0.85; }
+
+    .gameday-container { max-width: 700px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+    .game-selector {
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .game-selector label { font-weight: 600; font-size: 0.88rem; color: #555; }
+    .game-selector select {
+      flex: 1;
+      padding: 0.5rem 0.9rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      min-width: 200px;
+    }
+
+    .gameday-card {
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      overflow: hidden;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .gameday-card-header {
+      background: linear-gradient(135deg, #5D1725, #3c0f17);
+      color: white;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .gameday-card-title { font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .gameday-card-count { font-size: 0.82rem; opacity: 0.85; }
+
+    .gameday-card-body { padding: 0.75rem 1.25rem; }
+
+    .game-info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.4rem 0;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #f5f5f5;
+    }
+
+    .game-info-row:last-child { border-bottom: none; }
+    .game-info-label { color: #666; font-size: 0.82rem; }
+    .game-info-value { font-weight: 600; color: #111; }
+
+    .player-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #f5f5f5;
+      font-size: 0.88rem;
+    }
+
+    .player-row:last-child { border-bottom: none; }
+
+    .player-status {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-yes { background: #2e7d32; }
+    .status-no { background: #c62828; }
+    .status-pending { background: #ccc; }
+
+    .player-name-cell { flex: 1; font-weight: 500; }
+    .player-pos { font-size: 0.75rem; color: #888; }
+
+    .rsvp-counts {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .count-card {
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .count-num { font-size: 2.5rem; font-weight: 700; line-height: 1; }
+    .count-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.25rem; }
+    .count-yes .count-num { color: #2e7d32; }
+    .count-no .count-num { color: #c62828; }
+    .count-pending .count-num { color: #888; }
+
+    .no-game { text-align: center; padding: 3rem 1rem; color: #888; font-style: italic; }
+
+    .season-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .season-tab {
+      padding: 0.4rem 1rem;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      background: white;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: #555;
+    }
+    .season-tab.active { background: #5D1725; color: white; border-color: #5D1725; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-container">
+    <a href="/index.html"><img src="/assets/images/franklin-admirals-hockey-logo-lowres.png" alt="Franklin Admirals Hockey" class="logo-img"></a>
+    <div style="display:flex;gap:0.4rem;flex-shrink:0;">
+      <button id="memberNavBtn" class="member-nav-btn">Login</button>
+      <button id="memberSignupBtn" class="member-nav-btn" style="background:white;color:#5D1725;border:1px solid #5D1725;">Sign Up</button>
+    </div>
+    <nav>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/index.html" class="nav-link">Home</a></li>
+        <li><a href="/pages/schedule.html" class="nav-link">Schedule</a></li>
+        <li><a href="/pages/roster.html" class="nav-link">Roster</a></li>
+        <li><a href="/pages/stats.html" class="nav-link">Stats</a></li>
+        <li><a href="/pages/leaderboard.html" class="nav-link">Leaderboard</a></li>
+        <li><a href="/pages/news.html" class="nav-link">News</a></li>
+        <li><a href="/pages/events.html" class="nav-link">Events</a></li>
+        <li><a href="/pages/summer.html" class="nav-link">Summer Hockey</a></li>
+        <li><a href="/pages/alumni.html" class="nav-link">Alumni</a></li>
+        <li><a href="/pages/tryouts.html" class="nav-link">Tryouts</a></li>
+        <li><a href="/pages/contact.html" class="nav-link">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<div class="gameday-hero">
+  <h1>🏒 Game Day</h1>
+  <p>Live attendance dashboard — who's in, who's out</p>
+</div>
+
+<div class="gameday-container">
+
+  <div class="season-tabs">
+    <button class="season-tab active" id="tabRegular" onclick="switchLeague('regular')">Regular Season</button>
+    <button class="season-tab" id="tabSummer" onclick="switchLeague('summer')">Summer Hockey</button>
+  </div>
+
+  <div class="game-selector">
+    <label>Game:</label>
+    <select id="gameSelect"><option>Loading...</option></select>
+  </div>
+
+  <div id="gamedayContent"><div class="no-game">Select a game above</div></div>
+
+</div>
+
+<footer>
+  <div class="footer-content">
+    <div class="footer-section"><h3>Quick Links</h3>
+      <p><a href="/index.html">Home</a></p>
+      <p><a href="/pages/schedule.html">Schedule</a></p>
+      <p><a href="/pages/gameday.html">Game Day</a></p>
+    </div>
+    <div class="footer-section"><h3>Contact</h3>
+      <p><strong>Coach:</strong> Matt Berry</p>
+      <p><strong>Email:</strong> coachberry03@gmail.com</p>
+    </div>
+    <div class="footer-section"><h3>Location</h3>
+      <p>Franklin High School</p><p>810 Hillsboro Rd</p><p>Franklin, TN 37064</p>
+    </div>
+  </div>
+  <div class="footer-bottom"><p>&copy; 2025 Franklin High School Admirals Hockey. All rights reserved.</p></div>
+</footer>
+
+<div id="memberModal" class="modal-overlay" style="z-index:2000;">
+  <div class="modal" style="max-width:440px;max-height:90vh;overflow-y:auto;">
+    <button class="modal-close-float" onclick="hideMemberModal()">&times;</button>
+    <div class="member-view" id="memberView_login" style="display:block;">
+      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;text-align:center;">
+        <h2 style="font-size:1.3rem;font-weight:700;">Member Login</h2>
+      </div>
+      <div style="padding:1.5rem;display:flex;flex-direction:column;gap:0.75rem;">
+        <button onclick="memberGoogleSignIn()" style="display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.75rem;border:1px solid #ddd;border-radius:6px;background:white;font-size:0.95rem;cursor:pointer;">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px;">Continue with Google</button>
+        <input type="email" id="loginEmail" placeholder="Email" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <input type="password" id="loginPassword" placeholder="Password" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <p id="loginError" class="member-error" style="color:#c62828;font-size:0.85rem;"></p>
+        <button onclick="memberSignIn()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-size:1rem;font-weight:600;cursor:pointer;">Sign In</button>
+        <p style="text-align:center;font-size:0.88rem;">No account? <a href="#" onclick="showMemberView('signup')" style="color:#5D1725;font-weight:600;">Sign up</a></p>
+      </div>
+    </div>
+    <div class="member-view" id="memberView_signup" style="display:none;">
+      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;text-align:center;">
+        <h2 style="font-size:1.3rem;font-weight:700;">Create Account</h2>
+      </div>
+      <div style="padding:1.5rem;display:flex;flex-direction:column;gap:0.75rem;">
+        <input type="text" id="signupName" placeholder="Full name" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <input type="email" id="signupEmail" placeholder="Email" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <input type="password" id="signupPassword" placeholder="Password" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <input type="password" id="signupConfirm" placeholder="Confirm password" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <p id="signupError" class="member-error" style="color:#c62828;font-size:0.85rem;"></p>
+        <button onclick="memberSignUp()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-size:1rem;font-weight:600;cursor:pointer;">Create Account</button>
+        <p style="text-align:center;font-size:0.88rem;">Have account? <a href="#" onclick="showMemberView('login')" style="color:#5D1725;font-weight:600;">Sign in</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentLeague = 'regular';
+  let allGamesData = [];
+  let currentSeasonId = null;
+  let currentRoster = [];
+
+  function switchLeague(league) {
+    currentLeague = league;
+    document.getElementById('tabRegular').classList.toggle('active', league === 'regular');
+    document.getElementById('tabSummer').classList.toggle('active', league === 'summer');
+    loadGames();
+  }
+
+  function formatDate(d) {
+    return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+  }
+
+  function formatTime(t) {
+    if (!t) return '';
+    const [h,m] = t.split(':');
+    const hr = parseInt(h);
+    return `${hr%12||12}:${m} ${hr>=12?'PM':'AM'}`;
+  }
+
+  (function() {
+    var btn = document.getElementById('navToggle');
+    var nav = document.getElementById('navLinks');
+    if (btn && nav) btn.addEventListener('click', () => { btn.classList.toggle('open'); nav.classList.toggle('open'); });
+  })();
+</script>
+
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const app = getApps().length ? getApps()[0] : initializeApp({
+    apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
+    authDomain: "admirals-hockey.firebaseapp.com",
+    projectId: "admirals-hockey",
+    storageBucket: "admirals-hockey.firebasestorage.app",
+    messagingSenderId: "783358659334",
+    appId: "1:783358659334:web:5daffd093adca386faec87"
+  });
+  const db = getFirestore(app);
+
+  window.db = db;
+
+  window.loadGames = async function() {
+    const sel = document.getElementById('gameSelect');
+    sel.innerHTML = '<option>Loading...</option>';
+    document.getElementById('gamedayContent').innerHTML = '<div class="no-game">Loading games...</div>';
+
+    if (currentLeague === 'regular') {
+      const seasonsSnap = await getDocs(collection(db, 'seasons'));
+      const seasons = [];
+      seasonsSnap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
+      const current = seasons.find(s => s.current) || seasons.sort((a,b) => b.id.localeCompare(a.id))[0];
+      if (!current) { sel.innerHTML = '<option>No seasons found</option>'; return; }
+      currentSeasonId = current.id;
+
+      const gamesSnap = await getDocs(collection(db, 'seasons', current.id, 'schedule'));
+      allGamesData = [];
+      gamesSnap.forEach(d => allGamesData.push({ id: d.id, ...d.data() }));
+      allGamesData.sort((a,b) => a.date.localeCompare(b.date));
+
+      // Load roster
+      currentRoster = [];
+      try {
+        const rSnap = await getDocs(collection(db, 'roster', current.id, 'players'));
+        rSnap.forEach(d => currentRoster.push(d.data()));
+      } catch(e) {}
+
+      sel.innerHTML = allGamesData.map(g => {
+        const opp = g.opponent || g.awayTeam || 'Opponent';
+        const ha = g.homeAway === 'away' ? `@ ${opp}` : `vs. ${opp}`;
+        return `<option value="${g.id}">${formatDate(g.date)} ${formatTime(g.time)} — ${ha}</option>`;
+      }).join('');
+
+      // Auto-select today or next upcoming
+      const today = new Date().toISOString().split('T')[0];
+      const next = allGamesData.find(g => g.date >= today);
+      if (next) sel.value = next.id;
+
+    } else {
+      // Summer
+      const seasonsSnap = await getDocs(collection(db, 'summer'));
+      const seasons = [];
+      seasonsSnap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
+      seasons.sort((a,b) => b.id.localeCompare(a.id));
+      const current = seasons[0];
+      if (!current) { sel.innerHTML = '<option>No summer seasons</option>'; return; }
+      currentSeasonId = current.id;
+
+      const [teamsSnap, gamesSnap] = await Promise.all([
+        getDocs(collection(db, 'summer', current.id, 'teams')),
+        getDocs(collection(db, 'summer', current.id, 'games'))
+      ]);
+      const teams = {};
+      teamsSnap.forEach(d => { teams[d.id] = d.data(); });
+      allGamesData = [];
+      gamesSnap.forEach(d => allGamesData.push({ id: d.id, _teams: teams, ...d.data() }));
+      allGamesData.sort((a,b) => a.date.localeCompare(b.date));
+
+      sel.innerHTML = allGamesData.map(g => {
+        const home = teams[g.homeTeamId]?.name || '?';
+        const away = teams[g.awayTeamId]?.name || '?';
+        return `<option value="${g.id}">${formatDate(g.date)} ${formatTime(g.time)} — ${home} vs ${away}</option>`;
+      }).join('');
+
+      const today = new Date().toISOString().split('T')[0];
+      const next = allGamesData.find(g => g.date >= today);
+      if (next) sel.value = next.id;
+    }
+
+    sel.removeEventListener('change', onGameChange);
+    sel.addEventListener('change', onGameChange);
+    if (sel.value && sel.value !== 'Loading...') loadGameDay(sel.value);
+  };
+
+  async function onGameChange(e) { loadGameDay(e.target.value); }
+
+  async function loadGameDay(gameId) {
+    const content = document.getElementById('gamedayContent');
+    content.innerHTML = '<div class="no-game">Loading...</div>';
+
+    const game = allGamesData.find(g => g.id === gameId);
+    if (!game) return;
+
+    let rsvpSnap, roster = [], teams = {};
+
+    if (currentLeague === 'regular') {
+      rsvpSnap = await getDocs(collection(db, 'seasons', currentSeasonId, 'schedule', gameId, 'memberRsvps'));
+      roster = currentRoster;
+    } else {
+      rsvpSnap = await getDocs(collection(db, 'summer', currentSeasonId, 'games', gameId, 'rsvps'));
+      teams = game._teams || {};
+      const homeTeam = teams[game.homeTeamId];
+      const awayTeam = teams[game.awayTeamId];
+      roster = [
+        ...(Array.isArray(homeTeam?.roster) ? homeTeam.roster.map(p => ({ ...p, team: homeTeam.name })) : []),
+        ...(Array.isArray(awayTeam?.roster) ? awayTeam.roster.map(p => ({ ...p, team: awayTeam.name })) : [])
+      ];
+    }
+
+    const rsvps = {};
+    rsvpSnap.forEach(d => { rsvps[d.data().name || d.id] = d.data().response; });
+
+    const yesPlayers = [];
+    const noPlayers = [];
+    const pendingPlayers = [];
+
+    roster.forEach(p => {
+      const name = p.name || p.displayName || '';
+      const response = rsvps[name] || rsvps[p.memberUid] || null;
+      const entry = { name, pos: p.position || p.pos || '', team: p.team || '' };
+      if (response === 'yes') yesPlayers.push(entry);
+      else if (response === 'no') noPlayers.push(entry);
+      else pendingPlayers.push(entry);
+    });
+
+    // Also add any RSVPs from non-roster members
+    Object.entries(rsvps).forEach(([name, resp]) => {
+      if (!roster.find(p => p.name === name)) {
+        const entry = { name, pos: '', team: '' };
+        if (resp === 'yes') yesPlayers.push(entry);
+        else if (resp === 'no') noPlayers.push(entry);
+      }
+    });
+
+    const opp = currentLeague === 'regular'
+      ? (game.homeAway === 'away' ? `@ ${game.opponent||'Opponent'}` : `vs. ${game.opponent||'Opponent'}`)
+      : `${teams[game.homeTeamId]?.name||'?'} vs. ${teams[game.awayTeamId]?.name||'?'}`;
+
+    content.innerHTML = `
+      <div class="rsvp-counts">
+        <div class="count-card count-yes">
+          <div class="count-num">${yesPlayers.length}</div>
+          <div class="count-label">✅ In</div>
+        </div>
+        <div class="count-card count-no">
+          <div class="count-num">${noPlayers.length}</div>
+          <div class="count-label">❌ Out</div>
+        </div>
+        <div class="count-card count-pending">
+          <div class="count-num">${pendingPlayers.length}</div>
+          <div class="count-label">⏳ No Response</div>
+        </div>
+      </div>
+
+      <div class="gameday-card">
+        <div class="gameday-card-header">
+          <span class="gameday-card-title">Game Info</span>
+        </div>
+        <div class="gameday-card-body">
+          <div class="game-info-row"><span class="game-info-label">Matchup</span><span class="game-info-value">${opp}</span></div>
+          <div class="game-info-row"><span class="game-info-label">Date</span><span class="game-info-value">${formatDate(game.date)}</span></div>
+          <div class="game-info-row"><span class="game-info-label">Time</span><span class="game-info-value">${formatTime(game.time) || 'TBD'}</span></div>
+          ${game.location ? `<div class="game-info-row"><span class="game-info-label">Location</span><span class="game-info-value">${game.location}</span></div>` : ''}
+        </div>
+      </div>
+
+      ${yesPlayers.length ? `
+      <div class="gameday-card">
+        <div class="gameday-card-header">
+          <span class="gameday-card-title">✅ In</span>
+          <span class="gameday-card-count">${yesPlayers.length} player${yesPlayers.length !== 1 ? 's' : ''}</span>
+        </div>
+        <div class="gameday-card-body">
+          ${yesPlayers.map(p => `<div class="player-row">
+            <div class="player-status status-yes"></div>
+            <span class="player-name-cell">${p.name}</span>
+            ${p.pos ? `<span class="player-pos">${p.pos}</span>` : ''}
+            ${p.team ? `<span class="player-pos" style="color:#5D1725;">${p.team}</span>` : ''}
+          </div>`).join('')}
+        </div>
+      </div>` : ''}
+
+      ${noPlayers.length ? `
+      <div class="gameday-card">
+        <div class="gameday-card-header">
+          <span class="gameday-card-title">❌ Out</span>
+          <span class="gameday-card-count">${noPlayers.length} player${noPlayers.length !== 1 ? 's' : ''}</span>
+        </div>
+        <div class="gameday-card-body">
+          ${noPlayers.map(p => `<div class="player-row">
+            <div class="player-status status-no"></div>
+            <span class="player-name-cell">${p.name}</span>
+            ${p.pos ? `<span class="player-pos">${p.pos}</span>` : ''}
+          </div>`).join('')}
+        </div>
+      </div>` : ''}
+
+      ${pendingPlayers.length ? `
+      <div class="gameday-card">
+        <div class="gameday-card-header" style="background:#888;">
+          <span class="gameday-card-title">⏳ No Response</span>
+          <span class="gameday-card-count">${pendingPlayers.length} player${pendingPlayers.length !== 1 ? 's' : ''}</span>
+        </div>
+        <div class="gameday-card-body">
+          ${pendingPlayers.map(p => `<div class="player-row">
+            <div class="player-status status-pending"></div>
+            <span class="player-name-cell">${p.name}</span>
+            ${p.pos ? `<span class="player-pos">${p.pos}</span>` : ''}
+          </div>`).join('')}
+        </div>
+      </div>` : ''}`;
+  }
+
+  loadGames();
+</script>
+
+<script type="module" src="/assets/js/member-auth.js"></script>
+</body>
+</html>

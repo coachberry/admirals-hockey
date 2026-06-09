@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photo Gallery - Franklin Admirals Hockey</title>
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <script src="/assets/js/page-guard.js"></script>
+  <style>
+    .gallery-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+      margin-bottom: 3rem;
+      align-items: start;
+    }
+
+    .gallery-sidebar {
+      position: sticky;
+      top: 80px;
+    }
+
+    .gallery-sidebar-card {
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      background: linear-gradient(135deg, #5D1725, #3c0f17);
+      color: white;
+      padding: 0.75rem 1rem;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .season-item {
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.15s;
+    }
+
+    .season-item:hover { background: #fdf8f8; }
+    .season-item.active { background: #fdf0f2; color: #5D1725; font-weight: 600; }
+    .season-item:last-child { border-bottom: none; }
+
+    .album-item {
+      padding: 0.5rem 1rem 0.5rem 2rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      border-bottom: 1px solid #f5f5f5;
+      color: #555;
+      transition: background 0.15s;
+    }
+
+    .album-item:hover { background: #fdf8f8; color: #5D1725; }
+    .album-item.active { background: #fdf0f2; color: #5D1725; font-weight: 600; }
+
+    .photo-count { font-size: 0.72rem; color: #aaa; }
+
+    .gallery-main { min-width: 0; }
+
+    .gallery-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .gallery-title { font-size: 1.3rem; font-weight: 700; color: #5D1725; }
+    .gallery-subtitle { font-size: 0.85rem; color: #888; margin-top: 0.2rem; }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .photo-item {
+      aspect-ratio: 1;
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: pointer;
+      background: #f5f5f5;
+      position: relative;
+    }
+
+    .photo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.2s;
+    }
+
+    .photo-item:hover img { transform: scale(1.05); }
+
+    .lightbox {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 3000;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .lightbox.active { display: flex; }
+
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 85vh;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+
+    .lightbox-close {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 1.3rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    .lightbox-prev, .lightbox-next {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: white;
+      font-size: 2rem;
+      padding: 1rem 0.75rem;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .lightbox-prev { left: 0.5rem; }
+    .lightbox-next { right: 0.5rem; }
+
+    .empty-gallery { text-align: center; padding: 4rem 2rem; color: #999; font-style: italic; }
+
+    @media (max-width: 768px) {
+      .gallery-layout { grid-template-columns: 1fr; }
+      .gallery-sidebar { position: static; }
+      .photo-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-container">
+    <a href="/index.html"><img src="/assets/images/franklin-admirals-hockey-logo-lowres.png" alt="Franklin Admirals Hockey" class="logo-img"></a>
+    <div style="display:flex;gap:0.4rem;flex-shrink:0;">
+      <button id="memberNavBtn" class="member-nav-btn">Login</button>
+      <button id="memberSignupBtn" class="member-nav-btn" style="background:white;color:#5D1725;border:1px solid #5D1725;">Sign Up</button>
+    </div>
+    <nav>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/index.html" class="nav-link">Home</a></li>
+        <li><a href="/pages/schedule.html" class="nav-link">Schedule</a></li>
+        <li><a href="/pages/roster.html" class="nav-link">Roster</a></li>
+        <li><a href="/pages/stats.html" class="nav-link">Stats</a></li>
+        <li><a href="/pages/leaderboard.html" class="nav-link">Leaderboard</a></li>
+        <li><a href="/pages/news.html" class="nav-link">News</a></li>
+        <li><a href="/pages/events.html" class="nav-link">Events</a></li>
+        <li><a href="/pages/gallery.html" class="nav-link active">Gallery</a></li>
+        <li><a href="/pages/summer.html" class="nav-link">Summer Hockey</a></li>
+        <li><a href="/pages/alumni.html" class="nav-link">Alumni</a></li>
+        <li><a href="/pages/sponsors.html" class="nav-link">Sponsors</a></li>
+        <li><a href="/pages/tryouts.html" class="nav-link">Tryouts</a></li>
+        <li><a href="/pages/contact.html" class="nav-link">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<section class="hero-section">
+  <div class="hero-container">
+    <div class="hero-badge">Franklin Admirals Hockey</div>
+    <h1 class="hero-title">Photo Gallery</h1>
+    <p class="hero-subtitle">Memories from the ice</p>
+  </div>
+</section>
+
+<div class="main-container">
+  <div class="gallery-layout">
+
+    <div class="gallery-sidebar">
+      <div class="gallery-sidebar-card">
+        <div class="sidebar-header">Seasons & Albums</div>
+        <div id="sidebarContent"><div style="padding:1rem;color:#999;font-size:0.85rem;">Loading...</div></div>
+      </div>
+    </div>
+
+    <div class="gallery-main">
+      <div class="gallery-title-row">
+        <div>
+          <div class="gallery-title" id="galleryTitle">Select an album</div>
+          <div class="gallery-subtitle" id="gallerySubtitle"></div>
+        </div>
+      </div>
+      <div id="photoGrid" class="photo-grid"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" onclick="closeLightbox()">×</button>
+  <button class="lightbox-prev" onclick="lightboxNav(-1)">‹</button>
+  <img id="lightboxImg" src="" alt="">
+  <button class="lightbox-next" onclick="lightboxNav(1)">›</button>
+</div>
+
+<footer>
+  <div class="footer-content">
+    <div class="footer-section"><h3>Quick Links</h3>
+      <p><a href="/index.html">Home</a></p>
+      <p><a href="/pages/gallery.html">Gallery</a></p>
+      <p><a href="/pages/contact.html">Contact</a></p>
+    </div>
+    <div class="footer-section"><h3>Contact</h3>
+      <p><strong>Coach:</strong> Matt Berry</p>
+      <p><strong>Email:</strong> coachberry03@gmail.com</p>
+    </div>
+    <div class="footer-section"><h3>Location</h3>
+      <p>Franklin High School</p><p>810 Hillsboro Rd</p><p>Franklin, TN 37064</p>
+    </div>
+  </div>
+  <div class="footer-bottom"><p>&copy; 2025 Franklin High School Admirals Hockey. All rights reserved.</p></div>
+</footer>
+
+<div id="memberModal" class="modal-overlay" style="z-index:2000;">
+  <div class="modal" style="max-width:440px;">
+    <button class="modal-close-float" onclick="hideMemberModal()">&times;</button>
+    <div class="member-view" id="memberView_login" style="display:block;">
+      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;text-align:center;"><h2 style="font-size:1.3rem;font-weight:700;">Member Login</h2></div>
+      <div style="padding:1.5rem;display:flex;flex-direction:column;gap:0.75rem;">
+        <button onclick="memberGoogleSignIn()" style="display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.75rem;border:1px solid #ddd;border-radius:6px;background:white;cursor:pointer;"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px;">Continue with Google</button>
+        <input type="email" id="loginEmail" placeholder="Email" style="padding:0.65rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <input type="password" id="loginPassword" placeholder="Password" style="padding:0.65rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <p id="loginError" class="member-error" style="color:#c62828;font-size:0.85rem;"></p>
+        <button onclick="memberSignIn()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-weight:600;cursor:pointer;">Sign In</button>
+      </div>
+    </div>
+    <div class="member-view" id="memberView_signup" style="display:none;">
+      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;text-align:center;"><h2 style="font-size:1.3rem;font-weight:700;">Create Account</h2></div>
+      <div style="padding:1.5rem;display:flex;flex-direction:column;gap:0.75rem;">
+        <input type="text" id="signupName" placeholder="Full name" style="padding:0.65rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <input type="email" id="signupEmail" placeholder="Email" style="padding:0.65rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <input type="password" id="signupPassword" placeholder="Password" style="padding:0.65rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <input type="password" id="signupConfirm" placeholder="Confirm" style="padding:0.65rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <p id="signupError" class="member-error" style="color:#c62828;font-size:0.85rem;"></p>
+        <button onclick="memberSignUp()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-weight:600;cursor:pointer;">Create Account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentPhotos = [];
+  let lightboxIndex = 0;
+
+  function openLightbox(index) {
+    lightboxIndex = index;
+    document.getElementById('lightboxImg').src = currentPhotos[index].url;
+    document.getElementById('lightbox').classList.add('active');
+  }
+
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('active');
+  }
+
+  function lightboxNav(dir) {
+    lightboxIndex = (lightboxIndex + dir + currentPhotos.length) % currentPhotos.length;
+    document.getElementById('lightboxImg').src = currentPhotos[lightboxIndex].url;
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') lightboxNav(-1);
+    if (e.key === 'ArrowRight') lightboxNav(1);
+  });
+
+  document.getElementById('lightbox').addEventListener('click', e => {
+    if (e.target === document.getElementById('lightbox')) closeLightbox();
+  });
+
+  (function() {
+    var btn = document.getElementById('navToggle');
+    var nav = document.getElementById('navLinks');
+    if (btn && nav) btn.addEventListener('click', () => { btn.classList.toggle('open'); nav.classList.toggle('open'); });
+  })();
+</script>
+
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const app = getApps().length ? getApps()[0] : initializeApp({
+    apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
+    authDomain: "admirals-hockey.firebaseapp.com",
+    projectId: "admirals-hockey",
+    storageBucket: "admirals-hockey.firebasestorage.app",
+    messagingSenderId: "783358659334",
+    appId: "1:783358659334:web:5daffd093adca386faec87"
+  });
+  const db = getFirestore(app);
+
+  // Load gallery structure: gallery/{seasonId}/albums/{albumId}/photos/{photoId}
+  const seasonsSnap = await getDocs(collection(db, 'gallery'));
+  const seasons = [];
+  seasonsSnap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
+  seasons.sort((a,b) => b.id.localeCompare(a.id));
+
+  const sidebar = document.getElementById('sidebarContent');
+
+  if (!seasons.length) {
+    sidebar.innerHTML = '<div style="padding:1rem;color:#999;font-size:0.85rem;">No albums yet</div>';
+  } else {
+    let sidebarHTML = '';
+    const albumsBySeaon = {};
+
+    for (const season of seasons) {
+      const albumsSnap = await getDocs(collection(db, 'gallery', season.id, 'albums'));
+      const albums = [];
+      albumsSnap.forEach(d => albums.push({ id: d.id, ...d.data() }));
+      albums.sort((a,b) => (a.order||99) - (b.order||99));
+      albumsBySeaon[season.id] = albums;
+
+      sidebarHTML += `<div class="season-item" onclick="toggleSeason('${season.id}', this)">
+        <span>${season.label || season.id}</span>
+        <span class="photo-count">${albums.length} album${albums.length !== 1 ? 's' : ''}</span>
+      </div>
+      <div id="albums_${season.id}" style="display:none;">
+        ${albums.map(a => `<div class="album-item" onclick="loadAlbum('${season.id}','${a.id}','${a.name||a.id}','${season.label||season.id}', this)">
+          ${a.name || a.id}
+          <span class="photo-count">${a.photoCount || ''}</span>
+        </div>`).join('')}
+      </div>`;
+    }
+
+    sidebar.innerHTML = sidebarHTML;
+
+    // Auto-open first season
+    if (seasons.length) {
+      const firstSeasonEl = sidebar.querySelector('.season-item');
+      if (firstSeasonEl) firstSeasonEl.click();
+    }
+  }
+
+  window.toggleSeason = function(seasonId, el) {
+    const albumDiv = document.getElementById('albums_' + seasonId);
+    const isOpen = albumDiv.style.display !== 'none';
+    albumDiv.style.display = isOpen ? 'none' : 'block';
+    el.classList.toggle('active', !isOpen);
+  };
+
+  window.loadAlbum = async function(seasonId, albumId, albumName, seasonLabel, el) {
+    // Update active state
+    document.querySelectorAll('.album-item').forEach(a => a.classList.remove('active'));
+    if (el) el.classList.add('active');
+
+    document.getElementById('galleryTitle').textContent = albumName;
+    document.getElementById('gallerySubtitle').textContent = seasonLabel;
+
+    const grid = document.getElementById('photoGrid');
+    grid.innerHTML = '<div class="empty-gallery">Loading photos...</div>';
+
+    const photosSnap = await getDocs(collection(db, 'gallery', seasonId, 'albums', albumId, 'photos'));
+    const photos = [];
+    photosSnap.forEach(d => photos.push({ id: d.id, ...d.data() }));
+    photos.sort((a,b) => (a.order||99) - (b.order||99));
+
+    currentPhotos = photos;
+
+    if (!photos.length) {
+      grid.innerHTML = '<div class="empty-gallery">No photos in this album yet.</div>';
+      return;
+    }
+
+    grid.innerHTML = photos.map((p, i) => `
+      <div class="photo-item" onclick="openLightbox(${i})">
+        <img src="${p.url}" alt="${p.caption || ''}" loading="lazy">
+      </div>`).join('');
+  };
+</script>
+
+<script type="module" src="/assets/js/member-auth.js"></script>
+</body>
+</html>

@@ -2696,4 +2696,311 @@ if (exportMembersBtn) {
 loadMembersTab();
 loadRoleRequestsTab();
 
+
+// ============================================
+// SPONSORS ADMIN
+// ============================================
+async function loadSponsors() {
+  const list = document.getElementById('sponsorsList');
+  if (!list) return;
+  const snap = await getDocs(collection(db, 'sponsors'));
+  const sponsors = [];
+  snap.forEach(d => sponsors.push({ id: d.id, ...d.data() }));
+  sponsors.sort((a,b) => (a.order||99) - (b.order||99));
+
+  if (!sponsors.length) { list.innerHTML = '<div class="empty-state">No sponsors yet</div>'; return; }
+
+  list.innerHTML = sponsors.map(s => `
+    <div class="item">
+      <div class="item-info">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          ${s.logoURL ? `<img src="${s.logoURL}" style="width:48px;height:32px;object-fit:contain;border-radius:3px;border:1px solid #eee;">` : '<div style="width:48px;height:32px;background:#f5f5f5;border-radius:3px;"></div>'}
+          <div>
+            <strong>${s.name}</strong>
+            ${s.featured ? '<span style="background:#f0b429;color:#333;font-size:0.65rem;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:4px;">⭐ Featured</span>' : ''}
+            <span>${s.website || ''}</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="btn-edit" onclick="editSponsor('${s.id}')">Edit</button>
+        <button class="btn-delete" onclick="deleteSponsor('${s.id}')">Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+window.editSponsor = async function(id) {
+  const snap = await getDoc(doc(db, 'sponsors', id));
+  const s = snap.data();
+  openSponsorModal(id, s);
+};
+
+window.deleteSponsor = async function(id) {
+  if (!confirm('Delete this sponsor?')) return;
+  await deleteDoc(doc(db, 'sponsors', id));
+  loadSponsors();
+};
+
+function openSponsorModal(id, data) {
+  const existing = document.getElementById('sponsorModal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'sponsorModal';
+  modal.className = 'modal-overlay active';
+  modal.innerHTML = `
+    <div class="modal">
+      <div class="modal-header">
+        <h2>${id ? 'Edit Sponsor' : 'Add Sponsor'}</h2>
+        <button class="modal-close" onclick="document.getElementById('sponsorModal').remove()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-label-group"><label class="field-label">Name</label><input type="text" id="sponsorName" value="${data?.name||''}"></div>
+        <div class="form-label-group"><label class="field-label">Website URL</label><input type="text" id="sponsorWebsite" value="${data?.website||''}" placeholder="https://..."></div>
+        <div class="form-label-group"><label class="field-label">Description</label><textarea id="sponsorDesc" rows="2" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">${data?.description||''}</textarea></div>
+        <div class="form-label-group"><label class="field-label">Logo</label>
+          <div style="display:flex;gap:0.75rem;align-items:center;">
+            ${data?.logoURL ? `<img id="sponsorLogoPreview" src="${data.logoURL}" style="height:48px;object-fit:contain;border:1px solid #ddd;border-radius:4px;">` : '<div id="sponsorLogoPreview" style="width:80px;height:48px;background:#f5f5f5;border:1px solid #ddd;border-radius:4px;"></div>'}
+            <label class="btn-secondary photo-btn">Upload<input type="file" id="sponsorLogoFile" accept="image/*" style="display:none;"></label>
+          </div>
+        </div>
+        <div class="form-label-group"><label class="field-label">Display Order</label><input type="number" id="sponsorOrder" value="${data?.order||1}" min="1" style="width:80px;"></div>
+        <div class="captain-checkboxes">
+          <label class="captain-label"><input type="checkbox" id="sponsorFeatured" ${data?.featured?'checked':''}> Featured Sponsor (shown prominently)</label>
+        </div>
+        <div class="form-buttons">
+          <button id="saveSponsorBtn" class="btn-primary">Save Sponsor</button>
+          <button onclick="document.getElementById('sponsorModal').remove()" class="btn-secondary">Cancel</button>
+        </div>
+        <p id="sponsorStatus" class="save-status"></p>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+
+  let sponsorLogoData = data?.logoURL || null;
+
+  document.getElementById('sponsorLogoFile').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      sponsorLogoData = e.target.result;
+      document.getElementById('sponsorLogoPreview').outerHTML = `<img id="sponsorLogoPreview" src="${sponsorLogoData}" style="height:48px;object-fit:contain;border:1px solid #ddd;border-radius:4px;">`;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById('saveSponsorBtn').addEventListener('click', async () => {
+    const name = document.getElementById('sponsorName').value.trim();
+    if (!name) { document.getElementById('sponsorStatus').textContent = 'Name required'; return; }
+
+    let logoURL = data?.logoURL || '';
+    if (sponsorLogoData && sponsorLogoData.startsWith('data:')) {
+      const storageRef = storageRefFn(storage, `sponsors/${Date.now()}`);
+      await uploadString(storageRef, sponsorLogoData, 'data_url');
+      logoURL = await getDownloadURL(storageRef);
+    }
+
+    const sponsorData = {
+      name,
+      website: document.getElementById('sponsorWebsite').value.trim(),
+      description: document.getElementById('sponsorDesc').value.trim(),
+      logoURL,
+      order: parseInt(document.getElementById('sponsorOrder').value) || 1,
+      featured: document.getElementById('sponsorFeatured').checked
+    };
+
+    if (document.getElementById('sponsorFeatured').checked) {
+      // Unfeature others
+      const snap = await getDocs(collection(db, 'sponsors'));
+      const batch = [];
+      snap.forEach(d => { if (d.id !== id && d.data().featured) batch.push(setDoc(doc(db, 'sponsors', d.id), { featured: false }, { merge: true })); });
+      await Promise.all(batch);
+    }
+
+    const docId = id || Date.now().toString();
+    await setDoc(doc(db, 'sponsors', docId), sponsorData);
+    document.getElementById('sponsorModal').remove();
+    loadSponsors();
+  });
+}
+
+const addSponsorBtn = document.getElementById('addSponsorBtn');
+if (addSponsorBtn) addSponsorBtn.addEventListener('click', () => openSponsorModal(null, null));
+
+loadSponsors();
+
+// ============================================
+// GALLERY ADMIN
+// ============================================
+let currentGallerySeasonId = null;
+
+async function loadGallerySeasons() {
+  const sel = document.getElementById('gallerySeason');
+  if (!sel) return;
+  const snap = await getDocs(collection(db, 'gallery'));
+  const seasons = [];
+  snap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
+  seasons.sort((a,b) => b.id.localeCompare(a.id));
+
+  sel.innerHTML = seasons.length
+    ? seasons.map(s => `<option value="${s.id}">${s.label || s.id}</option>`).join('')
+    : '<option value="">No seasons yet</option>';
+
+  if (seasons.length) {
+    currentGallerySeasonId = seasons[0].id;
+    loadGalleryAlbums(seasons[0].id);
+  }
+
+  sel.removeEventListener('change', onGallerySeasonChange);
+  sel.addEventListener('change', onGallerySeasonChange);
+}
+
+function onGallerySeasonChange(e) {
+  currentGallerySeasonId = e.target.value;
+  loadGalleryAlbums(e.target.value);
+}
+
+async function loadGalleryAlbums(seasonId) {
+  const list = document.getElementById('galleryAlbumsList');
+  if (!list) return;
+  const snap = await getDocs(collection(db, 'gallery', seasonId, 'albums'));
+  const albums = [];
+  snap.forEach(d => albums.push({ id: d.id, ...d.data() }));
+  albums.sort((a,b) => (a.order||99) - (b.order||99));
+
+  if (!albums.length) { list.innerHTML = '<div class="empty-state">No albums yet — click + Add Album</div>'; return; }
+
+  list.innerHTML = albums.map(a => `
+    <div class="item">
+      <div class="item-info">
+        <div>
+          <strong>${a.name || a.id}</strong>
+          <span>${a.photoCount || 0} photos</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="btn-edit" onclick="openAlbum('${seasonId}','${a.id}','${(a.name||'').replace(/'/g,'\\'')}')">Open</button>
+        <button class="btn-delete" onclick="deleteAlbum('${seasonId}','${a.id}')">Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+const addGallerySeasonBtn = document.getElementById('addGallerySeasonBtn');
+if (addGallerySeasonBtn) {
+  addGallerySeasonBtn.addEventListener('click', async () => {
+    const label = prompt('Season label (e.g. 2024-25):');
+    if (!label) return;
+    const id = label.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+    await setDoc(doc(db, 'gallery', id), { label, createdAt: new Date().toISOString() });
+    loadGallerySeasons();
+  });
+}
+
+const addAlbumBtn = document.getElementById('addAlbumBtn');
+if (addAlbumBtn) {
+  addAlbumBtn.addEventListener('click', async () => {
+    if (!currentGallerySeasonId) { alert('Create a season first'); return; }
+    const name = prompt('Album name (e.g. Game 1 vs Brentwood):');
+    if (!name) return;
+    const id = Date.now().toString();
+    await setDoc(doc(db, 'gallery', currentGallerySeasonId, 'albums', id), {
+      name,
+      order: 99,
+      photoCount: 0,
+      createdAt: new Date().toISOString()
+    });
+    loadGalleryAlbums(currentGallerySeasonId);
+  });
+}
+
+window.deleteAlbum = async function(seasonId, albumId) {
+  if (!confirm('Delete this album and all its photos?')) return;
+  const photosSnap = await getDocs(collection(db, 'gallery', seasonId, 'albums', albumId, 'photos'));
+  await Promise.all(photosSnap.docs.map(d => deleteDoc(d.ref)));
+  await deleteDoc(doc(db, 'gallery', seasonId, 'albums', albumId));
+  loadGalleryAlbums(seasonId);
+};
+
+window.openAlbum = async function(seasonId, albumId, albumName) {
+  const list = document.getElementById('galleryAlbumsList');
+  list.innerHTML = `
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+      <button class="btn-secondary" onclick="loadGalleryAlbums('${seasonId}')">← Back</button>
+      <h3 style="margin:0;">${albumName}</h3>
+      <label class="btn-primary photo-btn" style="margin-left:auto;cursor:pointer;">
+        + Upload Photos
+        <input type="file" id="photoUploadInput" accept="image/*" multiple style="display:none;">
+      </label>
+    </div>
+    <p id="uploadProgress" style="font-size:0.85rem;color:#555;"></p>
+    <div id="albumPhotosList"></div>`;
+
+  loadAlbumPhotos(seasonId, albumId);
+
+  document.getElementById('photoUploadInput').addEventListener('change', async function() {
+    const files = Array.from(this.files);
+    const progress = document.getElementById('uploadProgress');
+    progress.textContent = `Uploading ${files.length} photo${files.length !== 1 ? 's' : ''}...`;
+
+    let uploaded = 0;
+    for (const file of files) {
+      const reader = new FileReader();
+      await new Promise(resolve => {
+        reader.onload = async e => {
+          const storageRef = storageRefFn(storage, `gallery/${seasonId}/${albumId}/${Date.now()}_${file.name}`);
+          await uploadString(storageRef, e.target.result, 'data_url');
+          const url = await getDownloadURL(storageRef);
+          await addDoc(collection(db, 'gallery', seasonId, 'albums', albumId, 'photos'), {
+            url,
+            caption: '',
+            order: Date.now(),
+            uploadedAt: new Date().toISOString()
+          });
+          uploaded++;
+          progress.textContent = `Uploaded ${uploaded} of ${files.length}...`;
+          resolve();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Update photo count
+    const photosSnap = await getDocs(collection(db, 'gallery', seasonId, 'albums', albumId, 'photos'));
+    await setDoc(doc(db, 'gallery', seasonId, 'albums', albumId), { photoCount: photosSnap.size }, { merge: true });
+
+    progress.textContent = `✅ ${uploaded} photo${uploaded !== 1 ? 's' : ''} uploaded!`;
+    setTimeout(() => { progress.textContent = ''; }, 3000);
+    loadAlbumPhotos(seasonId, albumId);
+  });
+};
+
+async function loadAlbumPhotos(seasonId, albumId) {
+  const container = document.getElementById('albumPhotosList');
+  if (!container) return;
+  const snap = await getDocs(collection(db, 'gallery', seasonId, 'albums', albumId, 'photos'));
+  const photos = [];
+  snap.forEach(d => photos.push({ id: d.id, ...d.data() }));
+
+  if (!photos.length) { container.innerHTML = '<div class="empty-state">No photos yet — click Upload Photos</div>'; return; }
+
+  container.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:0.5rem;">
+    ${photos.map(p => `
+      <div style="position:relative;aspect-ratio:1;border-radius:4px;overflow:hidden;background:#f5f5f5;">
+        <img src="${p.url}" style="width:100%;height:100%;object-fit:cover;">
+        <button onclick="deletePhoto('${seasonId}','${albumId}','${p.id}','${p.url}')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:22px;height:22px;font-size:0.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">×</button>
+      </div>`).join('')}
+  </div>`;
+}
+
+window.deletePhoto = async function(seasonId, albumId, photoId, url) {
+  if (!confirm('Delete this photo?')) return;
+  await deleteDoc(doc(db, 'gallery', seasonId, 'albums', albumId, 'photos', photoId));
+  const photosSnap = await getDocs(collection(db, 'gallery', seasonId, 'albums', albumId, 'photos'));
+  await setDoc(doc(db, 'gallery', seasonId, 'albums', albumId), { photoCount: photosSnap.size }, { merge: true });
+  openAlbum(seasonId, albumId, '');
+};
+
+loadGallerySeasons();
+
 });

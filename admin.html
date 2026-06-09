@@ -44,6 +44,8 @@
     <button class="tab-btn" data-tab="seasons">Seasons</button>
     <button class="tab-btn" data-tab="summer">Summer Hockey</button>
     <button class="tab-btn" data-tab="rsvp">RSVP Links</button>
+    <button class="tab-btn" data-tab="sponsors">Sponsors</button>
+    <button class="tab-btn" data-tab="gallery">Gallery</button>
     <button class="tab-btn" data-tab="members">Members</button>
     <button class="tab-btn" data-tab="roleRequests">Role Requests <span id="roleRequestsBadge" style="display:none;background:#c62828;color:white;border-radius:50%;padding:1px 6px;font-size:0.7rem;margin-left:4px;"></span></button>
     <button class="tab-btn" data-tab="users">Manage Users</button>
@@ -352,6 +354,26 @@
         </div>
         <div id="rsvpGamesList"><div class="empty-state">Select a season to view RSVPs</div></div>
       </div>
+    </div>
+
+    <!-- SPONSORS TAB -->
+    <div id="sponsorsTab" class="tab-content">
+      <h2>Sponsors</h2>
+      <div style="display:flex;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap;">
+        <button id="addSponsorBtn" class="btn-primary">+ Add Sponsor</button>
+      </div>
+      <div id="sponsorsList" class="items-list"><div class="empty-state">No sponsors yet</div></div>
+    </div>
+
+    <!-- GALLERY TAB -->
+    <div id="galleryTab" class="tab-content">
+      <h2>Photo Gallery</h2>
+      <div style="display:flex;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap;">
+        <select id="gallerySeason" style="padding:6px 10px;border:1px solid #ddd;border-radius:4px;"></select>
+        <button id="addGallerySeasonBtn" class="btn-secondary">+ Season</button>
+        <button id="addAlbumBtn" class="btn-primary">+ Add Album</button>
+      </div>
+      <div id="galleryAlbumsList" class="items-list"><div class="empty-state">Select or create a season</div></div>
     </div>
 
     <!-- MEMBERS TAB -->
