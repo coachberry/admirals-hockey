@@ -781,17 +781,22 @@ function showSection(name) {
           const rsvpDoc = await getDoc(doc(db, 'summer', season.id, 'games', gameDoc.id, 'rsvps', currentUser.uid));
           const existing = rsvpDoc.exists() ? rsvpDoc.data().response : null;
 
+          const yesActive = existing === 'yes';
+          const noActive = existing === 'no';
           html += `<div class="game-rsvp-item">
             <div>
               <div style="font-weight:600;font-size:0.9rem;">${team.name} vs. ${oppName}</div>
               <div style="font-size:0.82rem;color:#666;">${dateStr} · ${timeStr} · ${season.label || season.id}</div>
             </div>
             <div style="display:flex;gap:0.5rem;">
-              ${existing
-                ? `<span class="rsvp-done ${existing}">${existing === 'yes' ? '✅ In' : '❌ Out'}</span>
-                   <button class="btn-secondary-small" style="font-size:0.78rem;padding:3px 8px;" onclick="changeSummerRsvp('${season.id}','${gameDoc.id}','${currentUser.uid}')">Change</button>`
-                : `<button class="rsvp-yes-btn" onclick="doSummerRsvp('${season.id}','${gameDoc.id}','${currentUser.uid}','yes')">✅ In</button>
-                   <button class="rsvp-no-btn" onclick="doSummerRsvp('${season.id}','${gameDoc.id}','${currentUser.uid}','no')">❌ Out</button>`}
+              <button onclick="toggleSummerRsvp('${season.id}','${gameDoc.id}','${currentUser.uid}','yes',${yesActive})"
+                style="border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:${yesActive ? '#2e7d32' : 'white'};color:${yesActive ? 'white' : '#2e7d32'};">
+                ✅ In
+              </button>
+              <button onclick="toggleSummerRsvp('${season.id}','${gameDoc.id}','${currentUser.uid}','no',${noActive})"
+                style="border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:${noActive ? '#c62828' : 'white'};color:${noActive ? 'white' : '#c62828'};">
+                ❌ Out
+              </button>
             </div>
           </div>`;
         }
@@ -802,17 +807,19 @@ function showSection(name) {
     list.innerHTML = html;
   };
 
-  window.doSummerRsvp = async function(seasonId, gameId, uid, response) {
-    await setDoc(doc(db, 'summer', seasonId, 'games', gameId, 'rsvps', uid), {
-      name: currentProfile.displayName,
-      response,
-      timestamp: new Date().toISOString()
-    });
+  window.toggleSummerRsvp = async function(seasonId, gameId, uid, response, isActive) {
+    const { deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    if (isActive) {
+      // Clicking active button = deselect
+      await deleteDoc(doc(db, 'summer', seasonId, 'games', gameId, 'rsvps', uid));
+    } else {
+      await setDoc(doc(db, 'summer', seasonId, 'games', gameId, 'rsvps', uid), {
+        name: currentProfile.displayName,
+        response,
+        timestamp: new Date().toISOString()
+      });
+    }
     loadMyGames();
-  };
-
-  window.changeSummerRsvp = function(seasonId, gameId, uid) {
-    window.doSummerRsvp(seasonId, gameId, uid, 'yes');
   };
 
   window.doSignOutAndRedirect = async function() {
