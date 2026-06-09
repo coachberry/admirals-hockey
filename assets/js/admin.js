@@ -24,15 +24,50 @@ const storage = getStorage(app);
 const users = JSON.parse(localStorage.getItem('admirals_users')) || { admin: { password: 'admin', email: 'coachberry03@gmail.com' } };
 let currentUser = localStorage.getItem('admirals_currentUser');
 
-// If no localStorage user, wait briefly for Firebase auto-login to set it
+// If no localStorage user, wait for Firebase auto-login to set it
 if (!currentUser) {
-  setTimeout(() => {
+  // Show a checking message instead of login form
+  const loginBox = document.querySelector('.login-box');
+  if (loginBox) {
+    loginBox.innerHTML = '<h1>⚓ Franklin Admirals</h1><p style="color:#666;margin-top:1rem;">Checking credentials...</p>';
+  }
+  // Poll for Firebase auth up to 5 seconds
+  let attempts = 0;
+  const authCheck = setInterval(() => {
     currentUser = localStorage.getItem('admirals_currentUser');
+    attempts++;
     if (currentUser) {
+      clearInterval(authCheck);
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
+    } else if (attempts >= 10) {
+      clearInterval(authCheck);
+      // Not logged in via Firebase - show normal login form
+      if (loginBox) {
+        loginBox.innerHTML = `<h1>⚓ Franklin Admirals</h1>
+          <h2>Admin Portal</h2>
+          <form id="loginForm">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+          </form>
+          <p id="loginError" class="error"></p>`;
+        document.getElementById('loginForm').addEventListener('submit', e => {
+          e.preventDefault();
+          const u = document.getElementById('username').value;
+          const p = document.getElementById('password').value;
+          if (users[u] && users[u].password === p) {
+            currentUser = u;
+            localStorage.setItem('admirals_currentUser', u);
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+          } else {
+            document.getElementById('loginError').textContent = 'Invalid username or password';
+          }
+        });
+      }
     }
-  }, 1500);
+  }, 500);
 }
 function saveUsers() { localStorage.setItem('admirals_users', JSON.stringify(users)); }
 
