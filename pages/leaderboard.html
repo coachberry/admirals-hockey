@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard - Franklin Admirals Hockey</title>
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <script src="/assets/js/page-guard.js"></script>
+  <style>
+    .leaderboard-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid #e0e0e0;
+      padding-bottom: 0;
+    }
+
+    .lb-tab {
+      padding: 0.6rem 1.25rem;
+      border: none;
+      background: none;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #888;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+
+    .lb-tab.active {
+      color: #5D1725;
+      border-bottom-color: #5D1725;
+    }
+
+    .lb-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .lb-table th {
+      background: linear-gradient(135deg, #5D1725, #3c0f17);
+      color: white;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .lb-table th:hover { background: #3c0f17; }
+    .lb-table th.sorted { background: #3c0f17; }
+    .lb-table th .sort-arrow { margin-left: 4px; opacity: 0.7; }
+
+    .lb-table td {
+      padding: 0.7rem 1rem;
+      border-bottom: 1px solid #f5f5f5;
+      font-size: 0.9rem;
+    }
+
+    .lb-table tr:last-child td { border-bottom: none; }
+
+    .lb-table tr:hover td { background: #fdf8f8; }
+
+    .lb-table .rank {
+      font-weight: 700;
+      color: #888;
+      min-width: 32px;
+    }
+
+    .lb-table .rank-1 { color: #f0b429; }
+    .lb-table .rank-2 { color: #9e9e9e; }
+    .lb-table .rank-3 { color: #cd7f32; }
+
+    .lb-table .player-name {
+      font-weight: 600;
+      color: #111;
+    }
+
+    .lb-table .stat-val {
+      font-weight: 700;
+      color: #5D1725;
+      text-align: center;
+    }
+
+    .lb-table .stat-secondary {
+      color: #666;
+      text-align: center;
+    }
+
+    .season-selector {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .season-selector label {
+      font-weight: 600;
+      color: #555;
+      font-size: 0.9rem;
+    }
+
+    .season-selector select {
+      padding: 0.5rem 0.9rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      background: white;
+    }
+
+    .top-three {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .top-card {
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      padding: 1.25rem;
+      text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .top-card.first {
+      border-color: #f0b429;
+      box-shadow: 0 2px 12px rgba(240,180,41,0.2);
+    }
+
+    .top-card .medal { font-size: 2rem; margin-bottom: 0.5rem; }
+    .top-card .top-name { font-weight: 700; font-size: 0.95rem; color: #111; }
+    .top-card .top-stat { font-size: 1.8rem; font-weight: 700; color: #5D1725; line-height: 1; margin: 0.25rem 0; }
+    .top-card .top-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+    .top-card .top-detail { font-size: 0.78rem; color: #666; margin-top: 0.25rem; }
+
+    .empty-lb { text-align: center; padding: 3rem; color: #999; font-style: italic; }
+
+    @media (max-width: 600px) {
+      .top-three { grid-template-columns: 1fr; }
+      .lb-table th, .lb-table td { padding: 0.5rem 0.6rem; font-size: 0.82rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-container">
+    <a href="/index.html"><img src="/assets/images/franklin-admirals-hockey-logo-lowres.png" alt="Franklin Admirals Hockey" class="logo-img"></a>
+    <div style="display:flex;gap:0.4rem;flex-shrink:0;">
+      <button id="memberNavBtn" class="member-nav-btn">Login</button>
+      <button id="memberSignupBtn" class="member-nav-btn" style="background:white;color:#5D1725;border:1px solid #5D1725;">Sign Up</button>
+    </div>
+    <nav>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/index.html" class="nav-link">Home</a></li>
+        <li><a href="/pages/schedule.html" class="nav-link">Schedule</a></li>
+        <li><a href="/pages/roster.html" class="nav-link">Roster</a></li>
+        <li><a href="/pages/stats.html" class="nav-link">Stats</a></li>
+        <li><a href="/pages/leaderboard.html" class="nav-link active">Leaderboard</a></li>
+        <li><a href="/pages/news.html" class="nav-link">News</a></li>
+        <li><a href="/pages/events.html" class="nav-link">Events</a></li>
+        <li><a href="/pages/summer.html" class="nav-link">Summer Hockey</a></li>
+        <li><a href="/pages/alumni.html" class="nav-link">Alumni</a></li>
+        <li><a href="/pages/tryouts.html" class="nav-link">Tryouts</a></li>
+        <li><a href="/pages/contact.html" class="nav-link">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<section class="hero-section">
+  <div class="hero-container">
+    <div class="hero-badge">Franklin Admirals Hockey</div>
+    <h1 class="hero-title">Leaderboard</h1>
+    <p class="hero-subtitle">Season statistics leaders</p>
+  </div>
+</section>
+
+<div class="main-container" style="padding-top:2rem;padding-bottom:3rem;">
+
+  <div class="season-selector">
+    <label>Season:</label>
+    <select id="seasonSelect"></select>
+  </div>
+
+  <div class="leaderboard-tabs">
+    <button class="lb-tab active" onclick="showTab('skaters')">Skaters</button>
+    <button class="lb-tab" onclick="showTab('goalies')">Goalies</button>
+  </div>
+
+  <!-- SKATERS -->
+  <div id="skatersTab">
+    <div id="skaterTop3" class="top-three"></div>
+    <table class="lb-table" id="skatersTable">
+      <thead>
+        <tr>
+          <th onclick="sortTable('skaters','rank')">#</th>
+          <th onclick="sortTable('skaters','name')">Player <span class="sort-arrow"></span></th>
+          <th onclick="sortTable('skaters','pos')">Pos</th>
+          <th onclick="sortTable('skaters','gp')">GP <span class="sort-arrow"></span></th>
+          <th onclick="sortTable('skaters','g')">G <span class="sort-arrow"></span></th>
+          <th onclick="sortTable('skaters','a')">A <span class="sort-arrow"></span></th>
+          <th onclick="sortTable('skaters','pts')" class="sorted">PTS <span class="sort-arrow">↓</span></th>
+          <th onclick="sortTable('skaters','pim')">PIM <span class="sort-arrow"></span></th>
+        </tr>
+      </thead>
+      <tbody id="skatersBody"></tbody>
+    </table>
+  </div>
+
+  <!-- GOALIES -->
+  <div id="goaliesTab" style="display:none;">
+    <div id="goalieTop3" class="top-three"></div>
+    <table class="lb-table" id="goaliesTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th onclick="sortTable('goalies','name')">Goalie <span class="sort-arrow"></span></th>
+          <th onclick="sortTable('goalies','gp')">GP <span class="sort-arrow"></span></th>
+          <th onclick="sortTable('goalies','w')">W <span class="sort-arrow"></span></th>
+          <th onclick="sortTable('goalies','l')">L <span class="sort-arrow"></span></th>
+          <th onclick="sortTable('goalies','gaa')" class="sorted">GAA <span class="sort-arrow">↑</span></th>
+          <th onclick="sortTable('goalies','svpct')">SV% <span class="sort-arrow"></span></th>
+          <th onclick="sortTable('goalies','so')">SO <span class="sort-arrow"></span></th>
+        </tr>
+      </thead>
+      <tbody id="goaliesBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-content">
+    <div class="footer-section">
+      <h3>Quick Links</h3>
+      <p><a href="/index.html">Home</a></p>
+      <p><a href="/pages/schedule.html">Schedule</a></p>
+      <p><a href="/pages/stats.html">Stats</a></p>
+      <p><a href="/pages/leaderboard.html">Leaderboard</a></p>
+    </div>
+    <div class="footer-section">
+      <h3>Contact</h3>
+      <p><strong>Coach:</strong> Matt Berry</p>
+      <p><strong>Email:</strong> coachberry03@gmail.com</p>
+    </div>
+    <div class="footer-section">
+      <h3>Location</h3>
+      <p>Franklin High School</p>
+      <p>810 Hillsboro Rd</p>
+      <p>Franklin, TN 37064</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2025 Franklin High School Admirals Hockey. All rights reserved.</p>
+  </div>
+</footer>
+
+<div id="memberModal" class="modal-overlay" style="z-index:2000;">
+  <div class="modal" style="max-width:440px;max-height:90vh;overflow-y:auto;">
+    <button class="modal-close-float" onclick="hideMemberModal()">&times;</button>
+    <div class="member-view" id="memberView_login" style="display:block;">
+      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;text-align:center;">
+        <h2 style="font-size:1.3rem;font-weight:700;">Member Login</h2>
+      </div>
+      <div style="padding:1.5rem;">
+        <button onclick="memberGoogleSignIn()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.75rem;border:1px solid #ddd;border-radius:6px;background:white;font-size:0.95rem;font-weight:500;cursor:pointer;margin-bottom:1rem;">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px;height:20px;">
+          Continue with Google
+        </button>
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+          <input type="email" id="loginEmail" placeholder="Email" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+          <input type="password" id="loginPassword" placeholder="Password" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+          <p id="loginError" class="member-error" style="color:#c62828;font-size:0.85rem;min-height:1rem;"></p>
+          <button onclick="memberSignIn()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-size:1rem;font-weight:600;cursor:pointer;">Sign In</button>
+        </div>
+        <p style="text-align:center;margin-top:1rem;font-size:0.88rem;">Don't have an account? <a href="#" onclick="showMemberView('signup')" style="color:#5D1725;font-weight:600;">Sign up</a></p>
+      </div>
+    </div>
+    <div class="member-view" id="memberView_signup" style="display:none;">
+      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;text-align:center;">
+        <h2 style="font-size:1.3rem;font-weight:700;">Create Account</h2>
+      </div>
+      <div style="padding:1.5rem;">
+        <button onclick="memberGoogleSignIn()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.75rem;border:1px solid #ddd;border-radius:6px;background:white;font-size:0.95rem;font-weight:500;cursor:pointer;margin-bottom:1rem;">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px;height:20px;">
+          Sign up with Google
+        </button>
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+          <input type="text" id="signupName" placeholder="Full name" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+          <input type="email" id="signupEmail" placeholder="Email" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+          <input type="password" id="signupPassword" placeholder="Password (min 6 chars)" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+          <input type="password" id="signupConfirm" placeholder="Confirm password" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+          <p id="signupError" class="member-error" style="color:#c62828;font-size:0.85rem;min-height:1rem;"></p>
+          <button onclick="memberSignUp()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-size:1rem;font-weight:600;cursor:pointer;">Create Account</button>
+        </div>
+        <p style="text-align:center;margin-top:1rem;font-size:0.88rem;">Have an account? <a href="#" onclick="showMemberView('login')" style="color:#5D1725;font-weight:600;">Sign in</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentTab = 'skaters';
+  let allSkaters = [];
+  let allGoalies = [];
+  let skaterSort = { col: 'pts', dir: -1 };
+  let goalieSort = { col: 'gaa', dir: 1 };
+
+  function showTab(tab) {
+    currentTab = tab;
+    document.getElementById('skatersTab').style.display = tab === 'skaters' ? 'block' : 'none';
+    document.getElementById('goaliesTab').style.display = tab === 'goalies' ? 'block' : 'none';
+    document.querySelectorAll('.lb-tab').forEach((t, i) => {
+      t.classList.toggle('active', (i === 0 && tab === 'skaters') || (i === 1 && tab === 'goalies'));
+    });
+  }
+
+  function sortTable(type, col) {
+    if (type === 'skaters') {
+      if (skaterSort.col === col) skaterSort.dir *= -1;
+      else { skaterSort.col = col; skaterSort.dir = col === 'name' ? 1 : -1; }
+      renderSkaters();
+    } else {
+      if (goalieSort.col === col) goalieSort.dir *= -1;
+      else { goalieSort.col = col; goalieSort.dir = col === 'name' || col === 'gaa' ? 1 : -1; }
+      renderGoalies();
+    }
+  }
+
+  function renderTop3(players, statKey, statLabel, detailFn, containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const top = players.slice(0, 3);
+    if (!top.length) { container.innerHTML = ''; return; }
+    const medals = ['🥇', '🥈', '🥉'];
+    const order = top.length >= 3 ? [1, 0, 2] : top.length === 2 ? [0, 1] : [0];
+    container.innerHTML = order.map(i => {
+      if (!top[i]) return '';
+      const p = top[i];
+      return `<div class="top-card ${i === 0 ? 'first' : ''}">
+        <div class="medal">${medals[i]}</div>
+        <div class="top-name">${p.name}</div>
+        <div class="top-stat">${p[statKey]}</div>
+        <div class="top-label">${statLabel}</div>
+        <div class="top-detail">${detailFn(p)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderSkaters() {
+    const sorted = [...allSkaters].sort((a, b) => {
+      const col = skaterSort.col;
+      const av = col === 'name' ? a.name : (a[col] ?? 0);
+      const bv = col === 'name' ? b.name : (b[col] ?? 0);
+      if (col === 'name') return skaterSort.dir * av.localeCompare(bv);
+      return skaterSort.dir * (bv - av);
+    });
+
+    renderTop3(sorted, 'pts', 'Points', p => `${p.g}G ${p.a}A in ${p.gp} GP`, 'skaterTop3');
+
+    const tbody = document.getElementById('skatersBody');
+    if (!sorted.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty-lb">No stats available</td></tr>'; return; }
+
+    tbody.innerHTML = sorted.map((p, i) => {
+      const rankClass = i < 3 ? `rank-${i+1}` : '';
+      const medals = ['🥇', '🥈', '🥉'];
+      const rankDisplay = i < 3 ? medals[i] : i + 1;
+      return `<tr>
+        <td class="rank ${rankClass}">${rankDisplay}</td>
+        <td class="player-name">${p.name}</td>
+        <td class="stat-secondary">${p.pos || '—'}</td>
+        <td class="stat-secondary">${p.gp}</td>
+        <td class="stat-secondary">${p.g}</td>
+        <td class="stat-secondary">${p.a}</td>
+        <td class="stat-val">${p.pts}</td>
+        <td class="stat-secondary">${p.pim}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function renderGoalies() {
+    const sorted = [...allGoalies].sort((a, b) => {
+      const col = goalieSort.col;
+      if (col === 'name') return goalieSort.dir * a.name.localeCompare(b.name);
+      if (col === 'gaa') return goalieSort.dir * (a.gaa - b.gaa);
+      if (col === 'svpct') return -1 * goalieSort.dir * (a.svpct - b.svpct);
+      return goalieSort.dir * ((b[col] ?? 0) - (a[col] ?? 0));
+    });
+
+    renderTop3(sorted, 'gaa', 'GAA', p => `${p.w}W-${p.l}L · ${p.svpct}% SV`, 'goalieTop3');
+
+    const tbody = document.getElementById('goaliesBody');
+    if (!sorted.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty-lb">No goalie stats available</td></tr>'; return; }
+
+    tbody.innerHTML = sorted.map((p, i) => {
+      const rankClass = i < 3 ? `rank-${i+1}` : '';
+      const medals = ['🥇', '🥈', '🥉'];
+      const rankDisplay = i < 3 ? medals[i] : i + 1;
+      return `<tr>
+        <td class="rank ${rankClass}">${rankDisplay}</td>
+        <td class="player-name">${p.name}</td>
+        <td class="stat-secondary">${p.gp}</td>
+        <td class="stat-secondary">${p.w}</td>
+        <td class="stat-secondary">${p.l}</td>
+        <td class="stat-val">${p.gaa}</td>
+        <td class="stat-secondary">${p.svpct}%</td>
+        <td class="stat-secondary">${p.so}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  (function() {
+    var btn = document.getElementById('navToggle');
+    var nav = document.getElementById('navLinks');
+    if (!btn || !nav) return;
+    btn.addEventListener('click', function() { btn.classList.toggle('open'); nav.classList.toggle('open'); });
+  })();
+</script>
+
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
+    authDomain: "admirals-hockey.firebaseapp.com",
+    projectId: "admirals-hockey",
+    storageBucket: "admirals-hockey.firebasestorage.app",
+    messagingSenderId: "783358659334",
+    appId: "1:783358659334:web:5daffd093adca386faec87"
+  };
+
+  const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Load seasons
+  const seasonsSnap = await getDocs(collection(db, 'seasons'));
+  const seasons = [];
+  seasonsSnap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
+  seasons.sort((a, b) => b.id.localeCompare(a.id));
+
+  const sel = document.getElementById('seasonSelect');
+  seasons.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = s.id + (s.current ? ' (Current)' : '');
+    if (s.current) opt.selected = true;
+    sel.appendChild(opt);
+  });
+
+  async function loadLeaderboard(seasonId) {
+    const skaterMap = {};
+    const goalieMap = {};
+
+    // Load all games for season
+    const gamesSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule'));
+    const games = [];
+    gamesSnap.forEach(d => games.push({ id: d.id, ...d.data() }));
+
+    // Load roster for player positions
+    const posMap = {};
+    try {
+      const rosterSnap = await getDocs(collection(db, 'roster', seasonId, 'players'));
+      rosterSnap.forEach(d => {
+        const p = d.data();
+        posMap[p.name] = p.position || '';
+      });
+    } catch(e) {}
+
+    // Load stats from each game
+    await Promise.all(games.map(async g => {
+      const [skaterSnap, goalieSnap] = await Promise.all([
+        getDocs(collection(db, 'seasons', seasonId, 'schedule', g.id, 'skaterstats')),
+        getDocs(collection(db, 'seasons', seasonId, 'schedule', g.id, 'goaliestats'))
+      ]);
+
+      skaterSnap.forEach(d => {
+        const s = d.data();
+        const name = s.name || d.id;
+        if (!skaterMap[name]) skaterMap[name] = { name, gp:0, g:0, a:0, pts:0, pim:0, pos: posMap[name] || '' };
+        skaterMap[name].gp++;
+        skaterMap[name].g += parseInt(s.goals) || 0;
+        skaterMap[name].a += parseInt(s.assists) || 0;
+        skaterMap[name].pts += (parseInt(s.goals) || 0) + (parseInt(s.assists) || 0);
+        skaterMap[name].pim += parseInt(s.pim) || 0;
+      });
+
+      goalieSnap.forEach(d => {
+        const s = d.data();
+        const name = s.name || d.id;
+        if (!goalieMap[name]) goalieMap[name] = { name, gp:0, w:0, l:0, ga:0, shots:0, saves:0, so:0 };
+        goalieMap[name].gp++;
+        goalieMap[name].ga += parseInt(s.goalsAgainst) || 0;
+        goalieMap[name].saves += parseInt(s.saves) || 0;
+        goalieMap[name].shots += (parseInt(s.saves) || 0) + (parseInt(s.goalsAgainst) || 0);
+        if (s.result === 'W') goalieMap[name].w++;
+        else if (s.result === 'L') goalieMap[name].l++;
+        if ((parseInt(s.goalsAgainst) || 0) === 0 && (parseInt(s.saves) || 0) > 0) goalieMap[name].so++;
+      });
+    }));
+
+    // Compute GAA and SV%
+    Object.values(goalieMap).forEach(g => {
+      g.gaa = g.gp > 0 ? (g.ga / g.gp).toFixed(2) : '0.00';
+      g.svpct = g.shots > 0 ? ((g.saves / g.shots) * 100).toFixed(1) : '0.0';
+    });
+
+    allSkaters = Object.values(skaterMap).filter(p => p.pts > 0 || p.gp > 0);
+    allGoalies = Object.values(goalieMap).filter(g => g.gp > 0);
+
+    renderSkaters();
+    renderGoalies();
+  }
+
+  const currentSeason = seasons.find(s => s.current) || seasons[0];
+  if (currentSeason) loadLeaderboard(currentSeason.id);
+
+  sel.addEventListener('change', e => loadLeaderboard(e.target.value));
+</script>
+
+<script type="module" src="/assets/js/member-auth.js"></script>
+</body>
+</html>
