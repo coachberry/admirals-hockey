@@ -2599,7 +2599,71 @@ async function loadMembersTab() {
 
 window.updateMemberRole = async function(uid, role) {
   await setDoc(doc(db, 'members', uid), { role }, { merge: true });
+  if (role === 'admin') {
+    showAdminPermissions(uid);
+  }
   loadMembersTab();
+};
+
+const ADMIN_TABS = [
+  { id: 'roster',       label: 'Roster' },
+  { id: 'schedule',     label: 'Schedule' },
+  { id: 'gameStats',    label: 'Game Stats' },
+  { id: 'news',         label: 'News & Updates' },
+  { id: 'events',       label: 'Events' },
+  { id: 'summer',       label: 'Summer Hockey' },
+  { id: 'rsvp',         label: 'RSVP Links' },
+  { id: 'gallery',      label: 'Gallery' },
+  { id: 'sponsors',     label: 'Sponsors' },
+  { id: 'members',      label: 'Members' },
+  { id: 'applications', label: 'Applications' },
+  { id: 'pages',        label: 'Pages' },
+  { id: 'seasons',      label: 'Seasons' },
+];
+
+window.showAdminPermissions = async function(uid) {
+  const snap = await getDoc(doc(db, 'members', uid));
+  const member = snap.data();
+  const perms = member.adminPermissions || {};
+
+  const existing = document.getElementById('adminPermsModal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'adminPermsModal';
+  modal.className = 'modal-overlay active';
+  modal.innerHTML = `
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Admin Permissions — ${member.displayName}</h2>
+        <button class="modal-close" onclick="document.getElementById('adminPermsModal').remove()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.85rem;color:#666;margin-bottom:1rem;">Select which admin tabs this person can access:</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:1.25rem;">
+          ${ADMIN_TABS.map(t => `
+            <label style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem;background:#f9f9f9;border-radius:4px;cursor:pointer;">
+              <input type="checkbox" value="${t.id}" ${perms[t.id] ? 'checked' : ''}>
+              ${t.label}
+            </label>`).join('')}
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+          <button id="saveAdminPermsBtn" class="btn-primary">Save Permissions</button>
+          <button onclick="document.getElementById('adminPermsModal').remove()" class="btn-secondary">Cancel</button>
+        </div>
+        <p id="adminPermsStatus" class="save-status"></p>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+
+  document.getElementById('saveAdminPermsBtn').addEventListener('click', async () => {
+    const checkboxes = modal.querySelectorAll('input[type="checkbox"]');
+    const newPerms = {};
+    checkboxes.forEach(cb => { newPerms[cb.value] = cb.checked; });
+    await setDoc(doc(db, 'members', uid), { adminPermissions: newPerms }, { merge: true });
+    document.getElementById('adminPermsStatus').textContent = '✅ Saved!';
+    setTimeout(() => modal.remove(), 1000);
+  });
 };
 
 window.deleteMember = async function(uid) {
