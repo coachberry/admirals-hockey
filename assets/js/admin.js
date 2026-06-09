@@ -2880,7 +2880,7 @@ async function loadGalleryAlbums(seasonId) {
         </div>
       </div>
       <div style="display:flex;gap:0.5rem;">
-        <button class="btn-edit" onclick="openAlbum('${seasonId}','${a.id}','${(a.name||'').replace(/'/g,'\\'')}')">Open</button>
+        <button class="btn-edit" data-season='${seasonId}' data-album='${a.id}' data-name='${(a.name||a.id).replace(/'/g,'')}' onclick="openAlbum(this.dataset.season,this.dataset.album,this.dataset.name)">Open</button>
         <button class="btn-delete" onclick="deleteAlbum('${seasonId}','${a.id}')">Delete</button>
       </div>
     </div>`).join('');
