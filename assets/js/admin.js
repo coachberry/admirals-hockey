@@ -2635,8 +2635,10 @@ async function loadMembersTab() {
         <select onchange="updateMemberRole('${m.id}', this.value)" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:0.8rem;">
           <option value="member" ${m.role==='member'?'selected':''}>Member</option>
           <option value="player" ${m.role==='player'?'selected':''}>Player</option>
-          <option value="family" ${m.role==='family'?'selected':''}>Family</option>
           <option value="alumni" ${m.role==='alumni'?'selected':''}>Alumni</option>
+          <option value="rep" ${m.role==='rep'?'selected':''}>Team Rep</option>
+          <option value="admin" ${m.role==='admin'?'selected':''}>Admin</option>
+          <option value="superadmin" ${m.role==='superadmin'?'selected':''}>Super Admin</option>
         </select>
         <button class="btn-delete" onclick="deleteMember('${m.id}')">Remove</button>
       </div>
