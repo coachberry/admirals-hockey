@@ -194,7 +194,8 @@ onAuthStateChanged(auth, async (user) => {
     const adminBtn = document.getElementById('adminDashboardBtn');
     if (adminBtn) {
       const role = profile.role || 'member';
-      if (role === 'admin' || role === 'superadmin') {
+      const isSuperAdmin = user.email === 'coachberry03@gmail.com';
+      if (isSuperAdmin || role === 'admin' || role === 'superadmin') {
         adminBtn.style.display = 'inline-block';
       } else {
         adminBtn.style.display = 'none';
