@@ -424,12 +424,20 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  const CHANNELS = [
-    { id: 'general',     name: '#general',      desc: 'General team discussion', icon: '💬', readRoles: ['player','prospect','alumni','rep','admin','superadmin','member'], writeRoles: ['player','alumni','rep','admin','superadmin'] },
-    { id: 'players',     name: '#players',      desc: 'Current players only',    icon: '🏒', readRoles: ['player','admin','superadmin'], writeRoles: ['player','admin','superadmin'] },
-    { id: 'summer',      name: '#summer-league', desc: 'Summer league chat',      icon: '☀️', readRoles: ['player','prospect','alumni','rep','admin','superadmin','member'], writeRoles: ['player','alumni','rep','admin','superadmin','member'] },
-    { id: 'prospects',   name: '#prospects',    desc: 'Prospective players',     icon: '⭐', readRoles: ['prospect','player','admin','superadmin'], writeRoles: ['prospect','player','admin','superadmin'] },
-  ];
+  let CHANNELS = [];
+
+  async function loadChannels() {
+    const snap = await getDocs(collection(db, 'chatChannels'));
+    CHANNELS = [];
+    snap.forEach(d => CHANNELS.push({ id: d.id, ...d.data() }));
+    CHANNELS.sort((a,b) => (a.order||99) - (b.order||99));
+    if (!CHANNELS.length) {
+      // Default channel if none configured
+      CHANNELS = [{ id: 'general', name: '#general', desc: 'General team discussion', icon: '💬',
+        readRoles: ['player','alumni','rep','admin','superadmin'],
+        writeRoles: ['player','alumni','rep','admin','superadmin'] }];
+    }
+  }
 
   let currentUser = null;
   let currentProfile = null;
@@ -623,6 +631,7 @@
     document.getElementById('chatApp').style.display = 'block';
     document.getElementById('chatUserLabel').textContent = currentProfile.displayName || user.email;
 
+    await loadChannels();
     buildChannelList();
   });
 </script>

@@ -195,6 +195,12 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
+  const allowedRoles = ['player', 'alumni', 'rep', 'admin', 'superadmin'];
+  if (!allowedRoles.includes(currentProfile.role)) {
+    bubble.style.display = 'none';
+    return;
+  }
+
   bubble.style.display = 'flex';
 
   // Show input or no-access
