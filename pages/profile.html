@@ -292,7 +292,6 @@
 <header>
   <div class="header-container">
     <a href="/index.html"><img src="/assets/images/franklin-admirals-hockey-logo-lowres.png" alt="Franklin Admirals Hockey" class="logo-img"></a>
-    <a id="adminDashboardBtn" href="/admin.html" style="display:none;background:#3c0f17;color:white;border:none;border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;text-decoration:none;flex-shrink:0;">Admin</a>
     <div style="display:flex;gap:0.4rem;flex-shrink:0;align-items:center;">
       <a id="adminDashboardBtn" href="/admin.html" style="display:none;background:#3c0f17;color:white;border:none;border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;text-decoration:none;flex-shrink:0;">Admin</a>
       <button id="memberNavBtn" class="member-nav-btn">Login</button>
@@ -669,7 +668,20 @@ function showSection(name) {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       currentUser = user;
-      const snap = await getDoc(doc(db, 'members', user.uid));
+      // Try to get profile, retry once if empty
+      let snap = await getDoc(doc(db, 'members', user.uid));
+      if (!snap.exists()) {
+        // Create basic profile if missing
+        await setDoc(doc(db, 'members', user.uid), {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName || user.email.split('@')[0],
+          role: 'member',
+          status: 'active',
+          createdAt: new Date().toISOString()
+        });
+        snap = await getDoc(doc(db, 'members', user.uid));
+      }
       currentProfile = snap.exists() ? snap.data() : { role: 'member', status: 'active', displayName: user.displayName };
       if (currentProfile.status === 'pending') {
         // Show pending screen
