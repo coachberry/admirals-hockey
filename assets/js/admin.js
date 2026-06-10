@@ -1959,8 +1959,8 @@ async function loadMembersTab() {
 
   if (!members.length) { list.innerHTML = '<div class="empty-state">No users yet</div>'; return; }
 
-  const roleColors = { player:'#2e7d32', prospect:'#0277bd', alumni:'#e65100', coach:'#5D1725', member:'#666' };
-  const roleOrder = { coach:0, player:1, prospect:2, alumni:3, member:4 };
+  const roleColors = { player:'#2e7d32', prospect:'#0277bd', alumni:'#e65100', coach:'#5D1725', rep:'#1565c0', member:'#666' };
+  const roleOrder = { coach:0, player:1, prospect:2, alumni:3, rep:4, member:5 };
   members.sort((a,b) => (roleOrder[a.role]||99) - (roleOrder[b.role]||99) || (a.displayName||'').localeCompare(b.displayName||''));
 
   // Group by role
@@ -1971,7 +1971,7 @@ async function loadMembersTab() {
     groups[role].push(m);
   });
 
-  const roleLabels = { player:'Player', prospect:'Prospective Player', alumni:'Alumni', coach:'Coach', member:'Member' };
+  const roleLabels = { player:'Player', prospect:'Prospective Player', alumni:'Alumni', coach:'Coach', rep:'Team Rep', member:'Member' };
 
   let html = '';
   Object.entries(groups).sort((a,b) => (roleOrder[a[0]]||99) - (roleOrder[b[0]]||99)).forEach(([role, roleMembers]) => {
