@@ -100,7 +100,7 @@ async function showDashboard() {
   document.getElementById('settingsEmail').value = users[currentUser]?.email || '';
   await loadSeasons();
   loadNews();
-  loadUsers();
+  loadMembersTab();
 
   // Restore last active tab
   const savedTab = localStorage.getItem('admirals_activeTab');
@@ -1117,6 +1117,23 @@ window.deleteNews = async (id) => { if (!confirm('Delete post?')) return; await 
 
 
 
+
+async function loadHomeOrderManager() {
+  const container = document.getElementById('homeOrderManager');
+  if (!container) return;
+  const snap = await getDocs(collection(db, 'news'));
+  const cards = [];
+  snap.forEach(d => { const n = d.data(); if (n.homeCard) cards.push({ id: d.id, ...n }); });
+  cards.sort((a, b) => (a.homeOrder||99) - (b.homeOrder||99));
+  const list = document.getElementById('homeOrderList');
+  if (!list) return;
+  list.innerHTML = cards.map((n, i) => `
+    <div class="home-order-item" draggable="true" data-id="${n.id}" style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem;background:white;border:1px solid #eee;border-radius:4px;cursor:grab;margin-bottom:0.4rem;">
+      <span class="home-order-num" style="font-weight:700;color:#5D1725;min-width:20px;">${i+1}</span>
+      <span style="flex:1;font-size:0.9rem;">${n.title}</span>
+    </div>`).join('');
+  setupDragSort(list, cards);
+}
 
 function setupDragSort(list, items) {
   let dragged = null;
