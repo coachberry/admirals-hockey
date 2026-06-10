@@ -1115,13 +1115,6 @@ window.editNews = async (id) => {
 };
 window.deleteNews = async (id) => { if (!confirm('Delete post?')) return; await deleteDoc(doc(db, 'news', id)); loadNews(); };
 
-// ============================================
-// USERS
-// ============================================
-  if (!email) { alert('Please enter an email'); return; }
-  const token = Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
-  invites[token] = { email, used: false };
-});
 
 
 
