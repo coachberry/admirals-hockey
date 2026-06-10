@@ -120,9 +120,9 @@ async function doApply() {
     createdAt: new Date().toISOString()
   };
 
-  if (roleType === 'player') {
-    const gradYear = document.getElementById('applyGradYear')?.value;
-    const position = document.getElementById('applyPosition')?.value;
+  if (roleType === 'player' || roleType === 'prospect') {
+    const gradYear = document.getElementById(roleType === 'player' ? 'applyGradYear' : 'applyProspectGradYear')?.value;
+    const position = document.getElementById(roleType === 'player' ? 'applyPosition' : 'applyProspectPosition')?.value;
     if (!gradYear || !position) { setError('applyError', 'Please fill in all required fields.'); return; }
     applicationData.gradYear = gradYear;
     applicationData.position = position;
@@ -226,7 +226,7 @@ window.memberApply = doApply;
 
 // Show/hide role-specific fields in apply form
 window.showApplyFields = function(role) {
-  ['player', 'alumni'].forEach(r => {
+  ['player', 'prospect', 'alumni'].forEach(r => {
     const el = document.getElementById('applyFields_' + r);
     if (el) el.style.display = r === role ? 'block' : 'none';
   });

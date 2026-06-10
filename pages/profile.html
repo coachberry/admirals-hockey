@@ -355,6 +355,7 @@
           <button class="profile-nav-btn active" onclick="showSection('info')" id="navInfo">👤 My Info</button>
           <button class="profile-nav-btn" onclick="showSection('roles')" id="navRoles">🏷️ Roles</button>
           <button class="profile-nav-btn" onclick="showSection('rsvp')" id="navRsvp">📅 My Games</button>
+          <button class="profile-nav-btn" onclick="showSection('teamevents')" id="navTeamevents">🏒 Team Events</button>
           <hr style="margin:0.5rem 0;border:none;border-top:1px solid #f0f0f0;">
           <button class="profile-nav-btn" onclick="doSignOutAndRedirect()" style="color:#c62828;">🚪 Sign Out</button>
         </div>
@@ -447,6 +448,16 @@
         </div>
       </div>
 
+      <!-- TEAM EVENTS SECTION -->
+      <div class="profile-section" id="sectionTeamevents" style="display:none;">
+        <div class="profile-section-header">
+          <span class="profile-section-title">Team Events</span>
+        </div>
+        <div class="profile-section-body">
+          <div id="myTeamEventsList"><p style="color:#999;font-style:italic;">Loading events...</p></div>
+        </div>
+      </div>
+
       <!-- MY GAMES SECTION -->
       <div class="profile-section" id="sectionRsvp" style="display:none;">
         <div class="profile-section-header">
@@ -536,6 +547,7 @@
           <select id="applyRoleType" onchange="showApplyFields(this.value)" style="width:100%;padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
             <option value="">Select...</option>
             <option value="player">Current FHS Hockey Player</option>
+            <option value="prospect">Prospective Player</option>
             <option value="alumni">FHS Hockey Alumni</option>
             <option value="rep">Team Representative</option>
             <option value="member">Summer League / Other</option>
@@ -546,6 +558,18 @@
         <div id="applyFields_player" style="display:none;flex-direction:column;gap:0.75rem;">
           <input type="number" id="applyGradYear" placeholder="Graduation year *" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
           <select id="applyPosition" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+            <option value="">Position *</option>
+            <option value="Forward">Forward</option>
+            <option value="Defense">Defense</option>
+            <option value="Goaltender">Goaltender</option>
+          </select>
+        </div>
+
+
+        <!-- Prospect fields -->
+        <div id="applyFields_prospect" style="display:none;flex-direction:column;gap:0.75rem;">
+          <input type="number" id="applyProspectGradYear" placeholder="Graduation year *" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+          <select id="applyProspectPosition" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
             <option value="">Position *</option>
             <option value="Forward">Forward</option>
             <option value="Defense">Defense</option>
@@ -593,15 +617,16 @@ function showRoleFields(role) {
 }
 
 function showSection(name) {
-  ['info','roles','requestRole','rsvp'].forEach(s => {
+  ['info','roles','requestRole','rsvp','teamevents'].forEach(s => {
     const el = document.getElementById('section' + s.charAt(0).toUpperCase() + s.slice(1));
     if (el) el.style.display = s === name ? 'block' : 'none';
   });
-  ['info','roles','rsvp'].forEach(s => {
+  ['info','roles','rsvp','teamevents'].forEach(s => {
     const btn = document.getElementById('nav' + s.charAt(0).toUpperCase() + s.slice(1));
     if (btn) btn.classList.toggle('active', s === name);
   });
   if (name === 'rsvp') loadMyGames();
+  if (name === 'teamevents') loadMyTeamEvents();
   if (name === 'roles') loadMyRoles();
 }
 </script>
@@ -871,6 +896,76 @@ function showSection(name) {
   };
 
 
+
+  window.loadMyTeamEvents = async function() {
+    if (!currentUser || !currentProfile) return;
+    const list = document.getElementById('myTeamEventsList');
+    list.innerHTML = '<p style="color:#999;font-style:italic;">Loading...</p>';
+    const role = currentProfile.role || 'member';
+
+    const snap = await getDocs(collection(db, 'teamEvents'));
+    const events = [];
+    snap.forEach(d => {
+      const e = { id: d.id, ...d.data() };
+      if (!e.invitedRoles || e.invitedRoles.includes(role) || e.invitedRoles.includes('member')) {
+        events.push(e);
+      }
+    });
+    events.sort((a,b) => (a.date||'').localeCompare(b.date||''));
+
+    const today = new Date().toISOString().split('T')[0];
+    const upcoming = events.filter(e => !e.date || e.date >= today);
+
+    if (!upcoming.length) {
+      list.innerHTML = '<p style="color:#999;font-style:italic;">No upcoming team events.</p>';
+      return;
+    }
+
+    list.innerHTML = upcoming.map(e => {
+      const dateStr = e.date ? new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }) : 'TBD';
+      const timeStr = e.time ? (() => { const [h,m] = e.time.split(':'); const hr=parseInt(h); return hr%12||12+':'+m+' '+(hr>=12?'PM':'AM'); })() : '';
+      return \`<div class="game-rsvp-item" id="te_\${e.id}">
+        <div>
+          <div style="font-weight:600;font-size:0.9rem;">\${e.name}</div>
+          <div style="font-size:0.82rem;color:#888;">\${dateStr}\${timeStr?' · '+timeStr:''}\${e.location?' · '+e.location:''}</div>
+          \${e.details ? \`<div style="font-size:0.8rem;color:#666;margin-top:4px;">\${e.details}</div>\` : ''}
+        </div>
+        <div id="teBtns_\${e.id}" style="display:flex;gap:0.5rem;flex-shrink:0;"></div>
+      </div>\`;
+    }).join('');
+
+    // Load RSVPs for each event
+    for (const e of upcoming) {
+      const rsvpDoc = await getDoc(doc(db, 'teamEvents', e.id, 'rsvps', currentUser.uid));
+      const existing = rsvpDoc.exists() ? rsvpDoc.data().response : null;
+      const btns = document.getElementById('teBtns_' + e.id);
+      if (btns) btns.innerHTML = rsvpBtnsTE(e.id, currentUser.uid, existing);
+    }
+  };
+
+  function rsvpBtnsTE(eventId, uid, existing) {
+    const yesActive = existing === 'yes';
+    const noActive = existing === 'no';
+    return \`
+      <button onclick="toggleTeamEventRsvp('\${eventId}','\${uid}','yes',\${yesActive})"
+        style="border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:\${yesActive?'#2e7d32':'white'};color:\${yesActive?'white':'#2e7d32'};">✅ In</button>
+      <button onclick="toggleTeamEventRsvp('\${eventId}','\${uid}','no',\${noActive})"
+        style="border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:\${noActive?'#c62828':'white'};color:\${noActive?'white':'#c62828'};">❌ Out</button>\`;
+  }
+
+  window.toggleTeamEventRsvp = async function(eventId, uid, response, isActive) {
+    const { deleteDoc: dd } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const rsvpRef = doc(db, 'teamEvents', eventId, 'rsvps', uid);
+    if (isActive) {
+      await dd(rsvpRef);
+    } else {
+      await setDoc(rsvpRef, { name: currentProfile.displayName, response, timestamp: new Date().toISOString() });
+    }
+    const newYes = !isActive && response === 'yes';
+    const newNo = !isActive && response === 'no';
+    const btns = document.getElementById('teBtns_' + eventId);
+    if (btns) btns.innerHTML = rsvpBtnsTE(eventId, uid, isActive ? null : response);
+  };
 
   window.doSignOutAndRedirect = async function() {
     const { signOut } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
