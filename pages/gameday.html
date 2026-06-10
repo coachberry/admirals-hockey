@@ -188,6 +188,12 @@
   <div class="game-selector">
     <label>Game:</label>
     <select id="gameSelect"><option>Loading...</option></select>
+    <select id="teamFilterSelect" style="display:none;padding:0.5rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.9rem;font-family:inherit;">
+      <option value="all">Both Teams</option>
+    </select>
+    <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;color:#555;margin-left:auto;">
+      <input type="checkbox" id="autoRefreshToggle"> Auto-refresh
+    </label>
   </div>
 
   <div id="gamedayContent"><div class="no-game">Select a game above</div></div>
@@ -257,6 +263,33 @@
     document.getElementById('tabRegular').classList.toggle('active', league === 'regular');
     document.getElementById('tabSummer').classList.toggle('active', league === 'summer');
     loadGames();
+
+  // Auto-refresh every 30 seconds when toggled
+  let refreshInterval = null;
+  document.getElementById('autoRefreshToggle').addEventListener('change', function() {
+    if (this.checked) {
+      refreshInterval = setInterval(() => {
+        const sel = document.getElementById('gameSelect');
+        if (sel?.value) loadGameDay(sel.value);
+      }, 30000);
+    } else {
+      clearInterval(refreshInterval);
+    }
+  });
+
+  window.filterGamedayByTeam = function(game, teams) {
+    const teamId = document.getElementById('teamFilterSelect').value;
+    const allRows = document.querySelectorAll('.player-row');
+    allRows.forEach(row => {
+      const teamLabel = row.querySelector('.player-pos:last-child');
+      if (teamId === 'all') {
+        row.style.display = '';
+      } else {
+        const teamName = teams[teamId]?.name || '';
+        row.style.display = (!teamLabel || teamLabel.textContent === teamName) ? '' : 'none';
+      }
+    });
+  };
   }
 
   function formatDate(d) {
@@ -419,6 +452,22 @@
       ? (game.homeAway === 'away' ? `@ ${game.opponent||'Opponent'}` : `vs. ${game.opponent||'Opponent'}`)
       : `${teams[game.homeTeamId]?.name||'?'} vs. ${teams[game.awayTeamId]?.name||'?'}`;
 
+    // Summer team filter
+    const teamFilter = document.getElementById('teamFilterSelect');
+    if (currentLeague === 'summer' && teamFilter) {
+      teamFilter.style.display = 'block';
+      const homeTeamName = teams[game.homeTeamId]?.name || 'Home';
+      const awayTeamName = teams[game.awayTeamId]?.name || 'Away';
+      teamFilter.innerHTML = `<option value="all">Both Teams</option>
+        <option value="${game.homeTeamId}">${homeTeamName}</option>
+        <option value="${game.awayTeamId}">${awayTeamName}</option>`;
+      teamFilter.onchange = () => filterGamedayByTeam(game, teams);
+    } else if (teamFilter) {
+      teamFilter.style.display = 'none';
+    }
+
+    const location = currentLeague === 'summer' ? 'Centennial Ice Rink' : (game.location || '');
+
     content.innerHTML = `
       <div class="rsvp-counts">
         <div class="count-card count-yes">
@@ -443,7 +492,7 @@
           <div class="game-info-row"><span class="game-info-label">Matchup</span><span class="game-info-value">${opp}</span></div>
           <div class="game-info-row"><span class="game-info-label">Date</span><span class="game-info-value">${formatDate(game.date)}</span></div>
           <div class="game-info-row"><span class="game-info-label">Time</span><span class="game-info-value">${formatTime(game.time) || 'TBD'}</span></div>
-          ${game.location ? `<div class="game-info-row"><span class="game-info-label">Location</span><span class="game-info-value">${game.location}</span></div>` : ''}
+          ${location ? `<div class="game-info-row"><span class="game-info-label">Location</span><span class="game-info-value">${location}</span></div>` : ''}
         </div>
       </div>
 
@@ -495,6 +544,33 @@
   }
 
   loadGames();
+
+  // Auto-refresh every 30 seconds when toggled
+  let refreshInterval = null;
+  document.getElementById('autoRefreshToggle').addEventListener('change', function() {
+    if (this.checked) {
+      refreshInterval = setInterval(() => {
+        const sel = document.getElementById('gameSelect');
+        if (sel?.value) loadGameDay(sel.value);
+      }, 30000);
+    } else {
+      clearInterval(refreshInterval);
+    }
+  });
+
+  window.filterGamedayByTeam = function(game, teams) {
+    const teamId = document.getElementById('teamFilterSelect').value;
+    const allRows = document.querySelectorAll('.player-row');
+    allRows.forEach(row => {
+      const teamLabel = row.querySelector('.player-pos:last-child');
+      if (teamId === 'all') {
+        row.style.display = '';
+      } else {
+        const teamName = teams[teamId]?.name || '';
+        row.style.display = (!teamLabel || teamLabel.textContent === teamName) ? '' : 'none';
+      }
+    });
+  };
 </script>
 
 <script type="module" src="/assets/js/member-auth.js"></script>
