@@ -89,31 +89,8 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
   location.reload();
 });
 
-document.getElementById('signupForm').addEventListener('submit', e => {
-  e.preventDefault();
-  const email = document.getElementById('signupEmail').value;
-  const password = document.getElementById('signupPassword').value;
-  const confirm = document.getElementById('signupConfirm').value;
-  if (password !== confirm) { document.getElementById('signupError').textContent = 'Passwords do not match'; return; }
-  const username = email.split('@')[0];
-  users[username] = { password, email };
-  saveUsers();
-  currentUser = username;
-  localStorage.setItem('admirals_currentUser', username);
-  document.getElementById('signupScreen').style.display = 'none';
-  showDashboard();
-});
 
-const params = new URLSearchParams(window.location.search);
-const inviteToken = params.get('invite');
-if (inviteToken) {
-  const invites = JSON.parse(localStorage.getItem('admirals_invites')) || {};
-  if (invites[inviteToken] && !invites[inviteToken].used) {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('signupScreen').style.display = 'flex';
-    document.getElementById('signupEmail').value = invites[inviteToken].email;
-  }
-}
+
 
 async function showDashboard() {
   document.getElementById('loginScreen').style.display = 'none';
@@ -1141,20 +1118,10 @@ window.deleteNews = async (id) => { if (!confirm('Delete post?')) return; await 
 // ============================================
 // USERS
 // ============================================
-document.getElementById('inviteUserBtn').addEventListener('click', () => document.getElementById('inviteForm').style.display = 'block');
-document.getElementById('cancelInviteBtn').addEventListener('click', () => document.getElementById('inviteForm').style.display = 'none');
-document.getElementById('generateInviteBtn').addEventListener('click', () => {
-  const email = document.getElementById('inviteEmail').value;
   if (!email) { alert('Please enter an email'); return; }
   const token = Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
-  const invites = JSON.parse(localStorage.getItem('admirals_invites')) || {};
   invites[token] = { email, used: false };
-  localStorage.setItem('admirals_invites', JSON.stringify(invites));
-  document.getElementById('inviteLink').value = `${window.location.origin}/admin.html?invite=${token}`;
-  document.getElementById('inviteForm').style.display = 'none';
-  document.getElementById('inviteResult').style.display = 'block';
 });
-document.getElementById('copyLinkBtn').addEventListener('click', () => { document.getElementById('inviteLink').select(); document.execCommand('copy'); alert('Link copied!'); });
 
 
 
