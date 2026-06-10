@@ -199,7 +199,11 @@ body {
 }
 
 .tab-content {
-  display: none;
+  display: none !important;
+}
+
+.tab-content.active {
+  display: block !important;
 }
 
 /* Mobile - collapse sidebar to top bar */
