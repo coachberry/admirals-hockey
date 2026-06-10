@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Chat - Franklin Admirals Hockey</title>
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <script src="/assets/js/page-guard.js"></script>
+  <style>
+    .chat-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      height: calc(100vh - 120px);
+      gap: 0;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin: 1.5rem 0 3rem;
+    }
+
+    /* CHANNEL SIDEBAR */
+    .chat-sidebar {
+      background: #1a1a2e;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-sidebar-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .chat-sidebar-header h2 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 0.15rem;
+    }
+
+    .chat-sidebar-header p {
+      font-size: 0.75rem;
+      color: #888;
+    }
+
+    .channel-group-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #666;
+      padding: 0.75rem 1.25rem 0.3rem;
+    }
+
+    .channel-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.25rem;
+      background: none;
+      border: none;
+      color: #aaa;
+      font-size: 0.88rem;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+
+    .channel-btn:hover { color: white; background: rgba(255,255,255,0.05); }
+    .channel-btn.active { color: white; background: rgba(93,23,37,0.4); font-weight: 600; }
+
+    .channel-unread {
+      margin-left: auto;
+      background: #c62828;
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+      min-width: 18px;
+      text-align: center;
+    }
+
+    /* CHAT MAIN */
+    .chat-main {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .chat-channel-name {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #111;
+    }
+
+    .chat-channel-desc {
+      font-size: 0.8rem;
+      color: #888;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .chat-msg {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.3rem 0;
+      align-items: flex-start;
+    }
+
+    .chat-msg:hover { background: #f9f9f9; border-radius: 6px; padding: 0.3rem 0.5rem; margin: 0 -0.5rem; }
+    .chat-msg:hover .msg-delete { display: block; }
+
+    .msg-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #5D1725;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .msg-body { flex: 1; min-width: 0; }
+
+    .msg-meta {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .msg-name { font-weight: 700; font-size: 0.9rem; color: #111; }
+
+    .msg-role {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 3px;
+      text-transform: capitalize;
+    }
+
+    .role-superadmin, .role-admin { background: #5D1725; color: white; }
+    .role-player { background: #2e7d32; color: white; }
+    .role-prospect { background: #0277bd; color: white; }
+    .role-alumni { background: #e65100; color: white; }
+    .role-rep { background: #1565c0; color: white; }
+    .role-member { background: #666; color: white; }
+
+    .msg-time { font-size: 0.72rem; color: #bbb; }
+
+    .msg-text {
+      font-size: 0.9rem;
+      color: #333;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .msg-delete {
+      display: none;
+      background: none;
+      border: none;
+      color: #c62828;
+      cursor: pointer;
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 3px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .msg-delete:hover { background: #ffebee; }
+
+    .msg-pinned {
+      background: #fff8e1;
+      border-left: 3px solid #f0b429;
+      border-radius: 0 6px 6px 0;
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .msg-pinned-label { font-size: 0.7rem; color: #856404; font-weight: 700; margin-bottom: 0.25rem; }
+
+    .chat-input-area {
+      padding: 0.75rem 1.25rem;
+      border-top: 1px solid #f0f0f0;
+      flex-shrink: 0;
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-end;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 0.65rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      resize: none;
+      max-height: 120px;
+      outline: none;
+    }
+
+    .chat-input:focus { border-color: #5D1725; }
+
+    .chat-send-btn {
+      background: #5D1725;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.65rem 1.25rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .chat-send-btn:hover { background: #3c0f17; }
+    .chat-send-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+    .no-access-msg {
+      text-align: center;
+      padding: 2rem;
+      color: #888;
+      font-style: italic;
+      font-size: 0.9rem;
+    }
+
+    .not-logged-in-chat {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #666;
+    }
+
+    .not-logged-in-chat h3 { color: #5D1725; margin-bottom: 0.75rem; }
+
+    .date-divider {
+      text-align: center;
+      font-size: 0.72rem;
+      color: #aaa;
+      margin: 0.5rem 0;
+      position: relative;
+    }
+
+    .date-divider::before, .date-divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: #f0f0f0;
+    }
+
+    .date-divider::before { left: 0; }
+    .date-divider::after { right: 0; }
+
+    @media (max-width: 768px) {
+      .chat-layout { grid-template-columns: 1fr; height: auto; }
+      .chat-sidebar { flex-direction: row; flex-wrap: wrap; height: auto; }
+      .channel-group-label { display: none; }
+      .chat-sidebar-header { display: none; }
+      .channel-btn { width: auto; padding: 0.5rem 0.75rem; font-size: 0.8rem; }
+      .chat-messages { min-height: 400px; max-height: 60vh; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-container">
+    <a href="/index.html"><img src="/assets/images/franklin-admirals-hockey-logo-lowres.png" alt="Franklin Admirals Hockey" class="logo-img"></a>
+    <div style="display:flex;gap:0.4rem;flex-shrink:0;">
+      <a id="adminDashboardBtn" href="/admin.html" style="display:none;background:#3c0f17;color:white;border:none;border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;text-decoration:none;flex-shrink:0;">Admin</a>
+      <button id="memberNavBtn" class="member-nav-btn">Login</button>
+      <button id="memberSignupBtn" class="member-nav-btn" style="background:white;color:#5D1725;border:1px solid #5D1725;">Sign Up</button>
+    </div>
+    <nav>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/index.html" class="nav-link">Home</a></li>
+        <li><a href="/pages/schedule.html" class="nav-link">Schedule</a></li>
+        <li><a href="/pages/roster.html" class="nav-link">Roster</a></li>
+        <li><a href="/pages/stats.html" class="nav-link">Stats</a></li>
+        <li><a href="/pages/leaderboard.html" class="nav-link">Leaderboard</a></li>
+        <li><a href="/pages/news.html" class="nav-link">News</a></li>
+        <li><a href="/pages/events.html" class="nav-link">Events</a></li>
+        <li><a href="/pages/gallery.html" class="nav-link">Gallery</a></li>
+        <li><a href="/pages/summer.html" class="nav-link">Summer Hockey</a></li>
+        <li><a href="/pages/alumni.html" class="nav-link">Alumni</a></li>
+        <li><a href="/pages/chat.html" class="nav-link active">Team Chat</a></li>
+        <li><a href="/pages/contact.html" class="nav-link">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<div class="main-container" style="padding-top:1rem;">
+
+  <div id="notLoggedInChat" class="not-logged-in-chat" style="display:none;">
+    <h3>🏒 Team Chat</h3>
+    <p style="margin-bottom:1.5rem;">You need to be logged in to access team chat.</p>
+    <button onclick="showMemberModal('login')" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.75rem 1.5rem;font-size:0.95rem;font-weight:600;cursor:pointer;">Login</button>
+  </div>
+
+  <div id="chatApp" style="display:none;">
+    <div class="chat-layout">
+
+      <!-- SIDEBAR -->
+      <div class="chat-sidebar">
+        <div class="chat-sidebar-header">
+          <h2>⚓ Admirals Chat</h2>
+          <p id="chatUserLabel">Loading...</p>
+        </div>
+        <div id="channelList"></div>
+      </div>
+
+      <!-- MAIN -->
+      <div class="chat-main">
+        <div class="chat-header">
+          <div>
+            <div class="chat-channel-name" id="currentChannelName">#general</div>
+            <div class="chat-channel-desc" id="currentChannelDesc"></div>
+          </div>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="no-access-msg">Select a channel</div>
+        </div>
+        <div class="chat-input-area" id="chatInputArea" style="display:none;">
+          <div class="chat-input-row">
+            <textarea class="chat-input" id="chatInput" placeholder="Message #general..." rows="1"></textarea>
+            <button class="chat-send-btn" id="chatSendBtn">Send</button>
+          </div>
+        </div>
+        <div id="chatNoAccess" class="no-access-msg" style="display:none;">
+          You don't have permission to post in this channel.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Member modal -->
+<div id="memberModal" class="modal-overlay" style="z-index:2000;">
+  <div class="modal" style="max-width:440px;max-height:90vh;overflow-y:auto;">
+    <button class="modal-close-float" onclick="hideMemberModal()">&times;</button>
+    <div class="member-view" id="memberView_login" style="display:block;">
+      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;text-align:center;"><h2 style="font-size:1.3rem;font-weight:700;">Member Login</h2></div>
+      <div style="padding:1.5rem;display:flex;flex-direction:column;gap:0.75rem;">
+        <button onclick="memberGoogleSignIn()" style="display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.75rem;border:1px solid #ddd;border-radius:6px;background:white;cursor:pointer;"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px;">Continue with Google</button>
+        <input type="email" id="loginEmail" placeholder="Email" style="padding:0.65rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <input type="password" id="loginPassword" placeholder="Password" style="padding:0.65rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <p id="loginError" class="member-error" style="color:#c62828;font-size:0.85rem;"></p>
+        <button onclick="memberSignIn()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-weight:600;cursor:pointer;">Sign In</button>
+      </div>
+    </div>
+    <div class="member-view" id="memberView_signup" style="display:none;">
+      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;text-align:center;"><h2 style="font-size:1.3rem;font-weight:700;">Apply for Access</h2></div>
+      <div style="padding:1.5rem;text-align:center;"><p>Visit our <a href="/pages/tryouts.html" style="color:#5D1725;font-weight:600;">Apply page</a> to request access.</p></div>
+    </div>
+    <div class="member-view" id="memberView_apply" style="display:none;">
+      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;text-align:center;"><h2 style="font-size:1.3rem;font-weight:700;">Apply for Access</h2></div>
+      <div style="padding:1.5rem;text-align:center;"><p>Visit our <a href="/pages/tryouts.html" style="color:#5D1725;font-weight:600;">Tryouts page</a> to apply.</p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    var btn = document.getElementById('navToggle');
+    var nav = document.getElementById('navLinks');
+    if (btn && nav) btn.addEventListener('click', () => { btn.classList.toggle('open'); nav.classList.toggle('open'); });
+  })();
+</script>
+
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, getDocs, getDoc, doc, deleteDoc, onSnapshot, query, orderBy, limit, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const app = getApps().length ? getApps()[0] : initializeApp({
+    apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
+    authDomain: "admirals-hockey.firebaseapp.com",
+    projectId: "admirals-hockey",
+    storageBucket: "admirals-hockey.firebasestorage.app",
+    messagingSenderId: "783358659334",
+    appId: "1:783358659334:web:5daffd093adca386faec87"
+  });
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const CHANNELS = [
+    { id: 'general',     name: '#general',      desc: 'General team discussion', icon: '💬', readRoles: ['player','prospect','alumni','rep','admin','superadmin','member'], writeRoles: ['player','alumni','rep','admin','superadmin'] },
+    { id: 'players',     name: '#players',      desc: 'Current players only',    icon: '🏒', readRoles: ['player','admin','superadmin'], writeRoles: ['player','admin','superadmin'] },
+    { id: 'summer',      name: '#summer-league', desc: 'Summer league chat',      icon: '☀️', readRoles: ['player','prospect','alumni','rep','admin','superadmin','member'], writeRoles: ['player','alumni','rep','admin','superadmin','member'] },
+    { id: 'prospects',   name: '#prospects',    desc: 'Prospective players',     icon: '⭐', readRoles: ['prospect','player','admin','superadmin'], writeRoles: ['prospect','player','admin','superadmin'] },
+  ];
+
+  let currentUser = null;
+  let currentProfile = null;
+  let currentChannel = null;
+  let unsubscribeMessages = null;
+  let isSuperAdmin = false;
+
+  const ROLE_COLORS = { superadmin:'Coach', admin:'Admin', player:'Player', prospect:'Prospect', alumni:'Alumni', rep:'Team Rep', member:'Member' };
+
+  function canRead(channel) {
+    if (!currentProfile) return false;
+    return channel.readRoles.includes(currentProfile.role || 'member');
+  }
+
+  function canWrite(channel) {
+    if (!currentProfile) return false;
+    return channel.writeRoles.includes(currentProfile.role || 'member');
+  }
+
+  function formatTime(ts) {
+    if (!ts) return '';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+  }
+
+  function formatDate(ts) {
+    if (!ts) return '';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    const today = new Date();
+    const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+    if (d.toDateString() === today.toDateString()) return 'Today';
+    if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+    return d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+  }
+
+  function buildChannelList() {
+    const list = document.getElementById('channelList');
+    const accessible = CHANNELS.filter(ch => canRead(ch));
+
+    if (!accessible.length) {
+      list.innerHTML = '<div style="padding:1rem;color:#666;font-size:0.85rem;">No channels available</div>';
+      return;
+    }
+
+    list.innerHTML = `<div class="channel-group-label">Channels</div>` +
+      accessible.map(ch => `
+        <button class="channel-btn" data-channel="${ch.id}" onclick="switchChannel('${ch.id}')">
+          <span>${ch.icon}</span>
+          <span>${ch.name}</span>
+          <span class="channel-unread" id="unread_${ch.id}" style="display:none;"></span>
+        </button>`).join('');
+
+    // Auto-open general or first accessible
+    const first = accessible[0];
+    if (first) switchChannel(first.id);
+  }
+
+  window.switchChannel = function(channelId) {
+    const channel = CHANNELS.find(c => c.id === channelId);
+    if (!channel || !canRead(channel)) return;
+
+    currentChannel = channel;
+
+    // Update UI
+    document.querySelectorAll('.channel-btn').forEach(b => b.classList.toggle('active', b.dataset.channel === channelId));
+    document.getElementById('currentChannelName').textContent = channel.name;
+    document.getElementById('currentChannelDesc').textContent = channel.desc;
+
+    const inputArea = document.getElementById('chatInputArea');
+    const noAccess = document.getElementById('chatNoAccess');
+    const input = document.getElementById('chatInput');
+
+    if (canWrite(channel)) {
+      inputArea.style.display = 'block';
+      noAccess.style.display = 'none';
+      input.placeholder = `Message ${channel.name}...`;
+    } else {
+      inputArea.style.display = 'none';
+      noAccess.style.display = 'block';
+    }
+
+    // Unsubscribe previous listener
+    if (unsubscribeMessages) unsubscribeMessages();
+
+    // Listen for messages
+    const q = query(collection(db, 'chat', channelId, 'messages'), orderBy('timestamp', 'asc'), limit(100));
+    unsubscribeMessages = onSnapshot(q, (snap) => {
+      renderMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+  };
+
+  function renderMessages(messages) {
+    const container = document.getElementById('chatMessages');
+    if (!messages.length) {
+      container.innerHTML = '<div class="no-access-msg">No messages yet. Say hello! 👋</div>';
+      return;
+    }
+
+    let html = '';
+    let lastDate = null;
+
+    messages.forEach(msg => {
+      const dateLabel = msg.timestamp ? formatDate(msg.timestamp) : '';
+      if (dateLabel && dateLabel !== lastDate) {
+        html += `<div class="date-divider">${dateLabel}</div>`;
+        lastDate = dateLabel;
+      }
+
+      const initials = (msg.displayName || '?').charAt(0).toUpperCase();
+      const roleLabel = ROLE_COLORS[msg.role] || 'Member';
+      const isCoach = msg.role === 'superadmin' || msg.role === 'admin';
+      const canDelete = isSuperAdmin || msg.uid === currentUser?.uid;
+
+      html += `<div class="chat-msg" id="msg_${msg.id}">
+        <div class="msg-avatar" style="background:${isCoach ? '#5D1725' : '#333'};">${initials}</div>
+        <div class="msg-body">
+          <div class="msg-meta">
+            <span class="msg-name">${msg.displayName || 'Unknown'}${isCoach ? ' 🏒' : ''}</span>
+            <span class="msg-role role-${msg.role || 'member'}">${roleLabel}</span>
+            <span class="msg-time">${formatTime(msg.timestamp)}</span>
+          </div>
+          <div class="msg-text">${escapeHtml(msg.text)}</div>
+        </div>
+        ${canDelete ? `<button class="msg-delete" onclick="deleteMessage('${currentChannel.id}','${msg.id}')">Delete</button>` : ''}
+      </div>`;
+    });
+
+    container.innerHTML = html;
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function escapeHtml(text) {
+    return (text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text || !currentChannel || !currentUser || !canWrite(currentChannel)) return;
+
+    input.value = '';
+    input.style.height = 'auto';
+
+    await addDoc(collection(db, 'chat', currentChannel.id, 'messages'), {
+      uid: currentUser.uid,
+      displayName: currentProfile?.displayName || currentUser.displayName || 'Unknown',
+      role: currentProfile?.role || 'member',
+      text,
+      timestamp: serverTimestamp()
+    });
+  }
+
+  window.deleteMessage = async function(channelId, msgId) {
+    if (!confirm('Delete this message?')) return;
+    await deleteDoc(doc(db, 'chat', channelId, 'messages', msgId));
+  };
+
+  // Send on button click or Enter
+  document.getElementById('chatSendBtn').addEventListener('click', sendMessage);
+  document.getElementById('chatInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+
+  // Auto-resize textarea
+  document.getElementById('chatInput').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+  });
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      document.getElementById('notLoggedInChat').style.display = 'block';
+      document.getElementById('chatApp').style.display = 'none';
+      return;
+    }
+
+    currentUser = user;
+    const snap = await getDoc(doc(db, 'members', user.uid));
+    currentProfile = snap.exists() ? snap.data() : { role: 'member', status: 'pending' };
+    isSuperAdmin = user.email === 'coachberry03@gmail.com';
+    if (isSuperAdmin) currentProfile.role = 'superadmin';
+
+    if (currentProfile.status === 'pending') {
+      document.getElementById('notLoggedInChat').innerHTML = '<h3 style="color:#5D1725;">Application Pending</h3><p style="color:#666;margin-top:0.5rem;">Chat will be available once your application is approved.</p>';
+      document.getElementById('notLoggedInChat').style.display = 'block';
+      document.getElementById('chatApp').style.display = 'none';
+      return;
+    }
+
+    document.getElementById('notLoggedInChat').style.display = 'none';
+    document.getElementById('chatApp').style.display = 'block';
+    document.getElementById('chatUserLabel').textContent = currentProfile.displayName || user.email;
+
+    buildChannelList();
+  });
+</script>
+
+<script type="module" src="/assets/js/member-auth.js"></script>
+</body>
+</html>
