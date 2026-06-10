@@ -132,46 +132,103 @@ body {
   background: rgba(255,255,255,0.25);
 }
 
-/* TABS */
-.admin-tabs {
-  background: var(--white);
-  border-bottom: 1px solid var(--border);
+/* ADMIN BODY - sidebar layout */
+.admin-body {
   display: flex;
-  overflow-x: auto;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  min-height: calc(100vh - 64px);
+}
+
+/* SIDEBAR */
+.admin-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: #1a1a2e;
+  min-height: 100%;
+  padding: 1rem 0;
+  overflow-y: auto;
+}
+
+.sidebar-group {
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-group-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #666;
+  padding: 0.75rem 1.25rem 0.3rem;
 }
 
 .tab-btn {
+  display: block;
+  width: 100%;
   background: none;
   border: none;
-  border-bottom: 3px solid transparent;
-  padding: 1rem 1.5rem;
+  border-left: 3px solid transparent;
+  padding: 0.6rem 1.25rem;
   cursor: pointer;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
+  font-size: 0.85rem;
+  color: #aaa;
   white-space: nowrap;
-  transition: all 0.2s;
+  transition: all 0.15s;
+  text-align: left;
+  font-family: inherit;
 }
 
 .tab-btn:hover {
-  color: var(--primary-maroon);
+  color: white;
+  background: rgba(255,255,255,0.05);
 }
 
 .tab-btn.active {
-  color: var(--primary-maroon);
-  border-bottom-color: var(--primary-maroon);
+  color: white;
+  border-left-color: var(--primary-maroon);
+  background: rgba(93,23,37,0.3);
   font-weight: 600;
 }
 
-/* CONTENT */
+/* MAIN CONTENT */
 .admin-content {
-  max-width: 1100px;
-  margin: 0 auto;
+  flex: 1;
   padding: 2rem;
+  overflow-y: auto;
+  background: #f8f9fa;
+  min-width: 0;
 }
 
 .tab-content {
   display: none;
+}
+
+/* Mobile - collapse sidebar to top bar */
+@media (max-width: 768px) {
+  .admin-body { flex-direction: column; }
+  .admin-sidebar {
+    width: 100%;
+    min-height: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    padding: 0.5rem;
+    background: #1a1a2e;
+  }
+  .sidebar-group { display: contents; }
+  .sidebar-group-label { display: none; }
+  .tab-btn {
+    display: inline-flex;
+    width: auto;
+    border-left: none;
+    border-bottom: 2px solid transparent;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.78rem;
+  }
+  .tab-btn.active {
+    border-left-color: transparent;
+    border-bottom-color: var(--primary-maroon);
+  }
+  .admin-content { padding: 1rem; }
 }
 
 .tab-content.active {
