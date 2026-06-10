@@ -657,11 +657,15 @@ function showSection(name) {
   let currentUser = null;
   let currentProfile = null;
 
+  // Show loading state
+  document.getElementById('notLoggedIn').style.display = 'none';
+  document.getElementById('profileLayout').style.display = 'none';
+
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       currentUser = user;
       const snap = await getDoc(doc(db, 'members', user.uid));
-      currentProfile = snap.exists() ? snap.data() : {};
+      currentProfile = snap.exists() ? snap.data() : { role: 'member', status: 'active', displayName: user.displayName };
       if (currentProfile.status === 'pending') {
         // Show pending screen
         document.getElementById('notLoggedIn').style.display = 'none';
