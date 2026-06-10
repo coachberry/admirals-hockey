@@ -195,7 +195,7 @@ onAuthStateChanged(auth, async (user) => {
     if (adminBtn) {
       const role = profile.role || 'member';
       const isSuperAdmin = user.email === 'coachberry03@gmail.com';
-      if (isSuperAdmin || role === 'admin' || role === 'superadmin') {
+      if (isSuperAdmin || profile.isAdmin) {
         adminBtn.style.display = 'inline-block';
       } else {
         adminBtn.style.display = 'none';

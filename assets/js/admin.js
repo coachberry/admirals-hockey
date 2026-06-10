@@ -1959,8 +1959,8 @@ async function loadMembersTab() {
 
   if (!members.length) { list.innerHTML = '<div class="empty-state">No users yet</div>'; return; }
 
-  const roleColors = { superadmin:'#5D1725', admin:'#3c0f17', player:'#2e7d32', prospect:'#0277bd', alumni:'#e65100', rep:'#1565c0', member:'#666' };
-  const roleOrder = { superadmin:0, admin:1, player:2, prospect:3, alumni:4, rep:5, member:6 };
+  const roleColors = { player:'#2e7d32', prospect:'#0277bd', alumni:'#e65100', coach:'#5D1725', member:'#666' };
+  const roleOrder = { coach:0, player:1, prospect:2, alumni:3, member:4 };
   members.sort((a,b) => (roleOrder[a.role]||99) - (roleOrder[b.role]||99) || (a.displayName||'').localeCompare(b.displayName||''));
 
   // Group by role
@@ -1971,7 +1971,7 @@ async function loadMembersTab() {
     groups[role].push(m);
   });
 
-  const roleLabels = { superadmin:'Super Admin', admin:'Admin', player:'Player', prospect:'Prospective Player', alumni:'Alumni', rep:'Team Representative', member:'Member' };
+  const roleLabels = { player:'Player', prospect:'Prospective Player', alumni:'Alumni', coach:'Coach', member:'Member' };
 
   let html = '';
   Object.entries(groups).sort((a,b) => (roleOrder[a[0]]||99) - (roleOrder[b[0]]||99)).forEach(([role, roleMembers]) => {
@@ -2010,9 +2010,12 @@ async function loadMembersTab() {
 
 window.updateMemberRole = async function(uid, role) {
   await setDoc(doc(db, 'members', uid), { role }, { merge: true });
-  if (role === 'admin') {
-    showAdminPermissions(uid);
-  }
+  loadMembersTab();
+};
+
+window.updateMemberAdmin = async function(uid, isAdmin) {
+  await setDoc(doc(db, 'members', uid), { isAdmin }, { merge: true });
+  if (isAdmin) showAdminPermissions(uid);
   loadMembersTab();
 };
 

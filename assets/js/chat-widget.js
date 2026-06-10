@@ -113,7 +113,7 @@ window.sendWidgetMessage = async function() {
   const text = input?.value.trim();
   if (!text || !currentUser || !currentProfile) return;
 
-  const canWrite = ['player','alumni','rep','admin','superadmin'].includes(currentProfile.role);
+  const canWrite = ['player','alumni','coach','rep','admin','superadmin'].includes(currentProfile.role);
   if (!canWrite) return;
 
   input.value = '';
@@ -195,7 +195,7 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  const allowedRoles = ['player', 'alumni', 'rep', 'admin', 'superadmin'];
+  const allowedRoles = ['player', 'alumni', 'coach', 'rep', 'admin', 'superadmin'];
   if (!allowedRoles.includes(currentProfile.role)) {
     bubble.style.display = 'none';
     return;
@@ -204,7 +204,7 @@ onAuthStateChanged(auth, async (user) => {
   bubble.style.display = 'flex';
 
   // Show input or no-access
-  const canWrite = ['player','alumni','rep','admin','superadmin'].includes(currentProfile.role);
+  const canWrite = ['player','alumni','coach','rep','admin','superadmin'].includes(currentProfile.role);
   document.getElementById('widgetInputArea').style.display = canWrite ? 'block' : 'none';
   document.getElementById('widgetNoAccess').style.display = canWrite ? 'none' : 'block';
   document.getElementById('widgetLoginPrompt').style.display = 'none';

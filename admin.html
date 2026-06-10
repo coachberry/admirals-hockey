@@ -43,8 +43,13 @@
       }
     }
 
-    if (isAdmin) {
-      // Set global flag that admin.js polling will detect
+    // Check isAdmin flag from Firestore
+    let hasAdminAccess = isSuperAdmin;
+    if (!isSuperAdmin && snap && snap.exists()) {
+      hasAdminAccess = snap.data().isAdmin === true;
+    }
+
+    if (hasAdminAccess) {
       window._firebaseAdminUser = isSuperAdmin ? 'admin' : user.email.split('@')[0];
       localStorage.setItem('admirals_currentUser', window._firebaseAdminUser);
       document.getElementById('loginScreen').style.display = 'none';
