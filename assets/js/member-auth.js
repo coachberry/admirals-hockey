@@ -185,7 +185,7 @@ onAuthStateChanged(auth, async (user) => {
     window.currentMember = { ...profile, uid: user.uid };
 
     if (loginBtn) {
-      loginBtn.textContent = user.displayName?.split(' ')[0] || 'Account';
+      loginBtn.textContent = 'My Profile';
       loginBtn.onclick = () => { window.location.href = '/pages/profile.html'; };
     }
     if (signupBtn) signupBtn.style.display = 'none';
@@ -210,6 +210,8 @@ onAuthStateChanged(auth, async (user) => {
     if (signupBtn) signupBtn.style.display = '';
     const adminBtn = document.getElementById('adminDashboardBtn');
     if (adminBtn) adminBtn.style.display = 'none';
+    const logoutBtn2 = document.getElementById('memberLogoutBtn');
+    if (logoutBtn2) logoutBtn2.style.display = 'none';
   }
 });
 
