@@ -84,9 +84,15 @@ document.getElementById('loginForm').addEventListener('submit', e => {
   }
 });
 
-document.getElementById('logoutBtn').addEventListener('click', () => {
+document.getElementById('logoutBtn').addEventListener('click', async () => {
   localStorage.removeItem('admirals_currentUser');
-  location.reload();
+  // Also sign out of Firebase so auto-login doesn't re-trigger
+  try {
+    const { getAuth, signOut } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+    const auth = getAuth();
+    await signOut(auth);
+  } catch(e) {}
+  window.location.href = '/index.html';
 });
 
 
