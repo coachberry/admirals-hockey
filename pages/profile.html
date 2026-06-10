@@ -947,14 +947,14 @@ function showSection(name) {
     list.innerHTML = upcoming.map(e => {
       const dateStr = e.date ? new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }) : 'TBD';
       const timeStr = e.time ? (() => { const [h,m] = e.time.split(':'); const hr=parseInt(h); return hr%12||12+':'+m+' '+(hr>=12?'PM':'AM'); })() : '';
-      return \`<div class="game-rsvp-item" id="te_\${e.id}">
+      return `<div class="game-rsvp-item" id="te_${e.id}">
         <div>
-          <div style="font-weight:600;font-size:0.9rem;">\${e.name}</div>
-          <div style="font-size:0.82rem;color:#888;">\${dateStr}\${timeStr?' · '+timeStr:''}\${e.location?' · '+e.location:''}</div>
-          \${e.details ? \`<div style="font-size:0.8rem;color:#666;margin-top:4px;">\${e.details}</div>\` : ''}
+          <div style="font-weight:600;font-size:0.9rem;">${e.name}</div>
+          <div style="font-size:0.82rem;color:#888;">${dateStr}${timeStr?' · '+timeStr:''}${e.location?' · '+e.location:''}</div>
+          ${e.details ? `<div style="font-size:0.8rem;color:#666;margin-top:4px;">${e.details}</div>` : ''}
         </div>
-        <div id="teBtns_\${e.id}" style="display:flex;gap:0.5rem;flex-shrink:0;"></div>
-      </div>\`;
+        <div id="teBtns_${e.id}" style="display:flex;gap:0.5rem;flex-shrink:0;"></div>
+      </div>`;
     }).join('');
 
     // Load RSVPs for each event
@@ -969,11 +969,11 @@ function showSection(name) {
   function rsvpBtnsTE(eventId, uid, existing) {
     const yesActive = existing === 'yes';
     const noActive = existing === 'no';
-    return \`
-      <button onclick="toggleTeamEventRsvp('\${eventId}','\${uid}','yes',\${yesActive})"
-        style="border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:\${yesActive?'#2e7d32':'white'};color:\${yesActive?'white':'#2e7d32'};">✅ In</button>
-      <button onclick="toggleTeamEventRsvp('\${eventId}','\${uid}','no',\${noActive})"
-        style="border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:\${noActive?'#c62828':'white'};color:\${noActive?'white':'#c62828'};">❌ Out</button>\`;
+    return `
+      <button onclick="toggleTeamEventRsvp('${eventId}','${uid}','yes',${yesActive})"
+        style="border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:${yesActive?'#2e7d32':'white'};color:${yesActive?'white':'#2e7d32'};">✅ In</button>
+      <button onclick="toggleTeamEventRsvp('${eventId}','${uid}','no',${noActive})"
+        style="border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:${noActive?'#c62828':'white'};color:${noActive?'white':'#c62828'};">❌ Out</button>`;
   }
 
   window.toggleTeamEventRsvp = async function(eventId, uid, response, isActive) {
