@@ -1824,18 +1824,18 @@ if (generateScheduleBtn) {
 // PAGE VISIBILITY
 // ============================================
 const pagesList = [
-  { id: 'schedule',    label: 'Schedule',      path: '/pages/schedule.html' },
-  { id: 'roster',      label: 'Roster',        path: '/pages/roster.html' },
-  { id: 'stats',       label: 'Stats',         path: '/pages/stats.html' },
-  { id: 'leaderboard', label: 'Leaderboard',   path: '/pages/leaderboard.html' },
-  { id: 'news',        label: 'News',          path: '/pages/news.html' },
-  { id: 'events',      label: 'Events',        path: '/pages/events.html' },
-  { id: 'gallery',     label: 'Gallery',       path: '/pages/gallery.html' },
-  { id: 'summer',      label: 'Summer Hockey', path: '/pages/summer.html' },
-  { id: 'alumni',      label: 'Alumni',        path: '/pages/alumni.html' },
-  { id: 'sponsors',    label: 'Sponsors',      path: '/pages/sponsors.html' },
-  { id: 'tryouts',     label: 'Tryouts',       path: '/pages/tryouts.html' },
-  { id: 'contact',     label: 'Contact',       path: '/pages/contact.html' },
+  { id: 'schedule',    label: 'Schedule',      path: '/schedule' },
+  { id: 'roster',      label: 'Roster',        path: '/roster' },
+  { id: 'stats',       label: 'Stats',         path: '/stats' },
+  { id: 'leaderboard', label: 'Leaderboard',   path: '/leaderboard' },
+  { id: 'news',        label: 'News',          path: '/news' },
+  { id: 'events',      label: 'Events',        path: '/events' },
+  { id: 'gallery',     label: 'Gallery',       path: '/gallery' },
+  { id: 'summer',      label: 'Summer Hockey', path: '/summer' },
+  { id: 'alumni',      label: 'Alumni',        path: '/alumni' },
+  { id: 'sponsors',    label: 'Sponsors',      path: '/sponsors' },
+  { id: 'tryouts',     label: 'Tryouts',       path: '/tryouts' },
+  { id: 'contact',     label: 'Contact',       path: '/contact' },
 ];
 
 let pageVisibility = {};

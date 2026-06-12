@@ -26,7 +26,7 @@ if (generateRsvpLinkBtn) {
   generateRsvpLinkBtn.addEventListener('click', () => {
     const seasonId = document.getElementById('rsvpSeasonSelect').value;
     if (!seasonId) return;
-    const link = `${window.location.origin}/pages/rsvp.html?season=${seasonId}`;
+    const link = `${window.location.origin}/rsvp?season=${seasonId}`;
     document.getElementById('rsvpLinkInput').value = link;
     document.getElementById('rsvpLinkResult').style.display = 'block';
   });

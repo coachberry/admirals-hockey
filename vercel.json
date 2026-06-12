@@ -13,5 +13,71 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/schedule",
+      "destination": "/pages/schedule.html"
+    },
+    {
+      "source": "/roster",
+      "destination": "/pages/roster.html"
+    },
+    {
+      "source": "/stats",
+      "destination": "/pages/stats.html"
+    },
+    {
+      "source": "/leaderboard",
+      "destination": "/pages/leaderboard.html"
+    },
+    {
+      "source": "/news",
+      "destination": "/pages/news.html"
+    },
+    {
+      "source": "/events",
+      "destination": "/pages/events.html"
+    },
+    {
+      "source": "/gallery",
+      "destination": "/pages/gallery.html"
+    },
+    {
+      "source": "/chat",
+      "destination": "/pages/chat.html"
+    },
+    {
+      "source": "/summer",
+      "destination": "/pages/summer.html"
+    },
+    {
+      "source": "/alumni",
+      "destination": "/pages/alumni.html"
+    },
+    {
+      "source": "/sponsors",
+      "destination": "/pages/sponsors.html"
+    },
+    {
+      "source": "/tryouts",
+      "destination": "/pages/tryouts.html"
+    },
+    {
+      "source": "/contact",
+      "destination": "/pages/contact.html"
+    },
+    {
+      "source": "/profile",
+      "destination": "/pages/profile.html"
+    },
+    {
+      "source": "/rsvp",
+      "destination": "/pages/rsvp.html"
+    },
+    {
+      "source": "/gameday",
+      "destination": "/pages/gameday.html"
+    }
   ]
 }

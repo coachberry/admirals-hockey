@@ -186,7 +186,7 @@ onAuthStateChanged(auth, async (user) => {
 
     if (loginBtn) {
       loginBtn.textContent = 'My Profile';
-      loginBtn.onclick = () => { window.location.href = '/pages/profile.html'; };
+      loginBtn.onclick = () => { window.location.href = '/profile'; };
     }
     if (signupBtn) signupBtn.style.display = 'none';
 

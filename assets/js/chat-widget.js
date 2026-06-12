@@ -58,7 +58,7 @@ function injectWidget() {
           <div style="color:rgba(255,255,255,0.75);font-size:0.75rem;">#general</div>
         </div>
         <div style="display:flex;gap:0.5rem;align-items:center;">
-          <a href="/pages/chat.html" style="color:rgba(255,255,255,0.8);font-size:0.75rem;text-decoration:none;
+          <a href="/chat" style="color:rgba(255,255,255,0.8);font-size:0.75rem;text-decoration:none;
             border:1px solid rgba(255,255,255,0.3);padding:3px 8px;border-radius:4px;">Full View</a>
           <button onclick="toggleChatWidget()" style="background:none;border:none;color:white;
             cursor:pointer;font-size:1.2rem;padding:0;line-height:1;">×</button>
@@ -77,7 +77,7 @@ function injectWidget() {
       </div>
       <div id="widgetNoAccess" style="padding:0.6rem;border-top:1px solid #f0f0f0;
         text-align:center;font-size:0.78rem;color:#999;display:none;">
-        View only — <a href="/pages/chat.html" style="color:#5D1725;">open full chat</a>
+        View only — <a href="/chat" style="color:#5D1725;">open full chat</a>
       </div>
       <div id="widgetLoginPrompt" style="padding:1rem;text-align:center;font-size:0.85rem;
         color:#666;display:none;">

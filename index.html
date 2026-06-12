@@ -38,7 +38,7 @@
         <div id="homeLastGameCard" class="home-game-card home-game-past"></div>
       </div>
       <div id="homeNoGames" style="display:none;">
-        <a href="/pages/schedule.html" onclick="localStorage.removeItem('admirals_scheduleSeasonPublic')" class="view-all-link">View Full Schedule →</a>
+        <a href="/schedule" onclick="localStorage.removeItem('admirals_scheduleSeasonPublic')" class="view-all-link">View Full Schedule →</a>
       </div>
     </div>
     <div class="home-right-col">
@@ -49,7 +49,7 @@
       <div class="upcoming-events-section" style="margin-top:2rem;">
         <h2 class="home-section-title">Upcoming Events</h2>
         <div id="upcomingEventsList" class="upcoming-events-list"><div class="quick-hits-loading">Loading...</div></div>
-        <a href="/pages/events.html" class="view-all-link">View All Events →</a>
+        <a href="/events" class="view-all-link">View All Events →</a>
       </div>
     </div>
   </div>
@@ -221,7 +221,7 @@
           <div class="featured-main-overlay">
             <h1 class="featured-main-title">Franklin Admirals Hockey</h1>
             <p class="featured-main-excerpt">Tradition. Excellence. Victory.</p>
-            <a href="/pages/schedule.html" onclick="localStorage.removeItem('admirals_scheduleSeasonPublic')" class="featured-read-more">View Schedule →</a>
+            <a href="/schedule" onclick="localStorage.removeItem('admirals_scheduleSeasonPublic')" class="featured-read-more">View Schedule →</a>
           </div>
         </div>`;
     }
@@ -288,7 +288,7 @@
       document.getElementById('homeNextGameCard').innerHTML = buildGameCard(nextGame, false);
       document.getElementById('homeNextGame').style.display = 'block';
     } else {
-      document.getElementById('homeNextGameCard').innerHTML = `<div style="padding:1.25rem;color:#888;font-style:italic;font-size:0.95rem;">No upcoming games scheduled yet.<br><a href="/pages/schedule.html" onclick="localStorage.removeItem('admirals_scheduleSeasonPublic')" style="color:#5D1725;font-weight:600;font-style:normal;">View Schedule →</a></div>`;
+      document.getElementById('homeNextGameCard').innerHTML = `<div style="padding:1.25rem;color:#888;font-style:italic;font-size:0.95rem;">No upcoming games scheduled yet.<br><a href="/schedule" onclick="localStorage.removeItem('admirals_scheduleSeasonPublic')" style="color:#5D1725;font-weight:600;font-style:normal;">View Schedule →</a></div>`;
       document.getElementById('homeNextGame').style.display = 'block';
     }
 
@@ -325,7 +325,7 @@
     const list = document.getElementById('upcomingEventsList');
     if (!events.length) { list.innerHTML = '<p style="color:#999;font-size:0.9rem;">No upcoming events</p>'; return; }
     list.innerHTML = events.slice(0, 3).map(e => `
-      <a href="/pages/events.html" class="upcoming-event-item">
+      <a href="/events" class="upcoming-event-item">
         <div class="upcoming-event-date">
           <div class="upcoming-event-month">${new Date(e.date+'T12:00:00').toLocaleDateString('en-US',{month:'short'})}</div>
           <div class="upcoming-event-day">${new Date(e.date+'T12:00:00').getDate()}</div>
