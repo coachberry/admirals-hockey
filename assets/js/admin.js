@@ -2579,3 +2579,108 @@ window.deleteApplication = async function(appId) {
 loadApplicationsTab();
 
 });
+
+// ============================================
+// QUICK HITS ADMIN
+// ============================================
+async function loadQuickHitsAdmin() {
+  const list = document.getElementById('quickHitsList');
+  if (!list) return;
+  const snap = await getDocs(collection(db, 'quickhits'));
+  const hits = [];
+  snap.forEach(d => hits.push({ id: d.id, ...d.data() }));
+  hits.sort((a,b) => (a.order||99) - (b.order||99));
+
+  if (!hits.length) { list.innerHTML = '<div class="empty-state">No links added yet</div>'; return; }
+
+  list.innerHTML = hits.map(h => `
+    <div class="item">
+      <div class="item-info">
+        <div>
+          <strong>${h.emoji||''} ${h.label}</strong>
+          <span>${h.url||''}</span>
+          <span style="font-size:0.75rem;color:#999;">Order: ${h.order||1}</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="btn-edit" onclick="editQuickHit('${h.id}')">Edit</button>
+        <button class="btn-delete" onclick="deleteQuickHit('${h.id}')">Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+function openQuickHitModal(id, data) {
+  const existing = document.getElementById('quickHitModal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'quickHitModal';
+  modal.className = 'modal-overlay active';
+  modal.innerHTML = `
+    <div class="modal">
+      <div class="modal-header">
+        <h2>${id ? 'Edit' : 'Add'} Quick Hit Link</h2>
+        <button class="modal-close" onclick="document.getElementById('quickHitModal').remove()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-label-group" style="width:80px;">
+            <label class="field-label">Emoji</label>
+            <input type="text" id="qhEmoji" value="${data?.emoji||''}" style="width:60px;text-align:center;font-size:1.2rem;" placeholder="🔗">
+          </div>
+          <div class="form-label-group" style="flex:1;">
+            <label class="field-label">Label *</label>
+            <input type="text" id="qhLabel" value="${data?.label||''}" placeholder="e.g. Buy Tickets">
+          </div>
+        </div>
+        <div class="form-label-group">
+          <label class="field-label">URL *</label>
+          <input type="text" id="qhUrl" value="${data?.url||''}" placeholder="https://...">
+        </div>
+        <div class="form-label-group">
+          <label class="field-label">Display Order</label>
+          <input type="number" id="qhOrder" value="${data?.order||1}" min="1" style="width:80px;">
+        </div>
+        <div class="form-buttons">
+          <button id="saveQuickHitBtn" class="btn-primary">Save Link</button>
+          <button onclick="document.getElementById('quickHitModal').remove()" class="btn-secondary">Cancel</button>
+        </div>
+        <p id="qhStatus" class="save-status"></p>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+
+  document.getElementById('saveQuickHitBtn').addEventListener('click', async () => {
+    const label = document.getElementById('qhLabel').value.trim();
+    const url = document.getElementById('qhUrl').value.trim();
+    if (!label || !url) { document.getElementById('qhStatus').textContent = 'Label and URL required'; return; }
+
+    const hitData = {
+      label,
+      url,
+      emoji: document.getElementById('qhEmoji').value.trim(),
+      order: parseInt(document.getElementById('qhOrder').value) || 1
+    };
+
+    const docId = id || Date.now().toString();
+    await setDoc(doc(db, 'quickhits', docId), hitData);
+    modal.remove();
+    loadQuickHitsAdmin();
+  });
+}
+
+window.editQuickHit = async function(id) {
+  const snap = await getDoc(doc(db, 'quickhits', id));
+  openQuickHitModal(id, snap.data());
+};
+
+window.deleteQuickHit = async function(id) {
+  if (!confirm('Delete this link?')) return;
+  await deleteDoc(doc(db, 'quickhits', id));
+  loadQuickHitsAdmin();
+};
+
+const addQuickHitBtn = document.getElementById('addQuickHitBtn');
+if (addQuickHitBtn) addQuickHitBtn.addEventListener('click', () => openQuickHitModal(null, null));
+
+loadQuickHitsAdmin();
