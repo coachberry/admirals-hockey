@@ -248,3 +248,30 @@ if (modal) modal.addEventListener('click', e => { if (e.target === modal) hideMe
 // Button listeners
 const signupBtn = document.getElementById('memberSignupBtn');
 if (signupBtn) signupBtn.onclick = () => showMemberModal('apply');
+
+// ============================================
+// MOBILE AUTH BUTTONS SYNC
+// ============================================
+function syncMobileAuthButtons() {
+  const container = document.getElementById('mobileAuthButtons');
+  if (!container) return;
+  container.innerHTML = '';
+
+  ['adminDashboardBtn', 'memberNavBtn', 'memberSignupBtn', 'memberLogoutBtn'].forEach(id => {
+    const original = document.getElementById(id);
+    if (!original || original.style.display === 'none') return;
+    const clone = original.cloneNode(true);
+    clone.removeAttribute('id');
+    if (original.tagName === 'A') {
+      clone.addEventListener('click', () => { window.location.href = original.href; });
+    } else {
+      clone.addEventListener('click', () => original.click());
+    }
+    container.appendChild(clone);
+  });
+}
+window.syncMobileAuthButtons = syncMobileAuthButtons;
+
+onAuthStateChanged(auth, () => {
+  setTimeout(syncMobileAuthButtons, 100);
+});

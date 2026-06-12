@@ -558,12 +558,58 @@ footer {
     display: none !important;
   }
 
+  /* Mobile auth buttons inside dropdown */
+  .mobile-auth-buttons {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1rem 1.5rem !important;
+    border-bottom: none !important;
+  }
+
+  .mobile-auth-buttons:empty {
+    display: none !important;
+    padding: 0 !important;
+  }
+
+  .mobile-auth-buttons a,
+  .mobile-auth-buttons button {
+    width: 100%;
+    text-align: center;
+    padding: 0.65rem 1rem !important;
+    font-size: 0.9rem !important;
+    border-radius: 6px;
+  }
+
   .header-container {
     display: flex !important;
   }
 
   .header-container > div[style*="display:flex"] {
     display: none !important;
+  }
+
+  /* Mobile auth buttons inside dropdown */
+  .mobile-auth-buttons {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1rem 1.5rem !important;
+    border-bottom: none !important;
+  }
+
+  .mobile-auth-buttons:empty {
+    display: none !important;
+    padding: 0 !important;
+  }
+
+  .mobile-auth-buttons a,
+  .mobile-auth-buttons button {
+    width: 100%;
+    text-align: center;
+    padding: 0.65rem 1rem !important;
+    font-size: 0.9rem !important;
+    border-radius: 6px;
   }
 
   /* Header becomes flex on mobile, hide auth buttons (logo + hamburger only) */
@@ -573,6 +619,29 @@ footer {
 
   .header-container > div[style*="display:flex"] {
     display: none !important;
+  }
+
+  /* Mobile auth buttons inside dropdown */
+  .mobile-auth-buttons {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1rem 1.5rem !important;
+    border-bottom: none !important;
+  }
+
+  .mobile-auth-buttons:empty {
+    display: none !important;
+    padding: 0 !important;
+  }
+
+  .mobile-auth-buttons a,
+  .mobile-auth-buttons button {
+    width: 100%;
+    text-align: center;
+    padding: 0.65rem 1rem !important;
+    font-size: 0.9rem !important;
+    border-radius: 6px;
   }
 }
 
