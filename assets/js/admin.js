@@ -2683,4 +2683,42 @@ const addQuickHitBtn = document.getElementById('addQuickHitBtn');
 if (addQuickHitBtn) addQuickHitBtn.addEventListener('click', () => openQuickHitModal(null, null));
 
 loadQuickHitsAdmin();
+
+// ============================================
+// CONTACT PAGE INFO ADMIN
+// ============================================
+async function loadContactInfo() {
+  const fields = ['ciCoachName','ciCoachEmail','ciSchoolName','ciAddress1','ciAddress2','ciMapLink'];
+  if (!document.getElementById('ciCoachName')) return;
+
+  const snap = await getDoc(doc(db, 'settings', 'contactInfo'));
+  const data = snap.exists() ? snap.data() : {};
+
+  document.getElementById('ciCoachName').value = data.coachName || 'Matt Berry';
+  document.getElementById('ciCoachEmail').value = data.coachEmail || 'coachberry03@gmail.com';
+  document.getElementById('ciSchoolName').value = data.schoolName || 'Franklin High School';
+  document.getElementById('ciAddress1').value = data.address1 || '810 Hillsboro Rd';
+  document.getElementById('ciAddress2').value = data.address2 || 'Franklin, TN 37064';
+  document.getElementById('ciMapLink').value = data.mapLink || 'https://maps.google.com/maps?q=Franklin+High+School';
+}
+
+const saveContactInfoBtn = document.getElementById('saveContactInfoBtn');
+if (saveContactInfoBtn) {
+  saveContactInfoBtn.addEventListener('click', async () => {
+    const data = {
+      coachName: document.getElementById('ciCoachName').value.trim(),
+      coachEmail: document.getElementById('ciCoachEmail').value.trim(),
+      schoolName: document.getElementById('ciSchoolName').value.trim(),
+      address1: document.getElementById('ciAddress1').value.trim(),
+      address2: document.getElementById('ciAddress2').value.trim(),
+      mapLink: document.getElementById('ciMapLink').value.trim()
+    };
+    await setDoc(doc(db, 'settings', 'contactInfo'), data);
+    document.getElementById('contactInfoStatus').textContent = '✅ Saved!';
+    setTimeout(() => { document.getElementById('contactInfoStatus').textContent = ''; }, 2000);
+  });
+}
+
+loadContactInfo();
+
 });

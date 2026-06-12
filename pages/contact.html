@@ -251,14 +251,14 @@
     </div>
     <div class="footer-section">
       <h3>Contact</h3>
-      <p><strong>Coach:</strong> Matt Berry</p>
-      <p><strong>Email:</strong> <a href="mailto:coachberry03@gmail.com" style="color:white;">coachberry03@gmail.com</a></p>
+      <p><strong>Coach:</strong> <span id="footerCoachName">Matt Berry</span></p>
+      <p><strong>Email:</strong> <a id="footerCoachEmail" href="mailto:coachberry03@gmail.com" style="color:white;">coachberry03@gmail.com</a></p>
     </div>
     <div class="footer-section">
       <h3>Location</h3>
-      <p>Franklin High School</p>
-      <p>810 Hillsboro Rd</p>
-      <p>Franklin, TN 37064</p>
+      <p id="footerSchoolName">Franklin High School</p>
+      <p id="footerAddress1">810 Hillsboro Rd</p>
+      <p id="footerAddress2">Franklin, TN 37064</p>
     </div>
   </div>
   <div class="footer-bottom">
@@ -268,7 +268,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
@@ -306,6 +306,38 @@
   }
 
   loadBoardMembers();
+
+  async function loadContactInfo() {
+    const snap = await getDoc(doc(db, 'settings', 'contactInfo'));
+    if (!snap.exists()) return;
+    const d = snap.data();
+
+    if (d.coachName) {
+      document.getElementById('ciCoachName').textContent = d.coachName;
+      document.getElementById('footerCoachName').textContent = d.coachName;
+    }
+    if (d.coachEmail) {
+      document.getElementById('ciCoachEmail').textContent = d.coachEmail;
+      document.getElementById('ciCoachEmail').href = 'mailto:' + d.coachEmail;
+      document.getElementById('footerCoachEmail').textContent = d.coachEmail;
+      document.getElementById('footerCoachEmail').href = 'mailto:' + d.coachEmail;
+    }
+    if (d.schoolName) {
+      document.getElementById('ciSchoolName').textContent = d.schoolName;
+      document.getElementById('footerSchoolName').textContent = d.schoolName;
+    }
+    if (d.address1) {
+      document.getElementById('ciAddress1').textContent = d.address1;
+      document.getElementById('footerAddress1').textContent = d.address1;
+      if (d.mapLink) document.getElementById('ciAddress1').href = d.mapLink;
+    }
+    if (d.address2) {
+      document.getElementById('ciAddress2').textContent = d.address2;
+      document.getElementById('footerAddress2').textContent = d.address2;
+      if (d.mapLink) document.getElementById('ciAddress2').href = d.mapLink;
+    }
+  }
+  loadContactInfo();
 
   // Form submission
 
