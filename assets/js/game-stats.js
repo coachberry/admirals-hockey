@@ -1,3 +1,19 @@
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
+  authDomain: "admirals-hockey.firebaseapp.com",
+  projectId: "admirals-hockey",
+  storageBucket: "admirals-hockey.firebasestorage.app",
+  messagingSenderId: "783358659334",
+  appId: "1:783358659334:web:5daffd093adca386faec87"
+};
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+document.addEventListener('DOMContentLoaded', () => {
+
 // ============================================
 // GAME STATS
 // ============================================
@@ -234,4 +250,6 @@ document.getElementById('saveGameStatsBtn').addEventListener('click', async () =
 
   status.textContent = '✅ Stats saved!';
   status.style.color = 'green';
+});
+
 });
