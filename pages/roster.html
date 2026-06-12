@@ -32,6 +32,12 @@
     </select>
   </div>
 
+  <div id="rosterTBDBanner" style="display:none;background:linear-gradient(135deg,#5D1725,#3c0f17);color:white;border-radius:8px;padding:2.5rem 1.5rem;text-align:center;margin:2rem 0;">
+    <h2 style="font-size:1.4rem;font-weight:700;margin-bottom:0.5rem;">2026-27 Roster Coming Soon</h2>
+    <p style="opacity:0.9;margin-bottom:1.25rem;max-width:560px;margin-left:auto;margin-right:auto;">Information about the 2026-27 roster is to be determined and will be revealed following tryouts.</p>
+    <a href="/tryouts" style="display:inline-block;background:white;color:#5D1725;padding:0.65rem 1.75rem;border-radius:6px;font-weight:700;text-decoration:none;">View Tryout Information</a>
+  </div>
+  <div id="rosterSections">
   <div style="margin-top:2rem;margin-bottom:2rem;">
     <div class="section-header"><h2 class="section-title">Forwards</h2></div>
     <div id="forwardsGrid" class="roster-grid"></div>
@@ -43,6 +49,7 @@
   <div style="margin-top:3rem;margin-bottom:2rem;">
     <div class="section-header"><h2 class="section-title">Goaltenders</h2></div>
     <div id="goaltendersGrid" class="roster-grid"></div>
+  </div>
   </div>
   <div style="margin-top:3rem;margin-bottom:2rem;">
     <div class="section-header"><h2 class="section-title">Coaching Staff</h2></div>
@@ -114,17 +121,26 @@
     const current = seasons.find(s => s.current) || seasons[0];
     if (current) {
       document.getElementById('seasonBadge').textContent = current.label + ' Season';
-      await loadRoster(current.id);
+      await loadRoster(current.id, current);
     }
 
     select.addEventListener('change', async e => {
       const season = seasons.find(s => s.id === e.target.value);
       document.getElementById('seasonBadge').textContent = season.label + ' Season';
-      await loadRoster(e.target.value);
+      await loadRoster(e.target.value, season);
     });
   }
 
-  async function loadRoster(seasonId) {
+  async function loadRoster(seasonId, season) {
+    const rosterSections = document.getElementById('rosterSections');
+    const rosterBanner = document.getElementById('rosterTBDBanner');
+    if (season && season.rosterTBD) {
+      rosterSections.style.display = 'none';
+      rosterBanner.style.display = 'block';
+    } else {
+      rosterSections.style.display = '';
+      rosterBanner.style.display = 'none';
+    }
     // Clear all grids
     ['forwardsGrid','defenseGrid','goaltendersGrid','coachesGrid','boardGrid'].forEach(id => {
       document.getElementById(id).innerHTML = '<p style="color:#666;font-style:italic;">Loading...</p>';

@@ -210,10 +210,12 @@ function renderSeasonsList() {
         <div>
           <strong>${s.label}</strong>
           <span>${s.current ? '✅ Current Season' : ''}</span>
+          <span>${s.rosterTBD ? ' 🔒 Roster Hidden' : ''}</span>
         </div>
       </div>
       <div style="display:flex; gap:0.5rem;">
         ${!s.current ? `<button class="btn-edit" onclick="setCurrentSeason('${s.id}')">Set Current</button>` : ''}
+        <button class="btn-edit" onclick="toggleRosterTBD('${s.id}')">${s.rosterTBD ? 'Show Roster' : 'Hide Roster'}</button>
         <button class="btn-delete" onclick="deleteSeason('${s.id}')">Delete</button>
       </div>
     `;
@@ -224,6 +226,7 @@ function renderSeasonsList() {
 document.getElementById('addSeasonBtn').addEventListener('click', () => {
   document.getElementById('seasonLabel').value = '';
   document.getElementById('seasonCurrent').checked = false;
+  document.getElementById('seasonRosterTBD').checked = false;
   document.getElementById('seasonForm').style.display = 'block';
 });
 document.getElementById('cancelSeasonBtn').addEventListener('click', () => document.getElementById('seasonForm').style.display = 'none');
@@ -232,6 +235,7 @@ document.getElementById('saveSeasonBtn').addEventListener('click', async () => {
   const label = document.getElementById('seasonLabel').value.trim();
   if (!label) { alert('Please enter a season label'); return; }
   const isCurrent = document.getElementById('seasonCurrent').checked;
+  const rosterTBD = document.getElementById('seasonRosterTBD').checked;
   const id = label.replace(/[^a-zA-Z0-9-]/g, '-');
 
   // If setting as current, unset others
@@ -241,7 +245,7 @@ document.getElementById('saveSeasonBtn').addEventListener('click', async () => {
     }
   }
 
-  await setDoc(doc(db, 'seasons', id), { label, current: isCurrent, createdAt: new Date().toISOString() });
+  await setDoc(doc(db, 'seasons', id), { label, current: isCurrent, rosterTBD, createdAt: new Date().toISOString() });
   document.getElementById('seasonForm').style.display = 'none';
   await loadSeasons();
 });
@@ -250,6 +254,13 @@ window.setCurrentSeason = async (id) => {
   for (const s of allSeasons) {
     await setDoc(doc(db, 'seasons', s.id), { ...s, current: s.id === id });
   }
+  await loadSeasons();
+};
+
+window.toggleRosterTBD = async (id) => {
+  const s = allSeasons.find(x => x.id === id);
+  if (!s) return;
+  await setDoc(doc(db, 'seasons', s.id), { ...s, rosterTBD: !s.rosterTBD });
   await loadSeasons();
 };
 
