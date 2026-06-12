@@ -112,7 +112,6 @@
       <div class="sidebar-group">
         <div class="sidebar-group-label">Summer League</div>
         <button class="tab-btn" data-tab="summer">☀️ Summer Hockey</button>
-        <button class="tab-btn" data-tab="rsvp">🔗 RSVP Links</button>
       </div>
       <div class="sidebar-group">
         <div class="sidebar-group-label">Community</div>
@@ -406,38 +405,6 @@
 
     <!-- MANAGE USERS TAB -->
 
-
-    <!-- RSVP TAB -->
-    <div id="rsvpTab" class="tab-content">
-      <h2>Summer Hockey RSVP Links</h2>
-      <p style="color:#666;font-size:0.9rem;margin-bottom:1.5rem;">Generate an RSVP link for a season and share it with players via text or email. Anyone with the link can RSVP for games.</p>
-
-      <div style="background:white;border:1px solid #e0e0e0;border-radius:8px;padding:1.5rem;max-width:500px;margin-bottom:2rem;">
-        <div class="form-label-group">
-          <label class="field-label">Select Season</label>
-          <select id="rsvpSeasonSelect" class="season-select" style="min-width:180px;"></select>
-        </div>
-        <div style="margin-top:1rem;display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
-          <button id="generateRsvpLinkBtn" class="btn-primary">Generate RSVP Link</button>
-        </div>
-        <div id="rsvpLinkResult" style="display:none;margin-top:1rem;">
-          <label class="field-label">RSVP Link</label>
-          <div style="display:flex;gap:0.5rem;align-items:center;margin-top:0.4rem;">
-            <input type="text" id="rsvpLinkInput" readonly style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:4px;font-size:0.85rem;background:#f9f9f9;color:#333;">
-            <button id="copyRsvpLinkBtn" class="btn-secondary">Copy</button>
-          </div>
-          <p id="rsvpCopyStatus" style="font-size:0.8rem;color:green;margin-top:0.4rem;"></p>
-        </div>
-      </div>
-
-      <div>
-        <h3 style="margin-bottom:1rem;">RSVP Responses by Game</h3>
-        <div id="rsvpAdminSeasonSelect2Wrap" style="margin-bottom:1rem;">
-          <select id="rsvpAdminSeasonSelect2" class="season-select" style="min-width:180px;"></select>
-        </div>
-        <div id="rsvpGamesList"><div class="empty-state">Select a season to view RSVPs</div></div>
-      </div>
-    </div>
 
     <!-- SPONSORS TAB -->
     <div id="sponsorsTab" class="tab-content">
