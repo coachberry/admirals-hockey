@@ -98,6 +98,7 @@
         <button class="tab-btn active" data-tab="roster">🏒 Roster</button>
         <button class="tab-btn" data-tab="schedule">📅 Schedule</button>
         <button class="tab-btn" data-tab="seasons">🗓 Seasons</button>
+        <button class="tab-btn" data-tab="tryouts">🎯 Tryouts</button>
       </div>
       <div class="sidebar-group">
         <div class="sidebar-group-label">Content</div>
@@ -294,6 +295,57 @@
         </div>
       </div>
       <div id="seasonsList" class="items-list"><div class="empty-state">No seasons added yet</div></div>
+    </div>
+
+    <!-- TRYOUTS TAB -->
+    <div id="tryoutsTab" class="tab-content">
+      <h2>Tryouts Page</h2>
+      <p style="color:#666;font-size:0.9rem;margin-bottom:1rem;">Manage the content shown on the public Tryouts page for a specific season.</p>
+
+      <div class="form-label-group">
+        <label class="field-label">Season</label>
+        <select id="tryoutsSeasonSelect" class="season-select"></select>
+      </div>
+
+      <h3 style="margin-top:1.5rem;">Tryout Details</h3>
+      <div class="form-label-group">
+        <label class="field-label">Date</label>
+        <input type="text" id="tryoutsDate" placeholder="e.g. Saturday, August 15, 2026">
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">Time</label>
+        <input type="text" id="tryoutsTime" placeholder="e.g. 5:00 PM - 7:00 PM">
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">Location</label>
+        <input type="text" id="tryoutsLocation" placeholder="e.g. Ford Ice Center, Antioch">
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">Cost</label>
+        <input type="text" id="tryoutsCost" placeholder="e.g. $75 per player">
+      </div>
+      <p style="color:#999;font-size:0.8rem;margin-top:-0.5rem;">Leave any field blank to show "TBD" on the public page.</p>
+
+      <h3 style="margin-top:1.5rem;">Who Should Try Out?</h3>
+      <p style="color:#666;font-size:0.85rem;">Separate paragraphs with a blank line. For a bulleted list, start each line with "- ".</p>
+      <textarea id="tryoutsWho" rows="7" style="width:100%;font-family:inherit;font-size:0.92rem;padding:0.6rem;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;"></textarea>
+
+      <h3 style="margin-top:1.5rem;">What to Expect</h3>
+      <p style="color:#666;font-size:0.85rem;">Separate paragraphs with a blank line. For a labeled detail row, use "Label: description" on its own line.</p>
+      <textarea id="tryoutsExpect" rows="7" style="width:100%;font-family:inherit;font-size:0.92rem;padding:0.6rem;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;"></textarea>
+
+      <h3 style="margin-top:1.5rem;">FAQ</h3>
+      <p style="color:#666;font-size:0.85rem;">Format each item as a "Q: question" line followed by an "A: answer" line. Separate items with a blank line.</p>
+      <textarea id="tryoutsFAQ" rows="12" style="width:100%;font-family:inherit;font-size:0.92rem;padding:0.6rem;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;"></textarea>
+
+      <h3 style="margin-top:1.5rem;">Tryout Registration Embed Code</h3>
+      <p style="color:#666;font-size:0.85rem;">Paste the full JotForm embed code (iframe + script tags) for this season's registration form. Leave blank to keep the current embed.</p>
+      <textarea id="tryoutsEmbed" rows="8" style="width:100%;font-family:monospace;font-size:0.8rem;padding:0.6rem;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;"></textarea>
+
+      <div class="form-buttons" style="margin-top:1.5rem;">
+        <button id="saveTryoutsBtn" class="btn-primary">Save Tryouts Info</button>
+      </div>
+      <div id="tryoutsSaveStatus" style="margin-top:0.5rem;color:#2e7d32;font-size:0.85rem;"></div>
     </div>
 
     <!-- EVENTS TAB -->
@@ -919,6 +971,7 @@
 </div>
 
 <script type="module" src="/assets/js/admin.js"></script>
+<script type="module" src="/assets/js/tryouts-admin.js"></script>
 <script type="module" src="/assets/js/game-stats.js"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
