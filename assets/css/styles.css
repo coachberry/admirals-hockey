@@ -63,6 +63,10 @@ header {
   width: 100%;
 }
 
+.mobile-auth-buttons {
+  display: none;
+}
+
 .header-container .nav-links {
   justify-content: center;
 }
@@ -542,6 +546,7 @@ footer {
   .header-container nav {
     position: static;
     flex-shrink: 0;
+    margin-left: auto;
   }
 
   /* Hamburger on far right */
