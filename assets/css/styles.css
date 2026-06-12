@@ -569,6 +569,10 @@ footer {
 #adminDashboardBtn {
   background: #c62828 !important;
   color: white !important;
+  vertical-align: middle;
+  line-height: 36px;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 #adminDashboardBtn:hover {
