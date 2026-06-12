@@ -23,7 +23,7 @@
         var link = li.querySelector('a');
         if (!link) { li.style.visibility = 'visible'; return; }
         var href = link.getAttribute('href') || '';
-        var match = href.match(/\/([a-zA-Z0-9-]+)\.html/);
+        var match = href.match(/\/([a-zA-Z0-9-]+)(?:\.html)?$/);
         var linkPageId = match ? match[1] : null;
         if (linkPageId && fields[linkPageId] && fields[linkPageId].booleanValue === false) {
           li.style.display = 'none';
@@ -35,7 +35,7 @@
       // Hide footer Quick Links for hidden pages
       document.querySelectorAll('.footer-section a').forEach(function(link) {
         var href = link.getAttribute('href') || '';
-        var match = href.match(/\/([a-zA-Z0-9-]+)\.html/);
+        var match = href.match(/\/([a-zA-Z0-9-]+)(?:\.html)?$/);
         var linkPageId = match ? match[1] : null;
         if (linkPageId && fields[linkPageId] && fields[linkPageId].booleanValue === false) {
           var p = link.closest('p');
@@ -46,7 +46,7 @@
       // Hide footer Quick Links for hidden pages
       document.querySelectorAll('.footer-section a').forEach(function(link) {
         var href = link.getAttribute('href') || '';
-        var match = href.match(/\/([a-zA-Z0-9-]+)\.html/);
+        var match = href.match(/\/([a-zA-Z0-9-]+)(?:\.html)?$/);
         var linkPageId = match ? match[1] : null;
         if (linkPageId && fields[linkPageId] && fields[linkPageId].booleanValue === false) {
           var p = link.closest('p');
