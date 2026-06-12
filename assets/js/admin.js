@@ -2578,7 +2578,6 @@ window.deleteApplication = async function(appId) {
 
 loadApplicationsTab();
 
-});
 
 // ============================================
 // QUICK HITS ADMIN
@@ -2684,3 +2683,4 @@ const addQuickHitBtn = document.getElementById('addQuickHitBtn');
 if (addQuickHitBtn) addQuickHitBtn.addEventListener('click', () => openQuickHitModal(null, null));
 
 loadQuickHitsAdmin();
+});
