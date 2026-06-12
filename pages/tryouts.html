@@ -214,7 +214,7 @@
 <script src="/assets/js/load-header.js"></script>
 
 <div class="tryouts-hero">
-  <div class="hero-badge">2026–27 Season</div>
+  <div class="hero-badge" id="tryoutsSeasonBadge">Loading...</div>
   <h1>Admirals Hockey Tryouts</h1>
   <p>Join one of Tennessee's premier high school hockey programs. We welcome new players, returning players, and anyone ready to compete at the next level.</p>
 </div>
@@ -232,17 +232,17 @@
           <div class="detail-row">
             <span class="detail-icon">📆</span>
             <span class="detail-label">Date</span>
-            <span class="detail-value"><span class="placeholder">TBD — Check back for updates</span></span>
+            <span class="detail-value" id="tdDate"><span class="placeholder">TBD — Check back for updates</span></span>
           </div>
           <div class="detail-row">
             <span class="detail-icon">🕐</span>
             <span class="detail-label">Time</span>
-            <span class="detail-value"><span class="placeholder">TBD</span></span>
+            <span class="detail-value" id="tdTime"><span class="placeholder">TBD</span></span>
           </div>
           <div class="detail-row">
             <span class="detail-icon">📍</span>
             <span class="detail-label">Location</span>
-            <span class="detail-value"><span class="placeholder">TBD</span></span>
+            <span class="detail-value" id="tdLocation"><span class="placeholder">TBD</span></span>
           </div>
           <div class="detail-row">
             <span class="detail-icon">🏒</span>
@@ -252,7 +252,7 @@
           <div class="detail-row">
             <span class="detail-icon">💰</span>
             <span class="detail-label">Cost</span>
-            <span class="detail-value"><span class="placeholder">TBD</span></span>
+            <span class="detail-value" id="tdCost"><span class="placeholder">TBD</span></span>
           </div>
         </div>
       </div>
@@ -261,14 +261,7 @@
       <div class="info-card">
         <div class="info-card-header">🏒 Who Should Try Out?</div>
         <div class="info-card-body">
-          <p>We welcome players of all experience levels who attend or are eligible to attend Franklin High School. Whether you've been skating your whole life or are newer to the sport, we encourage you to come out and show us what you've got.</p>
-          <ul class="eligibility-list">
-            <li>Current Franklin High School students in grades 9–12</li>
-            <li>Incoming freshmen for the 2026–27 school year</li>
-            <li>Returning players from last season's roster</li>
-            <li>Transfer students who meet TSSAA eligibility requirements</li>
-            <li>All positions — forwards, defensemen, and goaltenders</li>
-          </ul>
+          <div id="whoBody"></div>
         </div>
       </div>
 
@@ -276,27 +269,7 @@
       <div class="info-card">
         <div class="info-card-header">⭐ What to Expect</div>
         <div class="info-card-body">
-          <p>Tryouts are designed to evaluate skating ability, hockey sense, compete level, and coachability. We look for players who bring energy, work hard, and are committed to the team.</p>
-          <div class="detail-row">
-            <span class="detail-icon">⛸️</span>
-            <span class="detail-label">Skating</span>
-            <span class="detail-value">Edge work, speed, agility, and backward skating drills</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-icon">🏒</span>
-            <span class="detail-label">Puck Skills</span>
-            <span class="detail-value">Stickhandling, passing, and shooting evaluation</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-icon">🎯</span>
-            <span class="detail-label">Compete</span>
-            <span class="detail-value">Small-area games and competitive drills</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-icon">📋</span>
-            <span class="detail-label">Results</span>
-            <span class="detail-value"><span class="placeholder">Roster decisions communicated TBD</span></span>
-          </div>
+          <div id="expectBody"></div>
         </div>
       </div>
 
@@ -304,22 +277,7 @@
       <div class="info-card">
         <div class="info-card-header">❓ Frequently Asked Questions</div>
         <div class="info-card-body">
-          <div class="faq-item">
-            <div class="faq-q">Do I need to register before tryouts?</div>
-            <div class="faq-a">Yes — please complete the registration form on this page before attending tryouts. This helps us plan ice time and ensure we have your information on file.</div>
-          </div>
-          <div class="faq-item">
-            <div class="faq-q">I've never played organized hockey before. Can I still try out?</div>
-            <div class="faq-a">Absolutely. We evaluate players based on their potential and work ethic, not just experience. If you can skate and love the game, come out and give it a shot.</div>
-          </div>
-          <div class="faq-item">
-            <div class="faq-q">I played last season. Do I still need to register?</div>
-            <div class="faq-a">Yes — all players, returning and new, must complete the registration form and attend tryouts.</div>
-          </div>
-          <div class="faq-item">
-            <div class="faq-q">Who do I contact with questions?</div>
-            <div class="faq-a">Reach out to Coach Matt Berry at <a href="mailto:coachberry03@gmail.com" style="color:#5D1725;">coachberry03@gmail.com</a></div>
-          </div>
+          <div id="faqBody"></div>
         </div>
       </div>
 
@@ -330,9 +288,10 @@
       <div class="form-section">
         <div class="form-section-header">
           <h2>Tryout Registration</h2>
-          <p>Complete this form to register for the 2026–27 tryouts</p>
+          <p id="regSubtitle">Complete this form to register for the 2026–27 tryouts</p>
         </div>
         <div class="form-section-body">
+          <div id="embedContainer">
           <div class="notice-banner">
             ✅ Submitting this form does not guarantee a roster spot — it registers you for tryouts.
           </div>
@@ -349,6 +308,7 @@
           ></iframe>
           <script src='https://cdn.jotfor.ms/s/umd/latest/for-form-embed-handler.js'></script>
           <script>window.jotformEmbedHandler("iframe[id='JotFormIFrame-261519024119149']", "https://form.jotform.com/")</script>
+          </div>
         </div>
       </div>
     </div>
@@ -481,5 +441,158 @@ function showRoleFields(role) {
 
   <script type="module" src="/assets/js/member-auth.js"></script>
   <script type="module" src="/assets/js/chat-widget.js"></script>
+
+<script type="module">
+  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
+    authDomain: "admirals-hockey.firebaseapp.com",
+    projectId: "admirals-hockey",
+    storageBucket: "admirals-hockey.firebasestorage.app",
+    messagingSenderId: "783358659334",
+    appId: "1:783358659334:web:5daffd093adca386faec87"
+  };
+
+  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const DEFAULT_WHO = "We welcome players of all experience levels who attend or are eligible to attend Franklin High School. Whether you've been skating your whole life or are newer to the sport, we encourage you to come out and show us what you've got.\n\n- Current Franklin High School students in grades 9-12\n- Incoming freshmen for the upcoming school year\n- Returning players from last season's roster\n- Transfer students who meet TSSAA eligibility requirements\n- All positions - forwards, defensemen, and goaltenders";
+
+  const DEFAULT_EXPECT = "Tryouts are designed to evaluate skating ability, hockey sense, compete level, and coachability. We look for players who bring energy, work hard, and are committed to the team.\n\nSkating: Edge work, speed, agility, and backward skating drills\nPuck Skills: Stickhandling, passing, and shooting evaluation\nCompete: Small-area games and competitive drills\nResults: Roster decisions communicated TBD";
+
+  const DEFAULT_FAQ = "Q: Do I need to register before tryouts?\nA: Yes - please complete the registration form on this page before attending tryouts. This helps us plan ice time and ensure we have your information on file.\n\nQ: I've never played organized hockey before. Can I still try out?\nA: Absolutely. We evaluate players based on their potential and work ethic, not just experience. If you can skate and love the game, come out and give it a shot.\n\nQ: I played last season. Do I still need to register?\nA: Yes - all players, returning and new, must complete the registration form and attend tryouts.\n\nQ: Who do I contact with questions?\nA: Reach out to Coach Matt Berry at coachberry03@gmail.com";
+
+  function setDetailValue(id, value, fallback) {
+    const el = document.getElementById(id);
+    if (value && value.trim()) {
+      el.textContent = value;
+    } else {
+      el.innerHTML = `<span class="placeholder">${fallback}</span>`;
+    }
+  }
+
+  function renderParagraphsAndList(text, container) {
+    container.innerHTML = '';
+    const blocks = text.split(/\n\s*\n/);
+    blocks.forEach(block => {
+      const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
+      if (!lines.length) return;
+      if (lines.every(l => l.startsWith('- '))) {
+        const ul = document.createElement('ul');
+        ul.className = 'eligibility-list';
+        lines.forEach(l => {
+          const li = document.createElement('li');
+          li.textContent = l.slice(2);
+          ul.appendChild(li);
+        });
+        container.appendChild(ul);
+      } else {
+        lines.forEach(line => {
+          const m = line.match(/^([^:]{1,24}):\s*(.+)$/);
+          if (m) {
+            const row = document.createElement('div');
+            row.className = 'detail-row';
+            const label = document.createElement('span');
+            label.className = 'detail-label';
+            label.textContent = m[1];
+            const value = document.createElement('span');
+            value.className = 'detail-value';
+            value.textContent = m[2];
+            row.appendChild(label);
+            row.appendChild(value);
+            container.appendChild(row);
+          } else {
+            const p = document.createElement('p');
+            p.textContent = line;
+            container.appendChild(p);
+          }
+        });
+      }
+    });
+  }
+
+  function renderFAQ(text, container) {
+    container.innerHTML = '';
+    const items = text.split(/\n\s*\n/);
+    items.forEach(item => {
+      const qMatch = item.match(/Q:\s*(.+)/);
+      const aMatch = item.match(/A:\s*([\s\S]+)/);
+      if (!qMatch || !aMatch) return;
+      const q = qMatch[1].trim();
+      let a = aMatch[1].trim();
+      const div = document.createElement('div');
+      div.className = 'faq-item';
+      const qEl = document.createElement('div');
+      qEl.className = 'faq-q';
+      qEl.textContent = q;
+      const aEl = document.createElement('div');
+      aEl.className = 'faq-a';
+      const emailMatch = a.match(/(\S+@\S+\.\S+)/);
+      if (emailMatch) {
+        const before = a.slice(0, emailMatch.index);
+        const after = a.slice(emailMatch.index + emailMatch[1].length);
+        aEl.appendChild(document.createTextNode(before));
+        const link = document.createElement('a');
+        link.href = 'mailto:' + emailMatch[1];
+        link.style.color = '#5D1725';
+        link.textContent = emailMatch[1];
+        aEl.appendChild(link);
+        aEl.appendChild(document.createTextNode(after));
+      } else {
+        aEl.textContent = a;
+      }
+      div.appendChild(qEl);
+      div.appendChild(aEl);
+      container.appendChild(div);
+    });
+  }
+
+  function injectEmbed(html) {
+    if (!html || !html.trim()) return;
+    const container = document.getElementById('embedContainer');
+    container.innerHTML = html;
+    container.querySelectorAll('script').forEach(old => {
+      const s = document.createElement('script');
+      Array.from(old.attributes).forEach(a => s.setAttribute(a.name, a.value));
+      if (old.src) { s.src = old.src; } else { s.textContent = old.textContent; }
+      old.parentNode.replaceChild(s, old);
+    });
+  }
+
+  async function init() {
+    const snap = await getDocs(collection(db, 'seasons'));
+    const seasons = [];
+    snap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
+    seasons.sort((a, b) => b.label.localeCompare(a.label));
+    const current = seasons.find(s => s.current) || seasons[0];
+    const label = current ? current.label : '';
+
+    document.getElementById('tryoutsSeasonBadge').textContent = (label ? label + ' Season' : 'Tryouts');
+    document.getElementById('regSubtitle').textContent = label
+      ? `Complete this form to register for the ${label} tryouts`
+      : 'Complete this form to register for tryouts';
+
+    let data = {};
+    if (current) {
+      const tSnap = await getDoc(doc(db, 'tryouts', current.id));
+      if (tSnap.exists()) data = tSnap.data();
+    }
+
+    setDetailValue('tdDate', data.date, 'TBD — Check back for updates');
+    setDetailValue('tdTime', data.time, 'TBD');
+    setDetailValue('tdLocation', data.location, 'TBD');
+    setDetailValue('tdCost', data.cost, 'TBD');
+
+    renderParagraphsAndList(data.whoText || DEFAULT_WHO, document.getElementById('whoBody'));
+    renderParagraphsAndList(data.expectText || DEFAULT_EXPECT, document.getElementById('expectBody'));
+    renderFAQ(data.faqText || DEFAULT_FAQ, document.getElementById('faqBody'));
+
+    if (data.embedCode) injectEmbed(data.embedCode);
+  }
+
+  init();
+</script>
 </body>
 </html>
