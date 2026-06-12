@@ -558,6 +558,17 @@ footer {
   justify-content: center;
   box-sizing: border-box;
   line-height: 1;
+  text-decoration: none;
+}
+
+#adminDashboardBtn {
+  background: #c62828 !important;
+  color: white !important;
+  border: none !important;
+}
+
+#adminDashboardBtn:hover {
+  background: #a31f1f !important;
 }
 
 .member-nav-btn {
