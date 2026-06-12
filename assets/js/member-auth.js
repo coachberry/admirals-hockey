@@ -293,7 +293,7 @@ function updateChatNavVisibility(profile) {
   const allowedRoles = ['player', 'alumni', 'coach', 'rep', 'admin', 'superadmin'];
   const canSeeChat = profile && allowedRoles.includes(profile.role);
 
-  document.querySelectorAll('a[href*="/chat.html"]').forEach(link => {
+  document.querySelectorAll('a[href="/chat"]').forEach(link => {
     const li = link.closest('li');
     if (li) li.style.display = canSeeChat ? '' : 'none';
     const p = link.closest('p');
