@@ -285,3 +285,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggle = document.getElementById('navToggle');
   if (toggle) toggle.addEventListener('click', () => setTimeout(syncMobileAuthButtons, 0));
 });
+
+// ============================================
+// HIDE TEAM CHAT NAV LINK FOR UNAUTHORIZED USERS
+// ============================================
+function updateChatNavVisibility(profile) {
+  const allowedRoles = ['player', 'alumni', 'coach', 'rep', 'admin', 'superadmin'];
+  const canSeeChat = profile && allowedRoles.includes(profile.role);
+
+  document.querySelectorAll('a[href*="/chat.html"]').forEach(link => {
+    const li = link.closest('li');
+    if (li) li.style.display = canSeeChat ? '' : 'none';
+  });
+}
+window.updateChatNavVisibility = updateChatNavVisibility;
