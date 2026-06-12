@@ -78,6 +78,10 @@
     {
       "source": "/gameday",
       "destination": "/pages/gameday.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
     }
   ]
 }
