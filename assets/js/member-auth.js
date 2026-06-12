@@ -296,6 +296,8 @@ function updateChatNavVisibility(profile) {
   document.querySelectorAll('a[href*="/chat.html"]').forEach(link => {
     const li = link.closest('li');
     if (li) li.style.display = canSeeChat ? '' : 'none';
+    const p = link.closest('p');
+    if (p) p.style.display = canSeeChat ? '' : 'none';
   });
 }
 window.updateChatNavVisibility = updateChatNavVisibility;
