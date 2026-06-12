@@ -299,3 +299,13 @@ function updateChatNavVisibility(profile) {
   });
 }
 window.updateChatNavVisibility = updateChatNavVisibility;
+
+// Hide chat nav by default, update once auth resolves
+updateChatNavVisibility(null);
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { updateChatNavVisibility(null); return; }
+  const snap = await getDoc(doc(db, 'members', user.uid));
+  const profile = snap.exists() ? snap.data() : null;
+  if (profile && user.email === 'coachberry03@gmail.com') profile.role = 'superadmin';
+  updateChatNavVisibility(profile);
+});
