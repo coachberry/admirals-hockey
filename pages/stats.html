@@ -29,6 +29,12 @@
     <select id="seasonSelect" class="season-selector-public"></select>
   </div>
 
+  <div id="statsTBDBanner" style="display:none;background:linear-gradient(135deg,#5D1725,#3c0f17);color:white;border-radius:8px;padding:2.5rem 1.5rem;text-align:center;margin:2rem 0;">
+    <h2 style="font-size:1.4rem;font-weight:700;margin-bottom:0.5rem;">2026-27 Stats Coming Soon</h2>
+    <p style="opacity:0.9;margin-bottom:1.25rem;max-width:560px;margin-left:auto;margin-right:auto;">Information about the 2026-27 roster is to be determined and will be revealed following tryouts.</p>
+    <a href="/tryouts" style="display:inline-block;background:white;color:#5D1725;padding:0.65rem 1.75rem;border-radius:6px;font-weight:700;text-decoration:none;">View Tryout Information</a>
+  </div>
+  <div id="statsSections">
   <!-- Team Stats -->
   <div style="margin-top:2rem; margin-bottom:1rem;">
     <div class="section-header"><h2 class="section-title">Team Stats</h2></div>
@@ -115,6 +121,7 @@
         </tbody>
       </table>
     </div>
+  </div>
   </div>
 
 </div>
@@ -295,7 +302,17 @@
   // ============================================
   // LOAD STATS
   // ============================================
-  async function loadStats(seasonId) {
+  async function loadStats(seasonId, season) {
+    const statsSections = document.getElementById('statsSections');
+    const statsBanner = document.getElementById('statsTBDBanner');
+    if (season && season.rosterTBD) {
+      statsSections.style.display = 'none';
+      statsBanner.style.display = 'block';
+      return;
+    } else {
+      statsSections.style.display = '';
+      statsBanner.style.display = 'none';
+    }
     document.getElementById('skatersBody').innerHTML = '<tr><td colspan="17" class="empty-cell">Loading...</td></tr>';
     document.getElementById('goaliesBody').innerHTML = '<tr><td colspan="20" class="empty-cell">Loading...</td></tr>';
 
@@ -432,7 +449,7 @@
     if (startSeason) {
       select.value = startSeason.id;
       document.getElementById('seasonBadge').textContent = startSeason.label + ' Season';
-      await loadStats(startSeason.id);
+      await loadStats(startSeason.id, startSeason);
       // Set up sort after data loads
       setupSortHeaders('skatersTable', skaterSort, renderSkaters);
       setupSortHeaders('goaliesTable', goalieSort, renderGoalies);
@@ -442,7 +459,7 @@
       const season = seasons.find(s => s.id === e.target.value);
       document.getElementById('seasonBadge').textContent = season.label + ' Season';
       localStorage.setItem('admirals_statsSeasonPublic', e.target.value);
-      await loadStats(e.target.value);
+      await loadStats(e.target.value, season);
     });
   }
 
