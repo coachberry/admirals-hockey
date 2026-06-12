@@ -2319,19 +2319,31 @@ let currentGallerySeasonId = null;
 async function loadGallerySeasons() {
   const sel = document.getElementById('gallerySeason');
   if (!sel) return;
-  const snap = await getDocs(collection(db, 'gallery'));
-  const seasons = [];
-  snap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
-  seasons.sort((a,b) => b.id.localeCompare(a.id));
 
-  sel.innerHTML = seasons.length
-    ? seasons.map(s => `<option value="${s.id}">${s.label || s.id}</option>`).join('')
-    : '<option value="">No seasons yet</option>';
+  // Pull from team seasons
+  const seasonsSnap = await getDocs(collection(db, 'seasons'));
+  const teamSeasons = [];
+  seasonsSnap.forEach(d => teamSeasons.push({ id: d.id, label: d.data().label || d.id, type: 'Team Season' }));
+  teamSeasons.sort((a,b) => b.id.localeCompare(a.id));
 
-  if (seasons.length) {
-    currentGallerySeasonId = seasons[0].id;
-    loadGalleryAlbums(seasons[0].id);
+  // Pull from summer seasons
+  const summerSnap = await getDocs(collection(db, 'summer'));
+  const summerSeasons = [];
+  summerSnap.forEach(d => summerSeasons.push({ id: 'summer-' + d.id, label: (d.data().label || d.id) + ' (Summer)', type: 'Summer League' }));
+  summerSeasons.sort((a,b) => b.id.localeCompare(a.id));
+
+  const allSeasons = [...teamSeasons, ...summerSeasons];
+
+  if (!allSeasons.length) {
+    sel.innerHTML = '<option value="">No seasons found</option>';
+    return;
   }
+
+  sel.innerHTML = `<optgroup label="Team Seasons">${teamSeasons.map(s => `<option value="${s.id}">${s.label}</option>`).join('')}</optgroup>` +
+    (summerSeasons.length ? `<optgroup label="Summer League">${summerSeasons.map(s => `<option value="${s.id}">${s.label}</option>`).join('')}</optgroup>` : '');
+
+  currentGallerySeasonId = allSeasons[0].id;
+  loadGalleryAlbums(allSeasons[0].id);
 
   sel.removeEventListener('change', onGallerySeasonChange);
   sel.addEventListener('change', onGallerySeasonChange);
