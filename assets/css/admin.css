@@ -924,3 +924,60 @@ body {
   font-weight: 700;
   flex-shrink: 0;
 }
+
+/* FORM LABEL GROUPS */
+.form-label-group {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.form-label-group input,
+.form-label-group textarea,
+.form-label-group select {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-label-group input:focus,
+.form-label-group textarea:focus,
+.form-label-group select:focus {
+  outline: none;
+  border-color: var(--primary-maroon);
+  box-shadow: 0 0 0 2px rgba(93,23,37,0.1);
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.form-row .form-label-group {
+  flex: 1;
+}
+
+.form-buttons {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.save-status {
+  font-size: 0.85rem;
+  color: #2e7d32;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  min-height: 1.2rem;
+}
