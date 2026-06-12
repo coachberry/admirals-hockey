@@ -528,18 +528,9 @@ footer {
     padding: 0 0 0 1rem;
   }
 
-  /* Spacer on left to balance hamburger on right */
-  .header-container::before {
-    content: "";
-    width: 40px;
-    flex-shrink: 0;
-  }
-
-  /* Logo centered */
+  /* Logo on left */
   .header-container a:first-child {
-    flex: 1;
-    display: flex;
-    justify-content: center;
+    flex-shrink: 0;
   }
 
   /* Nav element takes no space - dropdown only */
