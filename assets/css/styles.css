@@ -553,6 +553,9 @@ footer {
   .nav-toggle {
     display: flex !important;
     flex-shrink: 0;
+    margin: 0;
+    margin-right: 0.5rem;
+    padding-right: 0;
   }
 
   .header-container {

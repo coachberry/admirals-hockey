@@ -279,3 +279,9 @@ window.syncMobileAuthButtons = syncMobileAuthButtons;
 onAuthStateChanged(auth, () => {
   setTimeout(syncMobileAuthButtons, 100);
 });
+
+// Re-sync mobile auth buttons whenever hamburger menu opens (safety net)
+document.addEventListener('DOMContentLoaded', () => {
+  const toggle = document.getElementById('navToggle');
+  if (toggle) toggle.addEventListener('click', () => setTimeout(syncMobileAuthButtons, 0));
+});
