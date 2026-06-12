@@ -554,23 +554,29 @@ footer {
 #memberLogoutBtn {
   box-sizing: border-box;
   text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  height: 36px;
 }
 
 #adminDashboardBtn {
   background: #c62828 !important;
   color: white !important;
-  border: none !important;
-  border-radius: 4px;
-  padding: 0.4rem 0.9rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-block;
-  line-height: 1.2;
 }
 
 #adminDashboardBtn:hover {
   background: #a31f1f !important;
+}
+
+#memberLogoutBtn {
+  border: 1px solid #c62828;
 }
 
 .member-nav-btn {
