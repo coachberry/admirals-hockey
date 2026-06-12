@@ -549,6 +549,17 @@ footer {
 }
 
 /* MEMBER LOGIN BUTTON */
+.member-nav-btn,
+#adminDashboardBtn,
+#memberLogoutBtn {
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  line-height: 1;
+}
+
 .member-nav-btn {
   background: #5D1725;
   color: white;

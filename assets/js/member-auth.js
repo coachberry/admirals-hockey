@@ -190,6 +190,13 @@ onAuthStateChanged(auth, async (user) => {
     }
     if (signupBtn) signupBtn.style.display = 'none';
 
+    // Show Logout button
+    const logoutBtn = document.getElementById('memberLogoutBtn');
+    if (logoutBtn) {
+      logoutBtn.style.display = 'inline-flex';
+      logoutBtn.onclick = async () => { await doSignOut(); window.location.href = '/index.html'; };
+    }
+
     // Show Admin Dashboard button for admins/superadmins
     const adminBtn = document.getElementById('adminDashboardBtn');
     if (adminBtn) {
