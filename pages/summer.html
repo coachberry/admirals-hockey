@@ -124,6 +124,7 @@
         : `<div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.3);margin-bottom:0.5rem;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">🏒</div>`;
       const players = [...roster].sort((a,b) => parseInt(a.number)-parseInt(b.number))
         .map(p => `<div style="display:flex;align-items:center;gap:0.5rem;padding:4px 0;border-bottom:1px solid #f5f5f5;font-size:0.85rem;">
+          <span style="display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;background:#f0f0f0;color:#5D1725;font-weight:700;font-size:0.75rem;border-radius:4px;">${p.number ?? ''}</span>
           <span style="flex:1;">${p.name}</span>
           ${p.position==='Goalie'?'<span style="background:#5D1725;color:white;font-size:0.65rem;font-weight:700;padding:1px 6px;border-radius:3px;">G</span>':''}
         </div>`).join('');
