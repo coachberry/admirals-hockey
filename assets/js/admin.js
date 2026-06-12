@@ -1242,8 +1242,10 @@ function renderSummerRoster() {
   list.innerHTML = summerRoster.map((p, i) => `
     <div draggable="true" data-index="${i}" style="display:flex;align-items:center;gap:0.5rem;padding:5px 8px;background:white;border:1px solid #eee;border-radius:4px;font-size:0.85rem;cursor:grab;user-select:none;">
       <span style="color:#ccc;font-size:1rem;flex-shrink:0;">⋮⋮</span>
+      <span style="background:#5D1725;color:white;font-weight:700;font-size:0.75rem;border-radius:3px;padding:2px 6px;min-width:24px;text-align:center;flex-shrink:0;">${p.number || '-'}</span>
       <span style="flex:1;">${p.name}</span>
       <span style="color:#5D1725;font-size:0.75rem;font-weight:600;">${p.position === 'Goalie' ? 'G' : ''}</span>
+      <button onclick="editSummerPlayer(${i})" style="background:none;border:1px solid #999;border-radius:3px;color:#555;cursor:pointer;font-size:0.7rem;padding:1px 5px;flex-shrink:0;">Edit</button>
       <button onclick="linkMemberToPlayer(${i})" style="background:none;border:1px solid #999;border-radius:3px;color:${p.memberUid ? '#2e7d32' : '#999'};cursor:pointer;font-size:0.7rem;padding:1px 5px;flex-shrink:0;" title="${p.memberUid ? 'Linked: ' + (p.memberName||p.memberUid) : 'Link to member account'}">${p.memberUid ? '🔗' : 'Link'}</button>
       <button onclick="removeSummerPlayer(${i})" style="background:none;border:none;color:#c62828;cursor:pointer;font-size:1rem;padding:0 4px;flex-shrink:0;">×</button>
     </div>`).join('');
@@ -1323,12 +1325,68 @@ window.removeSummerPlayer = function(index) {
   renderSummerRoster();
 };
 
+window.editSummerPlayer = function(index) {
+  const p = summerRoster[index];
+  const existing = document.getElementById('editPlayerModal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'editPlayerModal';
+  modal.className = 'modal-overlay active';
+  modal.innerHTML = `
+    <div class="modal" style="max-width:400px;">
+      <div class="modal-header">
+        <h2>Edit Player</h2>
+        <button class="modal-close" onclick="document.getElementById('editPlayerModal').remove()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-label-group" style="width:80px;">
+            <label class="field-label">Number</label>
+            <input type="text" id="editPlayerNumber" value="${p.number || ''}" inputmode="numeric" style="text-align:center;">
+          </div>
+          <div class="form-label-group" style="flex:1;">
+            <label class="field-label">Name</label>
+            <input type="text" id="editPlayerName" value="${p.name || ''}">
+          </div>
+        </div>
+        <div class="form-label-group">
+          <label class="field-label">Position</label>
+          <select id="editPlayerPosition">
+            <option value="Skater" ${p.position!=='Goalie'?'selected':''}>Skater</option>
+            <option value="Goalie" ${p.position==='Goalie'?'selected':''}>Goalie</option>
+          </select>
+        </div>
+        <div class="form-buttons">
+          <button id="saveEditPlayerBtn" class="btn-primary">Save</button>
+          <button onclick="document.getElementById('editPlayerModal').remove()" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+
+  document.getElementById('saveEditPlayerBtn').addEventListener('click', () => {
+    summerRoster[index] = {
+      ...p,
+      number: document.getElementById('editPlayerNumber').value.trim(),
+      name: document.getElementById('editPlayerName').value.trim(),
+      position: document.getElementById('editPlayerPosition').value
+    };
+    modal.remove();
+    renderSummerRoster();
+  });
+};
+
 // Bulk roster table
-function addBulkRow(name='', pos='Skater') {
+function addBulkRow(name='', pos='Skater', number='') {
   const tbody = document.getElementById('bulkRosterBody');
   if (!tbody) return;
   const tr = document.createElement('tr');
   tr.innerHTML = `
+    <td style="border:1px solid #ddd;padding:2px;width:60px;">
+      <input type="text" placeholder="#" value="${number}" inputmode="numeric"
+        style="width:100%;border:none;padding:3px 4px;font-size:0.85rem;text-align:center;">
+    </td>
     <td style="border:1px solid #ddd;padding:2px;">
       <input type="text" placeholder="First Last" value="${name}"
         style="width:100%;border:none;padding:3px 4px;font-size:0.85rem;">
@@ -1344,8 +1402,7 @@ function addBulkRow(name='', pos='Skater') {
         style="background:none;border:none;color:#c62828;cursor:pointer;font-size:1rem;padding:0 4px;">×</button>
     </td>`;
   tbody.appendChild(tr);
-  // Focus the number field
-  tr.querySelector('input[type="text"]').focus();
+  tr.querySelector('input[placeholder="#"]').focus();
 }
 
 function initBulkTable() {
@@ -1367,17 +1424,17 @@ if (addAllPlayersBtn) {
     const rows = document.querySelectorAll('#bulkRosterBody tr');
     let added = 0;
     rows.forEach(row => {
-      const input = row.querySelector('input');
+      const inputs = row.querySelectorAll('input');
       const select = row.querySelector('select');
-      const name = input?.value.trim();
+      const number = inputs[0]?.value.trim() || '';
+      const name = inputs[1]?.value.trim();
       if (!name) return;
       const pos = select?.value || 'Skater';
       if (!summerRoster.find(p => p.name === name)) {
-        summerRoster.push({ name, position: pos });
+        summerRoster.push({ name, position: pos, number });
         added++;
       }
     });
-    summerRoster.sort((a, b) => parseInt(a.number) - parseInt(b.number));
     renderSummerRoster();
     // Clear the bulk table rows
     initBulkTable();
