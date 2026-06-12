@@ -51,9 +51,25 @@ header {
   max-width: 1440px;
   margin: 0 auto;
   padding: 0 2rem;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
+  gap: 1rem;
+}
+
+.header-container nav {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.header-container .nav-links {
+  justify-content: center;
+}
+
+/* Auth buttons group - far right on desktop */
+.header-container > div[style*="display:flex"] {
+  justify-self: end;
 }
 
 .logo {
@@ -532,6 +548,31 @@ footer {
   .nav-toggle {
     display: flex !important;
     flex-shrink: 0;
+  }
+
+  .header-container {
+    display: flex !important;
+  }
+
+  .header-container > div[style*="display:flex"] {
+    display: none !important;
+  }
+
+  .header-container {
+    display: flex !important;
+  }
+
+  .header-container > div[style*="display:flex"] {
+    display: none !important;
+  }
+
+  /* Header becomes flex on mobile, hide auth buttons (logo + hamburger only) */
+  .header-container {
+    display: flex !important;
+  }
+
+  .header-container > div[style*="display:flex"] {
+    display: none !important;
   }
 }
 
