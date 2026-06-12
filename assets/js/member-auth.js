@@ -257,17 +257,21 @@ function syncMobileAuthButtons() {
   if (!container) return;
   container.innerHTML = '';
 
-  ['adminDashboardBtn', 'memberNavBtn', 'memberSignupBtn', 'memberLogoutBtn'].forEach(id => {
+  const configs = [
+    { id: 'adminDashboardBtn', cls: 'mab-admin' },
+    { id: 'memberNavBtn',      cls: 'mab-profile' },
+    { id: 'memberSignupBtn',   cls: 'mab-signup' },
+    { id: 'memberLogoutBtn',   cls: 'mab-logout' },
+  ];
+
+  configs.forEach(({ id, cls }) => {
     const original = document.getElementById(id);
     if (!original || original.style.display === 'none') return;
-    const clone = original.cloneNode(true);
-    clone.removeAttribute('id');
-    if (original.tagName === 'A') {
-      clone.addEventListener('click', () => { window.location.href = original.href; });
-    } else {
-      clone.addEventListener('click', () => original.click());
-    }
-    container.appendChild(clone);
+    const btn = document.createElement('button');
+    btn.className = 'mab-btn ' + cls;
+    btn.textContent = original.textContent;
+    btn.addEventListener('click', () => original.click());
+    container.appendChild(btn);
   });
 }
 window.syncMobileAuthButtons = syncMobileAuthButtons;

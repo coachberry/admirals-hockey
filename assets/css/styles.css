@@ -525,7 +525,7 @@ footer {
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 0 0.5rem 0 1rem;
+    padding: 0 0 0 1rem;
   }
 
   /* Spacer on left to balance hamburger on right */
@@ -577,13 +577,33 @@ footer {
     padding: 0 !important;
   }
 
-  .mobile-auth-buttons a,
-  .mobile-auth-buttons button {
+  .mab-btn {
     width: 100%;
     text-align: center;
-    padding: 0.65rem 1rem !important;
-    font-size: 0.9rem !important;
+    padding: 0.65rem 1rem;
+    font-size: 0.9rem;
     border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    border: 1px solid transparent;
+    display: block;
+  }
+
+  .mab-admin {
+    background: #c62828;
+    color: white;
+  }
+
+  .mab-profile, .mab-signup {
+    background: #5D1725;
+    color: white;
+  }
+
+  .mab-logout {
+    background: white;
+    color: #c62828;
+    border: 1px solid #c62828;
   }
 
   .header-container {
@@ -608,13 +628,33 @@ footer {
     padding: 0 !important;
   }
 
-  .mobile-auth-buttons a,
-  .mobile-auth-buttons button {
+  .mab-btn {
     width: 100%;
     text-align: center;
-    padding: 0.65rem 1rem !important;
-    font-size: 0.9rem !important;
+    padding: 0.65rem 1rem;
+    font-size: 0.9rem;
     border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    border: 1px solid transparent;
+    display: block;
+  }
+
+  .mab-admin {
+    background: #c62828;
+    color: white;
+  }
+
+  .mab-profile, .mab-signup {
+    background: #5D1725;
+    color: white;
+  }
+
+  .mab-logout {
+    background: white;
+    color: #c62828;
+    border: 1px solid #c62828;
   }
 
   /* Header becomes flex on mobile, hide auth buttons (logo + hamburger only) */
@@ -640,13 +680,33 @@ footer {
     padding: 0 !important;
   }
 
-  .mobile-auth-buttons a,
-  .mobile-auth-buttons button {
+  .mab-btn {
     width: 100%;
     text-align: center;
-    padding: 0.65rem 1rem !important;
-    font-size: 0.9rem !important;
+    padding: 0.65rem 1rem;
+    font-size: 0.9rem;
     border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    border: 1px solid transparent;
+    display: block;
+  }
+
+  .mab-admin {
+    background: #c62828;
+    color: white;
+  }
+
+  .mab-profile, .mab-signup {
+    background: #5D1725;
+    color: white;
+  }
+
+  .mab-logout {
+    background: white;
+    color: #c62828;
+    border: 1px solid #c62828;
   }
 }
 
