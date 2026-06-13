@@ -51,6 +51,9 @@ async function loadTryoutsData(seasonId) {
   document.getElementById('tryoutsTime').value = data.time || '';
   document.getElementById('tryoutsLocation').value = data.location || '';
   document.getElementById('tryoutsCost').value = data.cost || '';
+  document.getElementById('tryoutsWhoTitle').value = data.whoTitle || '🏒 Who Should Try Out?';
+  document.getElementById('tryoutsExpectTitle').value = data.expectTitle || '⭐ What to Expect';
+  document.getElementById('tryoutsFAQTitle').value = data.faqTitle || '❓ Frequently Asked Questions';
   document.getElementById('tryoutsWho').value = data.whoText || DEFAULT_WHO;
   document.getElementById('tryoutsExpect').value = data.expectText || DEFAULT_EXPECT;
   document.getElementById('tryoutsFAQ').value = data.faqText || DEFAULT_FAQ;
@@ -90,6 +93,9 @@ document.getElementById('saveTryoutsBtn').addEventListener('click', async () => 
     time: document.getElementById('tryoutsTime').value.trim(),
     location: document.getElementById('tryoutsLocation').value.trim(),
     cost: document.getElementById('tryoutsCost').value.trim(),
+    whoTitle: document.getElementById('tryoutsWhoTitle').value.trim(),
+    expectTitle: document.getElementById('tryoutsExpectTitle').value.trim(),
+    faqTitle: document.getElementById('tryoutsFAQTitle').value.trim(),
     whoText: document.getElementById('tryoutsWho').value,
     expectText: document.getElementById('tryoutsExpect').value,
     faqText: document.getElementById('tryoutsFAQ').value,
