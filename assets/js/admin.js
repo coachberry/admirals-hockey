@@ -47,22 +47,31 @@ if (!currentUser) {
         loginBox.innerHTML = `<h1>⚓ Franklin Admirals</h1>
           <h2>Admin Portal</h2>
           <form id="loginForm">
-            <input type="text" id="username" placeholder="Username" required>
+            <input type="email" id="username" placeholder="Email" required>
             <input type="password" id="password" placeholder="Password" required>
             <button type="submit">Login</button>
           </form>
+          <button id="googleLoginBtn" type="button" style="margin-top:0.6rem;width:100%;padding:0.6rem;border:1px solid #ddd;border-radius:6px;background:white;cursor:pointer;font-size:0.9rem;">Sign in with Google</button>
           <p id="loginError" class="error"></p>`;
-        document.getElementById('loginForm').addEventListener('submit', e => {
+        document.getElementById('loginForm').addEventListener('submit', async e => {
           e.preventDefault();
-          const u = document.getElementById('username').value;
-          const p = document.getElementById('password').value;
-          if (users[u] && users[u].password === p) {
-            currentUser = u;
-            localStorage.setItem('admirals_currentUser', u);
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
-          } else {
-            document.getElementById('loginError').textContent = 'Invalid username or password';
+          const email = document.getElementById('username').value;
+          const pw = document.getElementById('password').value;
+          document.getElementById('loginError').textContent = '';
+          try {
+            const { getAuth, signInWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+            await signInWithEmailAndPassword(getAuth(), email, pw);
+          } catch (err) {
+            document.getElementById('loginError').textContent = 'Invalid email or password';
+          }
+        });
+        document.getElementById('googleLoginBtn').addEventListener('click', async () => {
+          document.getElementById('loginError').textContent = '';
+          try {
+            const { getAuth, signInWithPopup, GoogleAuthProvider } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+            await signInWithPopup(getAuth(), new GoogleAuthProvider());
+          } catch (err) {
+            document.getElementById('loginError').textContent = 'Google sign-in failed';
           }
         });
       }
@@ -1831,7 +1840,7 @@ const pagesList = [
   { id: 'news',        label: 'News',          path: '/news' },
   { id: 'events',      label: 'Events',        path: '/events' },
   { id: 'gallery',     label: 'Gallery',       path: '/gallery' },
-  { id: 'summer',      label: 'Summer Hockey', path: '/summer' },
+  { id: 'summer',      label: 'Summer Hockey', path: '/summer-hockey' },
   { id: 'alumni',      label: 'Alumni',        path: '/alumni' },
   { id: 'sponsors',    label: 'Sponsors',      path: '/sponsors' },
   { id: 'tryouts',     label: 'Tryouts',       path: '/tryouts' },

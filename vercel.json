@@ -48,7 +48,7 @@
       "destination": "/pages/chat.html"
     },
     {
-      "source": "/summer",
+      "source": "/summer-hockey",
       "destination": "/pages/summer.html"
     },
     {
@@ -82,6 +82,33 @@
     {
       "source": "/admin",
       "destination": "/admin.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/index.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/admin.html",
+      "destination": "/admin",
+      "permanent": true
+    },
+    {
+      "source": "/pages/summer.html",
+      "destination": "/summer-hockey",
+      "permanent": true
+    },
+    {
+      "source": "/pages/:slug.html",
+      "destination": "/:slug",
+      "permanent": true
+    },
+    {
+      "source": "/summer",
+      "destination": "/summer-hockey",
+      "permanent": true
     }
   ]
 }
