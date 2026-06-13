@@ -2699,4 +2699,116 @@ if (saveContactInfoBtn) {
 
 loadContactInfo();
 
+// ============================================
+// CHAT CHANNELS
+// ============================================
+const CHAT_ROLES = [
+  { id: 'player',     label: 'Player' },
+  { id: 'prospect',   label: 'Prospect' },
+  { id: 'alumni',     label: 'Alumni' },
+  { id: 'coach',      label: 'Coach' },
+  { id: 'rep',        label: 'Team Rep' },
+  { id: 'member',     label: 'Member' },
+  { id: 'admin',      label: 'Admin' },
+  { id: 'superadmin', label: 'Superadmin' },
+];
+
+let ADMIN_CHANNELS = [];
+
+function renderRoleCheckboxes(containerId, prefix, selected) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = CHAT_ROLES.map(r => `
+    <label class="captain-label" style="margin-right:1rem;display:inline-flex;align-items:center;gap:0.3rem;">
+      <input type="checkbox" id="${prefix}_${r.id}" ${selected.includes(r.id) ? 'checked' : ''}> ${r.label}
+    </label>
+  `).join('');
+}
+
+function getCheckedRoles(prefix) {
+  return CHAT_ROLES.filter(r => document.getElementById(`${prefix}_${r.id}`).checked).map(r => r.id);
+}
+
+const channelModal = document.getElementById('channelModal');
+document.getElementById('closeChannelModal').addEventListener('click', () => channelModal.classList.remove('active'));
+document.getElementById('cancelChannelBtn').addEventListener('click', () => channelModal.classList.remove('active'));
+channelModal.addEventListener('click', e => { if (e.target === channelModal) channelModal.classList.remove('active'); });
+
+function openChannelModal(data = null) {
+  document.getElementById('channelModalTitle').textContent = data ? 'Edit Channel' : 'Add Channel';
+  document.getElementById('channelId').value = data?.id || '';
+  document.getElementById('channelName').value = data?.name || '';
+  document.getElementById('channelIcon').value = data?.icon || '💬';
+  document.getElementById('channelDesc').value = data?.desc || '';
+  document.getElementById('channelOrder').value = (data?.order !== undefined && data?.order !== null) ? data.order : '';
+  const defaultRoles = ['player', 'alumni', 'rep', 'admin', 'superadmin'];
+  renderRoleCheckboxes('channelReadRoles', 'chRead', data?.readRoles || defaultRoles);
+  renderRoleCheckboxes('channelWriteRoles', 'chWrite', data?.writeRoles || defaultRoles);
+  channelModal.classList.add('active');
+}
+window.openChannelModal = openChannelModal;
+
+window.editChannel = (id) => {
+  const c = ADMIN_CHANNELS.find(x => x.id === id);
+  if (c) openChannelModal(c);
+};
+
+window.deleteChannel = async (id) => {
+  if (!confirm('Delete this channel? Existing messages will remain but the channel will no longer be selectable.')) return;
+  await deleteDoc(doc(db, 'chatChannels', id));
+  loadChannelsAdmin();
+};
+
+document.getElementById('addChannelBtn').addEventListener('click', () => openChannelModal());
+
+document.getElementById('saveChannelBtn').addEventListener('click', async () => {
+  const name = document.getElementById('channelName').value.trim();
+  if (!name) { alert('Please enter a channel name'); return; }
+  const existingId = document.getElementById('channelId').value;
+  const id = existingId || name.toLowerCase().replace(/^#/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || ('channel-' + Date.now());
+  const data = {
+    name,
+    icon: document.getElementById('channelIcon').value.trim() || '💬',
+    desc: document.getElementById('channelDesc').value.trim(),
+    order: parseInt(document.getElementById('channelOrder').value) || 99,
+    readRoles: getCheckedRoles('chRead'),
+    writeRoles: getCheckedRoles('chWrite'),
+  };
+  await setDoc(doc(db, 'chatChannels', id), data, { merge: true });
+  channelModal.classList.remove('active');
+  loadChannelsAdmin();
+});
+
+async function loadChannelsAdmin() {
+  const list = document.getElementById('channelsList');
+  list.innerHTML = '';
+  const snap = await getDocs(collection(db, 'chatChannels'));
+  ADMIN_CHANNELS = [];
+  snap.forEach(d => ADMIN_CHANNELS.push({ id: d.id, ...d.data() }));
+  ADMIN_CHANNELS.sort((a, b) => (a.order || 99) - (b.order || 99));
+  if (!ADMIN_CHANNELS.length) {
+    list.innerHTML = '<div class="empty-state">No channels yet - the site shows a default #general channel until you add one</div>';
+    return;
+  }
+  ADMIN_CHANNELS.forEach(c => {
+    const item = document.createElement('div');
+    item.className = 'item';
+    const readLabels = (c.readRoles || []).join(', ') || 'none';
+    const writeLabels = (c.writeRoles || []).join(', ') || 'none';
+    item.innerHTML = `
+      <div class="item-info">
+        <div><strong>${c.icon || ''} ${c.name}</strong><span>${c.desc || ''} — Read: ${readLabels} | Post: ${writeLabels}</span></div>
+      </div>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="btn-edit" onclick="editChannel('${c.id}')">Edit</button>
+        <button class="btn-delete" onclick="deleteChannel('${c.id}')">Delete</button>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+document.querySelector('[data-tab="chat"]').addEventListener('click', loadChannelsAdmin);
+
+loadChannelsAdmin();
+
 });
