@@ -236,18 +236,6 @@ function render() {
         childWrap.appendChild(row);
       });
 
-      const avail = availablePages();
-      const addSel = document.createElement('select');
-      addSel.innerHTML = '<option value="">+ Add page to this category...</option>' +
-        avail.map(p => `<option value="${p.id}">${p.label}</option>`).join('');
-      addSel.onchange = () => {
-        if (!addSel.value) return;
-        const page = PAGES.find(p => p.id === addSel.value);
-        item.children.push({ id: page.id, type: 'link', label: page.label, href: page.href });
-        render();
-      };
-      childWrap.appendChild(addSel);
-
       div.appendChild(childWrap);
     } else {
       // editable label for categories only is above; links use PAGES labels (not editable here)
