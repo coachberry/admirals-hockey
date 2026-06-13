@@ -126,6 +126,7 @@
         <button class="tab-btn" data-tab="pages">🔍 Pages</button>
         <button class="tab-btn" data-tab="contactInfo">📞 Contact Page</button>
         <button class="tab-btn" data-tab="settings">⚙️ Settings</button>
+        <button class="tab-btn" data-tab="navigation">🧭 Navigation</button>
       </div>
     </aside>
 
@@ -295,6 +296,24 @@
         </div>
       </div>
       <div id="seasonsList" class="items-list"><div class="empty-state">No seasons added yet</div></div>
+    </div>
+
+    <!-- NAVIGATION TAB -->
+    <div id="navigationTab" class="tab-content">
+      <h2>Site Navigation</h2>
+      <p style="color:#666;font-size:0.9rem;margin-bottom:1rem;">Reorder pages, group pages into dropdown categories, and add label-only category headers. A category with no pages won't appear on the site. Hidden pages (set in the Pages tab) are automatically left out of the menu.</p>
+      <div style="display:flex;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center;">
+        <button id="navAddCategoryBtn" class="btn-primary">+ Add Category</button>
+        <select id="navAddPageSelect" class="season-select" style="max-width:240px;">
+          <option value="">+ Add page to top level...</option>
+        </select>
+        <button id="navResetBtn" class="btn-secondary">Reset to Default</button>
+      </div>
+      <div id="navItemsList" class="items-list"></div>
+      <div class="form-buttons" style="margin-top:1rem;">
+        <button id="saveNavBtn" class="btn-primary">Save Navigation</button>
+      </div>
+      <div id="navSaveStatus" style="margin-top:0.5rem;color:#2e7d32;font-size:0.85rem;"></div>
     </div>
 
     <!-- TRYOUTS TAB -->
@@ -984,6 +1003,7 @@
 
 <script type="module" src="/assets/js/admin.js"></script>
 <script type="module" src="/assets/js/tryouts-admin.js"></script>
+<script type="module" src="/assets/js/nav-admin.js"></script>
 <script type="module" src="/assets/js/game-stats.js"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";

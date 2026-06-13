@@ -29,4 +29,10 @@
       nav.classList.toggle('open');
     });
   }
+
+  // Load custom navigation renderer (no-op unless a custom nav structure is configured)
+  var navScript = document.createElement('script');
+  navScript.type = 'module';
+  navScript.src = '/assets/js/nav-render.js';
+  document.body.appendChild(navScript);
 })();

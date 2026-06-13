@@ -2010,6 +2010,7 @@ const ADMIN_TABS = [
   { id: 'pages',        label: 'Pages' },
   { id: 'seasons',      label: 'Seasons' },
   { id: 'tryouts',      label: 'Tryouts' },
+  { id: 'navigation',   label: 'Navigation' },
 ];
 
 window.showAdminPermissions = async function(uid) {
