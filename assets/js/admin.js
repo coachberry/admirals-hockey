@@ -80,18 +80,20 @@ if (!currentUser) {
 }
 function saveUsers() { localStorage.setItem('admirals_users', JSON.stringify(users)); }
 
-document.getElementById('loginForm').addEventListener('submit', e => {
-  e.preventDefault();
-  const username = document.getElementById('username').value;
-  const password = document.getElementById('password').value;
-  if (users[username] && users[username].password === password) {
-    currentUser = username;
-    localStorage.setItem('admirals_currentUser', username);
-    showDashboard();
-  } else {
-    document.getElementById('loginError').textContent = 'Invalid username or password';
-  }
-});
+if (document.getElementById('loginForm')) {
+  document.getElementById('loginForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    if (users[username] && users[username].password === password) {
+      currentUser = username;
+      localStorage.setItem('admirals_currentUser', username);
+      showDashboard();
+    } else {
+      document.getElementById('loginError').textContent = 'Invalid username or password';
+    }
+  });
+}
 
 document.getElementById('logoutBtn').addEventListener('click', async () => {
   localStorage.removeItem('admirals_currentUser');
