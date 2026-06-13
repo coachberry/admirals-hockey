@@ -81,6 +81,8 @@ header {
   font-weight: 700;
   color: var(--primary-maroon);
   letter-spacing: -0.5px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* HAMBURGER BUTTON - hidden on desktop */
@@ -119,6 +121,18 @@ header {
   display: flex;
   list-style: none;
   gap: 2.5rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+/* Intermediate breakpoint: shrink nav gap/font before switching to hamburger */
+@media (max-width: 1100px) {
+  .nav-links {
+    gap: 1.1rem;
+  }
+  .nav-links a {
+    font-size: 0.85rem;
+  }
 }
 
 .nav-links a {
