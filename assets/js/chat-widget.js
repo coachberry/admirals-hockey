@@ -3,7 +3,7 @@
 // ============================================
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDoc, doc, onSnapshot, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDoc, getDocs, doc, onSnapshot, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
@@ -24,9 +24,11 @@ let isOpen = false;
 let unsubscribe = null;
 let lastSeenCount = parseInt(localStorage.getItem('chat_lastSeen') || '0');
 let totalMessages = 0;
+let CHANNELS = [];
+let currentChannel = null;
 
 // Only show widget on non-chat pages
-if (window.location.pathname.includes('chat.html')) {
+if (window.location.pathname.includes('chat.html') || window.location.pathname === '/chat') {
   // Don't inject widget on the chat page itself
 } else {
   injectWidget();
@@ -53,11 +55,14 @@ function injectWidget() {
       z-index:1000;flex-direction:column;overflow:hidden;border:1px solid #e0e0e0;">
       <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:0.85rem 1rem;
         display:flex;align-items:center;justify-content:space-between;">
-        <div>
+        <div style="min-width:0;flex:1;">
           <div style="color:white;font-weight:700;font-size:0.95rem;">⚓ Team Chat</div>
-          <div style="color:rgba(255,255,255,0.75);font-size:0.75rem;">#general</div>
+          <select id="widgetChannelSelect" style="
+            margin-top:2px;background:transparent;color:rgba(255,255,255,0.85);
+            font-size:0.75rem;border:none;outline:none;cursor:pointer;max-width:100%;">
+          </select>
         </div>
-        <div style="display:flex;gap:0.5rem;align-items:center;">
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-shrink:0;">
           <a href="/chat" style="color:rgba(255,255,255,0.8);font-size:0.75rem;text-decoration:none;
             border:1px solid rgba(255,255,255,0.3);padding:3px 8px;border-radius:4px;">Full View</a>
           <button onclick="toggleChatWidget()" style="background:none;border:none;color:white;
@@ -68,7 +73,7 @@ function injectWidget() {
         display:flex;flex-direction:column;gap:0.5rem;font-size:0.85rem;"></div>
       <div id="widgetInputArea" style="padding:0.6rem;border-top:1px solid #f0f0f0;display:none;">
         <div style="display:flex;gap:0.5rem;">
-          <input type="text" id="widgetInput" placeholder="Message #general..." style="
+          <input type="text" id="widgetInput" placeholder="Message..." style="
             flex:1;padding:0.5rem 0.75rem;border:1px solid #ddd;border-radius:6px;
             font-size:0.85rem;font-family:inherit;outline:none;">
           <button onclick="sendWidgetMessage()" style="background:#5D1725;color:white;border:none;
@@ -91,6 +96,11 @@ function injectWidget() {
   document.getElementById('widgetInput')?.addEventListener('keydown', e => {
     if (e.key === 'Enter') sendWidgetMessage();
   });
+
+  document.getElementById('widgetChannelSelect')?.addEventListener('change', e => {
+    const channel = CHANNELS.find(c => c.id === e.target.value);
+    if (channel) subscribeToChannel(channel);
+  });
 }
 
 window.toggleChatWidget = function() {
@@ -111,13 +121,13 @@ window.toggleChatWidget = function() {
 window.sendWidgetMessage = async function() {
   const input = document.getElementById('widgetInput');
   const text = input?.value.trim();
-  if (!text || !currentUser || !currentProfile) return;
+  if (!text || !currentUser || !currentProfile || !currentChannel) return;
 
-  const canWrite = ['player','alumni','coach','rep','admin','superadmin'].includes(currentProfile.role);
+  const canWrite = (currentChannel.writeRoles || []).includes(currentProfile.role);
   if (!canWrite) return;
 
   input.value = '';
-  await addDoc(collection(db, 'chat', 'general', 'messages'), {
+  await addDoc(collection(db, 'chat', currentChannel.id, 'messages'), {
     uid: currentUser.uid,
     displayName: currentProfile.displayName || currentUser.displayName,
     role: currentProfile.role || 'member',
@@ -150,8 +160,6 @@ function renderWidgetMessages(messages) {
     return;
   }
 
-  const ROLE_LABELS = { superadmin:'Coach', admin:'Admin', player:'Player', prospect:'Prospect', alumni:'Alumni', rep:'Team Rep', member:'Member' };
-
   container.innerHTML = messages.slice(-50).map(msg => {
     const isCoach = msg.role === 'superadmin' || msg.role === 'admin';
     const time = msg.timestamp ? (() => {
@@ -175,6 +183,39 @@ function renderWidgetMessages(messages) {
   if (isOpen) container.scrollTop = 999999;
 }
 
+async function loadChannels() {
+  const snap = await getDocs(collection(db, 'chatChannels'));
+  CHANNELS = [];
+  snap.forEach(d => CHANNELS.push({ id: d.id, ...d.data() }));
+  CHANNELS.sort((a, b) => (a.order || 99) - (b.order || 99));
+  if (!CHANNELS.length) {
+    CHANNELS = [{ id: 'general', name: '#general', desc: 'General team discussion', icon: '💬',
+      readRoles: ['player','alumni','rep','admin','superadmin'],
+      writeRoles: ['player','alumni','rep','admin','superadmin'] }];
+  }
+}
+
+function subscribeToChannel(channel) {
+  currentChannel = channel;
+  localStorage.setItem('chat_widget_channel', channel.id);
+
+  if (unsubscribe) unsubscribe();
+  const q = query(collection(db, 'chat', channel.id, 'messages'), orderBy('timestamp', 'asc'), limit(50));
+  unsubscribe = onSnapshot(q, snap => {
+    renderWidgetMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  });
+
+  const canWrite = (channel.writeRoles || []).includes(currentProfile?.role);
+  document.getElementById('widgetInputArea').style.display = canWrite ? 'block' : 'none';
+  document.getElementById('widgetNoAccess').style.display = canWrite ? 'none' : 'block';
+
+  const input = document.getElementById('widgetInput');
+  if (input) input.placeholder = `Message ${channel.name}...`;
+
+  const select = document.getElementById('widgetChannelSelect');
+  if (select) select.value = channel.id;
+}
+
 onAuthStateChanged(auth, async (user) => {
   const bubble = document.getElementById('chatBubble');
   if (!bubble) return;
@@ -195,24 +236,26 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  const allowedRoles = ['player', 'alumni', 'coach', 'rep', 'admin', 'superadmin'];
-  if (!allowedRoles.includes(currentProfile.role)) {
+  await loadChannels();
+  const readable = CHANNELS.filter(c => (c.readRoles || []).includes(currentProfile.role));
+
+  if (!readable.length) {
     bubble.style.display = 'none';
     return;
   }
 
   bubble.style.display = 'flex';
-
-  // Show input or no-access
-  const canWrite = ['player','alumni','coach','rep','admin','superadmin'].includes(currentProfile.role);
-  document.getElementById('widgetInputArea').style.display = canWrite ? 'block' : 'none';
-  document.getElementById('widgetNoAccess').style.display = canWrite ? 'none' : 'block';
   document.getElementById('widgetLoginPrompt').style.display = 'none';
 
-  // Subscribe to general channel
-  if (unsubscribe) unsubscribe();
-  const q = query(collection(db, 'chat', 'general', 'messages'), orderBy('timestamp', 'asc'), limit(50));
-  unsubscribe = onSnapshot(q, snap => {
-    renderWidgetMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-  });
+  // Populate channel dropdown
+  const select = document.getElementById('widgetChannelSelect');
+  if (select) {
+    select.innerHTML = readable.map(c => `<option value="${c.id}">${c.icon ? c.icon + ' ' : ''}${c.name}</option>`).join('');
+    select.style.display = readable.length > 1 ? 'block' : (readable.length === 1 ? 'block' : 'none');
+  }
+
+  // Restore previously selected channel if still readable, else default to first
+  const saved = localStorage.getItem('chat_widget_channel');
+  const initial = readable.find(c => c.id === saved) || readable[0];
+  subscribeToChannel(initial);
 });
