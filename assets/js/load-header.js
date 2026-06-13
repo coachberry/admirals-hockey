@@ -1,4 +1,10 @@
 (function() {
+  // Hide nav immediately to avoid flashing the default menu before nav-render.js decides
+  var navHideStyle = document.createElement('style');
+  navHideStyle.id = 'nav-hide-style';
+  navHideStyle.textContent = '#navLinks{display:none!important;}';
+  document.head.appendChild(navHideStyle);
+
   var xhr = new XMLHttpRequest();
   xhr.open('GET', '/assets/partials/header.html', false); // synchronous
   try {

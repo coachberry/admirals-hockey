@@ -23,8 +23,11 @@ function hrefToPageId(href) {
 
 async function init() {
   const ul = document.getElementById('navLinks');
-  if (ul) ul.style.display = 'none';
-  function reveal() { if (ul) ul.style.display = ''; }
+  function reveal() {
+    var s = document.getElementById('nav-hide-style');
+    if (s) s.remove();
+    if (ul) ul.style.display = '';
+  }
 
   let navSnap;
   try {

@@ -206,6 +206,12 @@
       .tryouts-hero h1 { font-size: 2.2rem; }
     }
   </style>
+  <style id="tryouts-hide-style">
+    #tryoutsSeasonBadge, #regSubtitle, #tdDate, #tdTime, #tdLocation, #tdCost,
+    #whoTitle, #whoBody, #expectTitle, #expectBody, #faqTitle, #faqBody {
+      visibility: hidden;
+    }
+  </style>
   <script src="/assets/js/page-guard.js"></script>
 </head>
 <body>
@@ -579,6 +585,9 @@ function showRoleFields(role) {
     renderFAQ(data.faqText || DEFAULT_FAQ, document.getElementById('faqBody'));
 
     if (data.embedCode) injectEmbed(data.embedCode);
+
+    const hideStyle = document.getElementById('tryouts-hide-style');
+    if (hideStyle) hideStyle.remove();
   }
 
   init();
