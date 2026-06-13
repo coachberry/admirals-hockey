@@ -147,7 +147,7 @@ function render() {
         empty.style.color = '#999';
         empty.style.fontSize = '0.85rem';
         empty.style.fontStyle = 'italic';
-        empty.textContent = 'No pages in this category yet (won\\'t show on site until you add one)';
+        empty.textContent = 'No pages in this category yet (will not show on site until you add one)';
         childWrap.appendChild(empty);
       }
 
