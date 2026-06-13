@@ -77,9 +77,35 @@ function render() {
     header.style.flexWrap = 'wrap';
     header.style.gap = '0.5rem';
 
-    const title = document.createElement('strong');
-    title.textContent = item.type === 'category' ? `📁 ${item.label} (category)` : `🔗 ${item.label}`;
-    header.appendChild(title);
+    const titleWrap = document.createElement('div');
+    titleWrap.style.display = 'flex';
+    titleWrap.style.alignItems = 'center';
+    titleWrap.style.gap = '0.4rem';
+
+    const icon = document.createElement('span');
+    icon.textContent = item.type === 'category' ? '📁' : '🔗';
+    titleWrap.appendChild(icon);
+
+    const labelInput = document.createElement('input');
+    labelInput.type = 'text';
+    labelInput.value = item.label;
+    labelInput.style.fontWeight = '700';
+    labelInput.style.border = '1px solid #ddd';
+    labelInput.style.borderRadius = '4px';
+    labelInput.style.padding = '0.3rem 0.5rem';
+    labelInput.style.fontSize = '0.95rem';
+    labelInput.oninput = () => { item.label = labelInput.value; };
+    titleWrap.appendChild(labelInput);
+
+    if (item.type === 'category') {
+      const tag = document.createElement('span');
+      tag.textContent = '(category)';
+      tag.style.color = '#999';
+      tag.style.fontSize = '0.8rem';
+      titleWrap.appendChild(tag);
+    }
+
+    header.appendChild(titleWrap);
 
     const controls = document.createElement('div');
     controls.style.display = 'flex';
@@ -159,9 +185,26 @@ function render() {
         row.style.flexWrap = 'wrap';
         row.style.gap = '0.4rem';
 
-        const label = document.createElement('span');
-        label.textContent = `🔗 ${child.label}`;
-        row.appendChild(label);
+        const childWrapLabel = document.createElement('div');
+        childWrapLabel.style.display = 'flex';
+        childWrapLabel.style.alignItems = 'center';
+        childWrapLabel.style.gap = '0.4rem';
+
+        const childIcon = document.createElement('span');
+        childIcon.textContent = '🔗';
+        childWrapLabel.appendChild(childIcon);
+
+        const childLabelInput = document.createElement('input');
+        childLabelInput.type = 'text';
+        childLabelInput.value = child.label;
+        childLabelInput.style.border = '1px solid #ddd';
+        childLabelInput.style.borderRadius = '4px';
+        childLabelInput.style.padding = '0.25rem 0.5rem';
+        childLabelInput.style.fontSize = '0.9rem';
+        childLabelInput.oninput = () => { child.label = childLabelInput.value; };
+        childWrapLabel.appendChild(childLabelInput);
+
+        row.appendChild(childWrapLabel);
 
         const rc = document.createElement('div');
         rc.style.display = 'flex';
