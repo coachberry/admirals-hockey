@@ -22,16 +22,19 @@ function hrefToPageId(href) {
 }
 
 async function init() {
+  const ul = document.getElementById('navLinks');
+  if (ul) ul.style.visibility = 'hidden';
+  function reveal() { if (ul) ul.style.visibility = ''; }
+
   let navSnap;
   try {
     navSnap = await getDoc(doc(db, 'settings', 'navigation'));
-  } catch (e) { return; }
-  if (!navSnap.exists()) return; // no custom nav configured - leave static menu as-is
+  } catch (e) { reveal(); return; }
+  if (!navSnap.exists()) { reveal(); return; } // no custom nav configured - leave static menu as-is
 
   const items = navSnap.data().items;
-  if (!Array.isArray(items) || !items.length) return;
+  if (!Array.isArray(items) || !items.length) { reveal(); return; }
 
-  const ul = document.getElementById('navLinks');
   if (!ul) return;
 
   let hiddenPages = {};
@@ -114,6 +117,8 @@ async function init() {
       }
     });
   });
+
+  reveal();
 }
 
 init();
