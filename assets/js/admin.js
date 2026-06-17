@@ -1774,12 +1774,19 @@ window.viewGameRsvp = async function(gameId, seasonId) {
     const inPlayers = players.filter(p => p.memberUid && rsvps[p.memberUid] === 'yes');
     const outPlayers = players.filter(p => p.memberUid && rsvps[p.memberUid] === 'no');
     const pendingPlayers = players.filter(p => !p.memberUid || !rsvps[p.memberUid]);
+    const rsvpKey = (p) => p.memberUid || 'manual_' + p.name.replace(/[^a-zA-Z0-9]/g, '_');
     function playerRow(p, status) {
-      const color = status === 'yes' ? '#2e7d32' : status === 'no' ? '#c62828' : '#888';
-      const label = status === 'yes' ? '✅ In' : status === 'no' ? '❌ Out' : p.memberUid ? '⏳ No RSVP' : '— Not linked';
+      const key = rsvpKey(p);
+      const inActive = status === 'yes';
+      const outActive = status === 'no';
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:0.88rem;">
-        <span>${p.number ? `<strong>#${p.number}</strong> ` : ''}${p.name}</span>
-        <span style="color:${color};font-weight:600;font-size:0.8rem;">${label}</span>
+        <span>${p.number ? `<strong>#${p.number}</strong> ` : ''}${p.name}${!p.memberUid ? ' <span style="color:#aaa;font-size:0.75rem;">(unlinked)</span>' : ''}</span>
+        <div style="display:flex;gap:0.3rem;">
+          <button onclick="adminSetRsvp('${gameId}','${seasonId}','${key}','${p.name}','yes',${inActive})"
+            style="border-radius:4px;padding:2px 8px;font-size:0.75rem;font-weight:600;cursor:pointer;border:1.5px solid #2e7d32;background:${inActive?'#2e7d32':'white'};color:${inActive?'white':'#2e7d32'};">✅ In</button>
+          <button onclick="adminSetRsvp('${gameId}','${seasonId}','${key}','${p.name}','no',${outActive})"
+            style="border-radius:4px;padding:2px 8px;font-size:0.75rem;font-weight:600;cursor:pointer;border:1.5px solid #c62828;background:${outActive?'#c62828':'white'};color:${outActive?'white':'#c62828'};">❌ Out</button>
+        </div>
       </div>`;
     }
     return `
@@ -1802,6 +1809,17 @@ window.viewGameRsvp = async function(gameId, seasonId) {
         ${renderTeamRsvp(away)}
       </div>
     </div>`;
+};
+
+window.adminSetRsvp = async function(gameId, seasonId, key, name, response, isActive) {
+  const rsvpRef = doc(db, 'summer', seasonId, 'games', gameId, 'rsvps', key);
+  if (isActive) {
+    await deleteDoc(rsvpRef);
+  } else {
+    await setDoc(rsvpRef, { response, name, adminSet: true, timestamp: new Date().toISOString() });
+  }
+  // Refresh modal
+  await window.viewGameRsvp(gameId, seasonId);
 };
 
 // Close RSVP modal
