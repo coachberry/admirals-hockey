@@ -1771,12 +1771,12 @@ window.viewGameRsvp = async function(gameId, seasonId) {
     const roster = Array.isArray(team.roster) ? team.roster : [];
     if (!roster.length) return '<p style="color:#999;font-style:italic;">No players on roster</p>';
     const players = [...roster].sort((a, b) => parseInt(a.number) - parseInt(b.number));
-    const inPlayers = players.filter(p => rsvps[p.uid] === 'yes');
-    const outPlayers = players.filter(p => rsvps[p.uid] === 'no');
-    const pendingPlayers = players.filter(p => !rsvps[p.uid]);
+    const inPlayers = players.filter(p => p.memberUid && rsvps[p.memberUid] === 'yes');
+    const outPlayers = players.filter(p => p.memberUid && rsvps[p.memberUid] === 'no');
+    const pendingPlayers = players.filter(p => !p.memberUid || !rsvps[p.memberUid]);
     function playerRow(p, status) {
       const color = status === 'yes' ? '#2e7d32' : status === 'no' ? '#c62828' : '#888';
-      const label = status === 'yes' ? '✅ In' : status === 'no' ? '❌ Out' : '⏳ No RSVP';
+      const label = status === 'yes' ? '✅ In' : status === 'no' ? '❌ Out' : p.memberUid ? '⏳ No RSVP' : '— Not linked';
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:0.88rem;">
         <span>${p.number ? `<strong>#${p.number}</strong> ` : ''}${p.name}</span>
         <span style="color:${color};font-weight:600;font-size:0.8rem;">${label}</span>
