@@ -1788,7 +1788,7 @@ window.viewGameRsvp = async function(gameId, seasonId) {
         <span style="color:#c62828;">❌ Out: ${outPlayers.length}</span>
         <span style="color:#888;">⏳ No RSVP: ${pendingPlayers.length}</span>
       </div>
-      ${[...inPlayers, ...outPlayers, ...pendingPlayers].map(p => playerRow(p, rsvps[p.uid])).join('')}`;
+      ${[...inPlayers, ...outPlayers, ...pendingPlayers].map(p => playerRow(p, rsvps[p.memberUid])).join('')}`;
   }
 
   content.innerHTML = `
