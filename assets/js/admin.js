@@ -1659,6 +1659,7 @@ async function loadSummerGames() {
           <span>${d}${g.time ? ' · ' + g.time : ''}${g.played ? ' · FINAL' : ' · Upcoming'}</span>
         </div></div>
         <div>
+          <button class="btn-secondary" onclick="viewGameRsvp('${g.id}','${summerCurrentSeasonId}')">📋 RSVP</button>
           <button class="btn-edit" onclick="editSummerGame('${g.id}')">Edit</button>
           <button class="btn-delete" onclick="deleteSummerGame('${g.id}')">Delete</button>
         </div>
@@ -1746,6 +1747,66 @@ if (saveSummerGameBtn) {
     }, 600);
   });
 }
+
+window.viewGameRsvp = async function(gameId, seasonId) {
+  const modal = document.getElementById('summerRsvpModal');
+  const content = document.getElementById('summerRsvpContent');
+  const titleEl = document.getElementById('summerRsvpModalTitle');
+  content.innerHTML = '<p style="color:#999;">Loading...</p>';
+  modal.classList.add('active');
+
+  const gameSnap = await getDoc(doc(db, 'summer', seasonId, 'games', gameId));
+  const game = gameSnap.exists() ? gameSnap.data() : {};
+  const home = summerTeams[game.homeTeamId];
+  const away = summerTeams[game.awayTeamId];
+  const d = game.date ? new Date(game.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }) : '';
+  titleEl.textContent = `${home?.name || '?'} vs ${away?.name || '?'} — ${d}${game.time ? ' · ' + game.time : ''}`;
+
+  const rsvpSnap = await getDocs(collection(db, 'summer', seasonId, 'games', gameId, 'rsvps'));
+  const rsvps = {};
+  rsvpSnap.forEach(d => { rsvps[d.id] = d.data().response; });
+
+  function renderTeamRsvp(team) {
+    if (!team) return '<p style="color:#999;font-style:italic;">Team not found</p>';
+    const roster = Array.isArray(team.roster) ? team.roster : [];
+    if (!roster.length) return '<p style="color:#999;font-style:italic;">No players on roster</p>';
+    const players = [...roster].sort((a, b) => parseInt(a.number) - parseInt(b.number));
+    const inPlayers = players.filter(p => rsvps[p.uid] === 'yes');
+    const outPlayers = players.filter(p => rsvps[p.uid] === 'no');
+    const pendingPlayers = players.filter(p => !rsvps[p.uid]);
+    function playerRow(p, status) {
+      const color = status === 'yes' ? '#2e7d32' : status === 'no' ? '#c62828' : '#888';
+      const label = status === 'yes' ? '✅ In' : status === 'no' ? '❌ Out' : '⏳ No RSVP';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:0.88rem;">
+        <span>${p.number ? `<strong>#${p.number}</strong> ` : ''}${p.name}</span>
+        <span style="color:${color};font-weight:600;font-size:0.8rem;">${label}</span>
+      </div>`;
+    }
+    return `
+      <div style="margin-bottom:0.5rem;display:flex;gap:1rem;font-size:0.82rem;font-weight:600;">
+        <span style="color:#2e7d32;">✅ In: ${inPlayers.length}</span>
+        <span style="color:#c62828;">❌ Out: ${outPlayers.length}</span>
+        <span style="color:#888;">⏳ No RSVP: ${pendingPlayers.length}</span>
+      </div>
+      ${[...inPlayers, ...outPlayers, ...pendingPlayers].map(p => playerRow(p, rsvps[p.uid])).join('')}`;
+  }
+
+  content.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+      <div>
+        <div style="font-weight:700;font-size:1rem;margin-bottom:0.75rem;padding-bottom:0.5rem;border-bottom:2px solid ${home?.color||'#5D1725'};color:${home?.color||'#5D1725'};">${home?.name || 'Home Team'}</div>
+        ${renderTeamRsvp(home)}
+      </div>
+      <div>
+        <div style="font-weight:700;font-size:1rem;margin-bottom:0.75rem;padding-bottom:0.5rem;border-bottom:2px solid ${away?.color||'#5D1725'};color:${away?.color||'#5D1725'};">${away?.name || 'Away Team'}</div>
+        ${renderTeamRsvp(away)}
+      </div>
+    </div>`;
+};
+
+// Close RSVP modal
+const closeSummerRsvpModalBtn = document.getElementById('closeSummerRsvpModal');
+if (closeSummerRsvpModalBtn) closeSummerRsvpModalBtn.addEventListener('click', () => document.getElementById('summerRsvpModal').classList.remove('active'));
 
 window.editSummerGame = async function(id) {
   const snap = await getDoc(doc(db, 'summer', summerCurrentSeasonId, 'games', id));
