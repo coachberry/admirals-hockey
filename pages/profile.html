@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=13">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=14">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=13">
-  <script src="/assets/js/page-guard.js?v=13"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=14">
+  <script src="/assets/js/page-guard.js?v=14"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -290,7 +290,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=13"></script>
+<script src="/assets/js/load-header.js?v=14"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -355,6 +355,7 @@
           <span class="profile-section-title">My Information</span>
         </div>
         <div class="profile-section-body">
+          <h4 style="margin:0 0 0.75rem;color:#5D1725;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.5px;">Account</h4>
           <div class="form-field">
             <label>Full Name</label>
             <input type="text" id="editDisplayName" placeholder="Your full name">
@@ -367,7 +368,45 @@
             <label>New Password <span style="font-weight:400;color:#999;">(leave blank to keep current)</span></label>
             <input type="password" id="editPassword" placeholder="New password">
           </div>
-          <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+
+          <h4 style="margin:1.25rem 0 0.75rem;color:#5D1725;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.5px;">Contact</h4>
+          <div class="form-field">
+            <label>Phone Number <span style="font-weight:400;color:#999;">(optional)</span></label>
+            <input type="tel" id="editPhone" placeholder="e.g. (615) 555-1234">
+          </div>
+
+          <h4 style="margin:1.25rem 0 0.75rem;color:#5D1725;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.5px;">Hockey Info</h4>
+          <div class="form-field">
+            <label>Position <span style="font-weight:400;color:#999;">(optional)</span></label>
+            <select id="editPosition" style="padding:0.6rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;width:100%;">
+              <option value="">Select...</option>
+              <option value="Forward">Forward</option>
+              <option value="Defense">Defense</option>
+              <option value="Goaltender">Goaltender</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Graduation Year <span style="font-weight:400;color:#999;">(optional)</span></label>
+            <input type="number" id="editGradYear" placeholder="e.g. 2027" min="1990" max="2040">
+          </div>
+          <div class="form-field">
+            <label>Years with Admirals Hockey <span style="font-weight:400;color:#999;">(optional)</span></label>
+            <input type="text" id="editYearsWithTeam" placeholder="e.g. 2022-2025 or 2023-Present">
+          </div>
+          <div class="form-field">
+            <label>Jersey Number <span style="font-weight:400;color:#999;">(optional)</span></label>
+            <input type="text" id="editJerseyNumber" placeholder="e.g. 17">
+          </div>
+          <div class="form-field">
+            <label>Hometown <span style="font-weight:400;color:#999;">(optional)</span></label>
+            <input type="text" id="editHometown" placeholder="e.g. Franklin, TN">
+          </div>
+          <div class="form-field">
+            <label>Bio / About Me <span style="font-weight:400;color:#999;">(optional)</span></label>
+            <textarea id="editBio" rows="3" placeholder="Tell the team a little about yourself..." style="width:100%;font-family:inherit;font-size:0.95rem;padding:0.6rem 0.9rem;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;resize:vertical;"></textarea>
+          </div>
+
+          <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;margin-top:1rem;">
             <button class="btn-save" onclick="saveProfileInfo()">Save Changes</button>
             <p id="infoStatus" class="status-msg" style="color:green;margin:0;"></p>
           </div>
@@ -513,7 +552,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=13"></script>
+<script src="/assets/js/load-footer.js?v=14"></script>
 
 <!-- MEMBER MODAL v2 -->
 <div id="memberModal" class="modal-overlay" style="z-index:2000;">
@@ -638,7 +677,7 @@ function showSection(name) {
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=13"></script>
+<script type="module" src="/assets/js/member-auth.js?v=14"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -702,6 +741,13 @@ function showSection(name) {
     document.getElementById('profileRoleBadge').textContent = profile.role || 'member';
     document.getElementById('editDisplayName').value = user.displayName || '';
     document.getElementById('editEmail').value = user.email || '';
+    document.getElementById('editPhone').value = profile.phone || '';
+    document.getElementById('editPosition').value = profile.position || '';
+    document.getElementById('editGradYear').value = profile.gradYear || '';
+    document.getElementById('editYearsWithTeam').value = profile.yearsWithTeam || '';
+    document.getElementById('editJerseyNumber').value = profile.jerseyNumber || '';
+    document.getElementById('editHometown').value = profile.hometown || '';
+    document.getElementById('editBio').value = profile.bio || '';
 
     // Avatar
     const container = document.getElementById('profileAvatarContainer');
@@ -740,17 +786,27 @@ function showSection(name) {
     try {
       if (name !== currentUser.displayName) {
         await updateProfile(currentUser, { displayName: name });
-        await setDoc(doc(db, 'members', currentUser.uid), { displayName: name }, { merge: true });
         document.getElementById('profileDisplayName').textContent = name;
       }
       if (email !== currentUser.email) {
         await updateEmail(currentUser, email);
-        await setDoc(doc(db, 'members', currentUser.uid), { email }, { merge: true });
       }
       if (password) {
         await updatePassword(currentUser, password);
         document.getElementById('editPassword').value = '';
       }
+      // Save all profile fields to Firestore
+      await setDoc(doc(db, 'members', currentUser.uid), {
+        displayName: name,
+        email,
+        phone: document.getElementById('editPhone').value.trim(),
+        position: document.getElementById('editPosition').value,
+        gradYear: document.getElementById('editGradYear').value.trim(),
+        yearsWithTeam: document.getElementById('editYearsWithTeam').value.trim(),
+        jerseyNumber: document.getElementById('editJerseyNumber').value.trim(),
+        hometown: document.getElementById('editHometown').value.trim(),
+        bio: document.getElementById('editBio').value.trim(),
+      }, { merge: true });
       status.textContent = '✅ Saved!';
       status.style.color = 'green';
       setTimeout(() => { status.textContent = ''; }, 3000);
