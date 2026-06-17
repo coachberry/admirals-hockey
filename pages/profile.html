@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=4">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=5">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=4">
-  <script src="/assets/js/page-guard.js?v=4"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=5">
+  <script src="/assets/js/page-guard.js?v=5"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -290,7 +290,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=4"></script>
+<script src="/assets/js/load-header.js?v=5"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -373,6 +373,21 @@
         </div>
         <div class="profile-section-body">
           <div id="myRolesList"></div>
+
+          <div style="background:#f9f9f9;border:1px solid #eee;border-radius:8px;padding:1rem 1.25rem;margin-top:1.25rem;">
+            <div style="font-weight:700;font-size:0.85rem;color:#333;margin-bottom:0.75rem;">🏒 About Roles</div>
+            <p style="font-size:0.85rem;color:#555;line-height:1.6;margin-bottom:0.75rem;">Your role determines what you can access on the Admirals Hockey site. Here's what each role means:</p>
+            <div style="display:flex;flex-direction:column;gap:0.4rem;font-size:0.83rem;color:#444;">
+              <div><strong>Player</strong> — Current FHS Hockey roster member. Full access to team chat, events, and member features.</div>
+              <div><strong>Prospect</strong> — Prospective player interested in trying out. Access to tryout info and basic member features.</div>
+              <div><strong>Alumni</strong> — Former FHS Hockey player. Access to team chat and alumni features.</div>
+              <div><strong>Coach</strong> — Coaching staff member. Full access to team features.</div>
+              <div><strong>Team Rep</strong> — Team representative or manager. Access to team features and events.</div>
+              <div><strong>Member</strong> — Summer league participant or other community member. Basic access.</div>
+            </div>
+            <p style="font-size:0.83rem;color:#888;margin-top:0.75rem;line-height:1.5;">All role requests are reviewed by Coach Berry. You'll keep your current access while your request is pending.</p>
+          </div>
+
           <div id="myRequestsList" style="margin-top:1rem;"></div>
         </div>
       </div>
@@ -489,7 +504,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=4"></script>
+<script src="/assets/js/load-footer.js?v=5"></script>
 
 <!-- MEMBER MODAL v2 -->
 <div id="memberModal" class="modal-overlay" style="z-index:2000;">
@@ -625,7 +640,7 @@ function showSection(name) {
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=4"></script>
+<script type="module" src="/assets/js/member-auth.js?v=5"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -775,15 +790,26 @@ function showSection(name) {
 
     const profile = (await getDoc(doc(db, 'members', currentUser.uid))).data();
     const role = profile?.role || 'member';
-    const roleColors = { player:'#2e7d32', family:'#1565c0', alumni:'#e65100', member:'#666' };
+    const roleColors = { player:'#2e7d32', prospect:'#1565c0', alumni:'#e65100', coach:'#5D1725', rep:'#6a1b9a', member:'#666', admin:'#333', superadmin:'#333' };
+    const roleLabels = { player:'Player', prospect:'Prospective Player', alumni:'Alumni', coach:'Coach', rep:'Team Representative', member:'Member', admin:'Admin', superadmin:'Coach (Admin)' };
+    const roleDescriptions = {
+      player: 'You have full access to team chat, events, and all member features as a current roster player.',
+      prospect: 'You have access to tryout information and basic member features as a prospective player.',
+      alumni: 'You have access to team chat and alumni features as a former FHS Hockey player.',
+      coach: 'You have full access to all team features as a coaching staff member.',
+      rep: 'You have access to team features and events as a team representative.',
+      member: 'You have basic member access as a summer league participant or community member.',
+      admin: 'You have admin access to manage site content.',
+      superadmin: 'You have full admin access to all site features.'
+    };
     rolesList.innerHTML = `
-      <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:#f9f9f9;border-radius:6px;margin-bottom:0.5rem;">
+      <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;background:#f9f9f9;border-radius:6px;margin-bottom:0.5rem;">
         <span style="font-size:1.5rem;">🏒</span>
-        <div>
-          <div style="font-weight:600;text-transform:capitalize;">${role}</div>
-          <div style="font-size:0.8rem;color:#666;">Your current role</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;color:#111;">${roleLabels[role] || role}</div>
+          <div style="font-size:0.8rem;color:#555;margin-top:2px;line-height:1.5;">${roleDescriptions[role] || 'Your current role.'}</div>
         </div>
-        <span style="margin-left:auto;background:${roleColors[role]||'#666'};color:white;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:10px;text-transform:capitalize;">${role}</span>
+        <span style="flex-shrink:0;background:${roleColors[role]||'#666'};color:white;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:10px;">${roleLabels[role] || role}</span>
       </div>`;
 
     const q = query(collection(db, 'roleRequests'), where('uid', '==', currentUser.uid));
@@ -792,17 +818,21 @@ function showSection(name) {
     snap.forEach(d => requests.push({ id: d.id, ...d.data() }));
 
     if (requests.length) {
-      requestsList.innerHTML = `<p style="font-weight:600;color:#555;font-size:0.85rem;margin-bottom:0.5rem;">Role Requests:</p>` +
+      const reqRoleLabels = { player:'Player', prospect:'Prospective Player', alumni:'Alumni', coach:'Coach', rep:'Team Representative', member:'Member' };
+      const statusDesc = { pending: 'Your request has been submitted and is waiting for Coach Berry to review it.', approved: 'Your request was approved!', denied: 'Your request was not approved. Contact Coach Berry with questions.' };
+      requestsList.innerHTML = `<div style="font-weight:700;font-size:0.85rem;color:#333;margin-bottom:0.5rem;margin-top:0.25rem;">📋 Your Role Requests</div>
+        <p style="font-size:0.82rem;color:#777;margin-bottom:0.75rem;line-height:1.5;">Role requests are reviewed by Coach Berry. You'll keep your current access while a request is pending.</p>` +
         requests.map(r => `
           <div class="role-request-card">
-            <div>
-              <div style="font-weight:600;text-transform:capitalize;">${r.requestedRole}</div>
-              <div style="font-size:0.8rem;color:#666;">${r.createdAt ? new Date(r.createdAt).toLocaleDateString() : ''}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;">${reqRoleLabels[r.requestedRole] || r.requestedRole}</div>
+              <div style="font-size:0.78rem;color:#777;margin-top:2px;">${statusDesc[r.status] || ''}</div>
+              <div style="font-size:0.75rem;color:#aaa;margin-top:2px;">${r.createdAt ? 'Submitted ' + new Date(r.createdAt).toLocaleDateString() : ''}</div>
             </div>
             <span class="status-pill status-${r.status}">${r.status}</span>
           </div>`).join('');
     } else {
-      requestsList.innerHTML = '<p style="color:#999;font-style:italic;font-size:0.85rem;">No role requests yet.</p>';
+      requestsList.innerHTML = '<p style="color:#999;font-style:italic;font-size:0.85rem;">No role requests submitted yet.</p>';
     }
   };
 
