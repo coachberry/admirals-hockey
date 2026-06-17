@@ -18,6 +18,7 @@ const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 window.currentMember = null;
 
@@ -94,6 +95,13 @@ async function doGoogleSignIn() {
 async function doSignOut() {
   await signOut(auth);
   window.currentMember = null;
+  // Clear Firebase auth persistence so next visitor starts fresh
+  try {
+    const dbs = await indexedDB.databases();
+    dbs.forEach(db => { if (db.name && db.name.includes('firebase')) indexedDB.deleteDatabase(db.name); });
+  } catch(e) {}
+  // Clear any local/session storage auth keys
+  Object.keys(localStorage).forEach(k => { if (k.includes('firebase') || k.includes('google')) localStorage.removeItem(k); });
 }
 
 // ============================================
