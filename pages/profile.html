@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=2">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=3">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=2">
-  <script src="/assets/js/page-guard.js?v=2"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=3">
+  <script src="/assets/js/page-guard.js?v=3"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -290,7 +290,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=2"></script>
+<script src="/assets/js/load-header.js?v=3"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -448,7 +448,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=2"></script>
+<script src="/assets/js/load-footer.js?v=3"></script>
 
 <!-- MEMBER MODAL v2 -->
 <div id="memberModal" class="modal-overlay" style="z-index:2000;">
@@ -584,10 +584,10 @@ function showSection(name) {
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=2"></script>
+<script type="module" src="/assets/js/member-auth.js?v=3"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 
@@ -865,7 +865,30 @@ function showSection(name) {
     list.innerHTML = html;
   };
 
-
+  window.toggleSummerRsvp = async function(seasonId, gameId, uid, response, isActive) {
+    const rsvpRef = doc(db, 'summer', seasonId, 'games', gameId, 'rsvps', uid);
+    if (isActive) {
+      await deleteDoc(rsvpRef);
+    } else {
+      await setDoc(rsvpRef, { response, uid, name: currentProfile.displayName || '', timestamp: new Date().toISOString() });
+    }
+    // Re-render just this row's buttons
+    const btns = document.getElementById('btns_' + gameId);
+    if (btns) {
+      const newActive = !isActive;
+      const yesActive = newActive && response === 'yes';
+      const noActive = newActive && response === 'no';
+      btns.innerHTML = `
+        <button onclick="toggleSummerRsvp('${seasonId}','${gameId}','${uid}','yes',${yesActive})"
+          style="border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:${yesActive ? '#2e7d32' : 'white'};color:${yesActive ? 'white' : '#2e7d32'};">
+          ✅ In
+        </button>
+        <button onclick="toggleSummerRsvp('${seasonId}','${gameId}','${uid}','no',${noActive})"
+          style="border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:${noActive ? '#c62828' : 'white'};color:${noActive ? 'white' : '#c62828'};">
+          ❌ Out
+        </button>`;
+    }
+  };
 
   window.loadMyTeamEvents = async function() {
     if (!currentUser || !currentProfile) return;
