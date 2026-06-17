@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=11">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=12">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=11">
-  <script src="/assets/js/page-guard.js?v=11"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=12">
+  <script src="/assets/js/page-guard.js?v=12"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -290,7 +290,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=11"></script>
+<script src="/assets/js/load-header.js?v=12"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -313,6 +313,15 @@
 
   <!-- PROFILE LAYOUT -->
   <div id="profileLayout" class="profile-layout" style="display:none;">
+
+    <!-- PROFILE ALERTS -->
+    <div id="profileAlertBanner" style="display:none;grid-column:1/-1;background:#fff8e1;border:1px solid #f0c040;border-radius:8px;padding:1rem 1.25rem;margin-bottom:0.5rem;display:none;align-items:flex-start;gap:0.75rem;">
+      <span style="font-size:1.4rem;flex-shrink:0;">⚠️</span>
+      <div>
+        <div id="profileAlertTitle" style="font-weight:700;color:#333;margin-bottom:0.25rem;"></div>
+        <div id="profileAlertMsg" style="font-size:0.88rem;color:#555;line-height:1.5;"></div>
+      </div>
+    </div>
 
     <!-- SIDEBAR -->
     <div class="profile-sidebar">
@@ -504,7 +513,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=11"></script>
+<script src="/assets/js/load-footer.js?v=12"></script>
 
 <!-- MEMBER MODAL v2 -->
 <div id="memberModal" class="modal-overlay" style="z-index:2000;">
@@ -540,7 +549,7 @@
       </div>
       <div style="padding:1.5rem;display:flex;flex-direction:column;gap:0.75rem;">
         <button onclick="memberGoogleSignIn()" style="display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.75rem;border:1px solid #ddd;border-radius:6px;background:white;font-size:0.95rem;cursor:pointer;">
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px;">Apply with Google
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px;">Sign Up with Google
         </button>
         <div style="display:flex;align-items:center;gap:0.5rem;"><hr style="flex:1;border:none;border-top:1px solid #eee;"><span style="font-size:0.8rem;color:#999;">or</span><hr style="flex:1;border:none;border-top:1px solid #eee;"></div>
 
@@ -593,25 +602,14 @@
         </div>
 
         <p id="applyError" class="member-error" style="color:#c62828;font-size:0.85rem;min-height:1rem;"></p>
-        <button onclick="memberApply()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-size:1rem;font-weight:600;cursor:pointer;">Submit Application</button>
+        <button onclick="memberApply()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-size:1rem;font-weight:600;cursor:pointer;">Sign Up</button>
         <p style="text-align:center;font-size:0.85rem;color:#555;">
           Already have an account? <a href="#" onclick="showMemberView('login')" style="color:#5D1725;font-weight:600;">Sign in</a>
         </p>
       </div>
     </div>
 
-    <!-- PENDING VIEW -->
-    <div class="member-view" id="memberView_pending" style="display:none;">
-      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;text-align:center;">
-        <h2 style="font-size:1.2rem;font-weight:700;">Application Pending</h2>
-      </div>
-      <div style="padding:2rem;text-align:center;">
-        <div style="font-size:3rem;margin-bottom:1rem;">⏳</div>
-        <p style="font-weight:600;color:#111;margin-bottom:0.5rem;">Your application is under review</p>
-        <p style="font-size:0.88rem;color:#555;line-height:1.6;margin-bottom:1.5rem;">Coach Berry will review your application and approve your account. You'll be able to access your profile once approved.</p>
-        <button onclick="memberSignOut();hideMemberModal();" style="background:white;color:#c62828;border:1px solid #c62828;border-radius:6px;padding:0.65rem 1.5rem;font-size:0.9rem;font-weight:600;cursor:pointer;">Sign Out</button>
-      </div>
-    </div>
+
 
   </div>
 </div>
@@ -640,7 +638,7 @@ function showSection(name) {
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=11"></script>
+<script type="module" src="/assets/js/member-auth.js?v=12"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -686,29 +684,9 @@ function showSection(name) {
         snap = await getDoc(doc(db, 'members', user.uid));
       }
       currentProfile = snap.exists() ? snap.data() : { role: 'member', status: 'active', displayName: user.displayName };
-      if (currentProfile.status === 'pending') {
-        // Show pending screen
-        document.getElementById('notLoggedIn').style.display = 'none';
-        document.getElementById('profileLayout').style.display = 'none';
-        let pendingDiv = document.getElementById('pendingApproval');
-        if (!pendingDiv) {
-          pendingDiv = document.createElement('div');
-          pendingDiv.id = 'pendingApproval';
-          pendingDiv.style.cssText = 'text-align:center;padding:4rem 2rem;';
-          pendingDiv.innerHTML = `<div style="font-size:3rem;margin-bottom:1rem;">⏳</div>
-            <h2 style="color:#5D1725;margin-bottom:0.75rem;">Application Pending</h2>
-            <p style="color:#666;margin-bottom:1.5rem;">Coach Berry will review your application. You'll have full access once approved.</p>
-            <button onclick="window.memberSignOut().then(()=>window.location.href='/')" style="background:white;color:#c62828;border:1px solid #c62828;border-radius:6px;padding:0.65rem 1.5rem;font-size:0.9rem;font-weight:600;cursor:pointer;">Sign Out</button>`;
-          document.querySelector('.main-container').prepend(pendingDiv);
-        }
-        pendingDiv.style.display = 'block';
-      } else if (currentProfile.status === 'denied') {
-        document.getElementById('notLoggedIn').innerHTML = '<h2 style="color:#c62828;">Access Denied</h2><p style="color:#666;margin:1rem 0;">Your application was not approved. Contact Coach Berry for more information.</p><button onclick="memberSignOut()" style="background:#c62828;color:white;border:none;border-radius:6px;padding:0.65rem 1.5rem;cursor:pointer;font-weight:600;">Sign Out</button>';
-        document.getElementById('notLoggedIn').style.display = 'block';
-        document.getElementById('profileLayout').style.display = 'none';
-      } else {
-        showProfile(user, currentProfile);
-      }
+      showProfile(user, currentProfile);
+      // Show contextual alert
+      await showProfileAlert(user, currentProfile);
     } else {
       document.getElementById('notLoggedIn').style.display = 'block';
       document.getElementById('profileLayout').style.display = 'none';
@@ -879,6 +857,34 @@ function showSection(name) {
   };
 
   // Load my games (summer + season)
+  async function showProfileAlert(user, profile) {
+    const banner = document.getElementById('profileAlertBanner');
+    const title = document.getElementById('profileAlertTitle');
+    const msg = document.getElementById('profileAlertMsg');
+    if (!banner) return;
+
+    // Check for pending role requests
+    const q = query(collection(db, 'roleRequests'), where('uid', '==', user.uid), where('status', '==', 'pending'));
+    const snap = await getDocs(q);
+    const hasPendingRequest = !snap.empty;
+
+    // Check if Google sign-up with no role request ever submitted
+    const allReqSnap = await getDocs(query(collection(db, 'roleRequests'), where('uid', '==', user.uid)));
+    const hasAnyRequest = !allReqSnap.empty;
+
+    if (profile.googleSignUp && !hasAnyRequest) {
+      banner.style.display = 'flex';
+      title.textContent = 'Welcome! Please select a role.';
+      msg.innerHTML = 'You signed up with Google. Please go to <strong>My Roles → Request a Role</strong> to let us know who you are so Coach Berry can grant you the right access.';
+    } else if (hasPendingRequest) {
+      banner.style.display = 'flex';
+      title.textContent = 'Role Request Pending';
+      msg.textContent = 'Your role request has been submitted and is being reviewed by Coach Berry. You currently have basic member access while your request is pending.';
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+
   window.loadMyGames = async function() {
     if (!currentUser || !currentProfile) return;
     const list = document.getElementById('myGamesList');

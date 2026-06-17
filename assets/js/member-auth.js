@@ -1,5 +1,5 @@
 // ============================================
-// MEMBER AUTH v2
+// MEMBER AUTH v3
 // ============================================
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -70,17 +70,22 @@ async function doSignIn() {
 async function doGoogleSignIn() {
   try {
     const cred = await signInWithPopup(auth, googleProvider);
-    // Check if they have a profile already
     const snap = await getDoc(doc(db, 'members', cred.user.uid));
     if (!snap.exists()) {
-      // New Google user - send to apply flow
-      window._pendingGoogleUser = cred.user;
-      showMemberView('apply');
-      if (document.getElementById('applyName')) document.getElementById('applyName').value = cred.user.displayName || '';
-      if (document.getElementById('applyEmail')) document.getElementById('applyEmail').value = cred.user.email || '';
-    } else {
-      hideMemberModal();
+      // New Google user - create profile immediately, active as member
+      await setDoc(doc(db, 'members', cred.user.uid), {
+        uid: cred.user.uid,
+        email: cred.user.email,
+        displayName: cred.user.displayName || cred.user.email,
+        role: 'member',
+        status: 'active',
+        googleSignUp: true,
+        createdAt: new Date().toISOString()
+      });
     }
+    hideMemberModal();
+    // If on profile page, reload to show alert
+    if (window.location.pathname === '/profile') window.location.reload();
   } catch(e) {
     setError('loginError', e.message);
   }
@@ -92,7 +97,7 @@ async function doSignOut() {
 }
 
 // ============================================
-// APPLY (new account creation)
+// SIGN UP (email/password)
 // ============================================
 async function doApply() {
   const name = document.getElementById('applyName')?.value.trim();
@@ -104,67 +109,52 @@ async function doApply() {
 
   if (!name) { setError('applyError', 'Please enter your name.'); return; }
   if (!email) { setError('applyError', 'Please enter your email.'); return; }
+  if (!password || password.length < 6) { setError('applyError', 'Password must be at least 6 characters.'); return; }
+  if (password !== confirm) { setError('applyError', 'Passwords do not match.'); return; }
 
-  // If not Google sign-in, validate password
-  if (!window._pendingGoogleUser) {
-    if (!password || password.length < 6) { setError('applyError', 'Password must be at least 6 characters.'); return; }
-    if (password !== confirm) { setError('applyError', 'Passwords do not match.'); return; }
-  }
-
-  const applicationData = {
-    displayName: name,
-    email,
-    phone: phone || '',
-    requestedRole: roleType || 'member',
-    status: 'pending',
-    createdAt: new Date().toISOString()
-  };
+  const roleData = { requestedRole: roleType || 'member' };
 
   if (roleType === 'player' || roleType === 'prospect') {
     const gradYear = document.getElementById(roleType === 'player' ? 'applyGradYear' : 'applyProspectGradYear')?.value;
     const position = document.getElementById(roleType === 'player' ? 'applyPosition' : 'applyProspectPosition')?.value;
     if (!gradYear || !position) { setError('applyError', 'Please fill in all required fields.'); return; }
-    applicationData.gradYear = gradYear;
-    applicationData.position = position;
+    roleData.gradYear = gradYear;
+    roleData.position = position;
   } else if (roleType === 'alumni') {
     const gradYear = document.getElementById('applyAlumniGradYear')?.value;
     const yearsPlayed = document.getElementById('applyYearsPlayed')?.value.trim();
     if (!gradYear || !yearsPlayed) { setError('applyError', 'Please fill in all required fields.'); return; }
-    applicationData.gradYear = gradYear;
-    applicationData.yearsPlayed = yearsPlayed;
+    roleData.gradYear = gradYear;
+    roleData.yearsPlayed = yearsPlayed;
   }
 
   try {
-    let uid;
-    let displayName = name;
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(cred.user, { displayName: name });
+    const uid = cred.user.uid;
 
-    if (window._pendingGoogleUser) {
-      uid = window._pendingGoogleUser.uid;
-      await updateProfile(window._pendingGoogleUser, { displayName: name });
-      window._pendingGoogleUser = null;
-    } else {
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(cred.user, { displayName: name });
-      uid = cred.user.uid;
-    }
-
-    // Create member profile with pending status
+    // Create member profile - active immediately as 'member'
     await setDoc(doc(db, 'members', uid), {
       uid,
       email,
       displayName: name,
       phone: phone || '',
       role: 'member',
-      status: 'pending',
-      requestedRole: roleType || 'member',
+      status: 'active',
       createdAt: new Date().toISOString()
     });
 
-    // Also create an application record
-    await addDoc(collection(db, 'applications'), {
-      uid,
-      ...applicationData
-    });
+    // Create role request
+    if (roleType) {
+      await addDoc(collection(db, 'roleRequests'), {
+        uid,
+        memberName: name,
+        email,
+        ...roleData,
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      });
+    }
 
     hideMemberModal();
   } catch(e) {
@@ -181,7 +171,7 @@ onAuthStateChanged(auth, async (user) => {
 
   if (user) {
     const snap = await getDoc(doc(db, 'members', user.uid));
-    const profile = snap.exists() ? snap.data() : { role: 'member', status: 'pending', displayName: user.displayName };
+    const profile = snap.exists() ? snap.data() : { role: 'member', status: 'active', displayName: user.displayName };
     window.currentMember = { ...profile, uid: user.uid };
 
     if (loginBtn) {
@@ -190,17 +180,14 @@ onAuthStateChanged(auth, async (user) => {
     }
     if (signupBtn) signupBtn.style.display = 'none';
 
-    // Show Logout button
     const logoutBtn = document.getElementById('memberLogoutBtn');
     if (logoutBtn) {
       logoutBtn.style.display = 'inline-flex';
       logoutBtn.onclick = async () => { await doSignOut(); window.location.href = '/index.html'; };
     }
 
-    // Show Admin Dashboard button for admins/superadmins
     const adminBtn = document.getElementById('adminDashboardBtn');
     if (adminBtn) {
-      const role = profile.role || 'member';
       const isSuperAdmin = user.email === 'coachberry03@gmail.com';
       if (isSuperAdmin || profile.isAdmin) {
         adminBtn.style.display = 'inline-block';
@@ -233,7 +220,6 @@ window.memberGoogleSignIn = doGoogleSignIn;
 window.memberSignOut = doSignOut;
 window.memberApply = doApply;
 
-// Show/hide role-specific fields in apply form
 window.showApplyFields = function(role) {
   ['player', 'prospect', 'alumni'].forEach(r => {
     const el = document.getElementById('applyFields_' + r);
@@ -241,11 +227,9 @@ window.showApplyFields = function(role) {
   });
 };
 
-// Modal overlay close
 const modal = document.getElementById('memberModal');
 if (modal) modal.addEventListener('click', e => { if (e.target === modal) hideMemberModal(); });
 
-// Button listeners
 const signupBtn = document.getElementById('memberSignupBtn');
 if (signupBtn) signupBtn.onclick = () => showMemberModal('apply');
 
@@ -256,14 +240,12 @@ function syncMobileAuthButtons() {
   const container = document.getElementById('mobileAuthButtons');
   if (!container) return;
   container.innerHTML = '';
-
   const configs = [
     { id: 'adminDashboardBtn', cls: 'mab-admin' },
     { id: 'memberNavBtn',      cls: 'mab-profile' },
     { id: 'memberSignupBtn',   cls: 'mab-signup' },
     { id: 'memberLogoutBtn',   cls: 'mab-logout' },
   ];
-
   configs.forEach(({ id, cls }) => {
     const original = document.getElementById(id);
     if (!original || original.style.display === 'none') return;
@@ -276,23 +258,19 @@ function syncMobileAuthButtons() {
 }
 window.syncMobileAuthButtons = syncMobileAuthButtons;
 
-onAuthStateChanged(auth, () => {
-  setTimeout(syncMobileAuthButtons, 100);
-});
+onAuthStateChanged(auth, () => { setTimeout(syncMobileAuthButtons, 100); });
 
-// Re-sync mobile auth buttons whenever hamburger menu opens (safety net)
 document.addEventListener('DOMContentLoaded', () => {
   const toggle = document.getElementById('navToggle');
   if (toggle) toggle.addEventListener('click', () => setTimeout(syncMobileAuthButtons, 0));
 });
 
 // ============================================
-// HIDE TEAM CHAT NAV LINK FOR UNAUTHORIZED USERS
+// CHAT NAV VISIBILITY
 // ============================================
 function updateChatNavVisibility(profile) {
   const allowedRoles = ['player', 'alumni', 'coach', 'rep', 'admin', 'superadmin'];
   const canSeeChat = profile && allowedRoles.includes(profile.role);
-
   document.querySelectorAll('a[href="/chat"]').forEach(link => {
     const li = link.closest('li');
     if (li) li.style.display = canSeeChat ? '' : 'none';
@@ -301,8 +279,6 @@ function updateChatNavVisibility(profile) {
   });
 }
 window.updateChatNavVisibility = updateChatNavVisibility;
-
-// Hide chat nav by default, update once auth resolves
 updateChatNavVisibility(null);
 onAuthStateChanged(auth, async (user) => {
   if (!user) { updateChatNavVisibility(null); return; }

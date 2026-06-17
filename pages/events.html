@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=11">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=12">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Events - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=11">
-  <link rel="stylesheet" href="/assets/css/events-styles.css?v=11">
-  <script src="/assets/js/page-guard.js?v=11"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=12">
+  <link rel="stylesheet" href="/assets/css/events-styles.css?v=12">
+  <script src="/assets/js/page-guard.js?v=12"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=11"></script>
+<script src="/assets/js/load-header.js?v=12"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -43,7 +43,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=11"></script>
+<script src="/assets/js/load-footer.js?v=12"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -174,7 +174,7 @@
       </div>
       <div style="padding:1.5rem;display:flex;flex-direction:column;gap:0.75rem;">
         <button onclick="memberGoogleSignIn()" style="display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.75rem;border:1px solid #ddd;border-radius:6px;background:white;font-size:0.95rem;cursor:pointer;">
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px;">Apply with Google
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px;">Sign Up with Google
         </button>
         <div style="display:flex;align-items:center;gap:0.5rem;"><hr style="flex:1;border:none;border-top:1px solid #eee;"><span style="font-size:0.8rem;color:#999;">or</span><hr style="flex:1;border:none;border-top:1px solid #eee;"></div>
 
@@ -227,25 +227,14 @@
         </div>
 
         <p id="applyError" class="member-error" style="color:#c62828;font-size:0.85rem;min-height:1rem;"></p>
-        <button onclick="memberApply()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-size:1rem;font-weight:600;cursor:pointer;">Submit Application</button>
+        <button onclick="memberApply()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-size:1rem;font-weight:600;cursor:pointer;">Sign Up</button>
         <p style="text-align:center;font-size:0.85rem;color:#555;">
           Already have an account? <a href="#" onclick="showMemberView('login')" style="color:#5D1725;font-weight:600;">Sign in</a>
         </p>
       </div>
     </div>
 
-    <!-- PENDING VIEW -->
-    <div class="member-view" id="memberView_pending" style="display:none;">
-      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;text-align:center;">
-        <h2 style="font-size:1.2rem;font-weight:700;">Application Pending</h2>
-      </div>
-      <div style="padding:2rem;text-align:center;">
-        <div style="font-size:3rem;margin-bottom:1rem;">⏳</div>
-        <p style="font-weight:600;color:#111;margin-bottom:0.5rem;">Your application is under review</p>
-        <p style="font-size:0.88rem;color:#555;line-height:1.6;margin-bottom:1.5rem;">Coach Berry will review your application and approve your account. You'll be able to access your profile once approved.</p>
-        <button onclick="memberSignOut();hideMemberModal();" style="background:white;color:#c62828;border:1px solid #c62828;border-radius:6px;padding:0.65rem 1.5rem;font-size:0.9rem;font-weight:600;cursor:pointer;">Sign Out</button>
-      </div>
-    </div>
+
 
   </div>
 </div>
@@ -260,7 +249,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=11"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=11"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=12"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=12"></script>
 </body>
 </html>
