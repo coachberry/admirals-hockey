@@ -26,7 +26,7 @@ async function init() {
   function reveal() {
     var s = document.getElementById('nav-hide-style');
     if (s) s.remove();
-    if (ul) ul.style.display = '';
+    // Don't touch ul.style.display - let CSS classes control visibility
   }
 
   let navSnap;
