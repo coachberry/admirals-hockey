@@ -1659,7 +1659,7 @@ async function loadSummerGames() {
           <span>${d}${g.time ? ' · ' + g.time : ''}${g.played ? ' · FINAL' : ' · Upcoming'}</span>
         </div></div>
         <div>
-          <button class="btn-secondary" onclick="viewGameRsvp('${g.id}','${summerCurrentSeasonId}')">📋 RSVP</button>
+          <button class="btn-edit" onclick="viewGameRsvp('${g.id}','${summerCurrentSeasonId}')">📋 RSVP</button>
           <button class="btn-edit" onclick="editSummerGame('${g.id}')">Edit</button>
           <button class="btn-delete" onclick="deleteSummerGame('${g.id}')">Delete</button>
         </div>
