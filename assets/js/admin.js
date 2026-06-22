@@ -33,7 +33,7 @@ if (!currentUser) {
   // Poll for Firebase auth up to 5 seconds
   let attempts = 0;
   const authCheck = setInterval(() => {
-    currentUser = localStorage.getItem('admirals_currentUser') || window._firebaseAdminUser;
+    currentUser = window._firebaseAdminUser || null;
     attempts++;
     if (currentUser) {
       clearInterval(authCheck);
@@ -77,20 +77,7 @@ if (!currentUser) {
     }
   }, 500);
 }
-if (document.getElementById('loginForm')) {
-  document.getElementById('loginForm').addEventListener('submit', e => {
-    e.preventDefault();
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    if (users[username] && users[username].password === password) {
-      currentUser = username;
-      localStorage.setItem('admirals_currentUser', username);
-      showDashboard();
-    } else {
-      document.getElementById('loginError').textContent = 'Invalid username or password';
-    }
-  });
-}
+
 
 document.getElementById('logoutBtn').addEventListener('click', async () => {
   localStorage.removeItem('admirals_currentUser');
@@ -111,7 +98,7 @@ async function showDashboard() {
   document.getElementById('dashboard').style.display = 'block';
   document.getElementById('currentUser').textContent = currentUser;
   document.getElementById('settingsUsername').textContent = currentUser;
-  document.getElementById('settingsEmail').value = users[currentUser]?.email || '';
+  document.getElementById('settingsEmail').value = '';
   await loadSeasons();
   loadNews();
   loadMembersTab();
