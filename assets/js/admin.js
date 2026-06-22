@@ -114,7 +114,9 @@ async function showDashboard() {
   }
 }
 
-if (currentUser) showDashboard();
+// showDashboard is called by the Firebase auth handler in admin.html
+// when _firebaseAdminUser is set. We expose it on window for that.
+window.showDashboard = showDashboard;
 
 // ============================================
 // TABS
