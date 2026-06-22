@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=17">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=18">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=17">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=17">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=18">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=18">
 </head>
 <body>
 
@@ -53,6 +53,8 @@
       window._firebaseAdminUser = isSuperAdmin ? 'admin' : user.email.split('@')[0];
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
+      if (window.showDashboard) window.showDashboard();
+      else { const t = setInterval(() => { if (window.showDashboard) { clearInterval(t); window.showDashboard(); } }, 100); }
     } else if (user) {
       // Logged in but not an admin - show message
       const loginBox = document.querySelector('.login-box');
@@ -1038,10 +1040,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=17"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=17"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=17"></script>
-<script type="module" src="/assets/js/game-stats.js?v=17"></script>
+<script type="module" src="/assets/js/admin.js?v=18"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=18"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=18"></script>
+<script type="module" src="/assets/js/game-stats.js?v=18"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
