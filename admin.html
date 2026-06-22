@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=18">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=19">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=18">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=18">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=19">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=19">
 </head>
 <body>
 
@@ -236,9 +236,9 @@
           <label class="field-label">Post Image (optional)</label>
           <div id="newsImagePreview" class="photo-preview"></div>
           <input type="file" id="newsImage" accept="image/*" style="display:none;">
-          <label class="btn-secondary photo-btn photo-choose-label" style="margin-top:0.5rem;display:inline-block;">
+          <label class="btn-secondary photo-btn photo-choose-label" style="margin-top:0.5rem;display:inline-flex;align-items:center;position:relative;overflow:hidden;cursor:pointer;">
             Choose Image
-            <input type="file" id="newsImageInput" accept="image/*" style="display:none;">
+            <input type="file" id="newsImageInput" accept="image/*" style="opacity:0;position:absolute;inset:0;width:100%;height:100%;cursor:pointer;">
           </label>
           <button type="button" id="removeNewsImage" class="btn-delete photo-btn" style="display:none;">Remove</button>
         </div>
@@ -1040,10 +1040,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=18"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=18"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=18"></script>
-<script type="module" src="/assets/js/game-stats.js?v=18"></script>
+<script type="module" src="/assets/js/admin.js?v=19"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=19"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=19"></script>
+<script type="module" src="/assets/js/game-stats.js?v=19"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";

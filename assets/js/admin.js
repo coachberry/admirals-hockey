@@ -1009,8 +1009,40 @@ window.deleteGame = async (id) => {
 // ============================================
 // NEWS
 // ============================================
-let newsImageData = null;       // ADD THIS
-let currentNewsImageURL = null; // ADD THIS
+let newsImageData = null;
+let currentNewsImageURL = null;
+
+// News image input handler
+const newsImageInput = document.getElementById('newsImageInput');
+if (newsImageInput) {
+  newsImageInput.addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      newsImageData = e.target.result;
+      const preview = document.getElementById('newsImagePreview');
+      if (preview) preview.innerHTML = `<img src="${newsImageData}" style="width:120px;aspect-ratio:16/9;object-fit:cover;border-radius:4px;border:1px solid #ddd;display:block;">`;
+      const removeBtn = document.getElementById('removeNewsImage');
+      if (removeBtn) removeBtn.style.display = 'inline-block';
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// News remove image handler
+const removeNewsImageBtn = document.getElementById('removeNewsImage');
+if (removeNewsImageBtn) {
+  removeNewsImageBtn.addEventListener('click', () => {
+    newsImageData = null;
+    currentNewsImageURL = null;
+    const preview = document.getElementById('newsImagePreview');
+    if (preview) preview.innerHTML = '';
+    removeNewsImageBtn.style.display = 'none';
+    const input = document.getElementById('newsImageInput');
+    if (input) input.value = '';
+  });
+}
 
 document.getElementById('addNewsBtn').addEventListener('click', () => {
   ['newsId','newsTitle','newsDate','newsCategory','newsContent'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
