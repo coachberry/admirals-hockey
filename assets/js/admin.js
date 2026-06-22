@@ -21,8 +21,7 @@ const storage = getStorage(app);
 // ============================================
 // AUTH
 // ============================================
-const users = JSON.parse(localStorage.getItem('admirals_users')) || { admin: { password: 'admin', email: 'coachberry03@gmail.com' } };
-let currentUser = localStorage.getItem('admirals_currentUser');
+let currentUser = null;
 
 // If no localStorage user, wait for Firebase auto-login to set it
 if (!currentUser) {
@@ -78,8 +77,6 @@ if (!currentUser) {
     }
   }, 500);
 }
-function saveUsers() { localStorage.setItem('admirals_users', JSON.stringify(users)); }
-
 if (document.getElementById('loginForm')) {
   document.getElementById('loginForm').addEventListener('submit', e => {
     e.preventDefault();
@@ -2085,7 +2082,6 @@ const ADMIN_TABS = [
   { id: 'gallery',      label: 'Gallery' },
   { id: 'sponsors',     label: 'Sponsors' },
   { id: 'members',      label: 'Members' },
-  { id: 'applications', label: 'Applications' },
   { id: 'pages',        label: 'Pages' },
   { id: 'seasons',      label: 'Seasons' },
   { id: 'tryouts',      label: 'Tryouts' },
@@ -2553,87 +2549,6 @@ window.deletePhoto = async function(seasonId, albumId, photoId, url) {
 
 loadGallerySeasons();
 
-
-// ============================================
-// APPLICATIONS ADMIN
-// ============================================
-async function loadApplicationsTab() {
-  const list = document.getElementById('applicationsList');
-  if (!list) return;
-  list.innerHTML = '<div class="empty-state">Loading...</div>';
-
-  const snap = await getDocs(collection(db, 'applications'));
-  const apps = [];
-  snap.forEach(d => apps.push({ id: d.id, ...d.data() }));
-  apps.sort((a, b) => {
-    const order = { pending: 0, approved: 1, denied: 2 };
-    return (order[a.status]||0) - (order[b.status]||0);
-  });
-
-  const pending = apps.filter(a => a.status === 'pending').length;
-  const badge = document.getElementById('applicationsBadge');
-  if (badge) { badge.textContent = pending; badge.style.display = pending > 0 ? 'inline' : 'none'; }
-
-  if (!apps.length) { list.innerHTML = '<div class="empty-state">No applications yet</div>'; return; }
-
-  const statusBg = { pending:'#fff8e1', approved:'#e8f5e9', denied:'#ffebee' };
-  const statusColor = { pending:'#856404', approved:'#2e7d32', denied:'#c62828' };
-
-  list.innerHTML = apps.map(a => {
-    let details = '';
-    if (a.requestedRole === 'player') details = `${a.position || ''} · Grad ${a.gradYear || ''}`;
-    else if (a.requestedRole === 'alumni') details = `Grad ${a.gradYear || ''} · Played ${a.yearsPlayed || ''}`;
-    else if (a.requestedRole === 'member') details = 'Summer League / Other';
-
-    return `
-      <div class="item" style="background:${statusBg[a.status]||'white'};">
-        <div class="item-info">
-          <div>
-            <strong>${a.displayName || 'Unknown'}</strong>
-            <span>${a.email}</span>
-            ${a.phone ? `<span>📱 ${a.phone}</span>` : ''}
-            <span style="text-transform:capitalize;font-weight:600;color:#5D1725;">${a.requestedRole || 'member'}${details ? ' — ' + details : ''}</span>
-            <span style="color:${statusColor[a.status]};font-weight:600;font-size:0.8rem;">${(a.status||'pending').toUpperCase()}</span>
-          </div>
-        </div>
-        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-          ${a.status === 'pending' ? `
-            <button class="btn-primary" style="font-size:0.8rem;padding:5px 10px;" onclick="approveApplication('${a.id}','${a.uid}','${a.requestedRole||'member'}')">✅ Approve</button>
-            <button class="btn-delete" style="font-size:0.8rem;padding:5px 10px;" onclick="denyApplication('${a.id}','${a.uid}')">❌ Deny</button>
-          ` : ''}
-          <button class="btn-secondary" style="font-size:0.8rem;padding:5px 10px;" onclick="deleteApplication('${a.id}')">Delete</button>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-window.approveApplication = async function(appId, uid, role) {
-  if (!uid) { alert('No user ID found for this application'); return; }
-  // Activate member with approved role
-  await setDoc(doc(db, 'members', uid), {
-    role: role || 'member',
-    status: 'active'
-  }, { merge: true });
-  // Update application status
-  await setDoc(doc(db, 'applications', appId), { status: 'approved' }, { merge: true });
-  loadApplicationsTab();
-  loadMembersTab();
-};
-
-window.denyApplication = async function(appId, uid) {
-  if (!confirm('Deny this application? The user will not be able to access the site.')) return;
-  await setDoc(doc(db, 'applications', appId), { status: 'denied' }, { merge: true });
-  if (uid) await setDoc(doc(db, 'members', uid), { status: 'denied' }, { merge: true });
-  loadApplicationsTab();
-};
-
-window.deleteApplication = async function(appId) {
-  if (!confirm('Delete this application?')) return;
-  await deleteDoc(doc(db, 'applications', appId));
-  loadApplicationsTab();
-};
-
-loadApplicationsTab();
 
 
 // ============================================
