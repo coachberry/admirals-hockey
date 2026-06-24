@@ -31,6 +31,9 @@
   var nav = document.getElementById('navLinks');
   if (btn && nav) {
     btn.addEventListener('click', function() {
+      // Remove hide style so mobile open class can take effect
+      var hideStyle = document.getElementById('nav-hide-style');
+      if (hideStyle) hideStyle.remove();
       btn.classList.toggle('open');
       nav.classList.toggle('open');
     });
