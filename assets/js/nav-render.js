@@ -122,6 +122,19 @@ async function init() {
   });
 
   reveal();
+
+  // Re-bind hamburger after nav rebuild
+  const toggle = document.getElementById('navToggle');
+  if (toggle) {
+    const newToggle = toggle.cloneNode(true);
+    toggle.parentNode.replaceChild(newToggle, toggle);
+    newToggle.addEventListener('click', function() {
+      var hideStyle = document.getElementById('nav-hide-style');
+      if (hideStyle) hideStyle.remove();
+      newToggle.classList.toggle('open');
+      ul.classList.toggle('open');
+    });
+  }
 }
 
 init();
