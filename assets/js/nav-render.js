@@ -26,7 +26,17 @@ async function init() {
   function reveal() {
     var s = document.getElementById('nav-hide-style');
     if (s) s.remove();
-    // Don't touch ul.style.display - let CSS classes control visibility
+    // Re-bind hamburger every time so it always works
+    const toggle = document.getElementById('navToggle');
+    const navUl = document.getElementById('navLinks');
+    if (toggle && navUl) {
+      const newToggle = toggle.cloneNode(true);
+      toggle.parentNode.replaceChild(newToggle, toggle);
+      newToggle.addEventListener('click', function() {
+        newToggle.classList.toggle('open');
+        navUl.classList.toggle('open');
+      });
+    }
   }
 
   let navSnap;
@@ -123,18 +133,7 @@ async function init() {
 
   reveal();
 
-  // Re-bind hamburger after nav rebuild
-  const toggle = document.getElementById('navToggle');
-  if (toggle) {
-    const newToggle = toggle.cloneNode(true);
-    toggle.parentNode.replaceChild(newToggle, toggle);
-    newToggle.addEventListener('click', function() {
-      var hideStyle = document.getElementById('nav-hide-style');
-      if (hideStyle) hideStyle.remove();
-      newToggle.classList.toggle('open');
-      ul.classList.toggle('open');
-    });
-  }
+
 }
 
 init();
