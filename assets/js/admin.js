@@ -2914,7 +2914,7 @@ async function loadTeamEventsAdmin() {
     const item = document.createElement('div');
     item.className = 'item';
     const dateStr = e.date ? new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }) : 'TBD';
-    const roles = (e.invitedRoles && e.invitedRoles.length) ? e.invitedRoles.join(', ') : 'all roles';
+    const roles = (e.invitedRoles && e.invitedRoles.length) ? e.invitedRoles.join(', ') : 'none (view only)';
     item.innerHTML = `
       <div class="item-info">
         <div>
