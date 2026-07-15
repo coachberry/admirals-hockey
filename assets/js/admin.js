@@ -2773,7 +2773,8 @@ if (saveHeroBtn) {
   });
 }
 
-document.querySelector('[data-tab="pageheroes"]').addEventListener('click', loadPageHeroes);
+const pageheroesTabBtn = document.querySelector('[data-tab="pageheroes"]');
+if (pageheroesTabBtn) pageheroesTabBtn.addEventListener('click', loadPageHeroes);
 loadPageHeroes();
 
 // ============================================
