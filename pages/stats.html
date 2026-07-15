@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=43">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=44">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Statistics - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=43">
-  <link rel="stylesheet" href="/assets/css/stats-styles.css?v=43">
-  <script src="/assets/js/page-guard.js?v=43"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=44">
+  <link rel="stylesheet" href="/assets/css/stats-styles.css?v=44">
+  <script src="/assets/js/page-guard.js?v=44"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=43" defer></script>
-<script src="/assets/js/load-header.js?v=43"></script>
+<script src="/assets/js/load-hero.js?v=44" defer></script>
+<script src="/assets/js/load-header.js?v=44"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -124,7 +124,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=43"></script>
+<script src="/assets/js/load-footer.js?v=44"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -406,7 +406,7 @@
     });
     currentTotSkater = tot;
 
-    currentRegularGoalies = Object.values(goalieStats).filter(g => !g.isEmptyNet && g.name && g.name.trim() !== '' && g.name !== '?');
+    currentRegularGoalies = Object.values(goalieStats).filter(g => !g.isEmptyNet && g.name && g.name.trim() !== '' && g.name !== '?' && (g.min > 0 || g.sa > 0 || g.ga > 0));
     currentEmptyNet = goalieStats['EMPTY_NET'];
 
     const gt = { gs:0, gp:0, w:0, l:0, t:0, otw:0, otl:0, sow:0, sol:0, min:0, sa:0, sv:0, ga:0, shutouts:0, assists:0, pim:0 };
@@ -588,7 +588,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=43"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=43"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=44"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=44"></script>
 </body>
 </html>
