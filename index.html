@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=45">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=46">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Franklin High School Hockey - Admirals</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=45">
-  <link rel="stylesheet" href="/assets/css/home-styles.css?v=45">
-  <script src="/assets/js/page-guard.js?v=45"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=46">
+  <link rel="stylesheet" href="/assets/css/home-styles.css?v=46">
+  <script src="/assets/js/page-guard.js?v=46"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=45"></script>
+<script src="/assets/js/load-header.js?v=46"></script>
 
 <!-- FEATURED NEWS SECTION -->
 <div id="featuredSection" class="featured-section">
@@ -71,7 +71,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=45"></script>
+<script src="/assets/js/load-footer.js?v=46"></script>
 
 <!-- Non-module script so onclick attrs can reach these functions -->
 <script>
@@ -317,10 +317,14 @@
   }
 
   async function loadUpcomingEvents() {
-    const snap = await getDocs(collection(db, 'events'));
-    const events = [];
     const today = new Date().toISOString().split('T')[0];
-    snap.forEach(d => { const e = { id: d.id, ...d.data() }; if (e.date >= today) events.push(e); });
+    const [evSnap, teSnap] = await Promise.all([
+      getDocs(collection(db, 'events')),
+      getDocs(collection(db, 'teamEvents'))
+    ]);
+    const events = [];
+    evSnap.forEach(d => { const e = { id: d.id, ...d.data() }; if (e.date >= today) events.push(e); });
+    teSnap.forEach(d => { const e = { id: d.id, ...d.data() }; if (e.date >= today && e.public !== false) events.push(e); });
     events.sort((a, b) => a.date.localeCompare(b.date));
     const list = document.getElementById('upcomingEventsList');
     if (!events.length) { list.innerHTML = '<p style="color:#999;font-size:0.9rem;">No upcoming events</p>'; return; }
@@ -452,7 +456,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=45"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=45"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=46"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=46"></script>
 </body>
 </html>
