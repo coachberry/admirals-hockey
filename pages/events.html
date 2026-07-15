@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=29">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=30">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Events - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=29">
-  <link rel="stylesheet" href="/assets/css/events-styles.css?v=29">
-  <script src="/assets/js/page-guard.js?v=29"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=30">
+  <link rel="stylesheet" href="/assets/css/events-styles.css?v=30">
+  <script src="/assets/js/page-guard.js?v=30"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=29"></script>
+<script src="/assets/js/load-header.js?v=30"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -50,7 +50,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=29"></script>
+<script src="/assets/js/load-footer.js?v=30"></script>
 
 <script type="module">
   import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -118,38 +118,42 @@
   function buildTeamEventCard(e, userProfile) {
     const canRsvp = userProfile && (e.invitedRoles || []).includes(userProfile.role);
     const d = new Date(e.date + 'T12:00:00');
-    const dateStr = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
-    const timeStr = e.time ? (() => { const [h,m] = e.time.split(':'); const hr=parseInt(h); return (hr%12||12)+':'+m+' '+(hr>=12?'PM':'AM'); })() : '';
+    const p = e.time ? e.time.split(':') : null;
+    const timeStr = p ? ((parseInt(p[0])%12||12) + ':' + p[1] + ' ' + (parseInt(p[0])>=12?'PM':'AM')) : '';
     const rsvpStatus = e._userRsvp;
     const inActive = rsvpStatus === 'yes';
     const outActive = rsvpStatus === 'no';
-    return `
-      <div class="event-card" style="position:relative;">
-        <div class="event-card-body">
-          <div class="event-card-top">
-            <div class="event-date-block">
-              <div class="event-month">${d.toLocaleDateString('en-US',{month:'short'})}</div>
-              <div class="event-day">${d.getDate()}</div>
-              <div class="event-year">${d.getFullYear()}</div>
-            </div>
-            <div class="event-info">
-              <span class="event-type-tag" style="background:#5D1725;">Team Event</span>
-              ${e.public === false ? '<span style="font-size:0.7rem;background:#333;color:white;padding:2px 6px;border-radius:3px;margin-left:4px;">🔒 Members Only</span>' : ''}
-              <h3 class="event-name">${e.name}</h3>
-              ${timeStr ? `<div class="event-meta">🕐 ${timeStr}</div>` : ''}
-              ${e.location ? `<div class="event-meta">📍 ${e.location}</div>` : ''}
-            </div>
-          </div>
-          ${e.description ? `<p class="event-details">${e.description}</p>` : ''}
-          ${canRsvp ? `
-            <div style="margin-top:0.75rem;display:flex;gap:0.5rem;align-items:center;">
-              <span style="font-size:0.85rem;font-weight:600;color:#555;">RSVP:</span>
-              <button onclick="rsvpTeamEvent('${e.id}','yes',${inActive})" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:${inActive?'#2e7d32':'white'};color:${inActive?'white':'#2e7d32'};">✅ In</button>
-              <button onclick="rsvpTeamEvent('${e.id}','no',${outActive})" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:${outActive?'#c62828':'white'};color:${outActive?'white':'#c62828'};">❌ Out</button>
-              ${rsvpStatus ? `<span style="font-size:0.8rem;color:#888;">You said: ${rsvpStatus === 'yes' ? 'In ✅' : 'Out ❌'}</span>` : ''}
-            </div>` : userProfile ? '<p style="font-size:0.82rem;color:#999;margin-top:0.5rem;">You are not invited to RSVP for this event.</p>' : '<p style="font-size:0.82rem;color:#999;margin-top:0.5rem;"><a href="#" onclick="window.showMemberModal&amp;&amp;window.showMemberModal('login')" style="color:#5D1725;font-weight:600;">Log in</a> to RSVP</p>'}
-        </div>
-      </div>`;
+    let rsvpHtml = '';
+    if (canRsvp) {
+      const statusHtml = rsvpStatus ? '<span style="font-size:0.8rem;color:#888;">You said: ' + (rsvpStatus === 'yes' ? 'In' : 'Out') + '</span>' : '';
+      rsvpHtml = '<div style="margin-top:0.75rem;display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">'
+        + '<span style="font-size:0.85rem;font-weight:600;color:#555;">RSVP:</span>'
+        + '<button onclick="rsvpTeamEvent('' + e.id + '','yes',' + inActive + ')" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:' + (inActive?'#2e7d32':'white') + ';color:' + (inActive?'white':'#2e7d32') + ';">In</button>'
+        + '<button onclick="rsvpTeamEvent('' + e.id + '','no',' + outActive + ')" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:' + (outActive?'#c62828':'white') + ';color:' + (outActive?'white':'#c62828') + ';">Out</button>'
+        + statusHtml + '</div>';
+    } else if (userProfile) {
+      rsvpHtml = '<p style="font-size:0.82rem;color:#999;margin-top:0.5rem;">You are not invited to RSVP for this event.</p>';
+    } else {
+      rsvpHtml = '<p style="font-size:0.82rem;color:#999;margin-top:0.5rem;"><a href="#" onclick="window.showMemberModal&&window.showMemberModal('login')" style="color:#5D1725;font-weight:600;">Log in</a> to RSVP</p>';
+    }
+    return '<div class="event-card">'
+      + '<div class="event-card-body">'
+      + '<div class="event-card-top">'
+      + '<div class="event-date-block">'
+      + '<div class="event-month">' + d.toLocaleDateString('en-US',{month:'short'}) + '</div>'
+      + '<div class="event-day">' + d.getDate() + '</div>'
+      + '<div class="event-year">' + d.getFullYear() + '</div>'
+      + '</div>'
+      + '<div class="event-info">'
+      + '<span class="event-type-tag" style="background:#5D1725;">Team Event</span>'
+      + (e.public === false ? '<span style="font-size:0.7rem;background:#333;color:white;padding:2px 6px;border-radius:3px;margin-left:4px;">Members Only</span>' : '')
+      + '<h3 class="event-name">' + e.name + '</h3>'
+      + (timeStr ? '<div class="event-meta">' + timeStr + '</div>' : '')
+      + (e.location ? '<div class="event-meta">' + e.location + '</div>' : '')
+      + '</div></div>'
+      + (e.description ? '<p class="event-details">' + e.description + '</p>' : '')
+      + rsvpHtml
+      + '</div></div>';
   }
 
   window.rsvpTeamEvent = async function(eventId, response, isActive) {
@@ -351,7 +355,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=29"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=29"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=30"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=30"></script>
 </body>
 </html>
