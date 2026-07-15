@@ -91,10 +91,12 @@ async function init() {
     ul.appendChild(fragment);
   }
 
-  // Active link highlight
+  // Active link highlight (skip dropdown toggles which link to #)
   const currentPage = window.location.pathname.split('/').pop() || '';
   ul.querySelectorAll('a[href]').forEach(a => {
+    if (a.classList.contains('nav-dropdown-toggle')) return;
     const href = a.getAttribute('href');
+    if (!href || href === '#') return;
     const m = href.match(/\/([a-zA-Z0-9-]+)(?:\.html)?$/);
     const hrefSlug = m ? m[1] : '';
     if (hrefSlug === currentPage || (currentPage === '' && (href === '/' || href === '/index.html'))) {
