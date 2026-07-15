@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=31">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=32">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Events - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=31">
-  <link rel="stylesheet" href="/assets/css/events-styles.css?v=31">
-  <script src="/assets/js/page-guard.js?v=31"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=32">
+  <link rel="stylesheet" href="/assets/css/events-styles.css?v=32">
+  <script src="/assets/js/page-guard.js?v=32"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=31"></script>
+<script src="/assets/js/load-header.js?v=32"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -26,16 +26,9 @@
 
   <div style="margin-top:2rem; margin-bottom:3rem;">
     <div class="section-header">
-      <h2 class="section-title">Upcoming Events</h2>
+      <h2 class="section-title">Events</h2>
     </div>
     <div id="upcomingEvents" class="events-list">
-      <p style="color:#666;font-style:italic;">Loading...</p>
-    </div>
-
-    <div class="section-header" style="margin-top:3rem;">
-      <h2 class="section-title">Team Events</h2>
-    </div>
-    <div id="teamEventsSection" class="events-list">
       <p style="color:#666;font-style:italic;">Loading...</p>
     </div>
 
@@ -50,7 +43,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=31"></script>
+<script src="/assets/js/load-footer.js?v=32"></script>
 
 <script type="module">
   import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -187,25 +180,28 @@
     loadTeamEvents();
   };
 
-  async function loadTeamEvents() {
-    const el = document.getElementById('teamEventsSection');
-    const snap = await getDocs(collection(db, 'teamEvents'));
-    const events = [];
-    snap.forEach(d => events.push({ id: d.id, ...d.data() }));
-
-    const uid = auth.currentUser?.uid;
+  async function loadAllEvents() {
     const today = new Date().toISOString().split('T')[0];
-    const upcoming = events
-      .filter(e => !e.date || e.date >= today)
-      .filter(e => e.public !== false || (currentMemberProfile && (e.invitedRoles || []).includes(currentMemberProfile.role)));
+    const uid = auth.currentUser && auth.currentUser.uid;
 
-    upcoming.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+    // Load public events
+    const evSnap = await getDocs(collection(db, 'events'));
+    const publicEvents = [];
+    evSnap.forEach(d => publicEvents.push({ id: d.id, _type: 'public', ...d.data() }));
 
-    if (!upcoming.length) { el.innerHTML = '<p style="color:#666;font-style:italic;">No upcoming team events.</p>'; return; }
+    // Load team events (filter by visibility/role)
+    const teSnap = await getDocs(collection(db, 'teamEvents'));
+    const teamEvents = [];
+    teSnap.forEach(d => {
+      const e = { id: d.id, _type: 'team', ...d.data() };
+      if (e.public !== false || (currentMemberProfile && (e.invitedRoles || []).includes(currentMemberProfile.role))) {
+        teamEvents.push(e);
+      }
+    });
 
-    // Load user RSVPs
+    // Load RSVPs for team events if logged in
     if (uid) {
-      await Promise.all(upcoming.map(async e => {
+      await Promise.all(teamEvents.map(async e => {
         try {
           const r = await getDoc(doc(db, 'teamEvents', e.id, 'rsvps', uid));
           e._userRsvp = r.exists() ? r.data().response : null;
@@ -213,32 +209,25 @@
       }));
     }
 
-    el.innerHTML = upcoming.map(e => buildTeamEventCard(e, currentMemberProfile)).join('');
-  }
+    const all = [...publicEvents, ...teamEvents];
+    all.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
 
-  async function loadEvents() {
-    const snap = await getDocs(collection(db, 'events'));
-    const events = [];
-    snap.forEach(d => events.push({ id: d.id, ...d.data() }));
-    events.sort((a, b) => a.date.localeCompare(b.date));
-
-    const today = new Date().toISOString().split('T')[0];
-    const upcoming = events.filter(e => e.date >= today);
-    const past = events.filter(e => e.date < today).reverse();
+    const upcoming = all.filter(e => !e.date || e.date >= today);
+    const past = all.filter(e => e.date && e.date < today).reverse();
 
     const upcomingEl = document.getElementById('upcomingEvents');
     const pastEl = document.getElementById('pastEvents');
 
     upcomingEl.innerHTML = upcoming.length
-      ? upcoming.map(e => buildEventCard(e, false)).join('')
+      ? upcoming.map(e => e._type === 'team' ? buildTeamEventCard(e, currentMemberProfile) : buildEventCard(e, false)).join('')
       : '<p style="color:#666;font-style:italic;">No upcoming events</p>';
 
     pastEl.innerHTML = past.length
-      ? past.map(e => buildEventCard(e, true)).join('')
+      ? past.map(e => e._type === 'team' ? buildTeamEventCard(e, currentMemberProfile) : buildEventCard(e, true)).join('')
       : '<p style="color:#666;font-style:italic;">No past events</p>';
   }
 
-  loadEvents();
+  loadAllEvents();
 
   onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -250,7 +239,7 @@
     } else {
       currentMemberProfile = null;
     }
-    loadTeamEvents();
+    loadAllEvents();
   });
 
   // Mobile nav
@@ -373,7 +362,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=31"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=31"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=32"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=32"></script>
 </body>
 </html>
