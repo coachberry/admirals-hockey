@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=27">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=28">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Events - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=27">
-  <link rel="stylesheet" href="/assets/css/events-styles.css?v=27">
-  <script src="/assets/js/page-guard.js?v=27"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=28">
+  <link rel="stylesheet" href="/assets/css/events-styles.css?v=28">
+  <script src="/assets/js/page-guard.js?v=28"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=27"></script>
+<script src="/assets/js/load-header.js?v=28"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -50,7 +50,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=27"></script>
+<script src="/assets/js/load-footer.js?v=28"></script>
 
 <script type="module">
   import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -147,7 +147,7 @@
               <button onclick="rsvpTeamEvent('${e.id}','yes',${inActive})" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:${inActive?'#2e7d32':'white'};color:${inActive?'white':'#2e7d32'};">✅ In</button>
               <button onclick="rsvpTeamEvent('${e.id}','no',${outActive})" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:${outActive?'#c62828':'white'};color:${outActive?'white':'#c62828'};">❌ Out</button>
               ${rsvpStatus ? `<span style="font-size:0.8rem;color:#888;">You said: ${rsvpStatus === 'yes' ? 'In ✅' : 'Out ❌'}</span>` : ''}
-            </div>` : userProfile ? '<p style="font-size:0.82rem;color:#999;margin-top:0.5rem;">You are not invited to RSVP for this event.</p>' : '<p style="font-size:0.82rem;color:#999;margin-top:0.5rem;"><a href="#" onclick="showMemberModal('login')" style="color:#5D1725;font-weight:600;">Log in</a> to RSVP</p>'}
+            </div>` : userProfile ? '<p style="font-size:0.82rem;color:#999;margin-top:0.5rem;">You are not invited to RSVP for this event.</p>' : '<p style="font-size:0.82rem;color:#999;margin-top:0.5rem;"><a href="#" onclick="window.showMemberModal&amp;&amp;window.showMemberModal('login')" style="color:#5D1725;font-weight:600;">Log in</a> to RSVP</p>'}
         </div>
       </div>`;
   }
@@ -351,7 +351,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=27"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=27"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=28"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=28"></script>
 </body>
 </html>
