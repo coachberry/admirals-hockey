@@ -2694,6 +2694,8 @@ async function loadContactInfo() {
   document.getElementById('ciAddress1').value = data.address1 || '810 Hillsboro Rd';
   document.getElementById('ciAddress2').value = data.address2 || 'Franklin, TN 37064';
   document.getElementById('ciMapLink').value = data.mapLink || 'https://maps.google.com/maps?q=Franklin+High+School';
+  document.getElementById('ciTeamEmail').value = data.teamEmail || '';
+  document.getElementById('ciTeamPhone').value = data.teamPhone || '';
 }
 
 const saveContactInfoBtn = document.getElementById('saveContactInfoBtn');
@@ -2705,7 +2707,9 @@ if (saveContactInfoBtn) {
       schoolName: document.getElementById('ciSchoolName').value.trim(),
       address1: document.getElementById('ciAddress1').value.trim(),
       address2: document.getElementById('ciAddress2').value.trim(),
-      mapLink: document.getElementById('ciMapLink').value.trim()
+      mapLink: document.getElementById('ciMapLink').value.trim(),
+      teamEmail: document.getElementById('ciTeamEmail').value.trim(),
+      teamPhone: document.getElementById('ciTeamPhone').value.trim()
     };
     await setDoc(doc(db, 'settings', 'contactInfo'), data);
     document.getElementById('contactInfoStatus').textContent = '✅ Saved!';
@@ -2714,6 +2718,51 @@ if (saveContactInfoBtn) {
 }
 
 loadContactInfo();
+
+// ============================================
+// FOOTER QUICK LINKS
+// ============================================
+const FOOTER_LINK_OPTIONS = [
+  { id: 'home',        label: 'Home',          href: '/index.html' },
+  { id: 'schedule',    label: 'Schedule',      href: '/schedule' },
+  { id: 'roster',      label: 'Roster',        href: '/roster' },
+  { id: 'stats',       label: 'Stats',         href: '/stats' },
+  { id: 'leaderboard', label: 'Leaderboard',   href: '/leaderboard' },
+  { id: 'news',        label: 'News',          href: '/news' },
+  { id: 'chat',        label: 'Team Chat',     href: '/chat' },
+  { id: 'events',      label: 'Events',        href: '/events' },
+  { id: 'gallery',     label: 'Gallery',       href: '/gallery' },
+  { id: 'summer',      label: 'Summer Hockey', href: '/summer-hockey' },
+  { id: 'alumni',      label: 'Alumni',        href: '/alumni' },
+  { id: 'sponsors',    label: 'Sponsors',      href: '/sponsors' },
+  { id: 'tryouts',     label: 'Tryouts',       href: '/tryouts' },
+  { id: 'contact',     label: 'Contact',       href: '/contact' },
+];
+
+async function loadFooterLinks() {
+  const snap = await getDoc(doc(db, 'settings', 'footerLinks'));
+  const saved = snap.exists() ? (snap.data().links || []) : FOOTER_LINK_OPTIONS.map(l => l.id);
+  const container = document.getElementById('footerLinksChecks');
+  if (!container) return;
+  container.innerHTML = FOOTER_LINK_OPTIONS.map(l => `
+    <label class="captain-label" style="display:inline-flex;align-items:center;gap:0.4rem;">
+      <input type="checkbox" id="fl_${l.id}" value="${l.id}" ${saved.includes(l.id) ? 'checked' : ''}> ${l.label}
+    </label>`).join('');
+}
+
+const saveFooterLinksBtn = document.getElementById('saveFooterLinksBtn');
+if (saveFooterLinksBtn) {
+  saveFooterLinksBtn.addEventListener('click', async () => {
+    const links = FOOTER_LINK_OPTIONS.filter(l => document.getElementById('fl_' + l.id)?.checked).map(l => l.id);
+    await setDoc(doc(db, 'settings', 'footerLinks'), { links });
+    const status = document.getElementById('footerLinksStatus');
+    status.textContent = '✅ Saved!';
+    setTimeout(() => { status.textContent = ''; }, 2500);
+  });
+}
+
+document.querySelector('[data-tab="contactInfo"]')?.addEventListener('click', () => { loadContactInfo(); loadFooterLinks(); });
+loadFooterLinks();
 
 // ============================================
 // PAGE HEROES
