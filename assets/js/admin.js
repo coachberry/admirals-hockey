@@ -2107,6 +2107,7 @@ const ADMIN_TABS = [
   { id: 'seasons',      label: 'Seasons' },
   { id: 'tryouts',      label: 'Tryouts' },
   { id: 'navigation',   label: 'Navigation' },
+  { id: 'pageheroes',   label: 'Page Heroes' },
 ];
 
 window.showAdminPermissions = async function(uid) {
@@ -2713,6 +2714,67 @@ if (saveContactInfoBtn) {
 }
 
 loadContactInfo();
+
+// ============================================
+// PAGE HEROES
+// ============================================
+const PAGE_HERO_DEFAULTS = {
+  news:        { badge: 'Franklin Admirals Hockey', title: 'News & Updates',   subtitle: 'The latest from the Admirals program' },
+  events:      { badge: 'Franklin Admirals Hockey', title: 'Events',           subtitle: 'Team events, fundraisers & community activities' },
+  roster:      { badge: '',                         title: 'Team Roster',      subtitle: 'Meet the Admirals' },
+  schedule:    { badge: '',                         title: 'Schedule',         subtitle: 'Complete game schedule and results' },
+  stats:       { badge: '',                         title: 'Statistics',       subtitle: 'Season stats for every player' },
+  leaderboard: { badge: 'Franklin Admirals Hockey', title: 'Leaderboard',     subtitle: 'Season statistics leaders' },
+  gallery:     { badge: 'Franklin Admirals Hockey', title: 'Photo Gallery',   subtitle: 'Memories from the ice' },
+  summer:      { badge: 'Franklin Admirals Hockey', title: 'Summer Hockey',   subtitle: 'In-house summer league — alumni, current players & friends' },
+  alumni:      { badge: 'Franklin Admirals Hockey', title: 'Alumni Network',  subtitle: 'Once an Admiral, always an Admiral' },
+  sponsors:    { badge: 'Franklin Admirals Hockey', title: 'Our Sponsors',    subtitle: 'Thank you to our supporters' },
+  contact:     { badge: 'Get In Touch',             title: 'Contact Us',      subtitle: "Questions? We'd love to hear from you" },
+  tryouts:     { badge: '',                         title: 'Admirals Hockey Tryouts', subtitle: 'Join one of Tennessee's premier high school hockey programs' },
+};
+
+let allPageHeroes = {};
+
+async function loadPageHeroes() {
+  const snap = await getDoc(doc(db, 'settings', 'pageHeroes'));
+  allPageHeroes = snap.exists() ? snap.data() : {};
+  populateHeroForm(document.getElementById('heroPageSelect').value);
+}
+
+function populateHeroForm(pageId) {
+  const saved = allPageHeroes[pageId] || {};
+  const defaults = PAGE_HERO_DEFAULTS[pageId] || {};
+  document.getElementById('heroBadge').value = saved.badge !== undefined ? saved.badge : (defaults.badge || '');
+  document.getElementById('heroTitle').value = saved.title || defaults.title || '';
+  document.getElementById('heroSubtitle').value = saved.subtitle || defaults.subtitle || '';
+  const badgeGroup = document.getElementById('heroBadgeGroup');
+  const dynamicBadgePages = ['roster','schedule','stats','tryouts'];
+  if (badgeGroup) badgeGroup.style.display = dynamicBadgePages.includes(pageId) ? 'none' : '';
+}
+
+const heroPageSelect = document.getElementById('heroPageSelect');
+if (heroPageSelect) {
+  heroPageSelect.addEventListener('change', e => populateHeroForm(e.target.value));
+}
+
+const saveHeroBtn = document.getElementById('saveHeroBtn');
+if (saveHeroBtn) {
+  saveHeroBtn.addEventListener('click', async () => {
+    const pageId = document.getElementById('heroPageSelect').value;
+    allPageHeroes[pageId] = {
+      badge: document.getElementById('heroBadge').value.trim(),
+      title: document.getElementById('heroTitle').value.trim(),
+      subtitle: document.getElementById('heroSubtitle').value.trim(),
+    };
+    await setDoc(doc(db, 'settings', 'pageHeroes'), allPageHeroes);
+    const status = document.getElementById('heroSaveStatus');
+    status.textContent = '✅ Saved!';
+    setTimeout(() => { status.textContent = ''; }, 2500);
+  });
+}
+
+document.querySelector('[data-tab="pageheroes"]').addEventListener('click', loadPageHeroes);
+loadPageHeroes();
 
 // ============================================
 // TEAM EVENTS ADMIN
