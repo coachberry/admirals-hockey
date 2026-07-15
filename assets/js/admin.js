@@ -2857,7 +2857,7 @@ function openTeamEventModal(data = null) {
   document.getElementById('teamEventPrivate').checked = !isPublic;
 
   const rolesDiv = document.getElementById('teamEventRoles');
-  const selected = data?.invitedRoles || TEAM_EVENT_ROLES.map(r => r.id);
+  const selected = (data?.invitedRoles && data.invitedRoles.length) ? data.invitedRoles : TEAM_EVENT_ROLES.map(r => r.id);
   rolesDiv.innerHTML = TEAM_EVENT_ROLES.map(r => `
     <label class="captain-label" style="display:inline-flex;align-items:center;gap:0.3rem;margin-right:0.5rem;">
       <input type="checkbox" id="ter_${r.id}" value="${r.id}" ${selected.includes(r.id) ? 'checked' : ''}> ${r.label}
@@ -2914,7 +2914,7 @@ async function loadTeamEventsAdmin() {
     const item = document.createElement('div');
     item.className = 'item';
     const dateStr = e.date ? new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }) : 'TBD';
-    const roles = (e.invitedRoles || []).join(', ') || 'all';
+    const roles = (e.invitedRoles && e.invitedRoles.length) ? e.invitedRoles.join(', ') : 'all roles';
     item.innerHTML = `
       <div class="item-info">
         <div>
