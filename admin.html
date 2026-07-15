@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=23">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=24">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=23">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=23">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=24">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=24">
 </head>
 <body>
 
@@ -831,6 +831,48 @@
   </div>
 </div>
 
+<!-- TEAM EVENT MODAL -->
+<div id="teamEventModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="teamEventModalTitle">Add Team Event</h2>
+      <button class="modal-close" id="closeTeamEventModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="teamEventId">
+      <div class="form-label-group">
+        <label class="field-label">Event Name</label>
+        <input type="text" id="teamEventName" placeholder="e.g. Team Banquet">
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">Date</label>
+        <input type="date" id="teamEventDate">
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">Time</label>
+        <input type="time" id="teamEventTime">
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">Location</label>
+        <input type="text" id="teamEventLocation" placeholder="e.g. Ford Ice Center">
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">Description</label>
+        <textarea id="teamEventDesc" rows="3" style="width:100%;font-family:inherit;font-size:0.92rem;padding:0.6rem;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;"></textarea>
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">Invite Roles (who can see this event)</label>
+        <div id="teamEventRoles" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.25rem;"></div>
+      </div>
+      <div class="form-buttons">
+        <button id="saveTeamEventBtn" class="btn-primary">Save Event</button>
+        <button id="cancelTeamEventBtn" class="btn-secondary">Cancel</button>
+      </div>
+      <div id="teamEventStatus" style="margin-top:0.5rem;font-size:0.85rem;color:#2e7d32;"></div>
+    </div>
+  </div>
+</div>
+
 <!-- CHANNEL MODAL -->
 <div id="channelModal" class="modal-overlay">
   <div class="modal">
@@ -1040,10 +1082,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=23"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=23"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=23"></script>
-<script type="module" src="/assets/js/game-stats.js?v=23"></script>
+<script type="module" src="/assets/js/admin.js?v=24"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=24"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=24"></script>
+<script type="module" src="/assets/js/game-stats.js?v=24"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";

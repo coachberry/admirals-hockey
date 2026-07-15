@@ -2715,6 +2715,109 @@ if (saveContactInfoBtn) {
 loadContactInfo();
 
 // ============================================
+// TEAM EVENTS ADMIN
+// ============================================
+const TEAM_EVENT_ROLES = [
+  { id: 'player', label: 'Player' },
+  { id: 'prospect', label: 'Prospect' },
+  { id: 'alumni', label: 'Alumni' },
+  { id: 'coach', label: 'Coach' },
+  { id: 'rep', label: 'Team Rep' },
+  { id: 'member', label: 'Member' },
+];
+
+const teamEventModal = document.getElementById('teamEventModal');
+document.getElementById('closeTeamEventModal').addEventListener('click', () => teamEventModal.classList.remove('active'));
+document.getElementById('cancelTeamEventBtn').addEventListener('click', () => teamEventModal.classList.remove('active'));
+teamEventModal.addEventListener('click', e => { if (e.target === teamEventModal) teamEventModal.classList.remove('active'); });
+
+function openTeamEventModal(data = null) {
+  document.getElementById('teamEventModalTitle').textContent = data ? 'Edit Team Event' : 'Add Team Event';
+  document.getElementById('teamEventId').value = data?.id || '';
+  document.getElementById('teamEventName').value = data?.name || '';
+  document.getElementById('teamEventDate').value = data?.date || '';
+  document.getElementById('teamEventTime').value = data?.time || '';
+  document.getElementById('teamEventLocation').value = data?.location || '';
+  document.getElementById('teamEventDesc').value = data?.description || '';
+  document.getElementById('teamEventStatus').textContent = '';
+
+  const rolesDiv = document.getElementById('teamEventRoles');
+  const selected = data?.invitedRoles || TEAM_EVENT_ROLES.map(r => r.id);
+  rolesDiv.innerHTML = TEAM_EVENT_ROLES.map(r => `
+    <label class="captain-label" style="display:inline-flex;align-items:center;gap:0.3rem;margin-right:0.5rem;">
+      <input type="checkbox" id="ter_${r.id}" value="${r.id}" ${selected.includes(r.id) ? 'checked' : ''}> ${r.label}
+    </label>`).join('');
+
+  teamEventModal.classList.add('active');
+}
+
+window.editTeamEvent = (id) => {
+  const snap = window._teamEvents?.find(e => e.id === id);
+  if (snap) openTeamEventModal(snap);
+};
+
+window.deleteTeamEvent = async (id) => {
+  if (!confirm('Delete this team event?')) return;
+  await deleteDoc(doc(db, 'teamEvents', id));
+  loadTeamEventsAdmin();
+};
+
+document.getElementById('addTeamEventBtn').addEventListener('click', () => openTeamEventModal());
+
+document.getElementById('saveTeamEventBtn').addEventListener('click', async () => {
+  const name = document.getElementById('teamEventName').value.trim();
+  if (!name) { alert('Please enter an event name'); return; }
+  const id = document.getElementById('teamEventId').value || Date.now().toString();
+  const invitedRoles = TEAM_EVENT_ROLES.filter(r => document.getElementById('ter_' + r.id)?.checked).map(r => r.id);
+  await setDoc(doc(db, 'teamEvents', id), {
+    name,
+    date: document.getElementById('teamEventDate').value,
+    time: document.getElementById('teamEventTime').value,
+    location: document.getElementById('teamEventLocation').value.trim(),
+    description: document.getElementById('teamEventDesc').value.trim(),
+    invitedRoles,
+    updatedAt: new Date().toISOString()
+  }, { merge: true });
+  document.getElementById('teamEventStatus').textContent = '✅ Saved!';
+  setTimeout(() => teamEventModal.classList.remove('active'), 800);
+  loadTeamEventsAdmin();
+});
+
+async function loadTeamEventsAdmin() {
+  const list = document.getElementById('teamEventsList');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-state">Loading...</div>';
+  const snap = await getDocs(collection(db, 'teamEvents'));
+  window._teamEvents = [];
+  snap.forEach(d => window._teamEvents.push({ id: d.id, ...d.data() }));
+  window._teamEvents.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+  if (!window._teamEvents.length) { list.innerHTML = '<div class="empty-state">No team events yet</div>'; return; }
+  list.innerHTML = '';
+  window._teamEvents.forEach(e => {
+    const item = document.createElement('div');
+    item.className = 'item';
+    const dateStr = e.date ? new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }) : 'TBD';
+    const roles = (e.invitedRoles || []).join(', ') || 'all';
+    item.innerHTML = `
+      <div class="item-info">
+        <div>
+          <strong>${e.name}</strong>
+          <span>${dateStr}${e.time ? ' · ' + e.time : ''}${e.location ? ' · ' + e.location : ''}</span>
+          <span>Invited: ${roles}</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="btn-edit" onclick="editTeamEvent('${e.id}')">Edit</button>
+        <button class="btn-delete" onclick="deleteTeamEvent('${e.id}')">Delete</button>
+      </div>`;
+    list.appendChild(item);
+  });
+}
+
+document.querySelector('[data-tab="teamEvents"]').addEventListener('click', loadTeamEventsAdmin);
+loadTeamEventsAdmin();
+
+// ============================================
 // CHAT CHANNELS
 // ============================================
 const CHAT_ROLES = [
