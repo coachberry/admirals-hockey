@@ -2857,7 +2857,7 @@ function openTeamEventModal(data = null) {
   document.getElementById('teamEventPrivate').checked = !isPublic;
 
   const rolesDiv = document.getElementById('teamEventRoles');
-  const selected = (data?.invitedRoles && data.invitedRoles.length) ? data.invitedRoles : TEAM_EVENT_ROLES.map(r => r.id);
+  const selected = data?.invitedRoles || [];
   rolesDiv.innerHTML = TEAM_EVENT_ROLES.map(r => `
     <label class="captain-label" style="display:inline-flex;align-items:center;gap:0.3rem;margin-right:0.5rem;">
       <input type="checkbox" id="ter_${r.id}" value="${r.id}" ${selected.includes(r.id) ? 'checked' : ''}> ${r.label}
