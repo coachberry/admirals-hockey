@@ -2730,7 +2730,7 @@ const PAGE_HERO_DEFAULTS = {
   alumni:      { badge: 'Franklin Admirals Hockey', title: 'Alumni Network',  subtitle: 'Once an Admiral, always an Admiral' },
   sponsors:    { badge: 'Franklin Admirals Hockey', title: 'Our Sponsors',    subtitle: 'Thank you to our supporters' },
   contact:     { badge: 'Get In Touch',             title: 'Contact Us',      subtitle: "Questions? We'd love to hear from you" },
-  tryouts:     { badge: '',                         title: 'Admirals Hockey Tryouts', subtitle: 'Join one of Tennessee's premier high school hockey programs' },
+  tryouts:     { badge: '',                         title: 'Admirals Hockey Tryouts', subtitle: "Join one of Tennessee's premier high school hockey programs" },
 };
 
 let allPageHeroes = {};
