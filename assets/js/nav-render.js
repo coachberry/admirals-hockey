@@ -91,16 +91,27 @@ async function init() {
     ul.appendChild(fragment);
   }
 
-  // Active link highlight (skip dropdown toggles which link to #)
-  const currentPage = window.location.pathname.split('/').pop() || '';
+  // Active link highlight
+  const currentPath = window.location.pathname;
+  const currentSlug = currentPath.split('/').pop() || '';
+
   ul.querySelectorAll('a[href]').forEach(a => {
     if (a.classList.contains('nav-dropdown-toggle')) return;
     const href = a.getAttribute('href');
     if (!href || href === '#') return;
     const m = href.match(/\/([a-zA-Z0-9-]+)(?:\.html)?$/);
     const hrefSlug = m ? m[1] : '';
-    if (hrefSlug === currentPage || (currentPage === '' && (href === '/' || href === '/index.html'))) {
+    const isHome = (currentSlug === '' || currentPath === '/') && (href === '/' || href === '/index.html');
+    const isMatch = hrefSlug && (hrefSlug === currentSlug || currentPath === '/' + hrefSlug);
+    if (isHome || isMatch) {
+      // Highlight this link
       a.classList.add('active');
+      // If inside a dropdown, also highlight the parent toggle
+      const dropdown = a.closest('.nav-dropdown');
+      if (dropdown) {
+        const toggle = dropdown.querySelector('.nav-dropdown-toggle');
+        if (toggle) toggle.classList.add('active');
+      }
     }
   });
 
