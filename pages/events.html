@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=25">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=26">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Events - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=25">
-  <link rel="stylesheet" href="/assets/css/events-styles.css?v=25">
-  <script src="/assets/js/page-guard.js?v=25"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=26">
+  <link rel="stylesheet" href="/assets/css/events-styles.css?v=26">
+  <script src="/assets/js/page-guard.js?v=26"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=25"></script>
+<script src="/assets/js/load-header.js?v=26"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -33,6 +33,13 @@
     </div>
 
     <div class="section-header" style="margin-top:3rem;">
+      <h2 class="section-title">Team Events</h2>
+    </div>
+    <div id="teamEventsSection" class="events-list">
+      <p style="color:#666;font-style:italic;">Loading...</p>
+    </div>
+
+    <div class="section-header" style="margin-top:3rem;">
       <h2 class="section-title">Past Events</h2>
     </div>
     <div id="pastEvents" class="events-list events-list-past">
@@ -43,11 +50,12 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=25"></script>
+<script src="/assets/js/load-footer.js?v=26"></script>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
@@ -58,8 +66,10 @@
     appId: "1:783358659334:web:5daffd093adca386faec87"
   };
 
-  const app = initializeApp(firebaseConfig);
+  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  const auth = getAuth(app);
+  let currentMemberProfile = null;
 
   const typeColors = {
     'Team Event': '#5D1725', 'Fundraiser': '#e65100',
@@ -105,6 +115,85 @@
     `;
   }
 
+  function buildTeamEventCard(e, userProfile) {
+    const canRsvp = userProfile && (e.invitedRoles || []).includes(userProfile.role);
+    const d = new Date(e.date + 'T12:00:00');
+    const dateStr = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+    const timeStr = e.time ? (() => { const [h,m] = e.time.split(':'); const hr=parseInt(h); return (hr%12||12)+':'+m+' '+(hr>=12?'PM':'AM'); })() : '';
+    const rsvpStatus = e._userRsvp;
+    const inActive = rsvpStatus === 'yes';
+    const outActive = rsvpStatus === 'no';
+    return `
+      <div class="event-card" style="position:relative;">
+        <div class="event-card-body">
+          <div class="event-card-top">
+            <div class="event-date-block">
+              <div class="event-month">${d.toLocaleDateString('en-US',{month:'short'})}</div>
+              <div class="event-day">${d.getDate()}</div>
+              <div class="event-year">${d.getFullYear()}</div>
+            </div>
+            <div class="event-info">
+              <span class="event-type-tag" style="background:#5D1725;">Team Event</span>
+              ${e.public === false ? '<span style="font-size:0.7rem;background:#333;color:white;padding:2px 6px;border-radius:3px;margin-left:4px;">🔒 Members Only</span>' : ''}
+              <h3 class="event-name">${e.name}</h3>
+              ${timeStr ? `<div class="event-meta">🕐 ${timeStr}</div>` : ''}
+              ${e.location ? `<div class="event-meta">📍 ${e.location}</div>` : ''}
+            </div>
+          </div>
+          ${e.description ? `<p class="event-details">${e.description}</p>` : ''}
+          ${canRsvp ? `
+            <div style="margin-top:0.75rem;display:flex;gap:0.5rem;align-items:center;">
+              <span style="font-size:0.85rem;font-weight:600;color:#555;">RSVP:</span>
+              <button onclick="rsvpTeamEvent('${e.id}','yes',${inActive})" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:${inActive?'#2e7d32':'white'};color:${inActive?'white':'#2e7d32'};">✅ In</button>
+              <button onclick="rsvpTeamEvent('${e.id}','no',${outActive})" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:${outActive?'#c62828':'white'};color:${outActive?'white':'#c62828'};">❌ Out</button>
+              ${rsvpStatus ? `<span style="font-size:0.8rem;color:#888;">You said: ${rsvpStatus === 'yes' ? 'In ✅' : 'Out ❌'}</span>` : ''}
+            </div>` : userProfile ? '<p style="font-size:0.82rem;color:#999;margin-top:0.5rem;">You are not invited to RSVP for this event.</p>' : '<p style="font-size:0.82rem;color:#999;margin-top:0.5rem;"><a href="#" onclick="showMemberModal('login')" style="color:#5D1725;font-weight:600;">Log in</a> to RSVP</p>'}
+        </div>
+      </div>`;
+  }
+
+  window.rsvpTeamEvent = async function(eventId, response, isActive) {
+    if (!currentMemberProfile) { showMemberModal('login'); return; }
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    const rsvpRef = doc(db, 'teamEvents', eventId, 'rsvps', uid);
+    if (isActive) {
+      await deleteDoc(rsvpRef);
+    } else {
+      await setDoc(rsvpRef, { response, name: currentMemberProfile.displayName, timestamp: new Date().toISOString() });
+    }
+    loadTeamEvents();
+  };
+
+  async function loadTeamEvents() {
+    const el = document.getElementById('teamEventsSection');
+    const snap = await getDocs(collection(db, 'teamEvents'));
+    const events = [];
+    snap.forEach(d => events.push({ id: d.id, ...d.data() }));
+
+    const uid = auth.currentUser?.uid;
+    const today = new Date().toISOString().split('T')[0];
+    const upcoming = events
+      .filter(e => !e.date || e.date >= today)
+      .filter(e => e.public !== false || (currentMemberProfile && (e.invitedRoles || []).includes(currentMemberProfile.role)));
+
+    upcoming.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+    if (!upcoming.length) { el.innerHTML = '<p style="color:#666;font-style:italic;">No upcoming team events.</p>'; return; }
+
+    // Load user RSVPs
+    if (uid) {
+      await Promise.all(upcoming.map(async e => {
+        try {
+          const r = await getDoc(doc(db, 'teamEvents', e.id, 'rsvps', uid));
+          e._userRsvp = r.exists() ? r.data().response : null;
+        } catch(_) { e._userRsvp = null; }
+      }));
+    }
+
+    el.innerHTML = upcoming.map(e => buildTeamEventCard(e, currentMemberProfile)).join('');
+  }
+
   async function loadEvents() {
     const snap = await getDocs(collection(db, 'events'));
     const events = [];
@@ -128,6 +217,19 @@
   }
 
   loadEvents();
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      try {
+        const snap = await getDoc(doc(db, 'members', user.uid));
+        currentMemberProfile = snap.exists() ? { ...snap.data(), uid: user.uid } : null;
+        if (user.email === 'coachberry03@gmail.com' && currentMemberProfile) currentMemberProfile.role = 'superadmin';
+      } catch(_) { currentMemberProfile = null; }
+    } else {
+      currentMemberProfile = null;
+    }
+    loadTeamEvents();
+  });
 
   // Mobile nav
   (function() {
@@ -249,7 +351,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=25"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=25"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=26"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=26"></script>
 </body>
 </html>

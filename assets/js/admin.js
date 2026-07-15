@@ -2740,6 +2740,9 @@ function openTeamEventModal(data = null) {
   document.getElementById('teamEventLocation').value = data?.location || '';
   document.getElementById('teamEventDesc').value = data?.description || '';
   document.getElementById('teamEventStatus').textContent = '';
+  const isPublic = data?.public !== false;
+  document.getElementById('teamEventPublic').checked = isPublic;
+  document.getElementById('teamEventPrivate').checked = !isPublic;
 
   const rolesDiv = document.getElementById('teamEventRoles');
   const selected = data?.invitedRoles || TEAM_EVENT_ROLES.map(r => r.id);
@@ -2769,6 +2772,7 @@ document.getElementById('saveTeamEventBtn').addEventListener('click', async () =
   if (!name) { alert('Please enter an event name'); return; }
   const id = document.getElementById('teamEventId').value || Date.now().toString();
   const invitedRoles = TEAM_EVENT_ROLES.filter(r => document.getElementById('ter_' + r.id)?.checked).map(r => r.id);
+  const isPublic = document.getElementById('teamEventPublic').checked;
   await setDoc(doc(db, 'teamEvents', id), {
     name,
     date: document.getElementById('teamEventDate').value,
@@ -2776,6 +2780,7 @@ document.getElementById('saveTeamEventBtn').addEventListener('click', async () =
     location: document.getElementById('teamEventLocation').value.trim(),
     description: document.getElementById('teamEventDesc').value.trim(),
     invitedRoles,
+    public: isPublic,
     updatedAt: new Date().toISOString()
   }, { merge: true });
   document.getElementById('teamEventStatus').textContent = '✅ Saved!';
@@ -2803,7 +2808,7 @@ async function loadTeamEventsAdmin() {
         <div>
           <strong>${e.name}</strong>
           <span>${dateStr}${e.time ? ' · ' + e.time : ''}${e.location ? ' · ' + e.location : ''}</span>
-          <span>Invited: ${roles}</span>
+          <span>${e.public !== false ? '🌐 Public' : '🔒 Private'} · RSVP: ${roles}</span>
         </div>
       </div>
       <div style="display:flex;gap:0.5rem;">

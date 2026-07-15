@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=25">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=26">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=25">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=25">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=26">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=26">
 </head>
 <body>
 
@@ -861,7 +861,14 @@
         <textarea id="teamEventDesc" rows="3" style="width:100%;font-family:inherit;font-size:0.92rem;padding:0.6rem;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;"></textarea>
       </div>
       <div class="form-label-group">
-        <label class="field-label">Invite Roles (who can see this event)</label>
+        <label class="field-label">Visibility</label>
+        <div style="display:flex;gap:1.5rem;margin-top:0.25rem;">
+          <label class="captain-label"><input type="radio" name="teamEventVisibility" id="teamEventPublic" value="public" checked> 🌐 Public (everyone can see, invited roles can RSVP)</label>
+          <label class="captain-label"><input type="radio" name="teamEventVisibility" id="teamEventPrivate" value="private"> 🔒 Private (only invited roles can see and RSVP)</label>
+        </div>
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">Invite Roles (who can RSVP)</label>
         <div id="teamEventRoles" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.25rem;"></div>
       </div>
       <div class="form-buttons">
@@ -1082,10 +1089,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=25"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=25"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=25"></script>
-<script type="module" src="/assets/js/game-stats.js?v=25"></script>
+<script type="module" src="/assets/js/admin.js?v=26"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=26"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=26"></script>
+<script type="module" src="/assets/js/game-stats.js?v=26"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
