@@ -327,15 +327,17 @@
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
-  .featured-main { height: 340px; }
-  .featured-main-overlay { padding: 1.5rem 1.25rem; }
-  .featured-main-title { font-size: 1.4rem; }
+  .featured-main { height: auto; min-height: 280px; aspect-ratio: 16/9; }
+  .featured-main-overlay { padding: 1.25rem 1rem; }
+  .featured-main-title { font-size: 1.3rem; }
   .featured-main-excerpt { display: none; }
   .stories-grid { grid-template-columns: 1fr 1fr; }
   .home-two-col { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {
+  .featured-main { aspect-ratio: 4/3; }
+  .featured-main-title { font-size: 1.1rem; }
   .stories-grid { grid-template-columns: 1fr; }
 }
 
