@@ -207,18 +207,16 @@ function renderSeasonsList() {
         <div>
           <strong>${s.label}</strong>
           <span>${s.current ? '✅ Current Season' : ''}</span>
-          <span>${s.varsityRosterHidden ? ' 🔒 VR Hidden' : ''}</span>
-          <span>${s.jvRosterHidden ? ' 🔒 JVR Hidden' : ''}</span>
-          <span>${s.varsityScheduleHidden ? ' 🔒 VS Hidden' : ''}</span>
-          <span>${s.jvScheduleHidden ? ' 🔒 JVS Hidden' : ''}</span>
+          <span>${s.varsityRosterHidden ? ' 🔒 Varsity Roster TBD' : ''}</span>
+          <span>${s.jvRosterHidden ? ' 🔒 JV Roster TBD' : ''}</span>
+          <span>${s.jvEnabled ? ' ✅ JV Active' : ' — JV Hidden'}</span>
         </div>
       </div>
       <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
         ${!s.current ? `<button class="btn-edit" onclick="setCurrentSeason('${s.id}')">Set Current</button>` : ''}
-        <button class="btn-edit" onclick="toggleSeasonFlag('${s.id}','varsityRosterHidden')">${s.varsityRosterHidden ? 'Show V.Roster' : 'Hide V.Roster'}</button>
-        <button class="btn-edit" onclick="toggleSeasonFlag('${s.id}','jvRosterHidden')">${s.jvRosterHidden ? 'Show JV Roster' : 'Hide JV Roster'}</button>
-        <button class="btn-edit" onclick="toggleSeasonFlag('${s.id}','varsityScheduleHidden')">${s.varsityScheduleHidden ? 'Show V.Schedule' : 'Hide V.Schedule'}</button>
-        <button class="btn-edit" onclick="toggleSeasonFlag('${s.id}','jvScheduleHidden')">${s.jvScheduleHidden ? 'Show JV Schedule' : 'Hide JV Schedule'}</button>
+        <button class="btn-edit" onclick="toggleSeasonFlag('${s.id}','varsityRosterHidden')">${s.varsityRosterHidden ? 'Show Varsity Roster' : 'Varsity Roster TBD'}</button>
+        <button class="btn-edit" onclick="toggleSeasonFlag('${s.id}','jvRosterHidden')">${s.jvRosterHidden ? 'Show JV Roster' : 'JV Roster TBD'}</button>
+        <button class="btn-edit" onclick="toggleSeasonFlag('${s.id}','jvEnabled')">${s.jvEnabled ? 'Hide from JV Pages' : 'Show on JV Pages'}</button>
         <button class="btn-delete" onclick="deleteSeason('${s.id}')">Delete</button>
       </div>
     `;
@@ -231,8 +229,7 @@ document.getElementById('addSeasonBtn').addEventListener('click', () => {
   document.getElementById('seasonCurrent').checked = false;
   document.getElementById('seasonVarsityRosterHidden').checked = false;
   document.getElementById('seasonJvRosterHidden').checked = false;
-  document.getElementById('seasonVarsityScheduleHidden').checked = false;
-  document.getElementById('seasonJvScheduleHidden').checked = false;
+  document.getElementById('seasonJvEnabled').checked = false;
   document.getElementById('seasonForm').style.display = 'block';
 });
 document.getElementById('cancelSeasonBtn').addEventListener('click', () => document.getElementById('seasonForm').style.display = 'none');
@@ -243,8 +240,7 @@ document.getElementById('saveSeasonBtn').addEventListener('click', async () => {
   const isCurrent = document.getElementById('seasonCurrent').checked;
   const varsityRosterHidden = document.getElementById('seasonVarsityRosterHidden').checked;
   const jvRosterHidden = document.getElementById('seasonJvRosterHidden').checked;
-  const varsityScheduleHidden = document.getElementById('seasonVarsityScheduleHidden').checked;
-  const jvScheduleHidden = document.getElementById('seasonJvScheduleHidden').checked;
+  const jvEnabled = document.getElementById('seasonJvEnabled').checked;
   const rosterTBD = varsityRosterHidden; // backward compat
   const id = label.replace(/[^a-zA-Z0-9-]/g, '-');
 
@@ -255,7 +251,7 @@ document.getElementById('saveSeasonBtn').addEventListener('click', async () => {
     }
   }
 
-  await setDoc(doc(db, 'seasons', id), { label, current: isCurrent, rosterTBD, varsityRosterHidden, jvRosterHidden, varsityScheduleHidden, jvScheduleHidden, createdAt: new Date().toISOString() });
+  await setDoc(doc(db, 'seasons', id), { label, current: isCurrent, rosterTBD, varsityRosterHidden, jvRosterHidden, jvEnabled, createdAt: new Date().toISOString() });
   document.getElementById('seasonForm').style.display = 'none';
   await loadSeasons();
 });
@@ -277,6 +273,7 @@ window.toggleSeasonFlag = async (id, flag) => {
   const update = { ...s };
   update[flag] = !s[flag];
   if (flag === 'varsityRosterHidden') update.rosterTBD = update[flag];
+  if (flag === 'jvEnabled' && !update[flag]) update.rosterTBD = s.rosterTBD;
   await setDoc(doc(db, 'seasons', s.id), update);
   await loadSeasons();
 };
