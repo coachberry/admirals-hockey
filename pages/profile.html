@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=50">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=51">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=50">
-  <script src="/assets/js/page-guard.js?v=50"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=51">
+  <script src="/assets/js/page-guard.js?v=51"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -290,7 +290,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=50"></script>
+<script src="/assets/js/load-header.js?v=51"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -457,6 +457,8 @@
               <option value="coach">Coach</option>
               <option value="rep">Team Representative</option>
               <option value="member">Summer League / Other</option>
+              <option value="jv">JV Player</option>
+              <option value="varsity">Varsity Player</option>
             </select>
           </div>
           <div id="roleFields_player" style="display:none;">
@@ -552,7 +554,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=50"></script>
+<script src="/assets/js/load-footer.js?v=51"></script>
 
 <!-- MEMBER MODAL v2 -->
 <div id="memberModal" class="modal-overlay" style="z-index:2000;">
@@ -677,7 +679,7 @@ function showSection(name) {
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=50"></script>
+<script type="module" src="/assets/js/member-auth.js?v=51"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -825,7 +827,7 @@ function showSection(name) {
     const profile = (await getDoc(doc(db, 'members', currentUser.uid))).data();
     const role = profile?.role || 'member';
     const roleColors = { player:'#2e7d32', prospect:'#1565c0', alumni:'#e65100', coach:'#5D1725', rep:'#6a1b9a', member:'#666', admin:'#333', superadmin:'#333' };
-    const roleLabels = { player:'Player', prospect:'Prospective Player', alumni:'Alumni', coach:'Coach', rep:'Team Representative', member:'Member', admin:'Admin', superadmin:'Coach (Admin)' };
+    const roleLabels = { player:'Player', prospect:'Prospective Player', alumni:'Alumni', coach:'Coach', rep:'Team Representative', member:'Member', jv:'JV Player', varsity:'Varsity Player', admin:'Admin', superadmin:'Coach (Admin)' };
     const roleDescriptions = {
       player: 'You have full access to team chat, events, and all member features as a current roster player.',
       prospect: 'You have access to tryout information and basic member features as a prospective player.',
@@ -833,6 +835,8 @@ function showSection(name) {
       coach: 'You have full access to all team features as a coaching staff member.',
       rep: 'You have access to team features and events as a team representative.',
       member: 'You have basic member access as a summer league participant or community member.',
+      jv: 'You are a JV team member with access to JV team features and chat.',
+      varsity: 'You are a Varsity team member with access to Varsity team features and chat.',
       admin: 'You have admin access to manage site content.',
       superadmin: 'You have full admin access to all site features.'
     };

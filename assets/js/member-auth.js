@@ -22,6 +22,18 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 window.currentMember = null;
 
+// Helper: check if a profile has a given role (supports both single role string and roles array)
+window.hasRole = function(profile, role) {
+  if (!profile) return false;
+  if (Array.isArray(profile.roles) && profile.roles.length) return profile.roles.includes(role);
+  return profile.role === role;
+};
+
+window.hasAnyRole = function(profile, roles) {
+  if (!profile) return false;
+  return roles.some(r => window.hasRole(profile, r));
+};
+
 // ============================================
 // MODAL
 // ============================================
@@ -277,8 +289,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // CHAT NAV VISIBILITY
 // ============================================
 function updateChatNavVisibility(profile) {
-  const allowedRoles = ['player', 'alumni', 'coach', 'rep', 'admin', 'superadmin'];
-  const canSeeChat = profile && allowedRoles.includes(profile.role);
+  const allowedRoles = ['player', 'alumni', 'coach', 'rep', 'admin', 'superadmin', 'jv', 'varsity'];
+  const canSeeChat = profile && window.hasAnyRole(profile, allowedRoles);
   document.querySelectorAll('a[href="/chat"]').forEach(link => {
     const li = link.closest('li');
     if (li) li.style.display = canSeeChat ? '' : 'none';
