@@ -104,6 +104,22 @@ function render() {
       titleWrap.appendChild(tag);
     }
 
+    if (item.type === 'link') {
+      const hrefInput = document.createElement('input');
+      hrefInput.type = 'text';
+      hrefInput.value = item.href || '';
+      hrefInput.placeholder = '/url';
+      hrefInput.title = 'URL';
+      hrefInput.style.border = '1px solid #eee';
+      hrefInput.style.borderRadius = '4px';
+      hrefInput.style.padding = '0.3rem 0.4rem';
+      hrefInput.style.fontSize = '0.82rem';
+      hrefInput.style.color = '#888';
+      hrefInput.style.width = '120px';
+      hrefInput.oninput = () => { item.href = hrefInput.value; };
+      titleWrap.appendChild(hrefInput);
+    }
+
     header.appendChild(titleWrap);
 
     const controls = document.createElement('div');
