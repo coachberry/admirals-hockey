@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=52">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=53">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=52">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=52">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=53">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=53">
 </head>
 <body>
 
@@ -96,8 +96,10 @@
     <aside class="admin-sidebar">
       <div class="sidebar-group">
         <div class="sidebar-group-label">Team</div>
-        <button class="tab-btn active" data-tab="roster">🏒 Roster</button>
-        <button class="tab-btn" data-tab="schedule">📅 Schedule</button>
+        <button class="tab-btn active" data-tab="roster">🏒 Varsity Roster</button>
+        <button class="tab-btn" data-tab="jvRoster">🏒 JV Roster</button>
+        <button class="tab-btn" data-tab="schedule">📅 Varsity Schedule</button>
+        <button class="tab-btn" data-tab="jvSchedule">📅 JV Schedule</button>
         <button class="tab-btn" data-tab="seasons">🗓 Seasons</button>
         <button class="tab-btn" data-tab="tryouts">🎯 Tryouts</button>
       </div>
@@ -137,7 +139,7 @@
     <!-- ROSTER TAB -->
     <div id="rosterTab" class="tab-content active">
       <div class="roster-tab-header">
-        <h2>Team Roster</h2>
+        <h2>Varsity Roster</h2>
         <select id="rosterSeasonSelect" class="season-select">
           <option value="">Loading seasons...</option>
         </select>
@@ -155,10 +157,42 @@
       <div id="boardList" class="items-list"><div class="empty-state">No board members added yet</div></div>
     </div>
 
+    <!-- JV ROSTER TAB -->
+    <div id="jvRosterTab" class="tab-content">
+      <div class="roster-tab-header">
+        <h2>JV Roster</h2>
+        <select id="jvRosterSeasonSelect" class="season-select">
+          <option value="">Loading seasons...</option>
+        </select>
+      </div>
+      <div class="roster-action-buttons">
+        <button id="addJvPlayerBtn" class="btn-primary">+ Add Player</button>
+        <button id="addJvCoachBtn" class="btn-primary">+ Add Coach</button>
+      </div>
+      <h3 class="list-heading">Players</h3>
+      <div id="jvPlayersList" class="items-list"><div class="empty-state">No players added yet</div></div>
+      <h3 class="list-heading">Coaching Staff</h3>
+      <div id="jvCoachesList" class="items-list"><div class="empty-state">No coaches added yet</div></div>
+    </div>
+
+    <!-- JV SCHEDULE TAB -->
+    <div id="jvScheduleTab" class="tab-content">
+      <div class="roster-tab-header">
+        <h2>JV Schedule</h2>
+        <select id="jvScheduleSeasonSelect" class="season-select">
+          <option value="">Loading seasons...</option>
+        </select>
+      </div>
+      <div class="roster-action-buttons">
+        <button id="addJvGameBtn" class="btn-primary">+ Add Game</button>
+      </div>
+      <div id="jvGamesList" class="items-list"><div class="empty-state">No games added yet</div></div>
+    </div>
+
     <!-- SCHEDULE TAB -->
     <div id="scheduleTab" class="tab-content">
       <div class="roster-tab-header">
-        <h2>Game Schedule</h2>
+        <h2>Varsity Schedule</h2>
         <select id="scheduleSeasonSelect" class="season-select">
           <option value="">Loading seasons...</option>
         </select>
@@ -933,6 +967,34 @@
   </div>
 </div>
 
+<!-- JV GAME MODAL -->
+<div id="jvGameModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>JV Game</h2>
+      <button class="modal-close" onclick="document.getElementById('jvGameModal').classList.remove('active')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="jvGameId">
+      <input type="hidden" id="jvGameSeasonId">
+      <div class="form-label-group"><label class="field-label">Date</label><input type="date" id="jvGameDate"></div>
+      <div class="form-label-group"><label class="field-label">Time</label><input type="time" id="jvGameTime"></div>
+      <div class="form-label-group"><label class="field-label">Opponent</label><input type="text" id="jvGameOpponent" placeholder="e.g. Hendersonville"></div>
+      <div class="form-label-group"><label class="field-label">Location</label><input type="text" id="jvGameLocation" placeholder="e.g. Ford Ice Center"></div>
+      <label class="captain-label"><input type="checkbox" id="jvGameHome"> Home game</label>
+      <label class="captain-label" style="margin-top:0.5rem;"><input type="checkbox" id="jvGamePlayed" onchange="document.getElementById('jvGameScoreFields').style.display=this.checked?'block':'none'"> Game played</label>
+      <div id="jvGameScoreFields" style="display:none;margin-top:0.75rem;">
+        <div class="form-label-group"><label class="field-label">Admirals Score</label><input type="number" id="jvGameHomeScore" min="0"></div>
+        <div class="form-label-group"><label class="field-label">Opponent Score</label><input type="number" id="jvGameAwayScore" min="0"></div>
+      </div>
+      <div class="form-buttons">
+        <button id="saveJvGameBtn" class="btn-primary">Save Game</button>
+        <button onclick="document.getElementById('jvGameModal').classList.remove('active')" class="btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- CHANNEL MODAL -->
 <div id="channelModal" class="modal-overlay">
   <div class="modal">
@@ -1142,10 +1204,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=52"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=52"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=52"></script>
-<script type="module" src="/assets/js/game-stats.js?v=52"></script>
+<script type="module" src="/assets/js/admin.js?v=53"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=53"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=53"></script>
+<script type="module" src="/assets/js/game-stats.js?v=53"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";

@@ -2720,6 +2720,209 @@ if (saveContactInfoBtn) {
 loadContactInfo();
 
 // ============================================
+// JV ROSTER ADMIN
+// ============================================
+let jvCurrentSeasonId = null;
+
+async function loadJvRosterSeasons() {
+  const snap = await getDocs(collection(db, 'seasons'));
+  const seasons = [];
+  snap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
+  seasons.sort((a, b) => b.label.localeCompare(a.label));
+  const select = document.getElementById('jvRosterSeasonSelect');
+  if (!select) return;
+  select.innerHTML = seasons.map(s => `<option value="${s.id}">${s.label}${s.current ? ' (Current)' : ''}</option>`).join('');
+  const current = seasons.find(s => s.current) || seasons[0];
+  if (current) {
+    jvCurrentSeasonId = current.id;
+    loadJvRoster(current.id);
+  }
+  select.addEventListener('change', e => {
+    jvCurrentSeasonId = e.target.value;
+    loadJvRoster(jvCurrentSeasonId);
+  });
+}
+
+async function loadJvRoster(seasonId) {
+  if (!seasonId) return;
+  await loadJvPlayers(seasonId);
+  await loadJvCoaches(seasonId);
+}
+
+async function loadJvPlayers(seasonId) {
+  const list = document.getElementById('jvPlayersList');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-state">Loading...</div>';
+  const snap = await getDocs(collection(db, 'jv-roster', seasonId, 'players'));
+  const players = [];
+  snap.forEach(d => players.push(d.data()));
+  if (!players.length) { list.innerHTML = '<div class="empty-state">No players added yet</div>'; return; }
+  list.innerHTML = '';
+  players.sort((a, b) => parseInt(a.number) - parseInt(b.number)).forEach(p => list.appendChild(buildJvRosterItem(p, 'player', seasonId)));
+}
+
+async function loadJvCoaches(seasonId) {
+  const list = document.getElementById('jvCoachesList');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-state">Loading...</div>';
+  const snap = await getDocs(collection(db, 'jv-roster', seasonId, 'coaches'));
+  const coaches = [];
+  snap.forEach(d => coaches.push(d.data()));
+  if (!coaches.length) { list.innerHTML = '<div class="empty-state">No coaches added yet</div>'; return; }
+  list.innerHTML = '';
+  coaches.forEach(c => list.appendChild(buildJvRosterItem(c, 'coach', seasonId)));
+}
+
+function buildJvRosterItem(m, type, seasonId) {
+  const item = document.createElement('div');
+  item.className = 'item';
+  const label = type === 'player' ? `#${m.number || '?'} - ${m.name}` : m.name;
+  const sub = type === 'player' ? m.position || '' : m.title || '';
+  item.innerHTML = `
+    <div class="item-info"><div>
+      <strong>${label}</strong>
+      <span>${sub}</span>
+    </div></div>
+    <div style="display:flex;gap:0.5rem;">
+      <button class="btn-edit" onclick="editJvMember('${m.id || m.name}','${type}','${seasonId}')">Edit</button>
+      <button class="btn-delete" onclick="deleteJvMember('${m.id || m.name}','${type}','${seasonId}')">Delete</button>
+    </div>`;
+  return item;
+}
+
+window.deleteJvMember = async (id, type, seasonId) => {
+  if (!confirm('Delete this member?')) return;
+  const col = type === 'player' ? 'players' : 'coaches';
+  await deleteDoc(doc(db, 'jv-roster', seasonId, col, id));
+  loadJvRoster(seasonId);
+};
+
+window.editJvMember = async (id, type, seasonId) => {
+  const col = type === 'player' ? 'players' : 'coaches';
+  const snap = await getDoc(doc(db, 'jv-roster', seasonId, col, id));
+  if (!snap.exists()) return;
+  openPlayerModal(snap.data(), type, 'jv', seasonId);
+};
+
+// Add JV player/coach buttons
+const addJvPlayerBtn = document.getElementById('addJvPlayerBtn');
+if (addJvPlayerBtn) addJvPlayerBtn.addEventListener('click', () => openPlayerModal(null, 'player', 'jv', jvCurrentSeasonId));
+
+const addJvCoachBtn = document.getElementById('addJvCoachBtn');
+if (addJvCoachBtn) addJvCoachBtn.addEventListener('click', () => openPlayerModal(null, 'coach', 'jv', jvCurrentSeasonId));
+
+// Load when tab clicked
+const jvRosterTabBtn = document.querySelector('[data-tab="jvRoster"]');
+if (jvRosterTabBtn) jvRosterTabBtn.addEventListener('click', loadJvRosterSeasons);
+
+// ============================================
+// JV SCHEDULE ADMIN
+// ============================================
+let jvScheduleSeasonId = null;
+
+async function loadJvScheduleSeasons() {
+  const snap = await getDocs(collection(db, 'seasons'));
+  const seasons = [];
+  snap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
+  seasons.sort((a, b) => b.label.localeCompare(a.label));
+  const select = document.getElementById('jvScheduleSeasonSelect');
+  if (!select) return;
+  select.innerHTML = seasons.map(s => `<option value="${s.id}">${s.label}${s.current ? ' (Current)' : ''}</option>`).join('');
+  const current = seasons.find(s => s.current) || seasons[0];
+  if (current) {
+    jvScheduleSeasonId = current.id;
+    loadJvGames(current.id);
+  }
+  select.addEventListener('change', e => {
+    jvScheduleSeasonId = e.target.value;
+    loadJvGames(jvScheduleSeasonId);
+  });
+}
+
+async function loadJvGames(seasonId) {
+  const list = document.getElementById('jvGamesList');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-state">Loading...</div>';
+  const snap = await getDocs(collection(db, 'jv-schedule', seasonId, 'games'));
+  const games = [];
+  snap.forEach(d => games.push({ id: d.id, ...d.data() }));
+  games.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+  if (!games.length) { list.innerHTML = '<div class="empty-state">No games added yet</div>'; return; }
+  list.innerHTML = '';
+  games.forEach(g => {
+    const item = document.createElement('div');
+    item.className = 'item';
+    const d = g.date ? new Date(g.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }) : 'TBD';
+    const score = g.played ? ` — ${g.homeScore || 0}-${g.awayScore || 0}` : '';
+    item.innerHTML = `
+      <div class="item-info"><div>
+        <strong>vs. ${g.opponent || 'TBD'}${score}</strong>
+        <span>${d}${g.time ? ' · ' + g.time : ''}${g.location ? ' · ' + g.location : ''}${g.played ? ' · FINAL' : ' · Upcoming'}</span>
+      </div></div>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="btn-edit" onclick="editJvGame('${g.id}','${seasonId}')">Edit</button>
+        <button class="btn-delete" onclick="deleteJvGame('${g.id}','${seasonId}')">Delete</button>
+      </div>`;
+    list.appendChild(item);
+  });
+}
+
+window.editJvGame = async (id, seasonId) => {
+  const snap = await getDoc(doc(db, 'jv-schedule', seasonId, 'games', id));
+  if (snap.exists()) openJvGameModal({ id, ...snap.data() }, seasonId);
+};
+
+window.deleteJvGame = async (id, seasonId) => {
+  if (!confirm('Delete this game?')) return;
+  await deleteDoc(doc(db, 'jv-schedule', seasonId, 'games', id));
+  loadJvGames(seasonId);
+};
+
+function openJvGameModal(data, seasonId) {
+  const modal = document.getElementById('jvGameModal');
+  if (!modal) return;
+  document.getElementById('jvGameId').value = data?.id || '';
+  document.getElementById('jvGameSeasonId').value = seasonId;
+  document.getElementById('jvGameDate').value = data?.date || '';
+  document.getElementById('jvGameTime').value = data?.time || '';
+  document.getElementById('jvGameOpponent').value = data?.opponent || '';
+  document.getElementById('jvGameLocation').value = data?.location || '';
+  document.getElementById('jvGameHome').checked = data?.isHome || false;
+  document.getElementById('jvGamePlayed').checked = data?.played || false;
+  document.getElementById('jvGameHomeScore').value = data?.homeScore ?? '';
+  document.getElementById('jvGameAwayScore').value = data?.awayScore ?? '';
+  document.getElementById('jvGameScoreFields').style.display = data?.played ? 'block' : 'none';
+  modal.classList.add('active');
+}
+
+const addJvGameBtn = document.getElementById('addJvGameBtn');
+if (addJvGameBtn) addJvGameBtn.addEventListener('click', () => openJvGameModal(null, jvScheduleSeasonId));
+
+const jvScheduleTabBtn = document.querySelector('[data-tab="jvSchedule"]');
+if (jvScheduleTabBtn) jvScheduleTabBtn.addEventListener('click', loadJvScheduleSeasons);
+
+const saveJvGameBtn = document.getElementById('saveJvGameBtn');
+if (saveJvGameBtn) {
+  saveJvGameBtn.addEventListener('click', async () => {
+    const seasonId = document.getElementById('jvGameSeasonId').value;
+    const id = document.getElementById('jvGameId').value || Date.now().toString();
+    const played = document.getElementById('jvGamePlayed').checked;
+    await setDoc(doc(db, 'jv-schedule', seasonId, 'games', id), {
+      date: document.getElementById('jvGameDate').value,
+      time: document.getElementById('jvGameTime').value,
+      opponent: document.getElementById('jvGameOpponent').value.trim(),
+      location: document.getElementById('jvGameLocation').value.trim(),
+      isHome: document.getElementById('jvGameHome').checked,
+      played,
+      homeScore: played ? parseInt(document.getElementById('jvGameHomeScore').value) || 0 : null,
+      awayScore: played ? parseInt(document.getElementById('jvGameAwayScore').value) || 0 : null,
+    }, { merge: true });
+    document.getElementById('jvGameModal').classList.remove('active');
+    loadJvGames(seasonId);
+  });
+}
+
+// ============================================
 // FOOTER QUICK LINKS
 // ============================================
 const FOOTER_LINK_OPTIONS = [
