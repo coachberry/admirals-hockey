@@ -2094,6 +2094,8 @@ async function loadMembersTab() {
             <option value="prospect" ${m.role==='prospect'?'selected':''}>Prospective Player</option>
             <option value="alumni" ${m.role==='alumni'?'selected':''}>Alumni</option>
             <option value="rep" ${m.role==='rep'?'selected':''}>Team Rep</option>
+            <option value="jv" ${m.role==='jv'?'selected':''}>JV Player</option>
+            <option value="varsity" ${m.role==='varsity'?'selected':''}>Varsity Player</option>
             <option value="admin" ${m.role==='admin'?'selected':''}>Admin</option>
             <option value="superadmin" ${m.role==='superadmin'?'selected':''}>Super Admin</option>
           </select>
