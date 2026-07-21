@@ -51,8 +51,7 @@ function usedHrefs() {
 }
 
 function availablePages() {
-  const used = usedHrefs();
-  return PAGES.filter(p => !used.has(p.href));
+  return PAGES;
 }
 
 function render() {
