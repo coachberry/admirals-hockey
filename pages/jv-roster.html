@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=52">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>Roster - Franklin Admirals Hockey</title>
+  <title>JV Roster - Franklin Admirals Hockey</title>
   <link rel="stylesheet" href="/assets/css/styles.css?v=52">
   <link rel="stylesheet" href="/assets/css/roster-styles.css?v=52">
   <script src="/assets/js/page-guard.js?v=52"></script>
@@ -18,8 +18,8 @@
 <section class="hero-section">
   <div class="hero-container">
     <div class="hero-badge" id="seasonBadge">Loading...</div>
-    <h1 class="hero-title">Team Roster</h1>
-    <p class="hero-subtitle">Meet the Admirals</p>
+    <h1 class="hero-title">JV Team Roster</h1>
+    <p class="hero-subtitle">Franklin Admirals JV Hockey</p>
   </div>
 </section>
 
@@ -34,7 +34,7 @@
   </div>
 
   <div id="rosterTBDBanner" style="display:none;background:linear-gradient(135deg,#5D1725,#3c0f17);color:white;border-radius:8px;padding:2.5rem 1.5rem;text-align:center;margin:2rem 0;">
-    <h2 style="font-size:1.4rem;font-weight:700;margin-bottom:0.5rem;">2026-27 Roster Coming Soon</h2>
+    <h2 style="font-size:1.4rem;font-weight:700;margin-bottom:0.5rem;">2026-27 JV Roster Coming Soon</h2>
     <p style="opacity:0.9;margin-bottom:1.25rem;max-width:560px;margin-left:auto;margin-right:auto;">Information about the 2026-27 roster is to be determined and will be revealed following tryouts.</p>
     <a href="/tryouts" style="display:inline-block;background:white;color:#5D1725;padding:0.65rem 1.75rem;border-radius:6px;font-weight:700;text-decoration:none;">View Tryout Information</a>
   </div>
@@ -121,13 +121,13 @@
 
     const current = seasons.find(s => s.current) || seasons[0];
     if (current) {
-      document.getElementById('seasonBadge').textContent = current.label + ' Season';
+      document.getElementById('seasonBadge').textContent = current.label + ' JV Season';
       await loadRoster(current.id, current);
     }
 
     select.addEventListener('change', async e => {
       const season = seasons.find(s => s.id === e.target.value);
-      document.getElementById('seasonBadge').textContent = season.label + ' Season';
+      document.getElementById('seasonBadge').textContent = season.label + ' JV Season';
       await loadRoster(e.target.value, season);
     });
   }
@@ -149,7 +149,7 @@
 
     const forwards = [], defense = [], goalies = [], coaches = [], board = [];
 
-    const playersSnap = await getDocs(collection(db, 'roster', seasonId, 'players'));
+    const playersSnap = await getDocs(collection(db, 'jv-roster', seasonId, 'players'));
     playersSnap.forEach(d => {
       const m = d.data();
       if (m.position === 'Forward') forwards.push(m);
@@ -157,10 +157,10 @@
       else if (m.position === 'Goaltender') goalies.push(m);
     });
 
-    const coachesSnap = await getDocs(collection(db, 'roster', seasonId, 'coaches'));
+    const coachesSnap = await getDocs(collection(db, 'jv-roster', seasonId, 'coaches'));
     coachesSnap.forEach(d => coaches.push(d.data()));
 
-    const boardSnap = await getDocs(collection(db, 'roster', seasonId, 'boards'));
+    const boardSnap = await getDocs(collection(db, 'jv-roster', seasonId, 'boards'));
     boardSnap.forEach(d => board.push(d.data()));
 
     const byNumber = (a, b) => parseInt(a.number) - parseInt(b.number);

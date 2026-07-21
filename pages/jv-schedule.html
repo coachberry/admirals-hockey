@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=52">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>Schedule - Franklin Admirals Hockey</title>
+  <title>JV Schedule - Franklin Admirals Hockey</title>
   <link rel="stylesheet" href="/assets/css/styles.css?v=52">
   <link rel="stylesheet" href="/assets/css/schedule-styles.css?v=52">
   <link rel="stylesheet" href="/assets/css/game-stats.css?v=52">
@@ -19,8 +19,8 @@
 <section class="hero-section">
   <div class="hero-container">
     <div class="hero-badge" id="seasonBadge">Loading...</div>
-    <h1 class="hero-title">Schedule</h1>
-    <p class="hero-subtitle">Complete game schedule and results</p>
+    <h1 class="hero-title">JV Schedule</h1>
+    <p class="hero-subtitle">JV team game schedule and results</p>
   </div>
 </section>
 
@@ -446,7 +446,7 @@
       `<option value="${s.id}" ${s.current?'selected':''}>${s.label}${s.current?' (Current)':''}</option>`
     ).join('');
 
-    const savedSeason = localStorage.getItem('admirals_scheduleSeasonPublic');
+    const savedSeason = localStorage.getItem('admirals_jvScheduleSeasonPublic');
     const startSeason = (savedSeason && seasons.find(s => s.id === savedSeason))
       ? seasons.find(s => s.id === savedSeason)
       : (seasons.find(s => s.current) || seasons[0]);
@@ -459,8 +459,8 @@
 
     select.addEventListener('change', async e => {
       const season = seasons.find(s => s.id === e.target.value);
-      document.getElementById('seasonBadge').textContent = season.label + ' Season';
-      localStorage.setItem('admirals_scheduleSeasonPublic', e.target.value);
+      document.getElementById('seasonBadge').textContent = season.label + ' JV Season';
+      localStorage.setItem('admirals_jvScheduleSeasonPublic', e.target.value);
       await loadSchedule(e.target.value);
     });
   }
