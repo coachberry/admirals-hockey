@@ -219,6 +219,20 @@ function render() {
         childLabelInput.oninput = () => { child.label = childLabelInput.value; };
         childWrapLabel.appendChild(childLabelInput);
 
+        const childHrefInput = document.createElement('input');
+        childHrefInput.type = 'text';
+        childHrefInput.value = child.href || '';
+        childHrefInput.placeholder = '/url';
+        childHrefInput.title = 'URL';
+        childHrefInput.style.border = '1px solid #eee';
+        childHrefInput.style.borderRadius = '4px';
+        childHrefInput.style.padding = '0.25rem 0.4rem';
+        childHrefInput.style.fontSize = '0.78rem';
+        childHrefInput.style.color = '#888';
+        childHrefInput.style.width = '110px';
+        childHrefInput.oninput = () => { child.href = childHrefInput.value; };
+        childWrapLabel.appendChild(childHrefInput);
+
         row.appendChild(childWrapLabel);
 
         const rc = document.createElement('div');
