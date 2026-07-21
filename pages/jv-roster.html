@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=63">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=64">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>JV Roster - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=63">
-  <link rel="stylesheet" href="/assets/css/roster-styles.css?v=63">
-  <script src="/assets/js/page-guard.js?v=63"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=64">
+  <link rel="stylesheet" href="/assets/css/roster-styles.css?v=64">
+  <script src="/assets/js/page-guard.js?v=64"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=63" defer></script>
-<script src="/assets/js/load-header.js?v=63"></script>
+<script src="/assets/js/load-hero.js?v=64" defer></script>
+<script src="/assets/js/load-header.js?v=64"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -56,10 +56,7 @@
     <div class="section-header"><h2 class="section-title">Coaching Staff</h2></div>
     <div id="coachesGrid" class="roster-grid"></div>
   </div>
-  <div style="margin-top:3rem;margin-bottom:3rem;">
-    <div class="section-header"><h2 class="section-title">Board Members</h2></div>
-    <div id="boardGrid" class="roster-grid"></div>
-  </div>
+
 </div>
 
 <!-- PROFILE MODAL -->
@@ -77,7 +74,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=63"></script>
+<script src="/assets/js/load-footer.js?v=64"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -161,15 +158,14 @@
     const coachesSnap = await getDocs(collection(db, 'jv-roster', seasonId, 'coaches'));
     coachesSnap.forEach(d => coaches.push(d.data()));
 
-    const boardSnap = await getDocs(collection(db, 'jv-roster', seasonId, 'boards'));
-    boardSnap.forEach(d => board.push(d.data()));
+
 
     const byNumber = (a, b) => parseInt(a.number) - parseInt(b.number);
     renderGrid('forwardsGrid', forwards.sort(byNumber));
     renderGrid('defenseGrid', defense.sort(byNumber));
     renderGrid('goaltendersGrid', goalies.sort(byNumber));
     renderGrid('coachesGrid', coaches);
-    renderGrid('boardGrid', board);
+
   }
 
   function openModal(m) {
@@ -187,7 +183,7 @@
       photoContainer.appendChild(img);
     } else {
       const img = document.createElement('img');
-      img.src = '/assets/images/admiral-logo.png?v=63';
+      img.src = '/assets/images/admiral-logo.png?v=64';
       img.alt = 'Admiral Logo';
       img.className = 'modal-placeholder-logo';
       photoContainer.appendChild(img);
@@ -238,7 +234,7 @@
       frame.appendChild(img);
     } else {
       const img = document.createElement('img');
-      img.src = '/assets/images/admiral-logo.png?v=63';
+      img.src = '/assets/images/admiral-logo.png?v=64';
       img.alt = 'Admiral Logo';
       img.className = 'card-placeholder-logo';
       frame.appendChild(img);
@@ -417,7 +413,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=63"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=63"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=64"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=64"></script>
 </body>
 </html>
