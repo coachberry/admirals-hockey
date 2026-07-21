@@ -235,6 +235,22 @@ function render() {
         childWrap.appendChild(row);
       });
 
+      const addTocat = document.createElement('button');
+      addTocat.className = 'btn-secondary';
+      addTocat.textContent = '+ Add Link to Category';
+      addTocat.style.marginTop = '0.4rem';
+      addTocat.style.fontSize = '0.8rem';
+      addTocat.onclick = () => {
+        const label = prompt('Link label:');
+        if (!label || !label.trim()) return;
+        const href = prompt('Link URL (e.g. "/roster"):');
+        if (!href || !href.trim()) return;
+        item.children = item.children || [];
+        item.children.push({ id: 'custom-' + Date.now(), type: 'link', label: label.trim(), href: href.trim() });
+        render();
+      };
+      childWrap.appendChild(addTocat);
+
       div.appendChild(childWrap);
     } else {
       // editable label for categories only is above; links use PAGES labels (not editable here)
