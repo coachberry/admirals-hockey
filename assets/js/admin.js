@@ -608,6 +608,7 @@ function buildRosterItem(m) {
       <div><strong>${label}</strong><span>${subtitle}</span></div>
     </div>
     <div>
+      <button class="btn-secondary" style="font-size:0.75rem;padding:3px 8px;color:${m.memberUid?'#2e7d32':'#999'}" onclick="linkRosterMember(window._rosterMode==='jv'?(window._jvSaveSeasonId||jvCurrentSeasonId):currentSeasonId,'${m.type==='player'?'players':m.type==='coach'?'coaches':'boards'}','${m.id}','${m.memberUid||''}',window._rosterMode==='jv'?'jv-roster':'roster')" title="${m.memberUid?'Linked':'Link to member'}">${m.memberUid?'🔗':'Link'}</button>
       <button class="btn-edit" onclick="editMember('${m.id}', '${m.type}')">Edit</button>
       <button class="btn-delete" onclick="deleteMember('${m.id}', '${m.type}')">Delete</button>
     </div>
