@@ -532,12 +532,19 @@ document.getElementById('saveMemberBtn').addEventListener('click', async () => {
     member.staffId = staffId;
   }
 
-  // Save to season-specific roster
+  // Save to season-specific roster (varsity or JV)
   const collName = type === 'player' ? 'players' : type === 'coach' ? 'coaches' : 'boards';
-  await setDoc(doc(db, 'roster', currentSeasonId, collName, id), member);
+  const rosterCollection = window._rosterMode === 'jv' ? 'jv-roster' : 'roster';
+  const saveSeason = window._rosterMode === 'jv' ? jvCurrentSeasonId : currentSeasonId;
+  await setDoc(doc(db, rosterCollection, saveSeason, collName, id), member);
 
   status.textContent = '✅ Saved!';
   status.style.color = 'green';
+  if (window._rosterMode === 'jv') {
+    setTimeout(() => { rosterModal.classList.remove('active'); loadJvRoster(jvCurrentSeasonId); }, 800);
+  } else {
+    setTimeout(() => { rosterModal.classList.remove('active'); loadRoster(currentSeasonId); }, 800);
+  }
   setTimeout(() => {
     rosterModal.classList.remove('active');
     loadRoster(currentSeasonId);
@@ -545,9 +552,9 @@ document.getElementById('saveMemberBtn').addEventListener('click', async () => {
 });
 
 // Add buttons
-document.getElementById('addPlayerBtn').addEventListener('click', () => openRosterModal('player'));
-document.getElementById('addCoachBtn').addEventListener('click', () => openRosterModal('coach'));
-document.getElementById('addBoardBtn').addEventListener('click', () => openRosterModal('board'));
+document.getElementById('addPlayerBtn').addEventListener('click', () => { window._rosterMode = 'varsity'; openRosterModal('player'); });
+document.getElementById('addCoachBtn').addEventListener('click', () => { window._rosterMode = 'varsity'; openRosterModal('coach'); });
+document.getElementById('addBoardBtn').addEventListener('click', () => { window._rosterMode = 'varsity'; openRosterModal('board'); });
 
 // ============================================
 // LOAD ROSTER
@@ -2818,15 +2825,22 @@ window.editJvMember = async (id, type, seasonId) => {
   const col = type === 'player' ? 'players' : 'coaches';
   const snap = await getDoc(doc(db, 'jv-roster', seasonId, col, id));
   if (!snap.exists()) return;
-  openPlayerModal(snap.data(), type, 'jv', seasonId);
+  window._rosterMode = 'jv';
+  openRosterModal(type, snap.data());
 };
 
 // Add JV player/coach buttons
 const addJvPlayerBtn = document.getElementById('addJvPlayerBtn');
-if (addJvPlayerBtn) addJvPlayerBtn.addEventListener('click', () => openPlayerModal(null, 'player', 'jv', jvCurrentSeasonId));
+if (addJvPlayerBtn) addJvPlayerBtn.addEventListener('click', () => {
+  window._rosterMode = 'jv';
+  openRosterModal('player');
+});
 
 const addJvCoachBtn = document.getElementById('addJvCoachBtn');
-if (addJvCoachBtn) addJvCoachBtn.addEventListener('click', () => openPlayerModal(null, 'coach', 'jv', jvCurrentSeasonId));
+if (addJvCoachBtn) addJvCoachBtn.addEventListener('click', () => {
+  window._rosterMode = 'jv';
+  openRosterModal('coach');
+});
 
 // Load when tab clicked
 const jvRosterTabBtn = document.querySelector('[data-tab="jvRoster"]');
