@@ -535,7 +535,7 @@ document.getElementById('saveMemberBtn').addEventListener('click', async () => {
   // Save to season-specific roster (varsity or JV)
   const collName = type === 'player' ? 'players' : type === 'coach' ? 'coaches' : 'boards';
   const rosterCollection = window._rosterMode === 'jv' ? 'jv-roster' : 'roster';
-  const saveSeason = window._rosterMode === 'jv' ? jvCurrentSeasonId : currentSeasonId;
+  const saveSeason = window._rosterMode === 'jv' ? (window._jvSaveSeasonId || jvCurrentSeasonId) : currentSeasonId;
   await setDoc(doc(db, rosterCollection, saveSeason, collName, id), member);
 
   status.textContent = '✅ Saved!';
@@ -2826,6 +2826,7 @@ window.editJvMember = async (id, type, seasonId) => {
   const snap = await getDoc(doc(db, 'jv-roster', seasonId, col, id));
   if (!snap.exists()) return;
   window._rosterMode = 'jv';
+  window._jvSaveSeasonId = seasonId;
   openRosterModal(type, snap.data());
 };
 
@@ -2833,12 +2834,14 @@ window.editJvMember = async (id, type, seasonId) => {
 const addJvPlayerBtn = document.getElementById('addJvPlayerBtn');
 if (addJvPlayerBtn) addJvPlayerBtn.addEventListener('click', () => {
   window._rosterMode = 'jv';
+  window._jvSaveSeasonId = jvCurrentSeasonId;
   openRosterModal('player');
 });
 
 const addJvCoachBtn = document.getElementById('addJvCoachBtn');
 if (addJvCoachBtn) addJvCoachBtn.addEventListener('click', () => {
   window._rosterMode = 'jv';
+  window._jvSaveSeasonId = jvCurrentSeasonId;
   openRosterModal('coach');
 });
 
