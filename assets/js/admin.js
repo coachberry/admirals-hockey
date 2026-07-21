@@ -596,6 +596,38 @@ async function loadBoardMembers(seasonId) {
   members.forEach(m => list.appendChild(buildRosterItem(m)));
 }
 
+window.linkRosterMember = async function(seasonId, collName, playerId, currentUid, rosterCollection) {
+  const snap = await getDocs(collection(db, 'members'));
+  const members = [];
+  snap.forEach(d => members.push({ id: d.id, ...d.data() }));
+  members.sort((a,b) => (a.displayName||'').localeCompare(b.displayName||''));
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  const options = members.map(m => '<option value="' + m.id + '"' + (currentUid===m.id?' selected':'') + '>' + (m.displayName||m.email) + ' (' + m.role + ')</option>').join('');
+  modal.innerHTML = '<div style="background:white;border-radius:8px;padding:1.5rem;max-width:400px;width:90%;">'
+    + '<h3 style="margin-bottom:1rem;">Link to Member Account</h3>'
+    + '<select id="rosterMemberPicker" style="width:100%;padding:0.6rem;border:1px solid #ddd;border-radius:6px;font-size:0.9rem;margin-bottom:1rem;"><option value="">-- No link --</option>' + options + '</select>'
+    + '<div style="display:flex;gap:0.5rem;">'
+    + '<button id="rmpSave" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.6rem 1.2rem;cursor:pointer;font-weight:600;">Save</button>'
+    + '<button id="rmpCancel" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:0.6rem 1.2rem;cursor:pointer;">Cancel</button>'
+    + (currentUid ? '<button id="rmpUnlink" style="background:white;color:#c62828;border:1px solid #c62828;border-radius:6px;padding:0.6rem 1.2rem;cursor:pointer;margin-left:auto;">Unlink</button>' : '')
+    + '</div></div>';
+  document.body.appendChild(modal);
+  modal.querySelector('#rmpCancel').onclick = () => modal.remove();
+  modal.querySelector('#rmpSave').onclick = async () => {
+    const uid = modal.querySelector('#rosterMemberPicker').value || null;
+    await setDoc(doc(db, rosterCollection, seasonId, collName, playerId), { memberUid: uid }, { merge: true });
+    modal.remove();
+    if (rosterCollection === 'jv-roster') loadJvRoster(seasonId); else loadRoster(seasonId);
+  };
+  const unlinkBtn = modal.querySelector('#rmpUnlink');
+  if (unlinkBtn) unlinkBtn.onclick = async () => {
+    await setDoc(doc(db, rosterCollection, seasonId, collName, playerId), { memberUid: null }, { merge: true });
+    modal.remove();
+    if (rosterCollection === 'jv-roster') loadJvRoster(seasonId); else loadRoster(seasonId);
+  };
+};
+
 function buildRosterItem(m) {
   const item = document.createElement('div');
   item.className = 'item';
