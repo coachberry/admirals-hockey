@@ -3103,6 +3103,8 @@ loadPageHeroes();
 // ============================================
 const TEAM_EVENT_ROLES = [
   { id: 'player', label: 'Player' },
+  { id: 'varsity', label: 'Varsity Player' },
+  { id: 'jv', label: 'JV Player' },
   { id: 'prospect', label: 'Prospect' },
   { id: 'alumni', label: 'Alumni' },
   { id: 'coach', label: 'Coach' },

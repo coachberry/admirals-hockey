@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=69">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=70">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=69">
-  <script src="/assets/js/page-guard.js?v=69"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=70">
+  <script src="/assets/js/page-guard.js?v=70"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -290,7 +290,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=69"></script>
+<script src="/assets/js/load-header.js?v=70"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -338,8 +338,7 @@
         <div class="profile-card-body">
           <button class="profile-nav-btn active" onclick="showSection('info')" id="navInfo">👤 My Info</button>
           <button class="profile-nav-btn" onclick="showSection('roles')" id="navRoles">🏷️ Roles</button>
-          <button class="profile-nav-btn" onclick="showSection('rsvp')" id="navRsvp">📅 My Games</button>
-          <button class="profile-nav-btn" onclick="showSection('teamevents')" id="navTeamevents">🏒 Team Events</button>
+          <button class="profile-nav-btn" onclick="showSection('schedule')" id="navSchedule">📅 My Schedule</button>
           <hr style="margin:0.5rem 0;border:none;border-top:1px solid #f0f0f0;">
           <button class="profile-nav-btn" onclick="doSignOutAndRedirect()" style="color:#c62828;">🚪 Sign Out</button>
         </div>
@@ -530,22 +529,14 @@
       </div>
 
       <!-- TEAM EVENTS SECTION -->
-      <div class="profile-section" id="sectionTeamevents" style="display:none;">
+      <!-- MY SCHEDULE SECTION -->
+      <div class="profile-section" id="sectionSchedule" style="display:none;">
         <div class="profile-section-header">
-          <span class="profile-section-title">Team Events</span>
+          <span class="profile-section-title">My Schedule</span>
         </div>
         <div class="profile-section-body">
-          <div id="myTeamEventsList"><p style="color:#999;font-style:italic;">Loading events...</p></div>
-        </div>
-      </div>
-
-      <!-- MY GAMES SECTION -->
-      <div class="profile-section" id="sectionRsvp" style="display:none;">
-        <div class="profile-section-header">
-          <span class="profile-section-title">My Upcoming Games</span>
-        </div>
-        <div class="profile-section-body">
-          <div id="myGamesList"><p style="color:#999;font-style:italic;">Loading games...</p></div>
+          <p style="font-size:0.85rem;color:#666;margin-bottom:1rem;">Upcoming games and events based on your team assignments and roles.</p>
+          <div id="myScheduleList"><p style="color:#999;font-style:italic;">Loading...</p></div>
         </div>
       </div>
 
@@ -554,7 +545,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=69"></script>
+<script src="/assets/js/load-footer.js?v=70"></script>
 
 <!-- MEMBER MODAL v2 -->
 <div id="memberModal" class="modal-overlay" style="z-index:2000;">
@@ -665,21 +656,20 @@ function showRoleFields(role) {
 }
 
 function showSection(name) {
-  ['info','roles','requestRole','rsvp','teamevents'].forEach(s => {
+  ['info','roles','requestRole','schedule'].forEach(s => {
     const el = document.getElementById('section' + s.charAt(0).toUpperCase() + s.slice(1));
     if (el) el.style.display = s === name ? 'block' : 'none';
   });
-  ['info','roles','rsvp','teamevents'].forEach(s => {
+  ['info','roles','schedule'].forEach(s => {
     const btn = document.getElementById('nav' + s.charAt(0).toUpperCase() + s.slice(1));
     if (btn) btn.classList.toggle('active', s === name);
   });
-  if (name === 'rsvp') loadMyGames();
-  if (name === 'teamevents') loadMyTeamEvents();
+  if (name === 'schedule') loadMySchedule();
   if (name === 'roles') loadMyRoles();
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=69"></script>
+<script type="module" src="/assets/js/member-auth.js?v=70"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -945,138 +935,149 @@ function showSection(name) {
     }
   }
 
-  window.loadMyGames = async function() {
+  window.loadMySchedule = async function() {
     if (!currentUser || !currentProfile) return;
-    const list = document.getElementById('myGamesList');
-    list.innerHTML = '<p style="color:#999;font-style:italic;">Loading...</p>';
-
-    const today = new Date().toISOString().split('T')[0];
-    let html = '';
-
-    // Summer games - find teams this member is on
-    const summerSnap = await getDocs(collection(db, 'summer'));
-    const seasons = [];
-    summerSnap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
-
-    for (const season of seasons) {
-      const teamsSnap = await getDocs(collection(db, 'summer', season.id, 'teams'));
-      for (const teamDoc of teamsSnap.docs) {
-        const team = teamDoc.data();
-        const roster = Array.isArray(team.roster) ? team.roster : [];
-        const isOnTeam = roster.some(p => p.memberUid === currentUser.uid || p.name === currentProfile.displayName);
-        if (!isOnTeam) continue;
-
-        const gamesSnap = await getDocs(collection(db, 'summer', season.id, 'games'));
-        for (const gameDoc of gamesSnap.docs) {
-          const g = gameDoc.data();
-          if (g.played || g.date < today) continue;
-          if (g.homeTeamId !== teamDoc.id && g.awayTeamId !== teamDoc.id) continue;
-
-          const oppTeamDoc = teamsSnap.docs.find(d => d.id === (g.homeTeamId === teamDoc.id ? g.awayTeamId : g.homeTeamId));
-          const oppName = oppTeamDoc?.data()?.name || 'TBD';
-          const dateStr = new Date(g.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
-          const timeStr = g.time ? (() => { const [h,m] = g.time.split(':'); const hr = parseInt(h); return `${hr%12||12}:${m} ${hr>=12?'PM':'AM'}`; })() : '';
-
-          // Check existing RSVP
-          const rsvpDoc = await getDoc(doc(db, 'summer', season.id, 'games', gameDoc.id, 'rsvps', currentUser.uid));
-          const existing = rsvpDoc.exists() ? rsvpDoc.data().response : null;
-
-          const yesActive = existing === 'yes';
-          const noActive = existing === 'no';
-          const rowId = 'rsvprow_' + gameDoc.id;
-          html += `<div class="game-rsvp-item" id="${rowId}">
-            <div>
-              <div style="font-weight:600;font-size:0.9rem;">${team.name} vs. ${oppName}</div>
-              <div style="font-size:0.82rem;color:#666;">${dateStr} · ${timeStr} · ${season.label || season.id}</div>
-            </div>
-            <div id="btns_${gameDoc.id}" style="display:flex;gap:0.5rem;">
-              <button onclick="toggleSummerRsvp('${season.id}','${gameDoc.id}','${currentUser.uid}','yes',${yesActive})"
-                style="border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:${yesActive ? '#2e7d32' : 'white'};color:${yesActive ? 'white' : '#2e7d32'};">
-                ✅ In
-              </button>
-              <button onclick="toggleSummerRsvp('${season.id}','${gameDoc.id}','${currentUser.uid}','no',${noActive})"
-                style="border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:${noActive ? '#c62828' : 'white'};color:${noActive ? 'white' : '#c62828'};">
-                ❌ Out
-              </button>
-            </div>
-          </div>`;
-        }
-      }
-    }
-
-    if (!html) html = '<p style="color:#999;font-style:italic;">No upcoming games found. Make sure you\'re added to a team roster by your admin.</p>';
-    list.innerHTML = html;
-  };
-
-  window.toggleSummerRsvp = async function(seasonId, gameId, uid, response, isActive) {
-    const rsvpRef = doc(db, 'summer', seasonId, 'games', gameId, 'rsvps', uid);
-    if (isActive) {
-      await deleteDoc(rsvpRef);
-    } else {
-      await setDoc(rsvpRef, { response, uid, name: currentProfile.displayName || '', timestamp: new Date().toISOString() });
-    }
-    // Re-render just this row's buttons
-    const btns = document.getElementById('btns_' + gameId);
-    if (btns) {
-      const newActive = !isActive;
-      const yesActive = newActive && response === 'yes';
-      const noActive = newActive && response === 'no';
-      btns.innerHTML = `
-        <button onclick="toggleSummerRsvp('${seasonId}','${gameId}','${uid}','yes',${yesActive})"
-          style="border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:${yesActive ? '#2e7d32' : 'white'};color:${yesActive ? 'white' : '#2e7d32'};">
-          ✅ In
-        </button>
-        <button onclick="toggleSummerRsvp('${seasonId}','${gameId}','${uid}','no',${noActive})"
-          style="border-radius:4px;padding:0.4rem 0.9rem;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:${noActive ? '#c62828' : 'white'};color:${noActive ? 'white' : '#c62828'};">
-          ❌ Out
-        </button>`;
-    }
-  };
-
-  window.loadMyTeamEvents = async function() {
-    if (!currentUser || !currentProfile) return;
-    const list = document.getElementById('myTeamEventsList');
+    const list = document.getElementById('myScheduleList');
     list.innerHTML = '<p style="color:#999;font-style:italic;">Loading...</p>';
     const role = currentProfile.role || 'member';
-
-    const snap = await getDocs(collection(db, 'teamEvents'));
-    const events = [];
-    snap.forEach(d => {
-      const e = { id: d.id, ...d.data() };
-      if (!e.invitedRoles || e.invitedRoles.includes(role) || e.invitedRoles.includes('member')) {
-        events.push(e);
-      }
-    });
-    events.sort((a,b) => (a.date||'').localeCompare(b.date||''));
-
     const today = new Date().toISOString().split('T')[0];
-    const upcoming = events.filter(e => !e.date || e.date >= today);
+    const items = [];
 
-    if (!upcoming.length) {
-      list.innerHTML = '<p style="color:#999;font-style:italic;">No upcoming team events.</p>';
+    // 1. Summer Hockey games (linked via memberUid)
+    try {
+      const summerSeasonsSnap = await getDocs(collection(db, 'summer'));
+      for (const seasonDoc of summerSeasonsSnap.docs) {
+        const seasonId = seasonDoc.id;
+        const teamsSnap = await getDocs(collection(db, 'summer', seasonId, 'teams'));
+        for (const teamDoc of teamsSnap.docs) {
+          const team = teamDoc.data();
+          const roster = Array.isArray(team.roster) ? team.roster : [];
+          const isOnTeam = roster.some(p => p.memberUid === currentUser.uid);
+          if (!isOnTeam) continue;
+          const gamesSnap = await getDocs(collection(db, 'summer', seasonId, 'games'));
+          for (const gameDoc of gamesSnap.docs) {
+            const g = gameDoc.data();
+            const gameTeams = [g.homeTeamId, g.awayTeamId];
+            if (!gameTeams.includes(teamDoc.id)) continue;
+            if (!g.date || g.date < today) continue;
+            const rsvpDoc = await getDoc(doc(db, 'summer', seasonId, 'games', gameDoc.id, 'rsvps', currentUser.uid));
+            const rsvp = rsvpDoc.exists() ? rsvpDoc.data().response : null;
+            items.push({ type: 'summer', date: g.date, time: g.time, label: team.name + ' vs ' + (g.homeTeamId === teamDoc.id ? (summerTeams && summerTeams[g.awayTeamId]?.name || 'Opponent') : (summerTeams && summerTeams[g.homeTeamId]?.name || 'Opponent')), sublabel: 'Summer Hockey · ' + (seasonId), rsvp, gameId: gameDoc.id, seasonId, canRsvp: true });
+          }
+        }
+      }
+    } catch(e) { console.error('Summer games error:', e); }
+
+    // 2. Varsity schedule (if varsity or player role)
+    if (['varsity','player','coach','admin','superadmin'].includes(role)) {
+      try {
+        const seasonsSnap = await getDocs(collection(db, 'seasons'));
+        for (const seasonDoc of seasonsSnap.docs) {
+          const sd = seasonDoc.data();
+          if (sd.varsityScheduleHidden) continue;
+          const gamesSnap = await getDocs(collection(db, 'seasons', seasonDoc.id, 'schedule'));
+          gamesSnap.forEach(g => {
+            const gd = g.data();
+            if (!gd.date || gd.date < today) return;
+            items.push({ type: 'varsity', date: gd.date, time: gd.time, label: 'vs ' + (gd.opponent || 'TBD'), sublabel: 'Varsity · ' + sd.label, rsvp: null, canRsvp: false });
+          });
+        }
+      } catch(e) { console.error('Varsity schedule error:', e); }
+    }
+
+    // 3. JV schedule (if jv role)
+    if (['jv','coach','admin','superadmin'].includes(role)) {
+      try {
+        const seasonsSnap = await getDocs(collection(db, 'seasons'));
+        for (const seasonDoc of seasonsSnap.docs) {
+          const sd = seasonDoc.data();
+          if (!sd.jvEnabled || sd.jvScheduleHidden) continue;
+          const gamesSnap = await getDocs(collection(db, 'jv-schedule', seasonDoc.id, 'games'));
+          gamesSnap.forEach(g => {
+            const gd = g.data();
+            if (!gd.date || gd.date < today) return;
+            items.push({ type: 'jv', date: gd.date, time: gd.time, label: 'vs ' + (gd.opponent || 'TBD'), sublabel: 'JV · ' + sd.label, rsvp: null, canRsvp: false });
+          });
+        }
+      } catch(e) { console.error('JV schedule error:', e); }
+    }
+
+    // 4. Team Events
+    try {
+      const teSnap = await getDocs(collection(db, 'teamEvents'));
+      for (const teDoc of teSnap.docs) {
+        const e = teDoc.data();
+        if (!e.date || e.date < today) continue;
+        const invitedRoles = e.invitedRoles || [];
+        const canRsvp = invitedRoles.length > 0 && invitedRoles.includes(role);
+        const canSee = e.public !== false || canRsvp;
+        if (!canSee) continue;
+        const rsvpDoc = await getDoc(doc(db, 'teamEvents', teDoc.id, 'rsvps', currentUser.uid));
+        const rsvp = rsvpDoc.exists() ? rsvpDoc.data().response : null;
+        items.push({ type: 'event', date: e.date, time: e.time, label: e.name, sublabel: e.location || 'Team Event', rsvp, eventId: teDoc.id, canRsvp });
+      }
+    } catch(e) { console.error('Team events error:', e); }
+
+    // Sort all by date
+    items.sort((a, b) => (a.date + (a.time||'')).localeCompare(b.date + (b.time||'')));
+
+    if (!items.length) {
+      list.innerHTML = '<p style="color:#999;font-style:italic;">No upcoming games or events found.</p>';
       return;
     }
 
-    list.innerHTML = upcoming.map(e => {
-      const dateStr = e.date ? new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }) : 'TBD';
-      const timeStr = e.time ? (() => { const [h,m] = e.time.split(':'); const hr=parseInt(h); return hr%12||12+':'+m+' '+(hr>=12?'PM':'AM'); })() : '';
-      return `<div class="game-rsvp-item" id="te_${e.id}">
-        <div>
-          <div style="font-weight:600;font-size:0.9rem;">${e.name}</div>
-          <div style="font-size:0.82rem;color:#888;">${dateStr}${timeStr?' · '+timeStr:''}${e.location?' · '+e.location:''}</div>
-          ${e.details ? `<div style="font-size:0.8rem;color:#666;margin-top:4px;">${e.details}</div>` : ''}
-        </div>
-        <div id="teBtns_${e.id}" style="display:flex;gap:0.5rem;flex-shrink:0;"></div>
-      </div>`;
+    list.innerHTML = items.map(item => {
+      const d = new Date(item.date + 'T12:00:00');
+      const dateStr = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+      const timeStr = item.time ? (() => { const p = item.time.split(':'); const hr = parseInt(p[0]); return (hr%12||12)+':'+p[1]+' '+(hr>=12?'PM':'AM'); })() : '';
+      const typeColor = item.type==='varsity'?'#5D1725':item.type==='jv'?'#1565c0':item.type==='summer'?'#2e7d32':'#e65100';
+      const typeLabel = item.type==='varsity'?'Varsity':item.type==='jv'?'JV':item.type==='summer'?'Summer':'Event';
+
+      let rsvpHtml = '';
+      if (item.canRsvp) {
+        const inActive = item.rsvp === 'yes';
+        const outActive = item.rsvp === 'no';
+        if (item.type === 'event') {
+          rsvpHtml = '<div style="display:flex;gap:0.4rem;margin-top:0.5rem;">'
+            + '<button data-etype="event" data-id="'+item.eventId+'" data-resp="yes" data-active="'+inActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:3px 10px;font-size:0.78rem;font-weight:600;cursor:pointer;border:1.5px solid #2e7d32;background:'+(inActive?'#2e7d32':'white')+';color:'+(inActive?'white':'#2e7d32')+';">✅ In</button>'
+            + '<button data-etype="event" data-id="'+item.eventId+'" data-resp="no" data-active="'+outActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:3px 10px;font-size:0.78rem;font-weight:600;cursor:pointer;border:1.5px solid #c62828;background:'+(outActive?'#c62828':'white')+';color:'+(outActive?'white':'#c62828')+';">❌ Out</button>'
+            + '</div>';
+        } else if (item.type === 'summer') {
+          rsvpHtml = '<div style="display:flex;gap:0.4rem;margin-top:0.5rem;">'
+            + '<button data-etype="summer" data-sid="'+item.seasonId+'" data-gid="'+item.gameId+'" data-resp="yes" data-active="'+inActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:3px 10px;font-size:0.78rem;font-weight:600;cursor:pointer;border:1.5px solid #2e7d32;background:'+(inActive?'#2e7d32':'white')+';color:'+(inActive?'white':'#2e7d32')+';">✅ In</button>'
+            + '<button data-etype="summer" data-sid="'+item.seasonId+'" data-gid="'+item.gameId+'" data-resp="no" data-active="'+outActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:3px 10px;font-size:0.78rem;font-weight:600;cursor:pointer;border:1.5px solid #c62828;background:'+(outActive?'#c62828':'white')+';color:'+(outActive?'white':'#c62828')+';">❌ Out</button>'
+            + '</div>';
+        }
+      }
+
+      return '<div class="game-rsvp-item">'
+        + '<div style="flex:1;min-width:0;">'
+        + '<div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.2rem;">'
+        + '<span style="background:'+typeColor+';color:white;font-size:0.65rem;font-weight:700;padding:1px 6px;border-radius:3px;">'+typeLabel+'</span>'
+        + '<span style="font-weight:600;font-size:0.9rem;">'+item.label+'</span>'
+        + '</div>'
+        + '<div style="font-size:0.8rem;color:#666;">'+dateStr+(timeStr?' · '+timeStr:'')+(item.sublabel?' · '+item.sublabel:'')+'</div>'
+        + rsvpHtml
+        + '</div>'
+        + '</div>';
     }).join('');
 
-    // Load RSVPs for each event
-    for (const e of upcoming) {
-      const rsvpDoc = await getDoc(doc(db, 'teamEvents', e.id, 'rsvps', currentUser.uid));
-      const existing = rsvpDoc.exists() ? rsvpDoc.data().response : null;
-      const btns = document.getElementById('teBtns_' + e.id);
-      if (btns) btns.innerHTML = rsvpBtnsTE(e.id, currentUser.uid, existing);
-    }
+    // Event delegation for RSVP buttons
+    list.querySelectorAll('.sch-rsvp-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const etype = btn.dataset.etype;
+        const resp = btn.dataset.resp;
+        const isActive = btn.dataset.active === 'true';
+        if (etype === 'event') {
+          const rsvpRef = doc(db, 'teamEvents', btn.dataset.id, 'rsvps', currentUser.uid);
+          if (isActive) { await deleteDoc(rsvpRef); } else { await setDoc(rsvpRef, { response: resp, name: currentProfile.displayName, timestamp: new Date().toISOString() }); }
+        } else if (etype === 'summer') {
+          const rsvpRef = doc(db, 'summer', btn.dataset.sid, 'games', btn.dataset.gid, 'rsvps', currentUser.uid);
+          if (isActive) { await deleteDoc(rsvpRef); } else { await setDoc(rsvpRef, { response: resp, uid: currentUser.uid, name: currentProfile.displayName, timestamp: new Date().toISOString() }); }
+        }
+        loadMySchedule();
+      });
+    });
   };
 
   function rsvpBtnsTE(eventId, uid, existing) {
