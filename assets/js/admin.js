@@ -207,12 +207,18 @@ function renderSeasonsList() {
         <div>
           <strong>${s.label}</strong>
           <span>${s.current ? '✅ Current Season' : ''}</span>
-          <span>${s.rosterTBD ? ' 🔒 Roster Hidden' : ''}</span>
+          <span>${s.varsityRosterHidden ? ' 🔒 VR Hidden' : ''}</span>
+          <span>${s.jvRosterHidden ? ' 🔒 JVR Hidden' : ''}</span>
+          <span>${s.varsityScheduleHidden ? ' 🔒 VS Hidden' : ''}</span>
+          <span>${s.jvScheduleHidden ? ' 🔒 JVS Hidden' : ''}</span>
         </div>
       </div>
-      <div style="display:flex; gap:0.5rem;">
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
         ${!s.current ? `<button class="btn-edit" onclick="setCurrentSeason('${s.id}')">Set Current</button>` : ''}
-        <button class="btn-edit" onclick="toggleRosterTBD('${s.id}')">${s.rosterTBD ? 'Show Roster' : 'Hide Roster'}</button>
+        <button class="btn-edit" onclick="toggleSeasonFlag('${s.id}','varsityRosterHidden')">${s.varsityRosterHidden ? 'Show V.Roster' : 'Hide V.Roster'}</button>
+        <button class="btn-edit" onclick="toggleSeasonFlag('${s.id}','jvRosterHidden')">${s.jvRosterHidden ? 'Show JV Roster' : 'Hide JV Roster'}</button>
+        <button class="btn-edit" onclick="toggleSeasonFlag('${s.id}','varsityScheduleHidden')">${s.varsityScheduleHidden ? 'Show V.Schedule' : 'Hide V.Schedule'}</button>
+        <button class="btn-edit" onclick="toggleSeasonFlag('${s.id}','jvScheduleHidden')">${s.jvScheduleHidden ? 'Show JV Schedule' : 'Hide JV Schedule'}</button>
         <button class="btn-delete" onclick="deleteSeason('${s.id}')">Delete</button>
       </div>
     `;
@@ -223,7 +229,10 @@ function renderSeasonsList() {
 document.getElementById('addSeasonBtn').addEventListener('click', () => {
   document.getElementById('seasonLabel').value = '';
   document.getElementById('seasonCurrent').checked = false;
-  document.getElementById('seasonRosterTBD').checked = false;
+  document.getElementById('seasonVarsityRosterHidden').checked = false;
+  document.getElementById('seasonJvRosterHidden').checked = false;
+  document.getElementById('seasonVarsityScheduleHidden').checked = false;
+  document.getElementById('seasonJvScheduleHidden').checked = false;
   document.getElementById('seasonForm').style.display = 'block';
 });
 document.getElementById('cancelSeasonBtn').addEventListener('click', () => document.getElementById('seasonForm').style.display = 'none');
@@ -232,7 +241,11 @@ document.getElementById('saveSeasonBtn').addEventListener('click', async () => {
   const label = document.getElementById('seasonLabel').value.trim();
   if (!label) { alert('Please enter a season label'); return; }
   const isCurrent = document.getElementById('seasonCurrent').checked;
-  const rosterTBD = document.getElementById('seasonRosterTBD').checked;
+  const varsityRosterHidden = document.getElementById('seasonVarsityRosterHidden').checked;
+  const jvRosterHidden = document.getElementById('seasonJvRosterHidden').checked;
+  const varsityScheduleHidden = document.getElementById('seasonVarsityScheduleHidden').checked;
+  const jvScheduleHidden = document.getElementById('seasonJvScheduleHidden').checked;
+  const rosterTBD = varsityRosterHidden; // backward compat
   const id = label.replace(/[^a-zA-Z0-9-]/g, '-');
 
   // If setting as current, unset others
@@ -242,7 +255,7 @@ document.getElementById('saveSeasonBtn').addEventListener('click', async () => {
     }
   }
 
-  await setDoc(doc(db, 'seasons', id), { label, current: isCurrent, rosterTBD, createdAt: new Date().toISOString() });
+  await setDoc(doc(db, 'seasons', id), { label, current: isCurrent, rosterTBD, varsityRosterHidden, jvRosterHidden, varsityScheduleHidden, jvScheduleHidden, createdAt: new Date().toISOString() });
   document.getElementById('seasonForm').style.display = 'none';
   await loadSeasons();
 });
@@ -255,9 +268,16 @@ window.setCurrentSeason = async (id) => {
 };
 
 window.toggleRosterTBD = async (id) => {
+  await window.toggleSeasonFlag(id, 'varsityRosterHidden');
+};
+
+window.toggleSeasonFlag = async (id, flag) => {
   const s = allSeasons.find(x => x.id === id);
   if (!s) return;
-  await setDoc(doc(db, 'seasons', s.id), { ...s, rosterTBD: !s.rosterTBD });
+  const update = { ...s };
+  update[flag] = !s[flag];
+  if (flag === 'varsityRosterHidden') update.rosterTBD = update[flag];
+  await setDoc(doc(db, 'seasons', s.id), update);
   await loadSeasons();
 };
 

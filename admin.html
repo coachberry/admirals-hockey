@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=60">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=61">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=60">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=60">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=61">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=61">
 </head>
 <body>
 
@@ -322,8 +322,18 @@
         <label class="captain-label" style="margin-bottom:0.75rem;">
           <input type="checkbox" id="seasonCurrent"> Set as current season
         </label>
+        <p style="font-size:0.82rem;color:#555;font-weight:600;margin-bottom:0.25rem;">Page Visibility (check to hide):</p>
+        <label class="captain-label" style="margin-bottom:0.4rem;">
+          <input type="checkbox" id="seasonVarsityRosterHidden"> Hide Varsity Roster (show Tryouts TBD banner)
+        </label>
+        <label class="captain-label" style="margin-bottom:0.4rem;">
+          <input type="checkbox" id="seasonJvRosterHidden"> Hide JV Roster
+        </label>
+        <label class="captain-label" style="margin-bottom:0.4rem;">
+          <input type="checkbox" id="seasonVarsityScheduleHidden"> Hide Varsity Schedule
+        </label>
         <label class="captain-label" style="margin-bottom:0.75rem;">
-          <input type="checkbox" id="seasonRosterTBD"> Hide player roster (show "Tryouts TBD" banner)
+          <input type="checkbox" id="seasonJvScheduleHidden"> Hide JV Schedule
         </label>
         <div class="form-buttons">
           <button id="saveSeasonBtn" class="btn-primary">Save Season</button>
@@ -1204,10 +1214,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=60"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=60"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=60"></script>
-<script type="module" src="/assets/js/game-stats.js?v=60"></script>
+<script type="module" src="/assets/js/admin.js?v=61"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=61"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=61"></script>
+<script type="module" src="/assets/js/game-stats.js?v=61"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
