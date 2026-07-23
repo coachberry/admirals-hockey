@@ -3490,6 +3490,4 @@ async function loadChannelsAdmin() {
 
 document.querySelector('[data-tab="chat"]').addEventListener('click', loadChannelsAdmin);
 
-loadChannelsAdmin();
-
 });
