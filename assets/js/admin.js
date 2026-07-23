@@ -1327,6 +1327,64 @@ if (toggleBtn) {
 }
 
 // Expose to window for HTML onclick attributes
+// Editor tab toggle (Visual / HTML)
+const editorVisualBtn = document.getElementById('editorVisualBtn');
+const editorHtmlBtn = document.getElementById('editorHtmlBtn');
+if (editorVisualBtn && editorHtmlBtn) {
+  editorVisualBtn.addEventListener('click', () => {
+    editorVisualBtn.classList.add('active');
+    editorHtmlBtn.classList.remove('active');
+    const visual = document.getElementById('newsContentVisual');
+    const html = document.getElementById('newsContent');
+    const toolbar = document.getElementById('editorToolbar');
+    // Sync HTML content into visual editor
+    visual.innerHTML = html.value;
+    visual.style.display = 'block';
+    html.style.display = 'none';
+    if (toolbar) toolbar.style.display = 'flex';
+  });
+  editorHtmlBtn.addEventListener('click', () => {
+    editorHtmlBtn.classList.add('active');
+    editorVisualBtn.classList.remove('active');
+    const visual = document.getElementById('newsContentVisual');
+    const html = document.getElementById('newsContent');
+    const toolbar = document.getElementById('editorToolbar');
+    // Sync visual content into HTML editor
+    html.value = visual.innerHTML;
+    visual.style.display = 'none';
+    html.style.display = 'block';
+    if (toolbar) toolbar.style.display = 'none';
+  });
+}
+
+window.insertBodyImage = function() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const dataUrl = e.target.result;
+      try {
+        const imgId = 'bodyimg_' + Date.now();
+        const imgRef = ref(storage, `news/body/${imgId}`);
+        await uploadString(imgRef, dataUrl, 'data_url');
+        const url = await getDownloadURL(imgRef);
+        const visual = document.getElementById('newsContentVisual');
+        visual.focus();
+        document.execCommand('insertHTML', false, `<img src="${url}" style="max-width:100%;border-radius:6px;margin:0.5rem 0;">`);
+      } catch (err) {
+        alert('Image upload failed. Please try again.');
+        console.error(err);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+};
+
 window.execCmd = window.execCmd || function(cmd, val) {
   const el = document.getElementById('newsContentVisual');
   if (el) { el.focus(); document.execCommand(cmd, false, val || null); }
