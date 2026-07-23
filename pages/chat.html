@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=108">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=109">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Team Chat - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=108">
-  <script src="/assets/js/page-guard.js?v=108"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=109">
+  <script src="/assets/js/page-guard.js?v=109"></script>
   <style>
     .chat-layout {
       display: grid;
@@ -288,19 +288,36 @@
     .date-divider::after { right: 0; }
 
     @media (max-width: 768px) {
-      .chat-layout { grid-template-columns: 1fr; height: auto; }
-      .chat-sidebar { flex-direction: row; flex-wrap: wrap; height: auto; }
-      .channel-group-label { display: none; }
-      .chat-sidebar-header { display: none; }
-      .channel-btn { width: auto; padding: 0.5rem 0.75rem; font-size: 0.8rem; }
-      .chat-messages { min-height: 400px; max-height: 60vh; }
+      .chat-layout { grid-template-columns: 1fr; height: auto; position: relative; }
+      .chat-sidebar {
+        position: fixed; top: 0; left: -280px; width: 260px; height: 100vh;
+        z-index: 1000; transition: left 0.3s ease; box-shadow: 2px 0 12px rgba(0,0,0,0.2);
+        flex-direction: column; overflow-y: auto;
+      }
+      .chat-sidebar.open { left: 0; }
+      .chat-sidebar-header { display: flex; }
+      .chat-messages { min-height: 400px; max-height: 70vh; }
+      .mobile-sidebar-overlay {
+        display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 999;
+      }
+      .mobile-sidebar-overlay.show { display: block; }
+      .mobile-channel-toggle {
+        display: flex; align-items: center; gap: 0.5rem;
+        padding: 0.6rem 1rem; background: #5D1725; color: white;
+        border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 600;
+        cursor: pointer; margin-bottom: 0.75rem;
+      }
+    }
+    @media (min-width: 769px) {
+      .mobile-channel-toggle { display: none; }
+      .mobile-sidebar-overlay { display: none !important; }
     }
   </style>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=108"></script>
+<script src="/assets/js/load-header.js?v=109"></script>
 
 <div class="main-container" style="padding-top:1rem;">
 
@@ -311,6 +328,8 @@
   </div>
 
   <div id="chatApp" style="display:none;">
+    <div id="mobileSidebarOverlay" class="mobile-sidebar-overlay" onclick="closeMobileSidebar()"></div>
+    <button class="mobile-channel-toggle" onclick="openMobileSidebar()">☰ Channels</button>
     <div class="chat-layout">
 
       <!-- SIDEBAR -->
@@ -608,6 +627,6 @@
   });
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=108"></script>
+<script type="module" src="/assets/js/member-auth.js?v=109"></script>
 </body>
 </html>
