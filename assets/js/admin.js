@@ -2167,10 +2167,9 @@ async function loadMembersTab() {
           </div>
         </div>
         <div style="display:flex;gap:0.5rem;align-items:center;">
-          <div style="display:flex;flex-wrap:wrap;gap:0.4rem;max-width:320px;">
-            <label style="font-size:0.78rem;display:flex;align-items:center;gap:0.25rem;cursor:pointer;white-space:nowrap;background:${m.role==="alumni"?'#5D1725':'#f5f5f5'};color:${m.role==="alumni"?'white':'#333'};padding:2px 8px;border-radius:12px;border:1px solid ${m.role==="alumni"?'#5D1725':'#ddd'};"><input type="radio" name="role_${m.id}" value="alumni" ${m.role==="alumni"?'checked':''} onchange="updateMemberRole(\'${m.id}\', \' alumni\')" style="display:none;"> Alumni</label><label style="font-size:0.78rem;display:flex;align-items:center;gap:0.25rem;cursor:pointer;white-space:nowrap;background:${m.role==="coach"?'#5D1725':'#f5f5f5'};color:${m.role==="coach"?'white':'#333'};padding:2px 8px;border-radius:12px;border:1px solid ${m.role==="coach"?'#5D1725':'#ddd'};"><input type="radio" name="role_${m.id}" value="coach" ${m.role==="coach"?'checked':''} onchange="updateMemberRole(\'${m.id}\', \' coach\')" style="display:none;"> Coach</label><label style="font-size:0.78rem;display:flex;align-items:center;gap:0.25rem;cursor:pointer;white-space:nowrap;background:${m.role==="member"?'#5D1725':'#f5f5f5'};color:${m.role==="member"?'white':'#333'};padding:2px 8px;border-radius:12px;border:1px solid ${m.role==="member"?'#5D1725':'#ddd'};"><input type="radio" name="role_${m.id}" value="member" ${m.role==="member"?'checked':''} onchange="updateMemberRole(\'${m.id}\', \' member\')" style="display:none;"> Member</label><label style="font-size:0.78rem;display:flex;align-items:center;gap:0.25rem;cursor:pointer;white-space:nowrap;background:${m.role==="player"?'#5D1725':'#f5f5f5'};color:${m.role==="player"?'white':'#333'};padding:2px 8px;border-radius:12px;border:1px solid ${m.role==="player"?'#5D1725':'#ddd'};"><input type="radio" name="role_${m.id}" value="player" ${m.role==="player"?'checked':''} onchange="updateMemberRole(\'${m.id}\', \' player\')" style="display:none;"> Player</label><label style="font-size:0.78rem;display:flex;align-items:center;gap:0.25rem;cursor:pointer;white-space:nowrap;background:${m.role==="prospect"?'#5D1725':'#f5f5f5'};color:${m.role==="prospect"?'white':'#333'};padding:2px 8px;border-radius:12px;border:1px solid ${m.role==="prospect"?'#5D1725':'#ddd'};"><input type="radio" name="role_${m.id}" value="prospect" ${m.role==="prospect"?'checked':''} onchange="updateMemberRole(\'${m.id}\', \' prospect\')" style="display:none;"> Prospective Player</label><label style="font-size:0.78rem;display:flex;align-items:center;gap:0.25rem;cursor:pointer;white-space:nowrap;background:${m.role==="rep"?'#5D1725':'#f5f5f5'};color:${m.role==="rep"?'white':'#333'};padding:2px 8px;border-radius:12px;border:1px solid ${m.role==="rep"?'#5D1725':'#ddd'};"><input type="radio" name="role_${m.id}" value="rep" ${m.role==="rep"?'checked':''} onchange="updateMemberRole(\'${m.id}\', \' rep\')" style="display:none;"> Team Rep</label><label style="font-size:0.78rem;display:flex;align-items:center;gap:0.25rem;cursor:pointer;white-space:nowrap;background:${m.role==="admin"?'#5D1725':'#f5f5f5'};color:${m.role==="admin"?'white':'#333'};padding:2px 8px;border-radius:12px;border:1px solid ${m.role==="admin"?'#5D1725':'#ddd'};"><input type="radio" name="role_${m.id}" value="admin" ${m.role==="admin"?'checked':''} onchange="updateMemberRole(\'${m.id}\', \' admin\')" style="display:none;"> Admin</label><label style="font-size:0.78rem;display:flex;align-items:center;gap:0.25rem;cursor:pointer;white-space:nowrap;background:${m.role==="superadmin"?'#5D1725':'#f5f5f5'};color:${m.role==="superadmin"?'white':'#333'};padding:2px 8px;border-radius:12px;border:1px solid ${m.role==="superadmin"?'#5D1725':'#ddd'};"><input type="radio" name="role_${m.id}" value="superadmin" ${m.role==="superadmin"?'checked':''} onchange="updateMemberRole(\'${m.id}\', \' superadmin\')" style="display:none;"> Super Admin</label>
-            <label style="font-size:0.78rem;display:flex;align-items:center;gap:0.25rem;cursor:pointer;white-space:nowrap;background:${(m.teams||[]).includes("varsity")?'#1565c0':'#f5f5f5'};color:${(m.teams||[]).includes("varsity")?'white':'#333'};padding:2px 8px;border-radius:12px;border:1px solid ${(m.teams||[]).includes("varsity")?'#1565c0':'#ddd'};"><input type="checkbox" ${(m.teams||[]).includes("varsity")?'checked':''} onchange="updateMemberTeams(\'${m.id}\',"varsity",this.checked)" style="display:none;"> Varsity</label><label style="font-size:0.78rem;display:flex;align-items:center;gap:0.25rem;cursor:pointer;white-space:nowrap;background:${(m.teams||[]).includes("jv")?'#1565c0':'#f5f5f5'};color:${(m.teams||[]).includes("jv")?'white':'#333'};padding:2px 8px;border-radius:12px;border:1px solid ${(m.teams||[]).includes("jv")?'#1565c0':'#ddd'};"><input type="checkbox" ${(m.teams||[]).includes("jv")?'checked':''} onchange="updateMemberTeams(\'${m.id}\',"jv",this.checked)" style="display:none;"> JV</label>
-          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:2px;max-width:340px;">
+            <label style="font-size:0.75rem;display:inline-flex;align-items:center;gap:0.25rem;cursor:pointer;padding:3px 8px;border-radius:12px;border:1px solid #ddd;background:${((m.roles||[]).includes('player')||m.role==='player')?'#5D1725':'#f9f9f9'};color:${((m.roles||[]).includes('player')||m.role==='player')?'white':'#555'};margin:1px;"><input type="checkbox" ${((m.roles||[]).includes('player')||m.role==='player')?' checked':''} onchange="toggleMemberRole('${m.id}','player',this.checked)" style="display:none;"> Player</label><label style="font-size:0.75rem;display:inline-flex;align-items:center;gap:0.25rem;cursor:pointer;padding:3px 8px;border-radius:12px;border:1px solid #ddd;background:${((m.roles||[]).includes('prospect')||m.role==='prospect')?'#5D1725':'#f9f9f9'};color:${((m.roles||[]).includes('prospect')||m.role==='prospect')?'white':'#555'};margin:1px;"><input type="checkbox" ${((m.roles||[]).includes('prospect')||m.role==='prospect')?' checked':''} onchange="toggleMemberRole('${m.id}','prospect',this.checked)" style="display:none;"> Prospect</label><label style="font-size:0.75rem;display:inline-flex;align-items:center;gap:0.25rem;cursor:pointer;padding:3px 8px;border-radius:12px;border:1px solid #ddd;background:${((m.roles||[]).includes('alumni')||m.role==='alumni')?'#5D1725':'#f9f9f9'};color:${((m.roles||[]).includes('alumni')||m.role==='alumni')?'white':'#555'};margin:1px;"><input type="checkbox" ${((m.roles||[]).includes('alumni')||m.role==='alumni')?' checked':''} onchange="toggleMemberRole('${m.id}','alumni',this.checked)" style="display:none;"> Alumni</label><label style="font-size:0.75rem;display:inline-flex;align-items:center;gap:0.25rem;cursor:pointer;padding:3px 8px;border-radius:12px;border:1px solid #ddd;background:${((m.roles||[]).includes('coach')||m.role==='coach')?'#5D1725':'#f9f9f9'};color:${((m.roles||[]).includes('coach')||m.role==='coach')?'white':'#555'};margin:1px;"><input type="checkbox" ${((m.roles||[]).includes('coach')||m.role==='coach')?' checked':''} onchange="toggleMemberRole('${m.id}','coach',this.checked)" style="display:none;"> Coach</label><label style="font-size:0.75rem;display:inline-flex;align-items:center;gap:0.25rem;cursor:pointer;padding:3px 8px;border-radius:12px;border:1px solid #ddd;background:${((m.roles||[]).includes('rep')||m.role==='rep')?'#5D1725':'#f9f9f9'};color:${((m.roles||[]).includes('rep')||m.role==='rep')?'white':'#555'};margin:1px;"><input type="checkbox" ${((m.roles||[]).includes('rep')||m.role==='rep')?' checked':''} onchange="toggleMemberRole('${m.id}','rep',this.checked)" style="display:none;"> Team Rep</label><label style="font-size:0.75rem;display:inline-flex;align-items:center;gap:0.25rem;cursor:pointer;padding:3px 8px;border-radius:12px;border:1px solid #ddd;background:${((m.roles||[]).includes('member')||m.role==='member')?'#5D1725':'#f9f9f9'};color:${((m.roles||[]).includes('member')||m.role==='member')?'white':'#555'};margin:1px;"><input type="checkbox" ${((m.roles||[]).includes('member')||m.role==='member')?' checked':''} onchange="toggleMemberRole('${m.id}','member',this.checked)" style="display:none;"> Member</label><label style="font-size:0.75rem;display:inline-flex;align-items:center;gap:0.25rem;cursor:pointer;padding:3px 8px;border-radius:12px;border:1px solid #ddd;background:${((m.roles||[]).includes('varsity')||m.role==='varsity')?'#5D1725':'#f9f9f9'};color:${((m.roles||[]).includes('varsity')||m.role==='varsity')?'white':'#555'};margin:1px;"><input type="checkbox" ${((m.roles||[]).includes('varsity')||m.role==='varsity')?' checked':''} onchange="toggleMemberRole('${m.id}','varsity',this.checked)" style="display:none;"> Varsity</label><label style="font-size:0.75rem;display:inline-flex;align-items:center;gap:0.25rem;cursor:pointer;padding:3px 8px;border-radius:12px;border:1px solid #ddd;background:${((m.roles||[]).includes('jv')||m.role==='jv')?'#5D1725':'#f9f9f9'};color:${((m.roles||[]).includes('jv')||m.role==='jv')?'white':'#555'};margin:1px;"><input type="checkbox" ${((m.roles||[]).includes('jv')||m.role==='jv')?' checked':''} onchange="toggleMemberRole('${m.id}','jv',this.checked)" style="display:none;"> JV</label><label style="font-size:0.75rem;display:inline-flex;align-items:center;gap:0.25rem;cursor:pointer;padding:3px 8px;border-radius:12px;border:1px solid #ddd;background:${((m.roles||[]).includes('admin')||m.role==='admin')?'#5D1725':'#f9f9f9'};color:${((m.roles||[]).includes('admin')||m.role==='admin')?'white':'#555'};margin:1px;"><input type="checkbox" ${((m.roles||[]).includes('admin')||m.role==='admin')?' checked':''} onchange="toggleMemberRole('${m.id}','admin',this.checked)" style="display:none;"> Admin</label><label style="font-size:0.75rem;display:inline-flex;align-items:center;gap:0.25rem;cursor:pointer;padding:3px 8px;border-radius:12px;border:1px solid #ddd;background:${((m.roles||[]).includes('superadmin')||m.role==='superadmin')?'#5D1725':'#f9f9f9'};color:${((m.roles||[]).includes('superadmin')||m.role==='superadmin')?'white':'#555'};margin:1px;"><input type="checkbox" ${((m.roles||[]).includes('superadmin')||m.role==='superadmin')?' checked':''} onchange="toggleMemberRole('${m.id}','superadmin',this.checked)" style="display:none;"> Super Admin</label>
+          </div>          </div>
           ${m.role === 'admin' ? `<button class="btn-secondary" style="font-size:0.8rem;padding:4px 8px;" onclick="showAdminPermissions('${m.id}')">Permissions</button>` : ''}
           <button class="btn-delete" onclick="deleteMember('${m.id}')">Remove</button>
         </div>
@@ -2180,19 +2179,21 @@ async function loadMembersTab() {
   list.innerHTML = html;
 }
 
+window.toggleMemberRole = async function(uid, role, checked) {
+  const snap = await getDoc(doc(db, 'members', uid));
+  if (!snap.exists()) return;
+  const data = snap.data();
+  let roles = Array.isArray(data.roles) ? [...data.roles] : (data.role ? [data.role] : []);
+  if (checked && !roles.includes(role)) roles.push(role);
+  if (!checked) roles = roles.filter(r => r !== role);
+  // Keep profile.role as primary for display (highest priority role)
+  const priority = ['superadmin','admin','coach','player','varsity','jv','alumni','rep','prospect','member'];
+  const primaryRole = priority.find(r => roles.includes(r)) || 'member';
+  await setDoc(doc(db, 'members', uid), { roles, role: primaryRole, teams: roles.filter(r => ['varsity','jv'].includes(r)) }, { merge: true });
+};
+
 window.updateMemberRole = async function(uid, role) {
-  // Save current team checkbox states before reloading
-  const teamStates = {};
-  document.querySelectorAll('[id^="team_"]').forEach(cb => {
-    teamStates[cb.id] = cb.checked;
-  });
-  await setDoc(doc(db, 'members', uid), { role }, { merge: true });
-  await loadMembersTab();
-  // Restore checkbox states after reload
-  Object.entries(teamStates).forEach(([id, checked]) => {
-    const el = document.getElementById(id);
-    if (el) el.checked = checked;
-  });
+  await window.toggleMemberRole(uid, role, true);
 };
 
 window.updateMemberAdmin = async function(uid, isAdmin) {
@@ -2320,15 +2321,7 @@ async function loadRoleRequestsTab() {
   }).join('');
 }
 
-window.updateMemberTeams = async function(uid, team, checked) {
-  const snap = await getDoc(doc(db, 'members', uid));
-  if (!snap.exists()) return;
-  const data = snap.data();
-  let teams = Array.isArray(data.teams) ? [...data.teams] : [];
-  if (checked && !teams.includes(team)) teams.push(team);
-  if (!checked) teams = teams.filter(t => t !== team);
-  await setDoc(doc(db, 'members', uid), { teams }, { merge: true });
-};
+
 
 window.approveRoleRequest = async function(requestId, uid, role) {
   await setDoc(doc(db, 'members', uid), { role }, { merge: true });

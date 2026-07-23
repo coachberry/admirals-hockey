@@ -22,15 +22,12 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 window.currentMember = null;
 
-// Helper: check if a profile has a given role or team assignment
+// Helper: check if a profile has a given role (checks roles array, teams, and legacy role string)
 window.hasRole = function(profile, role) {
   if (!profile) return false;
-  // Check primary role
-  if (profile.role === role) return true;
-  // Check teams array (varsity, jv)
-  if (Array.isArray(profile.teams) && profile.teams.includes(role)) return true;
-  // Legacy roles array support
   if (Array.isArray(profile.roles) && profile.roles.includes(role)) return true;
+  if (Array.isArray(profile.teams) && profile.teams.includes(role)) return true;
+  if (profile.role === role) return true;
   return false;
 };
 
