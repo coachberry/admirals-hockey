@@ -2280,6 +2280,16 @@ async function loadRoleRequestsTab() {
   }).join('');
 }
 
+window.updateMemberTeams = async function(uid, team, checked) {
+  const snap = await getDoc(doc(db, 'members', uid));
+  if (!snap.exists()) return;
+  const data = snap.data();
+  let teams = Array.isArray(data.teams) ? [...data.teams] : [];
+  if (checked && !teams.includes(team)) teams.push(team);
+  if (!checked) teams = teams.filter(t => t !== team);
+  await setDoc(doc(db, 'members', uid), { teams }, { merge: true });
+};
+
 window.approveRoleRequest = async function(requestId, uid, role) {
   await setDoc(doc(db, 'members', uid), { role }, { merge: true });
   await setDoc(doc(db, 'roleRequests', requestId), { status: 'approved' }, { merge: true });
