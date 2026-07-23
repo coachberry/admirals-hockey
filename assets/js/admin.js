@@ -2130,17 +2130,26 @@ async function loadMembersTab() {
           </div>
         </div>
         <div style="display:flex;gap:0.5rem;align-items:center;">
-          <select onchange="updateMemberRole('${m.id}', this.value)" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:0.8rem;">
-            <option value="member" ${m.role==='member'?'selected':''}>Member</option>
-            <option value="player" ${m.role==='player'?'selected':''}>Player</option>
-            <option value="prospect" ${m.role==='prospect'?'selected':''}>Prospective Player</option>
-            <option value="alumni" ${m.role==='alumni'?'selected':''}>Alumni</option>
-            <option value="rep" ${m.role==='rep'?'selected':''}>Team Rep</option>
-            <option value="jv" ${m.role==='jv'?'selected':''}>JV Player</option>
-            <option value="varsity" ${m.role==='varsity'?'selected':''}>Varsity Player</option>
-            <option value="admin" ${m.role==='admin'?'selected':''}>Admin</option>
-            <option value="superadmin" ${m.role==='superadmin'?'selected':''}>Super Admin</option>
-          </select>
+          <div style="display:flex;flex-direction:column;gap:0.3rem;">
+            <select onchange="updateMemberRole('${m.id}', this.value)" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:0.8rem;">
+              <option value="member" ${m.role==='member'?'selected':''}>Member</option>
+              <option value="player" ${m.role==='player'?'selected':''}>Player</option>
+              <option value="prospect" ${m.role==='prospect'?'selected':''}>Prospective Player</option>
+              <option value="alumni" ${m.role==='alumni'?'selected':''}>Alumni</option>
+              <option value="coach" ${m.role==='coach'?'selected':''}>Coach</option>
+              <option value="rep" ${m.role==='rep'?'selected':''}>Team Rep</option>
+              <option value="admin" ${m.role==='admin'?'selected':''}>Admin</option>
+              <option value="superadmin" ${m.role==='superadmin'?'selected':''}>Super Admin</option>
+            </select>
+            <div style="display:flex;gap:0.5rem;">
+              <label style="font-size:0.78rem;display:flex;align-items:center;gap:0.25rem;cursor:pointer;white-space:nowrap;">
+                <input type="checkbox" ${(m.teams||[]).includes('varsity')?'checked':''} onchange="updateMemberTeams('${m.id}','varsity',this.checked)"> Varsity
+              </label>
+              <label style="font-size:0.78rem;display:flex;align-items:center;gap:0.25rem;cursor:pointer;white-space:nowrap;">
+                <input type="checkbox" ${(m.teams||[]).includes('jv')?'checked':''} onchange="updateMemberTeams('${m.id}','jv',this.checked)"> JV
+              </label>
+            </div>
+          </div>
           ${m.role === 'admin' ? `<button class="btn-secondary" style="font-size:0.8rem;padding:4px 8px;" onclick="showAdminPermissions('${m.id}')">Permissions</button>` : ''}
           <button class="btn-delete" onclick="deleteMember('${m.id}')">Remove</button>
         </div>
@@ -2152,7 +2161,7 @@ async function loadMembersTab() {
 
 window.updateMemberRole = async function(uid, role) {
   await setDoc(doc(db, 'members', uid), { role }, { merge: true });
-  loadMembersTab();
+  // Don't reload full tab to avoid resetting checkboxes
 };
 
 window.updateMemberAdmin = async function(uid, isAdmin) {
