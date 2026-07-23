@@ -2907,7 +2907,7 @@ async function loadJvCoaches(seasonId) {
 function buildJvRosterItem(m, type, seasonId) {
   const item = document.createElement('div');
   item.className = 'item';
-  const label = type === 'player' ? `#${m.number || '?'} - ${m.name}` : m.name;
+  const label = type === 'player' ? `${m.number ? '#' + m.number + ' - ' : ''}${m.name}` : m.name;
   const sub = type === 'player' ? m.position || '' : m.title || '';
   item.innerHTML = `
     <div class="item-info"><div>
@@ -2915,6 +2915,7 @@ function buildJvRosterItem(m, type, seasonId) {
       <span>${sub}</span>
     </div></div>
     <div style="display:flex;gap:0.5rem;">
+      <button class="btn-secondary" style="font-size:0.75rem;padding:3px 8px;background:${m.memberUid?'white':'#c62828'};color:${m.memberUid?'#2e7d32':'white'};border-color:${m.memberUid?'#2e7d32':'#c62828'};" onclick="linkRosterMember('${seasonId}','${type==='player'?'players':'coaches'}','${m.id || m.name}','${m.memberUid||''}','jv-roster')" title="${m.memberUid?'Linked - click to change':'Not linked - click to link'}">${m.memberUid?'🔗 Linked':'Link'}</button>
       <button class="btn-edit" onclick="editJvMember('${m.id || m.name}','${type}','${seasonId}')">Edit</button>
       <button class="btn-delete" onclick="deleteJvMember('${m.id || m.name}','${type}','${seasonId}')">Delete</button>
     </div>`;
