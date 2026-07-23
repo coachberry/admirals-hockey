@@ -22,11 +22,16 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 window.currentMember = null;
 
-// Helper: check if a profile has a given role (supports both single role string and roles array)
+// Helper: check if a profile has a given role or team assignment
 window.hasRole = function(profile, role) {
   if (!profile) return false;
-  if (Array.isArray(profile.roles) && profile.roles.length) return profile.roles.includes(role);
-  return profile.role === role;
+  // Check primary role
+  if (profile.role === role) return true;
+  // Check teams array (varsity, jv)
+  if (Array.isArray(profile.teams) && profile.teams.includes(role)) return true;
+  // Legacy roles array support
+  if (Array.isArray(profile.roles) && profile.roles.includes(role)) return true;
+  return false;
 };
 
 window.hasAnyRole = function(profile, roles) {
