@@ -541,7 +541,7 @@ document.getElementById('saveMemberBtn').addEventListener('click', async () => {
   const member = { id, type, name, bio: document.getElementById('memberBio').value, photoURL, season: currentSeasonId, ...(title && { title }) };
 
   if (isPlayer) {
-    member.number = document.getElementById('memberNumber').value;
+    member.number = document.getElementById('memberNumber').value.trim() || null;
     member.position = document.getElementById('memberPosition').value;
     member.grade = document.getElementById('memberGrade').value;
     member.captain = document.getElementById('memberCaptain').checked;
