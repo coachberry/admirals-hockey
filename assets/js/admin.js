@@ -574,10 +574,6 @@ document.getElementById('saveMemberBtn').addEventListener('click', async () => {
   } else {
     setTimeout(() => { rosterModal.classList.remove('active'); loadRoster(currentSeasonId); }, 800);
   }
-  setTimeout(() => {
-    rosterModal.classList.remove('active');
-    loadRoster(currentSeasonId);
-  }, 800);
 });
 
 // Add buttons
