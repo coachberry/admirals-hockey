@@ -1357,6 +1357,45 @@ if (editorVisualBtn && editorHtmlBtn) {
   });
 }
 
+// Click handler for resizing images in the visual editor
+document.addEventListener('click', (e) => {
+  const visual = document.getElementById('newsContentVisual');
+  if (!visual) return;
+  // Remove any existing resize controls
+  document.querySelectorAll('.img-resize-controls').forEach(el => el.remove());
+
+  if (e.target.tagName === 'IMG' && visual.contains(e.target)) {
+    const img = e.target;
+    const controls = document.createElement('div');
+    controls.className = 'img-resize-controls';
+    controls.contentEditable = false;
+    controls.style.cssText = 'display:flex;gap:0.4rem;align-items:center;background:#333;padding:4px 8px;border-radius:4px;margin:4px 0;width:fit-content;';
+    controls.innerHTML = `
+      <span style="color:white;font-size:0.75rem;">Size:</span>
+      <button type="button" style="font-size:0.75rem;padding:2px 8px;cursor:pointer;">25%</button>
+      <button type="button" style="font-size:0.75rem;padding:2px 8px;cursor:pointer;">50%</button>
+      <button type="button" style="font-size:0.75rem;padding:2px 8px;cursor:pointer;">75%</button>
+      <button type="button" style="font-size:0.75rem;padding:2px 8px;cursor:pointer;">100%</button>
+      <span style="color:white;font-size:0.75rem;margin-left:0.5rem;">Align:</span>
+      <button type="button" style="font-size:0.75rem;padding:2px 8px;cursor:pointer;">Left</button>
+      <button type="button" style="font-size:0.75rem;padding:2px 8px;cursor:pointer;">Center</button>
+      <button type="button" style="font-size:0.75rem;padding:2px 8px;cursor:pointer;">Right</button>
+    `;
+    const buttons = controls.querySelectorAll('button');
+    buttons[0].onclick = () => { img.style.width = '25%'; img.style.height = 'auto'; };
+    buttons[1].onclick = () => { img.style.width = '50%'; img.style.height = 'auto'; };
+    buttons[2].onclick = () => { img.style.width = '75%'; img.style.height = 'auto'; };
+    buttons[3].onclick = () => { img.style.width = '100%'; img.style.height = 'auto'; };
+    buttons[4].onclick = () => { img.style.display = 'block'; img.style.margin = '0.5rem auto 0.5rem 0'; img.style.float = 'none'; };
+    buttons[5].onclick = () => { img.style.display = 'block'; img.style.margin = '0.5rem auto'; img.style.float = 'none'; };
+    buttons[6].onclick = () => { img.style.display = 'block'; img.style.margin = '0.5rem 0 0.5rem auto'; img.style.float = 'none'; };
+    img.parentNode.insertBefore(controls, img.nextSibling);
+    img.style.border = '2px solid #5D1725';
+  } else {
+    visual?.querySelectorAll('img').forEach(img => img.style.border = '');
+  }
+});
+
 window.insertBodyImage = function() {
   const input = document.createElement('input');
   input.type = 'file';
