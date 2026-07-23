@@ -280,7 +280,11 @@ function syncMobileAuthButtons() {
 }
 window.syncMobileAuthButtons = syncMobileAuthButtons;
 
-onAuthStateChanged(auth, () => { setTimeout(syncMobileAuthButtons, 100); });
+let _mobileAuthTimer = null;
+onAuthStateChanged(auth, () => {
+  if (_mobileAuthTimer) clearTimeout(_mobileAuthTimer);
+  _mobileAuthTimer = setTimeout(syncMobileAuthButtons, 600);
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   const toggle = document.getElementById('navToggle');
