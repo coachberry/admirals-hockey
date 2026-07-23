@@ -359,10 +359,12 @@ window.checkDuplicatePlayerName = async function(name) {
   });
   if (!matches.length) { warning.style.display = 'none'; return; }
   warning.style.display = 'block';
-  warning.innerHTML = '⚠️ A player named <strong>' + matches[0].name + '</strong> already exists'
-    + (matches[0].seasons ? ' (seasons: ' + matches[0].seasons.join(', ') + ')' : '') + '.<br>'
-    + '<button onclick="selectReturningPlayer('' + matches[0].id + '','' + matches[0].name.replace(/'/g,"\'") + '')" '
-    + 'style="margin-top:0.4rem;background:#5D1725;color:white;border:none;border-radius:4px;padding:4px 10px;font-size:0.8rem;cursor:pointer;">Use existing player profile</button>';
+  const pid = matches[0].id;
+  const pname = matches[0].name;
+  const pseasons = matches[0].seasons ? ' (seasons: ' + matches[0].seasons.join(', ') + ')' : '';
+  warning.innerHTML = '<p>⚠️ A player named <strong>' + pname + '</strong> already exists' + pseasons + '.</p>'
+    + '<button id="useExistingPlayerBtn" style="margin-top:0.4rem;background:#5D1725;color:white;border:none;border-radius:4px;padding:4px 10px;font-size:0.8rem;cursor:pointer;">Use existing player profile</button>';
+  document.getElementById('useExistingPlayerBtn').onclick = () => selectReturningPlayer(pid, pname)
 };
 
 document.getElementById('playerSearchBtn').addEventListener('click', async () => {
