@@ -347,6 +347,24 @@ function openRosterModal(type, data = null) {
 // ============================================
 // RETURNING PLAYER SEARCH
 // ============================================
+window.checkDuplicatePlayerName = async function(name) {
+  const warning = document.getElementById('duplicatePlayerWarning');
+  if (!warning) return;
+  if (!name || name.trim().length < 2) { warning.style.display = 'none'; return; }
+  const snap = await getDocs(collection(db, 'players'));
+  const matches = [];
+  snap.forEach(d => {
+    const p = d.data();
+    if (p.name && p.name.toLowerCase() === name.trim().toLowerCase()) matches.push({ id: d.id, ...p });
+  });
+  if (!matches.length) { warning.style.display = 'none'; return; }
+  warning.style.display = 'block';
+  warning.innerHTML = '⚠️ A player named <strong>' + matches[0].name + '</strong> already exists'
+    + (matches[0].seasons ? ' (seasons: ' + matches[0].seasons.join(', ') + ')' : '') + '.<br>'
+    + '<button onclick="selectReturningPlayer('' + matches[0].id + '','' + matches[0].name.replace(/'/g,"\'") + '')" '
+    + 'style="margin-top:0.4rem;background:#5D1725;color:white;border:none;border-radius:4px;padding:4px 10px;font-size:0.8rem;cursor:pointer;">Use existing player profile</button>';
+};
+
 document.getElementById('playerSearchBtn').addEventListener('click', async () => {
   const query = document.getElementById('playerSearch').value.trim().toLowerCase();
   if (!query) return;
