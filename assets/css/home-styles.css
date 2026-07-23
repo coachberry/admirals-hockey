@@ -20,9 +20,11 @@
 .featured-main {
   position: relative;
   width: 100%;
-  height: 520px;
+  aspect-ratio: 1200 / 520;
   cursor: pointer;
   overflow: hidden;
+  background-size: cover;
+  background-position: center;
 }
 
 .featured-main-empty {
