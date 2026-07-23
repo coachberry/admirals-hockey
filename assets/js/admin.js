@@ -362,7 +362,10 @@ window.checkDuplicatePlayerName = async function(name) {
   const pid = matches[0].id;
   const pname = matches[0].name;
   const pseasons = matches[0].seasons ? ' (seasons: ' + matches[0].seasons.join(', ') + ')' : '';
-  warning.innerHTML = '<p>⚠️ A player named <strong>' + pname + '</strong> already exists' + pseasons + '.</p>'
+  warning.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
+    + '<p style="margin:0;">⚠️ A player named <strong>' + pname + '</strong> already exists' + pseasons + '.</p>'
+    + '<button onclick="document.getElementById(\'duplicatePlayerWarning\').style.display=\'none\'" style="background:none;border:none;font-size:1rem;cursor:pointer;color:#888;padding:0 0 0 0.5rem;">✕</button>'
+    + '</div>'
     + '<button id="useExistingPlayerBtn" style="margin-top:0.4rem;background:#5D1725;color:white;border:none;border-radius:4px;padding:4px 10px;font-size:0.8rem;cursor:pointer;">Use existing player profile</button>';
   document.getElementById('useExistingPlayerBtn').onclick = () => selectReturningPlayer(pid, pname)
 };
