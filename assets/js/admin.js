@@ -651,7 +651,7 @@ function buildRosterItem(m) {
     <div>
       <button class="btn-secondary" style="font-size:0.75rem;padding:3px 8px;color:${m.memberUid?'#2e7d32':'#999'}" onclick="linkRosterMember(window._rosterMode==='jv'?(window._jvSaveSeasonId||window.jvCurrentSeasonId):window.currentSeasonId,'${m.type==='player'?'players':m.type==='coach'?'coaches':'boards'}','${m.id}','${m.memberUid||''}',window._rosterMode==='jv'?'jv-roster':'roster')" title="${m.memberUid?'Linked':'Link to member'}">${m.memberUid?'🔗':'Link'}</button>
       <button class="btn-edit" onclick="editMember('${m.id}', '${m.type}')">Edit</button>
-      <button class="btn-delete" onclick="deleteMember('${m.id}', '${m.type}')">Delete</button>
+      <button class="btn-delete" onclick="deleteRosterMember('${m.id}', '${m.type}')">Delete</button>
     </div>
   `;
   return item;
@@ -663,12 +663,14 @@ window.editMember = async (id, type) => {
   if (snap.exists()) openRosterModal(type, snap.data());
 };
 
-window.deleteMember = async (id, type) => {
+window.deleteRosterMember = async (id, type) => {
   if (!confirm('Delete this member from this season?')) return;
   const collName = type === 'player' ? 'players' : type === 'coach' ? 'coaches' : 'boards';
-  await deleteDoc(doc(db, 'roster', currentSeasonId, collName, id));
-  try { await deleteObject(ref(storage, `roster/${currentSeasonId}/${type}/${id}`)); } catch(e) {}
-  loadRoster(currentSeasonId);
+  const rc = window._rosterMode === 'jv' ? 'jv-roster' : 'roster';
+  const sid = window._rosterMode === 'jv' ? (window.jvCurrentSeasonId || jvCurrentSeasonId) : currentSeasonId;
+  await deleteDoc(doc(db, rc, sid, collName, id));
+  try { await deleteObject(ref(storage, `roster/${sid}/${type}/${id}`)); } catch(e) {}
+  if (window._rosterMode === 'jv') loadJvRoster(sid); else loadRoster(sid);
 };
 
 // ============================================
