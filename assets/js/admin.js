@@ -598,7 +598,19 @@ async function loadPlayers(seasonId) {
   const players = [];
   snap.forEach(d => players.push(d.data()));
   if (!players.length) { list.innerHTML = '<div class="empty-state">No players added yet</div>'; return; }
-  players.sort((a, b) => parseInt(a.number) - parseInt(b.number)).forEach(p => list.appendChild(buildRosterItem(p)));
+  players.sort((a, b) => parseInt(a.number) - parseInt(b.number));
+  const forwards = players.filter(p => p.position === 'Forward');
+  const defense = players.filter(p => p.position === 'Defense');
+  const goalies = players.filter(p => p.position === 'Goaltender');
+  const other = players.filter(p => !['Forward','Defense','Goaltender'].includes(p.position));
+  [['Forwards', forwards], ['Defense', defense], ['Goaltenders', goalies], ['Other', other]].forEach(([label, group]) => {
+    if (!group.length) return;
+    const h = document.createElement('h4');
+    h.textContent = label;
+    h.style.cssText = 'margin:0.75rem 0 0.25rem;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.5px;color:#5D1725;border-bottom:1px solid #eee;padding-bottom:0.2rem;';
+    list.appendChild(h);
+    group.forEach(p => list.appendChild(buildRosterItem(p)));
+  });
 }
 
 async function loadCoaches(seasonId) {
