@@ -2160,8 +2160,18 @@ async function loadMembersTab() {
 }
 
 window.updateMemberRole = async function(uid, role) {
+  // Save current team checkbox states before reloading
+  const teamStates = {};
+  document.querySelectorAll('[id^="team_"]').forEach(cb => {
+    teamStates[cb.id] = cb.checked;
+  });
   await setDoc(doc(db, 'members', uid), { role }, { merge: true });
-  // Don't reload full tab to avoid resetting checkboxes
+  await loadMembersTab();
+  // Restore checkbox states after reload
+  Object.entries(teamStates).forEach(([id, checked]) => {
+    const el = document.getElementById(id);
+    if (el) el.checked = checked;
+  });
 };
 
 window.updateMemberAdmin = async function(uid, isAdmin) {
