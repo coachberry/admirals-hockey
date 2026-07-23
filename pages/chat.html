@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=106">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=107">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Team Chat - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=106">
-  <script src="/assets/js/page-guard.js?v=106"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=107">
+  <script src="/assets/js/page-guard.js?v=107"></script>
   <style>
     .chat-layout {
       display: grid;
@@ -300,7 +300,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=106"></script>
+<script src="/assets/js/load-header.js?v=107"></script>
 
 <div class="main-container" style="padding-top:1rem;">
 
@@ -412,14 +412,21 @@
 
   const ROLE_COLORS = { superadmin:'Coach', admin:'Admin', player:'Player', prospect:'Prospect', alumni:'Alumni', rep:'Team Rep', member:'Member' };
 
+  function getMemberRoles() {
+    if (!currentProfile) return [];
+    return [currentProfile.role, ...(currentProfile.roles || []), ...(currentProfile.teams || [])].filter(Boolean);
+  }
+
   function canRead(channel) {
     if (!currentProfile) return false;
-    return channel.readRoles.includes(currentProfile.role || 'member');
+    const roles = channel.readRoles || [];
+    return roles.length === 0 || getMemberRoles().some(r => roles.includes(r));
   }
 
   function canWrite(channel) {
     if (!currentProfile) return false;
-    return channel.writeRoles.includes(currentProfile.role || 'member');
+    const roles = channel.writeRoles || [];
+    return roles.length === 0 || getMemberRoles().some(r => roles.includes(r));
   }
 
   function formatTime(ts) {
@@ -601,6 +608,6 @@
   });
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=106"></script>
+<script type="module" src="/assets/js/member-auth.js?v=107"></script>
 </body>
 </html>

@@ -123,7 +123,8 @@ window.sendWidgetMessage = async function() {
   const text = input?.value.trim();
   if (!text || !currentUser || !currentProfile || !currentChannel) return;
 
-  const canWrite = (currentChannel.writeRoles || []).includes(currentProfile.role);
+  const memberRoles1 = [currentProfile.role, ...(currentProfile.roles || []), ...(currentProfile.teams || [])].filter(Boolean);
+  const canWrite = (currentChannel.writeRoles || []).length === 0 || memberRoles1.some(r => (currentChannel.writeRoles || []).includes(r));
   if (!canWrite) return;
 
   input.value = '';
@@ -205,7 +206,8 @@ function subscribeToChannel(channel) {
     renderWidgetMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
   });
 
-  const canWrite = (channel.writeRoles || []).includes(currentProfile?.role);
+  const memberRoles2 = [currentProfile?.role, ...(currentProfile?.roles || []), ...(currentProfile?.teams || [])].filter(Boolean);
+  const canWrite = (channel.writeRoles || []).length === 0 || memberRoles2.some(r => (channel.writeRoles || []).includes(r));
   document.getElementById('widgetInputArea').style.display = canWrite ? 'block' : 'none';
   document.getElementById('widgetNoAccess').style.display = canWrite ? 'none' : 'block';
 
@@ -237,7 +239,11 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   await loadChannels();
-  const readable = CHANNELS.filter(c => (c.readRoles || []).includes(currentProfile.role));
+  const memberRoles = [currentProfile.role, ...(currentProfile.roles || []), ...(currentProfile.teams || [])].filter(Boolean);
+  const readable = CHANNELS.filter(c => {
+    const readRoles = c.readRoles || [];
+    return readRoles.length === 0 || memberRoles.some(r => readRoles.includes(r));
+  });
 
   if (!readable.length) {
     bubble.style.display = 'none';
