@@ -601,7 +601,14 @@ async function loadBoardMembers(seasonId) {
 window.linkRosterMember = async function(seasonId, collName, playerId, currentUid, rosterCollection) {
   const snap = await getDocs(collection(db, 'members'));
   const members = [];
-  snap.forEach(d => members.push({ id: d.id, ...d.data() }));
+  const teamFilter = rosterCollection === 'jv-roster' ? 'jv' : 'varsity';
+  snap.forEach(d => {
+    const m = { id: d.id, ...d.data() };
+    // Only show players with the matching team assignment or player role
+    const hasTeam = Array.isArray(m.teams) && m.teams.includes(teamFilter);
+    const isPlayer = m.role === 'player' || m.role === teamFilter;
+    if (hasTeam || isPlayer) members.push(m);
+  });
   members.sort((a,b) => (a.displayName||'').localeCompare(b.displayName||''));
   const modal = document.createElement('div');
   modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
