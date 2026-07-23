@@ -698,7 +698,7 @@ function buildRosterItem(m) {
       <div><strong>${label}</strong><span>${subtitle}</span></div>
     </div>
     <div>
-      <button class="btn-secondary" style="font-size:0.75rem;padding:3px 8px;color:${m.memberUid?'#2e7d32':'#999'}" onclick="linkRosterMember(window._rosterMode==='jv'?(window._jvSaveSeasonId||window.jvCurrentSeasonId):window.currentSeasonId,'${m.type==='player'?'players':m.type==='coach'?'coaches':'boards'}','${m.id}','${m.memberUid||''}',window._rosterMode==='jv'?'jv-roster':'roster')" title="${m.memberUid?'Linked':'Link to member'}">${m.memberUid?'🔗':'Link'}</button>
+      <button class="btn-secondary" style="font-size:0.75rem;padding:3px 8px;background:${m.memberUid?'white':'#c62828'};color:${m.memberUid?'#2e7d32':'white'};border-color:${m.memberUid?'#2e7d32':'#c62828'};" onclick="linkRosterMember(window._rosterMode==='jv'?(window._jvSaveSeasonId||window.jvCurrentSeasonId):window.currentSeasonId,'${m.type==='player'?'players':m.type==='coach'?'coaches':'boards'}','${m.id}','${m.memberUid||''}',window._rosterMode==='jv'?'jv-roster':'roster')" title="${m.memberUid?'Linked - click to change':'Not linked - click to link'}">${m.memberUid?'🔗 Linked':'Link'}</button>
       <button class="btn-edit" onclick="editMember('${m.id}', '${m.type}')">Edit</button>
       <button class="btn-delete" onclick="deleteRosterMember('${m.id}', '${m.type}')">Delete</button>
     </div>
