@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=86">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=87">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Events - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=86">
-  <link rel="stylesheet" href="/assets/css/events-styles.css?v=86">
-  <script src="/assets/js/page-guard.js?v=86"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=87">
+  <link rel="stylesheet" href="/assets/css/events-styles.css?v=87">
+  <script src="/assets/js/page-guard.js?v=87"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=86" defer></script>
-<script src="/assets/js/load-header.js?v=86"></script>
+<script src="/assets/js/load-hero.js?v=87" defer></script>
+<script src="/assets/js/load-header.js?v=87"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -39,7 +39,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=86"></script>
+<script src="/assets/js/load-footer.js?v=87"></script>
 
 <script type="module">
   import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -106,7 +106,8 @@
 
   function buildTeamEventCard(e, userProfile) {
     const invitedRoles = e.invitedRoles || [];
-    const canRsvp = userProfile && invitedRoles.length > 0 && invitedRoles.includes(userProfile.role);
+    const userRoles = [userProfile?.role, ...(userProfile?.teams || [])].filter(Boolean);
+    const canRsvp = userProfile && invitedRoles.length > 0 && userRoles.some(r => invitedRoles.includes(r));
     const d = new Date(e.date + "T12:00:00");
     const p = e.time ? e.time.split(":") : null;
     const timeStr = p ? ((parseInt(p[0])%12||12) + ":" + p[1] + " " + (parseInt(p[0])>=12?"PM":"AM")) : "";
@@ -191,7 +192,8 @@
     const teamEvents = [];
     teSnap.forEach(d => {
       const e = { id: d.id, _type: 'team', ...d.data() };
-      if (e.public !== false || (currentMemberProfile && (e.invitedRoles || []).includes(currentMemberProfile.role))) {
+      const memberRoles2 = [currentMemberProfile?.role, ...(currentMemberProfile?.teams || [])].filter(Boolean);
+      if (e.public !== false || (currentMemberProfile && (e.invitedRoles || []).some(r => memberRoles2.includes(r)))) {
         teamEvents.push(e);
       }
     });
@@ -357,7 +359,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=86"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=86"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=87"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=87"></script>
 </body>
 </html>
