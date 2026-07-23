@@ -354,12 +354,19 @@ document.getElementById('playerSearchBtn').addEventListener('click', async () =>
   const results = document.getElementById('playerSearchResults');
   results.innerHTML = '<p style="font-size:0.8rem;color:#666;">Searching...</p>';
 
-  // Search players collection
-  const snap = await getDocs(collection(db, 'players'));
+  // Search players collection - exclude already on current season roster
+  const [snap, rosterSnap] = await Promise.all([
+    getDocs(collection(db, 'players')),
+    window._rosterMode === 'jv'
+      ? getDocs(collection(db, 'jv-roster', window.jvCurrentSeasonId || jvCurrentSeasonId, 'players'))
+      : getDocs(collection(db, 'roster', currentSeasonId, 'players'))
+  ]);
+  const alreadyOnRoster = new Set();
+  rosterSnap.forEach(d => { if (d.data().playerId) alreadyOnRoster.add(d.data().playerId); });
   const matches = [];
   snap.forEach(d => {
     const p = d.data();
-    if (p.name.toLowerCase().includes(query)) matches.push({ id: d.id, ...p });
+    if (p.name.toLowerCase().includes(query) && !alreadyOnRoster.has(d.id)) matches.push({ id: d.id, ...p });
   });
 
   if (!matches.length) {
