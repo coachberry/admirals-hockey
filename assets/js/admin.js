@@ -103,7 +103,7 @@ async function showDashboard() {
   loadNews();
   loadMembersTab();
 
-  // Restore last active tab
+  // Restore last active tab and load its data
   const savedTab = localStorage.getItem('admirals_activeTab');
   if (savedTab && document.getElementById(savedTab + 'Tab')) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -111,6 +111,17 @@ async function showDashboard() {
     document.getElementById(savedTab + 'Tab').classList.add('active');
     const tabBtn = document.querySelector(`[data-tab="${savedTab}"]`);
     if (tabBtn) tabBtn.classList.add('active');
+    // Load data for the restored tab
+    if (savedTab === 'jvRoster') loadJvRosterSeasons();
+    if (savedTab === 'jvSchedule') loadJvScheduleSeasons();
+    if (savedTab === 'summer') loadSummerSeasons();
+    if (savedTab === 'schedule') loadScheduleGames(document.getElementById('scheduleSeasonSelect')?.value);
+    if (savedTab === 'chat') loadChannelsAdmin();
+    if (savedTab === 'teamEvents') loadTeamEventsAdmin();
+    if (savedTab === 'contactInfo') { loadContactInfo(); loadFooterLinks(); }
+    if (savedTab === 'navigation') loadNav();
+    if (savedTab === 'tryouts') loadTryoutsSeasons();
+    if (savedTab === 'pageheroes') loadPageHeroes();
   }
 }
 
