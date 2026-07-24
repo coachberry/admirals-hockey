@@ -1719,19 +1719,54 @@ async function loadSummerSeasons() {
   }
 
   select.innerHTML = seasons.map(s =>
-    `<option value="${s.id}">${s.label || s.id}</option>`
+    `<option value="${s.id}">${s.label || s.id}${s.hidden ? ' (Hidden)' : ''}</option>`
   ).join('');
 
   summerCurrentSeasonId = seasons[0].id;
   await loadSummerTeams();
   await loadSummerGames();
 
+  // Add hide/delete buttons next to select if not already there
+  const existingBtns = document.getElementById('summerSeasonActions');
+  if (!existingBtns) {
+    const btnWrap = document.createElement('div');
+    btnWrap.id = 'summerSeasonActions';
+    btnWrap.style.cssText = 'display:flex;gap:0.5rem;margin-top:0.5rem;';
+    btnWrap.innerHTML = `
+      <button id="toggleSummerSeasonBtn" class="btn-secondary" style="font-size:0.8rem;" onclick="toggleSummerSeasonVisibility()">Hide Season</button>
+      <button class="btn-delete" style="font-size:0.8rem;" onclick="deleteSummerSeason()">Delete Season</button>`;
+    select.parentNode.insertBefore(btnWrap, select.nextSibling);
+  }
+  updateSummerSeasonButtons(seasons);
+
   select.addEventListener('change', async e => {
     summerCurrentSeasonId = e.target.value;
+    updateSummerSeasonButtons(seasons);
     await loadSummerTeams();
     await loadSummerGames();
   });
 }
+
+function updateSummerSeasonButtons(seasons) {
+  const btn = document.getElementById('toggleSummerSeasonBtn');
+  if (!btn) return;
+  const season = seasons.find(s => s.id === summerCurrentSeasonId);
+  btn.textContent = season?.hidden ? 'Show Season on Website' : 'Hide Season from Website';
+}
+
+window.toggleSummerSeasonVisibility = async function() {
+  const snap = await getDoc(doc(db, 'summer', summerCurrentSeasonId));
+  if (!snap.exists()) return;
+  const hidden = !snap.data().hidden;
+  await setDoc(doc(db, 'summer', summerCurrentSeasonId), { hidden }, { merge: true });
+  loadSummerSeasons();
+};
+
+window.deleteSummerSeason = async function() {
+  if (!confirm('Delete this summer season? This will NOT delete teams or games — just the season entry.')) return;
+  await deleteDoc(doc(db, 'summer', summerCurrentSeasonId));
+  loadSummerSeasons();
+};
 
 // Add Season
 const addSummerSeasonBtn = document.getElementById('addSummerSeasonBtn');
