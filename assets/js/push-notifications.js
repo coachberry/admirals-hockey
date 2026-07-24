@@ -43,21 +43,6 @@ export async function initPushNotifications(app, user) {
     const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration });
     showDebug('Token received: ' + (token ? token.substring(0, 20) + '...' : 'NULL'));
 
-    // Handle foreground messages (app is open when notification arrives)
-    // iOS requires showing via service worker registration, not the Notification constructor
-    onMessage(messaging, (payload) => {
-      const title = payload.notification?.title || 'Admirals Hockey';
-      const body = payload.notification?.body || '';
-      const url = payload.fcmOptions?.link || payload.data?.url || '/';
-      if (Notification.permission === 'granted' && registration) {
-        registration.showNotification(title, {
-          body,
-          icon: '/assets/images/admiral-logo.png',
-          data: { url }
-        });
-      }
-    });
-
     if (token) {
       const db = getFirestore(app);
       const memberRef = doc(db, 'members', user.uid);
