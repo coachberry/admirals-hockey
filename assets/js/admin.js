@@ -2239,6 +2239,7 @@ const pagesList = [
   { id: 'sponsors',    label: 'Sponsors',      path: '/sponsors' },
   { id: 'tryouts',     label: 'Tryouts',       path: '/tryouts' },
   { id: 'contact',     label: 'Contact',       path: '/contact' },
+  { id: 'get-app',      label: 'Get App',       path: '/get-app' },
 ];
 
 let pageVisibility = {};
@@ -3452,6 +3453,7 @@ const PAGE_HERO_DEFAULTS = {
   sponsors:    { badge: 'Franklin Admirals Hockey', title: 'Our Sponsors',    subtitle: 'Thank you to our supporters' },
   contact:     { badge: 'Get In Touch',             title: 'Contact Us',      subtitle: "Questions? We'd love to hear from you" },
   tryouts:     { badge: '',                         title: 'Admirals Hockey Tryouts', subtitle: "Join one of Tennessee's premier high school hockey programs" },
+  'get-app':   { badge: '📱 App',                    title: 'Get the Admirals Hockey App', subtitle: 'Install the site on your phone for quick access to schedules, chat, and RSVPs' },
 };
 
 let allPageHeroes = {};
