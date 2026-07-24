@@ -12,9 +12,12 @@
     var banner = document.createElement('div');
     banner.id = 'previewBanner';
     banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#5D1725;color:white;text-align:center;padding:6px 1rem;font-size:0.82rem;font-weight:600;display:flex;align-items:center;justify-content:center;gap:1rem;';
-    banner.innerHTML = 'Previewing as: <strong>' + previewRole.toUpperCase() + '</strong> &nbsp;&mdash;&nbsp; <a href="javascript:window.close()" style="color:white;text-decoration:underline;">Close Preview</a>';
-    document.body.appendChild(banner);
-    document.body.style.paddingTop = '34px';
+    var roleLabel = {public:'Public (Not Logged In)',member:'Member',player:'Player',varsity:'Varsity Player',jv:'JV Player',alumni:'Alumni',coach:'Coach',admin:'Admin'}[previewRole] || previewRole;
+    banner.innerHTML = '<span>👁️ Preview Mode: <strong>' + roleLabel + '</strong></span>'
+      + '<a href="/admin" style="background:white;color:#5D1725;padding:3px 12px;border-radius:4px;font-weight:700;text-decoration:none;font-size:0.8rem;">✕ Exit Preview</a>';
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#5D1725;color:white;padding:6px 1rem;font-size:0.82rem;font-weight:600;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,0.3);';
+    document.body.prepend(banner);
+    document.body.style.paddingTop = '36px';
   }
 
   window._previewRole = previewRole || null;
