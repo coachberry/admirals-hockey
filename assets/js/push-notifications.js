@@ -1,4 +1,4 @@
-import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const VAPID_KEY = "BCbLDoNo9nX8669RUa_E_Jne-_EjXXtai1-UeOkJhWU_fRSEGOQsF0KXPXAyms4GNkWU1m1CSphRkAS_8EkoGpg";
@@ -42,6 +42,16 @@ export async function initPushNotifications(app, user) {
     showDebug('Getting FCM token...');
     const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration });
     showDebug('Token received: ' + (token ? token.substring(0, 20) + '...' : 'NULL'));
+
+    // Handle foreground messages (app is open when notification arrives)
+    onMessage(messaging, (payload) => {
+      const title = payload.notification?.title || 'Admirals Hockey';
+      const body = payload.notification?.body || '';
+      if (Notification.permission === 'granted') {
+        const n = new Notification(title, { body, icon: '/assets/images/admiral-logo.png' });
+        n.onclick = () => { window.open(payload.fcmOptions?.link || payload.data?.url || '/', '_self'); };
+      }
+    });
 
     if (token) {
       const db = getFirestore(app);
