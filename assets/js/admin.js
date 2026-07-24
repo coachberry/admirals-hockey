@@ -977,7 +977,7 @@ function createGameModal() {
     const tournamentName = document.getElementById('gameTournamentName').value;
 
     // Upload opponent logo if new one selected
-    let opponentLogo = document.getElementById('gameId').value ? (window._editingGameLogo || '') : '';
+    let opponentLogo = window._editingGameLogo || '';
     if (opponentLogoData) {
       try {
         const storageRef = ref(storage, `schedule/${seasonId}/${id}/opponentLogo`);
