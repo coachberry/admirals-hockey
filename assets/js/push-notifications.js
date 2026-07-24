@@ -44,12 +44,17 @@ export async function initPushNotifications(app, user) {
     showDebug('Token received: ' + (token ? token.substring(0, 20) + '...' : 'NULL'));
 
     // Handle foreground messages (app is open when notification arrives)
+    // iOS requires showing via service worker registration, not the Notification constructor
     onMessage(messaging, (payload) => {
       const title = payload.notification?.title || 'Admirals Hockey';
       const body = payload.notification?.body || '';
-      if (Notification.permission === 'granted') {
-        const n = new Notification(title, { body, icon: '/assets/images/admiral-logo.png' });
-        n.onclick = () => { window.open(payload.fcmOptions?.link || payload.data?.url || '/', '_self'); };
+      const url = payload.fcmOptions?.link || payload.data?.url || '/';
+      if (Notification.permission === 'granted' && registration) {
+        registration.showNotification(title, {
+          body,
+          icon: '/assets/images/admiral-logo.png',
+          data: { url }
+        });
       }
     });
 
