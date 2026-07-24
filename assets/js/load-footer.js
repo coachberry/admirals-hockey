@@ -82,4 +82,14 @@
   // Load copyright year
   var copy = document.querySelector('.footer-bottom p');
   if (copy) copy.innerHTML = '&copy; ' + new Date().getFullYear() + ' Franklin High School Admirals Hockey. All rights reserved.';
+  // Preserve preview parameter in footer links
+  var previewRole = new URLSearchParams(window.location.search).get('preview');
+  if (previewRole) {
+    document.querySelectorAll('.footer-section a[href]').forEach(function(a) {
+      var href = a.getAttribute('href');
+      if (href && href.startsWith('/') && !href.includes('?preview')) {
+        a.setAttribute('href', href + '?preview=' + previewRole);
+      }
+    });
+  }
 })();

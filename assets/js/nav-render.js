@@ -21,6 +21,10 @@ function hrefToPageId(href) {
   return m ? m[1] : null;
 }
 
+// Read preview role from URL (set before auth resolves)
+const _navPreviewRole = new URLSearchParams(window.location.search).get('preview');
+if (_navPreviewRole) window._previewRole = _navPreviewRole;
+
 async function init() {
   const ul = document.getElementById('navLinks');
   function reveal() {
@@ -99,6 +103,10 @@ async function init() {
     if (a.classList.contains('nav-dropdown-toggle')) return;
     const href = a.getAttribute('href');
     if (!href || href === '#') return;
+    // Preserve preview parameter across navigation
+    if (_navPreviewRole && !href.includes('?preview') && href.startsWith('/')) {
+      a.setAttribute('href', href + '?preview=' + _navPreviewRole);
+    }
     const m = href.match(/\/([a-zA-Z0-9-]+)(?:\.html)?$/);
     const hrefSlug = m ? m[1] : '';
     const isHome = (currentSlug === '' || currentPath === '/') && (href === '/' || href === '/index.html');
