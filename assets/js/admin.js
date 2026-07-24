@@ -2760,7 +2760,7 @@ function openSponsorModal(id, data) {
 
     let logoURL = data?.logoURL || '';
     if (sponsorLogoData && sponsorLogoData.startsWith('data:')) {
-      const storageRef = storageRefFn(storage, `sponsors/${Date.now()}`);
+      const storageRef = ref(storage, `sponsors/${Date.now()}`);
       await uploadString(storageRef, sponsorLogoData, 'data_url');
       logoURL = await getDownloadURL(storageRef);
     }
