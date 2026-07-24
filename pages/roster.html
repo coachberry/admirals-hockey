@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=137">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=138">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Roster - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=137">
-  <link rel="stylesheet" href="/assets/css/roster-styles.css?v=137">
-  <script src="/assets/js/page-guard.js?v=137"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=138">
+  <link rel="stylesheet" href="/assets/css/roster-styles.css?v=138">
+  <script src="/assets/js/page-guard.js?v=138"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=137" defer></script>
-<script src="/assets/js/load-header.js?v=137"></script>
+<script src="/assets/js/load-hero.js?v=138" defer></script>
+<script src="/assets/js/load-header.js?v=138"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -84,7 +84,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=137"></script>
+<script src="/assets/js/load-footer.js?v=138"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -158,7 +158,7 @@
 
     const playersSnap = await getDocs(collection(db, 'roster', seasonId, 'players'));
     playersSnap.forEach(d => {
-      const m = { ...d.data(), _seasonId: seasonId };
+      const m = { ...d.data(), _seasonId: seasonId, _rosterId: d.id };
       if (m.position === 'Forward') forwards.push(m);
       else if (m.position === 'Defense') defense.push(m);
       else if (m.position === 'Goaltender') goalies.push(m);
@@ -193,7 +193,7 @@
       photoContainer.appendChild(img);
     } else {
       const img = document.createElement('img');
-      img.src = '/assets/images/admiral-logo.png?v=137';
+      img.src = '/assets/images/admiral-logo.png?v=138';
       img.alt = 'Admiral Logo';
       img.className = 'modal-placeholder-logo';
       photoContainer.appendChild(img);
@@ -229,82 +229,104 @@
     // Load player stats
     const statsEl = document.getElementById('modalStats');
     statsEl.innerHTML = '';
-    if (m.type === 'player' && m.playerId) {
+    if (m.type === 'player') {
       statsEl.innerHTML = '<p style="color:#999;font-size:0.82rem;font-style:italic;">Loading stats...</p>';
-      loadPlayerStats(m.playerId).then(html => { statsEl.innerHTML = html; });
+      loadPlayerStats(m._rosterId, m.playerId, m._seasonId, m.position).then(html => { statsEl.innerHTML = html; });
     }
 
     modal.classList.add('active');
   }
 
-  async function loadPlayerStats(playerId) {
+  async function loadPlayerStats(rosterId, playerId, currentSeasonId, position) {
     try {
-      // Get all seasons this player has been on
+      const isGoalie = position === 'Goaltender';
       const seasonsSnap = await getDocs(collection(db, 'seasons'));
       const seasons = [];
       seasonsSnap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
       seasons.sort((a, b) => b.label.localeCompare(a.label));
+
+      // Find which seasons this player has a roster entry in
+      const playerSeasons = [];
+      for (const season of seasons) {
+        const playersSnap = await getDocs(collection(db, 'roster', season.id, 'players'));
+        let found = false;
+        let seasonRosterId = rosterId;
+        playersSnap.forEach(d => {
+          const p = d.data();
+          if (d.id === rosterId || (playerId && p.playerId === playerId)) {
+            found = true;
+            seasonRosterId = d.id;
+          }
+        });
+        if (found) playerSeasons.push({ season, rosterId: seasonRosterId });
+      }
 
       let html = '<div style="border-top:1px solid #eee;margin-top:1rem;padding-top:1rem;">';
       html += '<div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#5D1725;margin-bottom:0.75rem;">Season Stats</div>';
 
       let hasAnyStats = false;
 
-      for (const season of seasons) {
-        // Find this player in this season's skater stats across all games
+      for (const { season, rosterId: sRosterId } of playerSeasons) {
         const gamesSnap = await getDocs(collection(db, 'seasons', season.id, 'schedule'));
-        let gp=0, goals=0, assists=0, ppg=0, ppa=0, shg=0, sha=0, gwg=0, pim=0, sog=0;
-        let isGoalie = false;
-        let gsGoalie=0, gpGoalie=0, w=0, l=0, min=0, sa=0, sv=0, ga=0, shutouts=0;
+
+        let gp=0, goals=0, assists=0, ppg=0, ppa=0, shg=0, sha=0, gwg=0, pim=0, sog=0, plus=0, minus=0;
+        let gpG=0, gsG=0, w=0, l=0, t=0, min=0, sa=0, sv=0, ga=0, shutouts=0;
 
         for (const gameDoc of gamesSnap.docs) {
-          // Check skater stats
-          const skaterSnap = await getDocs(collection(db, 'seasons', season.id, 'schedule', gameDoc.id, 'skaterstats'));
-          skaterSnap.forEach(sd => {
-            if (sd.data().playerId === playerId) {
-              const st = sd.data();
-              gp++; goals+=st.goals||0; assists+=st.assists||0; ppg+=st.ppg||0;
-              ppa+=st.ppa||0; shg+=st.shg||0; sha+=st.sha||0; gwg+=st.gwg||0;
-              pim+=st.pim||0; sog+=st.sog||0;
-            }
-          });
-          // Check goalie stats
-          const goalieSnap = await getDocs(collection(db, 'seasons', season.id, 'schedule', gameDoc.id, 'goaliestats'));
-          goalieSnap.forEach(gd => {
-            if (gd.data().playerId === playerId && !gd.data().isEmptyNet) {
-              isGoalie = true;
-              const gt = gd.data();
-              gpGoalie++; if(gt.gs) gsGoalie++;
-              w+=gt.w||0; l+=gt.l||0; min+=gt.minutesPlayed||0;
-              sa+=gt.shotsAgainst||0; sv+=gt.saves||0; ga+=gt.goalsAgainst||0;
-              if(gt.shutouts) shutouts++;
-            }
-          });
+          if (isGoalie) {
+            const gSnap = await getDocs(collection(db, 'seasons', season.id, 'schedule', gameDoc.id, 'goaliestats'));
+            gSnap.forEach(gd => {
+              if (gd.id === sRosterId || gd.data().playerId === sRosterId) {
+                const gt = gd.data();
+                gpG++; if(gt.gs) gsG++;
+                w+=gt.w||0; l+=gt.l||0; t+=gt.t||0;
+                min+=parseFloat(gt.minutesPlayed||0);
+                sa+=parseInt(gt.shotsAgainst||0); sv+=parseInt(gt.saves||0); ga+=parseInt(gt.goalsAgainst||0);
+                if(gt.shutouts) shutouts++;
+              }
+            });
+          } else {
+            const sSnap = await getDocs(collection(db, 'seasons', season.id, 'schedule', gameDoc.id, 'skaterstats'));
+            sSnap.forEach(sd => {
+              if (sd.data().playerId === sRosterId) {
+                const st = sd.data();
+                gp++; goals+=st.goals||0; assists+=st.assists||0; ppg+=st.ppg||0;
+                ppa+=st.ppa||0; shg+=st.shg||0; sha+=st.sha||0; gwg+=st.gwg||0;
+                pim+=st.pim||0; sog+=st.sog||0; plus+=st.plus||0; minus+=st.minus||0;
+              }
+            });
+          }
         }
 
-        if (gp === 0 && gpGoalie === 0) continue;
+        const totalGames = isGoalie ? gpG : gp;
+        // Show the season even with 0 stats if it's a current season
+        const showSeason = totalGames > 0 || season.id === currentSeasonId;
+        if (!showSeason) continue;
         hasAnyStats = true;
 
         html += '<div style="margin-bottom:1rem;">';
-        html += '<div style="font-size:0.78rem;font-weight:700;color:#333;margin-bottom:0.4rem;">' + season.label + '</div>';
+        html += '<div style="font-size:0.78rem;font-weight:700;color:#333;margin-bottom:0.4rem;">' + season.label + (season.current ? ' <span style="color:#5D1725;">(Current)</span>' : '') + '</div>';
 
-        if (isGoalie && gpGoalie > 0) {
+        if (isGoalie) {
           const svPct = sa > 0 ? (sv/sa).toFixed(3) : '.000';
-          const gaa = min > 0 ? (ga / (min/60)).toFixed(2) : '0.00';
-          html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.3rem;">';
-          [['GP',gpGoalie],['W',w],['L',l],['GA',ga],['SA',sa],['SV',sv],['SV%',svPct],['GAA',gaa],['SO',shutouts]].forEach(([k,v]) => {
+          const gaa = min > 0 ? (ga/(min/60)).toFixed(2) : '0.00';
+          const stats = [['GP',gpG],['W',w],['L',l],['T',t],['GA',ga],['SA',sa],['SV%',svPct],['GAA',gaa],['SO',shutouts]];
+          html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.3rem;">';
+          stats.forEach(([k,v]) => {
             html += '<div style="text-align:center;background:#f9f9f9;border-radius:4px;padding:4px 2px;">'
-              + '<div style="font-size:0.65rem;color:#999;text-transform:uppercase;">' + k + '</div>'
-              + '<div style="font-size:0.9rem;font-weight:700;color:#111;">' + v + '</div></div>';
+              + '<div style="font-size:0.62rem;color:#999;text-transform:uppercase;">' + k + '</div>'
+              + '<div style="font-size:0.88rem;font-weight:700;color:#111;">' + v + '</div></div>';
           });
           html += '</div>';
-        } else if (gp > 0) {
+        } else {
           const pts = goals + assists;
-          html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.3rem;">';
-          [['GP',gp],['G',goals],['A',assists],['PTS',pts],['PPG',ppg],['PPA',ppa],['GWG',gwg],['PIM',pim]].forEach(([k,v]) => {
+          const pm = plus - minus;
+          const stats = [['GP',gp],['G',goals],['A',assists],['PTS',pts],['+/-',pm>=0?'+'+pm:pm],['PPG',ppg],['PPA',ppa],['GWG',gwg],['PIM',pim]];
+          html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.3rem;">';
+          stats.forEach(([k,v]) => {
             html += '<div style="text-align:center;background:#f9f9f9;border-radius:4px;padding:4px 2px;">'
-              + '<div style="font-size:0.65rem;color:#999;text-transform:uppercase;">' + k + '</div>'
-              + '<div style="font-size:0.9rem;font-weight:700;color:#111;">' + v + '</div></div>';
+              + '<div style="font-size:0.62rem;color:#999;text-transform:uppercase;">' + k + '</div>'
+              + '<div style="font-size:0.88rem;font-weight:700;color:#111;">' + v + '</div></div>';
           });
           html += '</div>';
         }
@@ -312,13 +334,13 @@
       }
 
       if (!hasAnyStats) {
-        html += '<p style="color:#999;font-size:0.82rem;font-style:italic;">No stats recorded yet.</p>';
+        html += '<p style="color:#999;font-size:0.82rem;font-style:italic;">No seasons found for this player.</p>';
       }
       html += '</div>';
       return html;
     } catch(e) {
-      console.error('Stats load error:', e);
-      return '';
+      console.error('Stats error:', e);
+      return '<p style="color:#999;font-size:0.82rem;">Could not load stats.</p>';
     }
   }
 
@@ -337,7 +359,7 @@
       frame.appendChild(img);
     } else {
       const img = document.createElement('img');
-      img.src = '/assets/images/admiral-logo.png?v=137';
+      img.src = '/assets/images/admiral-logo.png?v=138';
       img.alt = 'Admiral Logo';
       img.className = 'card-placeholder-logo';
       frame.appendChild(img);
@@ -522,7 +544,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=137"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=137"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=138"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=138"></script>
 </body>
 </html>
