@@ -2270,7 +2270,7 @@ async function loadMembersTab() {
           <div style="display:flex;align-items:center;gap:0.5rem;">
             ${m.photoURL ? `<img src="${m.photoURL}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">` : `<div style="width:32px;height:32px;border-radius:50%;background:${roleColors[m.role]||'#666'};color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;">${(m.displayName||'?').charAt(0)}</div>`}
             <div>
-              <strong>${m.displayName || 'Unknown'}</strong>
+              <strong style="cursor:pointer;color:#5D1725;text-decoration:underline;" onclick="viewMemberInfo('${m.id}')">${m.displayName || 'Unknown'}</strong>
               <span>${m.email}</span>
               ${m.status === 'pending' ? '<span style="color:#856404;font-size:0.75rem;font-weight:600;">⏳ Pending</span>' : ''}
               ${m.status === 'denied' ? '<span style="color:#c62828;font-size:0.75rem;font-weight:600;">❌ Denied</span>' : ''}
@@ -2378,6 +2378,32 @@ window.showAdminPermissions = async function(uid) {
     document.getElementById('adminPermsStatus').textContent = '✅ Saved!';
     setTimeout(() => modal.remove(), 1000);
   });
+};
+
+window.viewMemberInfo = async function(uid) {
+  const snap = await getDoc(doc(db, 'members', uid));
+  if (!snap.exists()) return;
+  const m = snap.data();
+  const modal = document.getElementById('memberInfoModal');
+  document.getElementById('memberInfoName').textContent = m.displayName || 'Member Info';
+  if (!m.shareWithCoach) {
+    document.getElementById('memberInfoBody').innerHTML = '<p style="color:#999;font-style:italic;">This member has not chosen to share their information with coaches.</p>';
+  } else {
+    document.getElementById('memberInfoBody').innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:0.6rem;font-size:0.9rem;">
+        ${m.photoURL ? '<div style="text-align:center;margin-bottom:0.5rem;"><img src="' + m.photoURL + '" style="width:64px;height:64px;border-radius:50%;object-fit:cover;"></div>' : ''}
+        <div><strong>Email:</strong> ${m.email || '—'}</div>
+        <div><strong>Phone:</strong> ${m.phone || '—'}</div>
+        <div><strong>Position:</strong> ${m.position || '—'}</div>
+        <div><strong>Grad Year:</strong> ${m.gradYear || '—'}</div>
+        <div><strong>Jersey #:</strong> ${m.jerseyNumber || '—'}</div>
+        <div><strong>Years with Team:</strong> ${m.yearsWithTeam || '—'}</div>
+        <div><strong>Hometown:</strong> ${m.hometown || '—'}</div>
+        ${m.bio ? '<div><strong>Bio:</strong> ' + m.bio + '</div>' : ''}
+        <div><strong>Roles:</strong> ${(m.roles || [m.role]).filter(Boolean).join(', ')}</div>
+      </div>`;
+  }
+  modal.classList.add('active');
 };
 
 window.deleteMember = async function(uid) {

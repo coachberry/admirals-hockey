@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=114">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=115">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=114">
-  <script src="/assets/js/page-guard.js?v=114"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=115">
+  <script src="/assets/js/page-guard.js?v=115"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -290,7 +290,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=114"></script>
+<script src="/assets/js/load-header.js?v=115"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -403,6 +403,16 @@
           <div class="form-field">
             <label>Bio / About Me <span style="font-weight:400;color:#999;">(optional)</span></label>
             <textarea id="editBio" rows="3" placeholder="Tell the team a little about yourself..." style="width:100%;font-family:inherit;font-size:0.95rem;padding:0.6rem 0.9rem;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;resize:vertical;"></textarea>
+
+          <div style="margin-top:1rem;background:#f8f4f0;border:1px solid #e8d5c0;border-radius:8px;padding:1rem;">
+            <label style="display:flex;align-items:flex-start;gap:0.6rem;cursor:pointer;">
+              <input type="checkbox" id="editShareWithCoach" style="margin-top:3px;accent-color:#5D1725;">
+              <div>
+                <div style="font-weight:600;font-size:0.9rem;color:#5D1725;">Share my information with Coach</div>
+                <div style="font-size:0.8rem;color:#666;margin-top:0.2rem;">Allow Coach Berry to view your contact info, position, grad year, and bio from the admin dashboard.</div>
+              </div>
+            </label>
+          </div>
           </div>
 
           <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;margin-top:1rem;">
@@ -545,7 +555,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=114"></script>
+<script src="/assets/js/load-footer.js?v=115"></script>
 
 <!-- MEMBER MODAL v2 -->
 <div id="memberModal" class="modal-overlay" style="z-index:2000;">
@@ -669,7 +679,7 @@ function showSection(name) {
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=114"></script>
+<script type="module" src="/assets/js/member-auth.js?v=115"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -740,6 +750,7 @@ function showSection(name) {
     document.getElementById('editJerseyNumber').value = profile.jerseyNumber || '';
     document.getElementById('editHometown').value = profile.hometown || '';
     document.getElementById('editBio').value = profile.bio || '';
+    document.getElementById('editShareWithCoach').checked = profile.shareWithCoach || false;
 
     // Avatar
     const container = document.getElementById('profileAvatarContainer');
@@ -792,6 +803,7 @@ function showSection(name) {
         displayName: name,
         email,
         phone: document.getElementById('editPhone').value.trim(),
+        shareWithCoach: document.getElementById('editShareWithCoach').checked,
         position: document.getElementById('editPosition').value,
         gradYear: document.getElementById('editGradYear').value.trim(),
         yearsWithTeam: document.getElementById('editYearsWithTeam').value.trim(),

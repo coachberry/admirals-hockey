@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=114">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=115">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=114">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=114">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=115">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=115">
 </head>
 <body>
 
@@ -929,6 +929,19 @@
   </div>
 </div>
 
+<!-- MEMBER INFO MODAL -->
+<div id="memberInfoModal" class="modal-overlay">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <h2 id="memberInfoName">Member Info</h2>
+      <button class="modal-close" onclick="document.getElementById('memberInfoModal').classList.remove('active')">&times;</button>
+    </div>
+    <div class="modal-body" id="memberInfoBody">
+      <p style="color:#999;">Loading...</p>
+    </div>
+  </div>
+</div>
+
 <!-- TEAM EVENT MODAL -->
 <div id="teamEventModal" class="modal-overlay">
   <div class="modal">
@@ -1221,10 +1234,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=114"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=114"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=114"></script>
-<script type="module" src="/assets/js/game-stats.js?v=114"></script>
+<script type="module" src="/assets/js/admin.js?v=115"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=115"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=115"></script>
+<script type="module" src="/assets/js/game-stats.js?v=115"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
