@@ -1098,6 +1098,7 @@ async function loadScheduleGames(seasonId) {
       </div>
       <div style="display:flex;gap:0.5rem;">
         <button class="btn-stats" onclick="openGameStats('${g.id}', '${seasonIdForStats}')">Stats</button>
+        <button class="btn-edit" onclick="viewScheduleGameRsvp('${g.id}','${currentSeasonId}')">📋 RSVPs</button>
         <button class="btn-edit" onclick="editGame('${g.id}')">Edit</button>
         <button class="btn-delete" onclick="deleteGame('${g.id}')">Delete</button>
       </div>
@@ -2465,6 +2466,123 @@ async function loadRoleRequestsTab() {
 
 
 
+// ============================================
+// RSVP VIEWER (Team Events + Varsity Schedule)
+// ============================================
+function showRsvpModal(title, html) {
+  document.getElementById('rsvpViewerTitle').textContent = title;
+  document.getElementById('rsvpViewerContent').innerHTML = html;
+  document.getElementById('rsvpViewerModal').classList.add('active');
+}
+
+window.viewTeamEventRsvp = async function(eventId) {
+  const modal = document.getElementById('rsvpViewerModal');
+  modal.classList.add('active');
+  document.getElementById('rsvpViewerContent').innerHTML = '<p style="color:#999;">Loading...</p>';
+
+  const evSnap = await getDoc(doc(db, 'teamEvents', eventId));
+  const ev = evSnap.exists() ? evSnap.data() : {};
+  const d = ev.date ? new Date(ev.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }) : '';
+  document.getElementById('rsvpViewerTitle').textContent = (ev.name || 'Team Event') + (d ? ' — ' + d : '');
+
+  const rsvpSnap = await getDocs(collection(db, 'teamEvents', eventId, 'rsvps'));
+  const rsvps = {};
+  rsvpSnap.forEach(d => { rsvps[d.id] = d.data(); });
+
+  // Load all members with invited roles
+  const invitedRoles = ev.invitedRoles || [];
+  const membersSnap = await getDocs(collection(db, 'members'));
+  const invited = [];
+  membersSnap.forEach(d => {
+    const m = { id: d.id, ...d.data() };
+    const mRoles = [m.role, ...(m.roles||[]), ...(m.teams||[])].filter(Boolean);
+    if (invitedRoles.length === 0 || mRoles.some(r => invitedRoles.includes(r))) invited.push(m);
+  });
+  invited.sort((a,b) => (a.displayName||'').localeCompare(b.displayName||''));
+
+  const inList = invited.filter(m => rsvps[m.id]?.response === 'yes');
+  const outList = invited.filter(m => rsvps[m.id]?.response === 'no');
+  const pending = invited.filter(m => !rsvps[m.id]);
+
+  function memberRow(m, resp) {
+    const inA = resp === 'yes'; const outA = resp === 'no';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:0.88rem;">
+      <span>${m.displayName || m.email}</span>
+      <div style="display:flex;gap:0.3rem;">
+        <button onclick="adminSetTeamEventRsvp('${eventId}','${m.id}','${m.displayName||m.email}','yes',${inA})" style="border-radius:4px;padding:2px 8px;font-size:0.75rem;font-weight:600;cursor:pointer;border:1.5px solid #2e7d32;background:${inA?'#2e7d32':'white'};color:${inA?'white':'#2e7d32'};">✅ In</button>
+        <button onclick="adminSetTeamEventRsvp('${eventId}','${m.id}','${m.displayName||m.email}','no',${outA})" style="border-radius:4px;padding:2px 8px;font-size:0.75rem;font-weight:600;cursor:pointer;border:1.5px solid #c62828;background:${outA?'#c62828':'white'};color:${outA?'white':'#c62828'};">❌ Out</button>
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('rsvpViewerContent').innerHTML = `
+    <div style="display:flex;gap:1rem;font-size:0.82rem;font-weight:600;margin-bottom:1rem;">
+      <span style="color:#2e7d32;">✅ In: ${inList.length}</span>
+      <span style="color:#c62828;">❌ Out: ${outList.length}</span>
+      <span style="color:#888;">⏳ No RSVP: ${pending.length}</span>
+    </div>
+    ${[...inList,...outList,...pending].map(m => memberRow(m, rsvps[m.id]?.response)).join('')}
+    ${invited.length === 0 ? '<p style="color:#999;font-style:italic;">No members invited.</p>' : ''}`;
+};
+
+window.adminSetTeamEventRsvp = async function(eventId, uid, name, response, isActive) {
+  const rsvpRef = doc(db, 'teamEvents', eventId, 'rsvps', uid);
+  if (isActive) { await deleteDoc(rsvpRef); }
+  else { await setDoc(rsvpRef, { response, name, adminSet: true, timestamp: new Date().toISOString() }); }
+  await window.viewTeamEventRsvp(eventId);
+};
+
+window.viewScheduleGameRsvp = async function(gameId, seasonId) {
+  const modal = document.getElementById('rsvpViewerModal');
+  modal.classList.add('active');
+  document.getElementById('rsvpViewerContent').innerHTML = '<p style="color:#999;">Loading...</p>';
+
+  const gSnap = await getDoc(doc(db, 'seasons', seasonId, 'schedule', gameId));
+  const g = gSnap.exists() ? gSnap.data() : {};
+  const d = g.date ? new Date(g.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }) : '';
+  document.getElementById('rsvpViewerTitle').textContent = 'vs ' + (g.opponent||'TBD') + (d ? ' — ' + d : '');
+
+  const rsvpSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule', gameId, 'rsvps'));
+  const rsvps = {};
+  rsvpSnap.forEach(d => { rsvps[d.id] = d.data(); });
+
+  // Load linked varsity roster players
+  const playersSnap = await getDocs(collection(db, 'roster', seasonId, 'players'));
+  const players = [];
+  playersSnap.forEach(d => { const p = d.data(); if (p.memberUid) players.push(p); });
+  players.sort((a,b) => parseInt(a.number||99) - parseInt(b.number||99));
+
+  const inList = players.filter(p => rsvps[p.memberUid]?.response === 'yes');
+  const outList = players.filter(p => rsvps[p.memberUid]?.response === 'no');
+  const pending = players.filter(p => !rsvps[p.memberUid]);
+
+  function playerRow(p, resp) {
+    const inA = resp === 'yes'; const outA = resp === 'no';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:0.88rem;">
+      <span>${p.number ? '<strong>#'+p.number+'</strong> ' : ''}${p.name}</span>
+      <div style="display:flex;gap:0.3rem;">
+        <button onclick="adminSetScheduleRsvp('${gameId}','${seasonId}','${p.memberUid}','${p.name}','yes',${inA})" style="border-radius:4px;padding:2px 8px;font-size:0.75rem;font-weight:600;cursor:pointer;border:1.5px solid #2e7d32;background:${inA?'#2e7d32':'white'};color:${inA?'white':'#2e7d32'};">✅ In</button>
+        <button onclick="adminSetScheduleRsvp('${gameId}','${seasonId}','${p.memberUid}','${p.name}','no',${outA})" style="border-radius:4px;padding:2px 8px;font-size:0.75rem;font-weight:600;cursor:pointer;border:1.5px solid #c62828;background:${outA?'#c62828':'white'};color:${outA?'white':'#c62828'};">❌ Out</button>
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('rsvpViewerContent').innerHTML = `
+    <div style="display:flex;gap:1rem;font-size:0.82rem;font-weight:600;margin-bottom:1rem;">
+      <span style="color:#2e7d32;">✅ In: ${inList.length}</span>
+      <span style="color:#c62828;">❌ Out: ${outList.length}</span>
+      <span style="color:#888;">⏳ No RSVP: ${pending.length}</span>
+    </div>
+    ${players.length === 0 ? '<p style="color:#999;font-style:italic;">No linked players on this roster. Link players to member accounts first.</p>' : [...inList,...outList,...pending].map(p => playerRow(p, rsvps[p.memberUid]?.response)).join('')}`;
+};
+
+window.adminSetScheduleRsvp = async function(gameId, seasonId, uid, name, response, isActive) {
+  const rsvpRef = doc(db, 'seasons', seasonId, 'schedule', gameId, 'rsvps', uid);
+  if (isActive) { await deleteDoc(rsvpRef); }
+  else { await setDoc(rsvpRef, { response, name, adminSet: true, timestamp: new Date().toISOString() }); }
+  await window.viewScheduleGameRsvp(gameId, seasonId);
+};
+
 window.approveRoleRequest = async function(requestId, uid, role) {
   await setDoc(doc(db, 'members', uid), { role }, { merge: true });
   await setDoc(doc(db, 'roleRequests', requestId), { status: 'approved' }, { merge: true });
@@ -3394,6 +3512,7 @@ async function loadTeamEventsAdmin() {
         </div>
       </div>
       <div style="display:flex;gap:0.5rem;">
+        <button class="btn-edit" onclick="viewTeamEventRsvp('${e.id}')">📋 RSVPs</button>
         <button class="btn-edit" onclick="editTeamEvent('${e.id}')">Edit</button>
         <button class="btn-delete" onclick="deleteTeamEvent('${e.id}')">Delete</button>
       </div>`;
