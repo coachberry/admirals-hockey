@@ -768,7 +768,8 @@ function showGameModal(data = null) {
     document.getElementById('gameTeamScore').value = data.teamScore ?? '';
     document.getElementById('gameOpponentScore').value = data.opponentScore ?? '';
     document.getElementById('scoreFields').style.display = data.result ? 'grid' : 'none';
-    if (data.opponentLogo) {
+    window._editingGameLogo = data?.opponentLogo || '';
+  if (data.opponentLogo) {
       document.getElementById('gameOpponentLogoPreview').innerHTML = `<img src="${data.opponentLogo}" style="height:50px;object-fit:contain;">`;
       document.getElementById('removeOpponentLogo').style.display = 'inline-block';
     }
@@ -976,7 +977,7 @@ function createGameModal() {
     const tournamentName = document.getElementById('gameTournamentName').value;
 
     // Upload opponent logo if new one selected
-    let opponentLogo = '';
+    let opponentLogo = document.getElementById('gameId').value ? (window._editingGameLogo || '') : '';
     if (opponentLogoData) {
       try {
         const storageRef = ref(storage, `schedule/${seasonId}/${id}/opponentLogo`);
