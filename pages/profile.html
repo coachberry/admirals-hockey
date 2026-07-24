@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=124">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=125">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=124">
-  <script src="/assets/js/page-guard.js?v=124"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=125">
+  <script src="/assets/js/page-guard.js?v=125"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -290,7 +290,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=124"></script>
+<script src="/assets/js/load-header.js?v=125"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -554,7 +554,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=124"></script>
+<script src="/assets/js/load-footer.js?v=125"></script>
 
 <!-- MEMBER MODAL v2 -->
 <!-- CHANGE PASSWORD MODAL -->
@@ -747,7 +747,7 @@ function showSection(name) {
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=124"></script>
+<script type="module" src="/assets/js/member-auth.js?v=125"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -1118,13 +1118,13 @@ function showSection(name) {
         const outActive = item.rsvp === 'no';
         if (item.type === 'event') {
           rsvpHtml = '<div style="display:flex;gap:0.4rem;margin-top:0.5rem;">'
-            + '<button data-etype="event" data-id="'+item.eventId+'" data-resp="yes" data-active="'+inActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:3px 10px;font-size:0.78rem;font-weight:600;cursor:pointer;border:1.5px solid #2e7d32;background:'+(inActive?'#2e7d32':'white')+';color:'+(inActive?'white':'#2e7d32')+';">✅ In</button>'
-            + '<button data-etype="event" data-id="'+item.eventId+'" data-resp="no" data-active="'+outActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:3px 10px;font-size:0.78rem;font-weight:600;cursor:pointer;border:1.5px solid #c62828;background:'+(outActive?'#c62828':'white')+';color:'+(outActive?'white':'#c62828')+';">❌ Out</button>'
+            + '<button data-etype="event" data-id="'+item.eventId+'" data-resp="yes" data-active="'+inActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:'+(inActive?'#2e7d32':'white')+';color:'+(inActive?'white':'#2e7d32')+';">In</button>'
+            + '<button data-etype="event" data-id="'+item.eventId+'" data-resp="no" data-active="'+outActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:'+(outActive?'#c62828':'white')+';color:'+(outActive?'white':'#c62828')+';">Out</button>'
             + '</div>';
         } else if (item.type === 'summer') {
           rsvpHtml = '<div style="display:flex;gap:0.4rem;margin-top:0.5rem;">'
-            + '<button data-etype="summer" data-sid="'+item.seasonId+'" data-gid="'+item.gameId+'" data-resp="yes" data-active="'+inActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:3px 10px;font-size:0.78rem;font-weight:600;cursor:pointer;border:1.5px solid #2e7d32;background:'+(inActive?'#2e7d32':'white')+';color:'+(inActive?'white':'#2e7d32')+';">✅ In</button>'
-            + '<button data-etype="summer" data-sid="'+item.seasonId+'" data-gid="'+item.gameId+'" data-resp="no" data-active="'+outActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:3px 10px;font-size:0.78rem;font-weight:600;cursor:pointer;border:1.5px solid #c62828;background:'+(outActive?'#c62828':'white')+';color:'+(outActive?'white':'#c62828')+';">❌ Out</button>'
+            + '<button data-etype="summer" data-sid="'+item.seasonId+'" data-gid="'+item.gameId+'" data-resp="yes" data-active="'+inActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:'+(inActive?'#2e7d32':'white')+';color:'+(inActive?'white':'#2e7d32')+';">In</button>'
+            + '<button data-etype="summer" data-sid="'+item.seasonId+'" data-gid="'+item.gameId+'" data-resp="no" data-active="'+outActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:'+(outActive?'#c62828':'white')+';color:'+(outActive?'white':'#c62828')+';">Out</button>'
             + '</div>';
         }
       }
