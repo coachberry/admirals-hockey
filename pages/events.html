@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=122">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=123">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Events - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=122">
-  <link rel="stylesheet" href="/assets/css/events-styles.css?v=122">
-  <script src="/assets/js/page-guard.js?v=122"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=123">
+  <link rel="stylesheet" href="/assets/css/events-styles.css?v=123">
+  <script src="/assets/js/page-guard.js?v=123"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=122" defer></script>
-<script src="/assets/js/load-header.js?v=122"></script>
+<script src="/assets/js/load-hero.js?v=123" defer></script>
+<script src="/assets/js/load-header.js?v=123"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -39,7 +39,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=122"></script>
+<script src="/assets/js/load-footer.js?v=123"></script>
 
 <script type="module">
   import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -161,8 +161,26 @@
     if (!uid) return;
     const {doc: fDoc, setDoc: fSetDoc, deleteDoc: fDeleteDoc} = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
     const rsvpRef = fDoc(db, 'teamEvents', eventId, 'rsvps', uid);
+
+    // Update buttons visually immediately
+    const newActive = !isActive;
+    const group = btn.closest('div');
+    if (group) {
+      group.querySelectorAll('.te-rsvp-btn').forEach(b => {
+        const bResp = b.dataset.resp;
+        const bActive = bResp === response ? newActive : false;
+        b.dataset.active = bActive;
+        if (bResp === 'yes') {
+          b.style.background = bActive ? '#2e7d32' : 'white';
+          b.style.color = bActive ? 'white' : '#2e7d32';
+        } else {
+          b.style.background = bActive ? '#c62828' : 'white';
+          b.style.color = bActive ? 'white' : '#c62828';
+        }
+      });
+    }
+
     if (isActive) { await fDeleteDoc(rsvpRef); } else { await fSetDoc(rsvpRef, { response, name: currentMemberProfile.displayName, timestamp: new Date().toISOString() }); }
-    loadTeamEvents();
   });
 
   window.rsvpTeamEvent = async function(eventId, response, isActive) {
@@ -360,7 +378,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=122"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=122"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=123"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=123"></script>
 </body>
 </html>
