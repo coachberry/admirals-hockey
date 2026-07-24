@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=128">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=129">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=128">
-  <script src="/assets/js/page-guard.js?v=128"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=129">
+  <script src="/assets/js/page-guard.js?v=129"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -290,7 +290,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=128"></script>
+<script src="/assets/js/load-header.js?v=129"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -554,7 +554,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=128"></script>
+<script src="/assets/js/load-footer.js?v=129"></script>
 
 <!-- MEMBER MODAL v2 -->
 <!-- CHANGE PASSWORD MODAL -->
@@ -747,7 +747,7 @@ function showSection(name) {
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=128"></script>
+<script type="module" src="/assets/js/member-auth.js?v=129"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -894,7 +894,7 @@ function showSection(name) {
     const profile = (await getDoc(doc(db, 'members', currentUser.uid))).data();
     const role = profile?.role || 'member';
     const roleColors = { player:'#2e7d32', prospect:'#1565c0', alumni:'#e65100', coach:'#5D1725', rep:'#6a1b9a', member:'#666', admin:'#333', superadmin:'#333' };
-    const roleLabels = { player:'Player', prospect:'Prospective Player', alumni:'Alumni', coach:'Coach', rep:'Team Representative', member:'Member', jv:'JV Player', varsity:'Varsity Player', admin:'Admin', superadmin:'Coach (Admin)' };
+    const roleLabels = { player:'Player', prospect:'Prospective Player', alumni:'Alumni', coach:'Coach', rep:'Team Representative', member:'Member', jv:'JV Player', varsity:'Varsity Player', admin:'Admin', superadmin:'Super Admin' };
     const roleDescriptions = {
       player: 'You have full access to team chat, events, and all member features as a current roster player.',
       prospect: 'You have access to tryout information and basic member features as a prospective player.',
