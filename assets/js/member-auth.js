@@ -22,6 +22,22 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 window.currentMember = null;
 
+window.sendPasswordReset = async function() {
+  const emailEl = document.getElementById('loginEmail');
+  const email = emailEl ? emailEl.value.trim() : '';
+  if (!email) {
+    alert('Please enter your email address first, then click Forgot Password?');
+    return;
+  }
+  try {
+    const { sendPasswordResetEmail } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+    await sendPasswordResetEmail(auth, email);
+    alert('Password reset email sent to ' + email + '. Check your inbox.');
+  } catch(err) {
+    alert('Error: ' + err.message);
+  }
+};
+
 // Helper: check if a profile has a given role (checks roles array, teams, and legacy role string)
 window.hasRole = function(profile, role) {
   if (!profile) return false;

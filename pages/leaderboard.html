@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=115">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=116">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Leaderboard - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=115">
-  <script src="/assets/js/page-guard.js?v=115"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=116">
+  <script src="/assets/js/page-guard.js?v=116"></script>
   <style>
     .leaderboard-tabs {
       display: flex;
@@ -156,8 +156,8 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=115" defer></script>
-<script src="/assets/js/load-header.js?v=115"></script>
+<script src="/assets/js/load-hero.js?v=116" defer></script>
+<script src="/assets/js/load-header.js?v=116"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -222,7 +222,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=115"></script>
+<script src="/assets/js/load-footer.js?v=116"></script>
 
 <div id="memberModal" class="modal-overlay" style="z-index:2000;">
   <div class="modal" style="max-width:440px;max-height:90vh;overflow-y:auto;">
@@ -240,6 +240,7 @@
           <input type="email" id="loginEmail" placeholder="Email" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
           <input type="password" id="loginPassword" placeholder="Password" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
           <p id="loginError" class="member-error" style="color:#c62828;font-size:0.85rem;min-height:1rem;"></p>
+        <p style="text-align:center;margin-top:0.5rem;"><a href="#" onclick="sendPasswordReset()" style="font-size:0.82rem;color:#5D1725;font-weight:600;">Forgot Password?</a></p>
           <button onclick="memberSignIn()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-size:1rem;font-weight:600;cursor:pointer;">Sign In</button>
         </div>
         <p style="text-align:center;margin-top:1rem;font-size:0.88rem;">Don't have an account? <a href="#" onclick="showMemberView('signup')" style="color:#5D1725;font-weight:600;">Sign up</a></p>
@@ -487,6 +488,6 @@
   sel.addEventListener('change', e => loadLeaderboard(e.target.value));
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=115"></script>
+<script type="module" src="/assets/js/member-auth.js?v=116"></script>
 </body>
 </html>

@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=115">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=116">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=115">
-  <script src="/assets/js/page-guard.js?v=115"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=116">
+  <script src="/assets/js/page-guard.js?v=116"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -290,7 +290,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=115"></script>
+<script src="/assets/js/load-header.js?v=116"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -364,8 +364,7 @@
             <input type="email" id="editEmail" placeholder="your@email.com">
           </div>
           <div class="form-field">
-            <label>New Password <span style="font-weight:400;color:#999;">(leave blank to keep current)</span></label>
-            <input type="password" id="editPassword" placeholder="New password">
+            <button type="button" onclick="showChangePassword()" style="background:none;border:1px solid #5D1725;color:#5D1725;padding:0.5rem 1rem;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:600;">🔒 Change Password</button>
           </div>
 
           <h4 style="margin:1.25rem 0 0.75rem;color:#5D1725;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.5px;">Contact</h4>
@@ -555,9 +554,39 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=115"></script>
+<script src="/assets/js/load-footer.js?v=116"></script>
 
 <!-- MEMBER MODAL v2 -->
+<!-- CHANGE PASSWORD MODAL -->
+<div id="changePasswordModal" class="modal-overlay" style="z-index:3000;">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-header">
+      <h2>Change Password</h2>
+      <button class="modal-close" onclick="hideChangePassword()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-field" style="margin-bottom:1rem;">
+        <label style="font-size:0.85rem;font-weight:600;color:#333;display:block;margin-bottom:0.4rem;">Current Password</label>
+        <input type="password" id="cpCurrent" placeholder="Your current password" style="width:100%;padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;box-sizing:border-box;">
+      </div>
+      <div class="form-field" style="margin-bottom:1rem;">
+        <label style="font-size:0.85rem;font-weight:600;color:#333;display:block;margin-bottom:0.4rem;">New Password</label>
+        <input type="password" id="cpNew" placeholder="New password (min 6 characters)" style="width:100%;padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;box-sizing:border-box;">
+      </div>
+      <div class="form-field" style="margin-bottom:1rem;">
+        <label style="font-size:0.85rem;font-weight:600;color:#333;display:block;margin-bottom:0.4rem;">Confirm New Password</label>
+        <input type="password" id="cpConfirm" placeholder="Confirm new password" style="width:100%;padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;box-sizing:border-box;">
+      </div>
+      <p id="cpError" style="color:#c62828;font-size:0.85rem;display:none;margin-bottom:0.5rem;"></p>
+      <p id="cpSuccess" style="color:#2e7d32;font-size:0.85rem;display:none;margin-bottom:0.5rem;"></p>
+      <div style="display:flex;gap:0.5rem;">
+        <button onclick="submitChangePassword()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.65rem 1.5rem;cursor:pointer;font-weight:600;">Update Password</button>
+        <button onclick="hideChangePassword()" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:0.65rem 1rem;cursor:pointer;">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="memberModal" class="modal-overlay" style="z-index:2000;">
   <div class="modal" style="max-width:480px;max-height:90vh;overflow-y:auto;">
     <button class="modal-close-float" onclick="hideMemberModal()">&times;</button>
@@ -576,6 +605,7 @@
         <input type="email" id="loginEmail" placeholder="Email address" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
         <input type="password" id="loginPassword" placeholder="Password" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
         <p id="loginError" class="member-error" style="color:#c62828;font-size:0.85rem;min-height:1rem;"></p>
+        <p style="text-align:center;margin-top:0.5rem;"><a href="#" onclick="sendPasswordReset()" style="font-size:0.82rem;color:#5D1725;font-weight:600;">Forgot Password?</a></p>
         <button onclick="memberSignIn()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-size:1rem;font-weight:600;cursor:pointer;">Sign In</button>
         <p style="text-align:center;font-size:0.85rem;color:#555;">
           Player or Alumni? <a href="#" onclick="showMemberView('apply')" style="color:#5D1725;font-weight:600;">Apply for access →</a>
@@ -665,6 +695,44 @@ function showRoleFields(role) {
   });
 }
 
+window.showChangePassword = function() {
+  document.getElementById('changePasswordModal').classList.add('active');
+  document.getElementById('cpCurrent').value = '';
+  document.getElementById('cpNew').value = '';
+  document.getElementById('cpConfirm').value = '';
+  document.getElementById('cpError').style.display = 'none';
+  document.getElementById('cpSuccess').style.display = 'none';
+};
+
+window.hideChangePassword = function() {
+  document.getElementById('changePasswordModal').classList.remove('active');
+};
+
+window.submitChangePassword = async function() {
+  const current = document.getElementById('cpCurrent').value;
+  const newPw = document.getElementById('cpNew').value;
+  const confirm = document.getElementById('cpConfirm').value;
+  const errEl = document.getElementById('cpError');
+  const sucEl = document.getElementById('cpSuccess');
+  errEl.style.display = 'none';
+  sucEl.style.display = 'none';
+  if (!current) { errEl.textContent = 'Please enter your current password.'; errEl.style.display = 'block'; return; }
+  if (newPw.length < 6) { errEl.textContent = 'New password must be at least 6 characters.'; errEl.style.display = 'block'; return; }
+  if (newPw !== confirm) { errEl.textContent = 'New passwords do not match.'; errEl.style.display = 'block'; return; }
+  try {
+    const { reauthenticateWithCredential, EmailAuthProvider, updatePassword } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+    const credential = EmailAuthProvider.credential(currentUser.email, current);
+    await reauthenticateWithCredential(currentUser, credential);
+    await updatePassword(currentUser, newPw);
+    sucEl.textContent = '✅ Password updated successfully!';
+    sucEl.style.display = 'block';
+    setTimeout(() => window.hideChangePassword(), 1500);
+  } catch(err) {
+    errEl.textContent = (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') ? 'Current password is incorrect.' : 'Error: ' + err.message;
+    errEl.style.display = 'block';
+  }
+};
+
 function showSection(name) {
   ['info','roles','requestRole','schedule'].forEach(s => {
     const el = document.getElementById('section' + s.charAt(0).toUpperCase() + s.slice(1));
@@ -679,7 +747,7 @@ function showSection(name) {
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=115"></script>
+<script type="module" src="/assets/js/member-auth.js?v=116"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -782,7 +850,7 @@ function showSection(name) {
   window.saveProfileInfo = async function() {
     const name = document.getElementById('editDisplayName').value.trim();
     const email = document.getElementById('editEmail').value.trim();
-    const password = document.getElementById('editPassword').value;
+    const password = '';
     const status = document.getElementById('infoStatus');
     status.textContent = 'Saving...';
     status.style.color = '#555';
@@ -794,10 +862,7 @@ function showSection(name) {
       if (email !== currentUser.email) {
         await updateEmail(currentUser, email);
       }
-      if (password) {
-        await updatePassword(currentUser, password);
-        document.getElementById('editPassword').value = '';
-      }
+  
       // Save all profile fields to Firestore
       await setDoc(doc(db, 'members', currentUser.uid), {
         displayName: name,
