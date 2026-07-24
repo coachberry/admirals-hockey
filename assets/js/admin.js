@@ -21,6 +21,30 @@ const storage = getStorage(app);
 const functions = getFunctions(app);
 
 // ============================================
+// MASTER PAGE LIST — single source of truth
+// Add a new page here ONCE and it will automatically appear in:
+// Pages visibility, Footer Quick Links, and Page Hero settings.
+// ============================================
+const SITE_PAGES = [
+  { id: 'home',        label: 'Home',          path: '/index.html', footer: true,  hero: false },
+  { id: 'schedule',    label: 'Schedule',      path: '/schedule',   footer: true,  hero: true,  heroBadge: '', heroTitle: 'Schedule', heroSubtitle: 'Complete game schedule and results' },
+  { id: 'roster',      label: 'Roster',        path: '/roster',     footer: true,  hero: true,  heroBadge: '', heroTitle: 'Team Roster', heroSubtitle: 'Meet the Admirals' },
+  { id: 'stats',       label: 'Stats',         path: '/stats',      footer: true,  hero: true,  heroBadge: '', heroTitle: 'Statistics', heroSubtitle: 'Season stats for every player' },
+  { id: 'leaderboard', label: 'Leaderboard',   path: '/leaderboard', footer: true, hero: true,  heroBadge: 'Franklin Admirals Hockey', heroTitle: 'Leaderboard', heroSubtitle: 'Season statistics leaders' },
+  { id: 'news',        label: 'News',          path: '/news',       footer: true,  hero: true,  heroBadge: 'Franklin Admirals Hockey', heroTitle: 'News & Updates', heroSubtitle: 'The latest from the Admirals program' },
+  { id: 'chat',        label: 'Team Chat',     path: '/chat',       footer: true,  hero: false },
+  { id: 'events',      label: 'Events',        path: '/events',     footer: true,  hero: true,  heroBadge: 'Franklin Admirals Hockey', heroTitle: 'Events', heroSubtitle: 'Team events, fundraisers & community activities' },
+  { id: 'gallery',     label: 'Gallery',       path: '/gallery',    footer: true,  hero: true,  heroBadge: 'Franklin Admirals Hockey', heroTitle: 'Photo Gallery', heroSubtitle: 'Memories from the ice' },
+  { id: 'summer',      label: 'Summer Hockey', path: '/summer-hockey', footer: true, hero: true, heroBadge: 'Franklin Admirals Hockey', heroTitle: 'Summer Hockey', heroSubtitle: 'In-house summer league — alumni, current players & friends' },
+  { id: 'alumni',      label: 'Alumni',        path: '/alumni',     footer: true,  hero: true,  heroBadge: 'Franklin Admirals Hockey', heroTitle: 'Alumni Network', heroSubtitle: 'Once an Admiral, always an Admiral' },
+  { id: 'sponsors',    label: 'Sponsors',      path: '/sponsors',   footer: true,  hero: true,  heroBadge: 'Franklin Admirals Hockey', heroTitle: 'Our Sponsors', heroSubtitle: 'Thank you to our supporters' },
+  { id: 'tryouts',     label: 'Tryouts',       path: '/tryouts',    footer: true,  hero: true,  heroBadge: '', heroTitle: 'Admirals Hockey Tryouts', heroSubtitle: "Join one of Tennessee's premier high school hockey programs" },
+  { id: 'contact',     label: 'Contact',       path: '/contact',    footer: true,  hero: true,  heroBadge: 'Get In Touch', heroTitle: 'Contact Us', heroSubtitle: "Questions? We'd love to hear from you" },
+  { id: 'get-app',     label: 'Get App',       path: '/get-app',    footer: true,  hero: true,  heroBadge: '📱 App', heroTitle: 'Get the Admirals Hockey App', heroSubtitle: 'Install the site on your phone for quick access to schedules, chat, and RSVPs' },
+];
+
+
+// ============================================
 // AUTH
 // ============================================
 let currentUser = null;
@@ -122,7 +146,7 @@ async function showDashboard() {
     if (savedTab === 'teamEvents') loadTeamEventsAdmin();
     if (savedTab === 'contactInfo') { loadContactInfo(); loadFooterLinks(); }
     if (savedTab === 'navigation') loadNav();
-    if (savedTab === 'tryouts') loadTryoutsSeasons();
+    // if (savedTab === 'tryouts') loadTryoutsSeasons(); // TODO: Tryouts tab JS not yet implemented
     if (savedTab === 'pageheroes') loadPageHeroes();
   }
 }
