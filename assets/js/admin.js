@@ -2995,20 +2995,26 @@ async function loadQuickHitsAdmin() {
   if (!hits.length) { list.innerHTML = '<div class="empty-state">No links added yet</div>'; return; }
 
   list.innerHTML = hits.map(h => `
-    <div class="item">
+    <div class="item" style="opacity:${h.hidden ? '0.5' : '1'};">
       <div class="item-info">
         <div>
-          <strong>${h.emoji||''} ${h.label}</strong>
+          <strong>${h.emoji||''} ${h.label}${h.hidden ? ' <span style="color:#c62828;font-size:0.75rem;font-weight:600;">(Hidden)</span>' : ''}</strong>
           <span>${h.url||''}</span>
           <span style="font-size:0.75rem;color:#999;">Order: ${h.order||1}</span>
         </div>
       </div>
       <div style="display:flex;gap:0.5rem;">
+        <button class="btn-secondary" style="font-size:0.8rem;" onclick="toggleQuickHitVisibility('${h.id}',${!h.hidden})">${h.hidden ? 'Show' : 'Hide'}</button>
         <button class="btn-edit" onclick="editQuickHit('${h.id}')">Edit</button>
         <button class="btn-delete" onclick="deleteQuickHit('${h.id}')">Delete</button>
       </div>
     </div>`).join('');
 }
+
+window.toggleQuickHitVisibility = async function(id, hidden) {
+  await setDoc(doc(db, 'quickhits', id), { hidden }, { merge: true });
+  loadQuickHitsAdmin();
+};
 
 function openQuickHitModal(id, data) {
   const existing = document.getElementById('quickHitModal');
