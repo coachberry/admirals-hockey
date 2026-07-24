@@ -133,14 +133,16 @@ async function init() {
   }
   applyChatVisibility(false);
   onAuthStateChanged(auth, async (user) => {
-    if (!user) { applyChatVisibility(false); return; }
+    // In preview mode, simulate the preview role
+  if (_navPreviewRole === 'public') { applyChatVisibility(false); return; }
+  if (!user) { applyChatVisibility(false); return; }
     try {
       const mSnap = await getDoc(doc(db, 'members', user.uid));
       const profile = mSnap.exists() ? mSnap.data() : null;
       if (profile && user.email === 'coachberry03@gmail.com') profile.role = 'superadmin';
       // Override with preview role if set
-      if (window._previewRole && window._previewRole !== 'public') {
-        if (profile) profile.role = window._previewRole;
+      if (_navPreviewRole && _navPreviewRole !== 'public') {
+        if (profile) { profile.role = _navPreviewRole; profile.roles = [_navPreviewRole]; profile.teams = []; }
       }
       applyChatVisibility(!!(profile && allowedRoles.includes(profile.role)));
     } catch (e) { applyChatVisibility(false); }
