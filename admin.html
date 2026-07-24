@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=129">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=130">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=129">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=129">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=130">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=130">
 </head>
 <body>
 
@@ -124,6 +124,20 @@
         <button class="tab-btn" data-tab="roleRequests">🏷 Role Requests <span id="roleRequestsBadge" style="display:none;background:#c62828;color:white;border-radius:50%;padding:2px 7px;font-size:0.7rem;margin-left:4px;border-radius:10px;"></span></button>
       </div>
       <div class="sidebar-group">
+        <div style="padding:0.75rem 1rem;border-bottom:1px solid #eee;margin-bottom:0.5rem;">
+          <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:#999;font-weight:600;margin-bottom:0.4rem;">Preview Site As</div>
+          <select id="previewRoleSelect" style="width:100%;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:0.82rem;" onchange="openPreview(this.value)">
+            <option value="">Choose role...</option>
+            <option value="public">Public (not logged in)</option>
+            <option value="member">Member</option>
+            <option value="player">Player</option>
+            <option value="varsity">Varsity Player</option>
+            <option value="jv">JV Player</option>
+            <option value="alumni">Alumni</option>
+            <option value="coach">Coach</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
         <div class="sidebar-group-label">System</div>
         <button class="tab-btn" data-tab="pages">🔍 Pages</button>
         <button class="tab-btn" data-tab="contactInfo">📞 Contact Page</button>
@@ -1247,10 +1261,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=129"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=129"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=129"></script>
-<script type="module" src="/assets/js/game-stats.js?v=129"></script>
+<script type="module" src="/assets/js/admin.js?v=130"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=130"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=130"></script>
+<script type="module" src="/assets/js/game-stats.js?v=130"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";

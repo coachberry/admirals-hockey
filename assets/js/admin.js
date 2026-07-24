@@ -129,6 +129,13 @@ async function showDashboard() {
 // when _firebaseAdminUser is set. We expose it on window for that.
 window.showDashboard = showDashboard;
 
+window.openPreview = function(role) {
+  if (!role) return;
+  const url = role === 'public' ? '/?preview=public' : '/?preview=' + role;
+  window.open(url, '_blank');
+  document.getElementById('previewRoleSelect').value = '';
+};
+
 // ============================================
 // TABS
 // ============================================
