@@ -3,16 +3,7 @@ import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/fireb
 
 const VAPID_KEY = "BCbLDoNo9nX8669RUa_E_Jne-_EjXXtai1-UeOkJhWU_fRSEGOQsF0KXPXAyms4GNkWU1m1CSphRkAS_8EkoGpg";
 
-function showDebug(msg) {
-  let el = document.getElementById('pushDebugBanner');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'pushDebugBanner';
-    el.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:999999;background:#000;color:#0f0;font-family:monospace;font-size:11px;padding:8px;max-height:40vh;overflow-y:auto;white-space:pre-wrap;';
-    document.body.appendChild(el);
-  }
-  el.textContent += msg + '\n';
-}
+function showDebug(msg) { /* debug disabled */ }
 
 export async function initPushNotifications(app, user) {
   showDebug('--- Push init started ---');
