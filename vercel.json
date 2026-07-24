@@ -20,6 +20,10 @@
       "destination": "/pages/schedule.html"
     },
     {
+      "source": "/get-app",
+      "destination": "/pages/get-app.html"
+    },
+    {
       "source": "/roster",
       "destination": "/pages/roster.html"
     },
