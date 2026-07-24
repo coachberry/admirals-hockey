@@ -2226,21 +2226,7 @@ if (generateScheduleBtn) {
 // ============================================
 // PAGE VISIBILITY
 // ============================================
-const pagesList = [
-  { id: 'schedule',    label: 'Schedule',      path: '/schedule' },
-  { id: 'roster',      label: 'Roster',        path: '/roster' },
-  { id: 'stats',       label: 'Stats',         path: '/stats' },
-  { id: 'leaderboard', label: 'Leaderboard',   path: '/leaderboard' },
-  { id: 'news',        label: 'News',          path: '/news' },
-  { id: 'events',      label: 'Events',        path: '/events' },
-  { id: 'gallery',     label: 'Gallery',       path: '/gallery' },
-  { id: 'summer',      label: 'Summer Hockey', path: '/summer-hockey' },
-  { id: 'alumni',      label: 'Alumni',        path: '/alumni' },
-  { id: 'sponsors',    label: 'Sponsors',      path: '/sponsors' },
-  { id: 'tryouts',     label: 'Tryouts',       path: '/tryouts' },
-  { id: 'contact',     label: 'Contact',       path: '/contact' },
-  { id: 'get-app',      label: 'Get App',       path: '/get-app' },
-];
+const pagesList = SITE_PAGES.filter(p => p.id !== 'home').map(p => ({ id: p.id, label: p.label, path: p.path }));
 
 let pageVisibility = {};
 
@@ -3395,22 +3381,7 @@ if (saveJvGameBtn) {
 // ============================================
 // FOOTER QUICK LINKS
 // ============================================
-const FOOTER_LINK_OPTIONS = [
-  { id: 'home',        label: 'Home',          href: '/index.html' },
-  { id: 'schedule',    label: 'Schedule',      href: '/schedule' },
-  { id: 'roster',      label: 'Roster',        href: '/roster' },
-  { id: 'stats',       label: 'Stats',         href: '/stats' },
-  { id: 'leaderboard', label: 'Leaderboard',   href: '/leaderboard' },
-  { id: 'news',        label: 'News',          href: '/news' },
-  { id: 'chat',        label: 'Team Chat',     href: '/chat' },
-  { id: 'events',      label: 'Events',        href: '/events' },
-  { id: 'gallery',     label: 'Gallery',       href: '/gallery' },
-  { id: 'summer',      label: 'Summer Hockey', href: '/summer-hockey' },
-  { id: 'alumni',      label: 'Alumni',        href: '/alumni' },
-  { id: 'sponsors',    label: 'Sponsors',      href: '/sponsors' },
-  { id: 'tryouts',     label: 'Tryouts',       href: '/tryouts' },
-  { id: 'contact',     label: 'Contact',       href: '/contact' },
-];
+const FOOTER_LINK_OPTIONS = SITE_PAGES.filter(p => p.footer).map(p => ({ id: p.id, label: p.label, href: p.path }));
 
 async function loadFooterLinks() {
   const snap = await getDoc(doc(db, 'settings', 'footerLinks'));
@@ -3440,25 +3411,20 @@ loadFooterLinks();
 // ============================================
 // PAGE HEROES
 // ============================================
-const PAGE_HERO_DEFAULTS = {
-  news:        { badge: 'Franklin Admirals Hockey', title: 'News & Updates',   subtitle: 'The latest from the Admirals program' },
-  events:      { badge: 'Franklin Admirals Hockey', title: 'Events',           subtitle: 'Team events, fundraisers & community activities' },
-  roster:      { badge: '',                         title: 'Team Roster',      subtitle: 'Meet the Admirals' },
-  schedule:    { badge: '',                         title: 'Schedule',         subtitle: 'Complete game schedule and results' },
-  stats:       { badge: '',                         title: 'Statistics',       subtitle: 'Season stats for every player' },
-  leaderboard: { badge: 'Franklin Admirals Hockey', title: 'Leaderboard',     subtitle: 'Season statistics leaders' },
-  gallery:     { badge: 'Franklin Admirals Hockey', title: 'Photo Gallery',   subtitle: 'Memories from the ice' },
-  summer:      { badge: 'Franklin Admirals Hockey', title: 'Summer Hockey',   subtitle: 'In-house summer league — alumni, current players & friends' },
-  alumni:      { badge: 'Franklin Admirals Hockey', title: 'Alumni Network',  subtitle: 'Once an Admiral, always an Admiral' },
-  sponsors:    { badge: 'Franklin Admirals Hockey', title: 'Our Sponsors',    subtitle: 'Thank you to our supporters' },
-  contact:     { badge: 'Get In Touch',             title: 'Contact Us',      subtitle: "Questions? We'd love to hear from you" },
-  tryouts:     { badge: '',                         title: 'Admirals Hockey Tryouts', subtitle: "Join one of Tennessee's premier high school hockey programs" },
-  'get-app':   { badge: '📱 App',                    title: 'Get the Admirals Hockey App', subtitle: 'Install the site on your phone for quick access to schedules, chat, and RSVPs' },
-};
+const PAGE_HERO_DEFAULTS = Object.fromEntries(
+  SITE_PAGES.filter(p => p.hero).map(p => [p.id, { badge: p.heroBadge || '', title: p.heroTitle || p.label, subtitle: p.heroSubtitle || '' }])
+);
 
 let allPageHeroes = {};
 
+function populateHeroPageSelect() {
+  const select = document.getElementById('heroPageSelect');
+  if (!select || select.options.length) return;
+  select.innerHTML = SITE_PAGES.filter(p => p.hero).map(p => `<option value="${p.id}">${p.label}</option>`).join('');
+}
+
 async function loadPageHeroes() {
+  populateHeroPageSelect();
   const snap = await getDoc(doc(db, 'settings', 'pageHeroes'));
   allPageHeroes = snap.exists() ? snap.data() : {};
   populateHeroForm(document.getElementById('heroPageSelect').value);
