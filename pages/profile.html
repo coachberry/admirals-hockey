@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=117">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=118">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=117">
-  <script src="/assets/js/page-guard.js?v=117"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=118">
+  <script src="/assets/js/page-guard.js?v=118"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -290,7 +290,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=117"></script>
+<script src="/assets/js/load-header.js?v=118"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -554,7 +554,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=117"></script>
+<script src="/assets/js/load-footer.js?v=118"></script>
 
 <!-- MEMBER MODAL v2 -->
 <!-- CHANGE PASSWORD MODAL -->
@@ -747,7 +747,7 @@ function showSection(name) {
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=117"></script>
+<script type="module" src="/assets/js/member-auth.js?v=118"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -1147,6 +1147,27 @@ function showSection(name) {
         const etype = btn.dataset.etype;
         const resp = btn.dataset.resp;
         const isActive = btn.dataset.active === 'true';
+        const newActive = !isActive;
+
+        // Find sibling buttons in the same RSVP group
+        const group = btn.closest('div');
+        const siblings = group ? group.querySelectorAll('.sch-rsvp-btn') : [btn];
+
+        // Update all buttons in group immediately
+        siblings.forEach(b => {
+          const bResp = b.dataset.resp;
+          const bActive = bResp === resp ? newActive : false;
+          b.dataset.active = bActive;
+          if (bResp === 'yes') {
+            b.style.background = bActive ? '#2e7d32' : 'white';
+            b.style.color = bActive ? 'white' : '#2e7d32';
+          } else {
+            b.style.background = bActive ? '#c62828' : 'white';
+            b.style.color = bActive ? 'white' : '#c62828';
+          }
+        });
+
+        // Save to Firestore in background
         if (etype === 'event') {
           const rsvpRef = doc(db, 'teamEvents', btn.dataset.id, 'rsvps', currentUser.uid);
           if (isActive) { await deleteDoc(rsvpRef); } else { await setDoc(rsvpRef, { response: resp, name: currentProfile.displayName, timestamp: new Date().toISOString() }); }
@@ -1154,7 +1175,6 @@ function showSection(name) {
           const rsvpRef = doc(db, 'summer', btn.dataset.sid, 'games', btn.dataset.gid, 'rsvps', currentUser.uid);
           if (isActive) { await deleteDoc(rsvpRef); } else { await setDoc(rsvpRef, { response: resp, uid: currentUser.uid, name: currentProfile.displayName, timestamp: new Date().toISOString() }); }
         }
-        loadMySchedule();
       });
     });
   };
