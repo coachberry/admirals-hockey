@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=146">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=147">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=146">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=146">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=147">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=147">
 </head>
 <body>
 
@@ -121,6 +121,7 @@
         <div class="sidebar-group-label">Community</div>
         <button class="tab-btn" data-tab="alumni">🎓 Alumni</button>
         <button class="tab-btn" data-tab="members">👥 Manage Users</button>
+        <button class="tab-btn" data-tab="notifications">🔔 Send Notification</button>
         <button class="tab-btn" data-tab="roleRequests">🏷 Role Requests <span id="roleRequestsBadge" style="display:none;background:#c62828;color:white;border-radius:50%;padding:2px 7px;font-size:0.7rem;margin-left:4px;border-radius:10px;"></span></button>
       </div>
       <div class="sidebar-group">
@@ -589,6 +590,40 @@
     </div>
 
     <!--    <!-- MEMBERS TAB -->
+    <div id="notificationsTab" class="tab-content">
+      <h2>Send Push Notification</h2>
+      <p style="color:#666;font-size:0.85rem;margin-bottom:1rem;">Send a push notification to members who have enabled notifications on their device. Only members with the app installed and notifications turned on will receive it.</p>
+      <div class="form-label-group">
+        <label class="field-label">Title *</label>
+        <input type="text" id="notifTitle" placeholder="e.g. Practice Cancelled">
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">Message *</label>
+        <textarea id="notifBody" rows="3" placeholder="e.g. Tonight's practice is cancelled due to weather."></textarea>
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">Link (optional)</label>
+        <input type="text" id="notifUrl" placeholder="/events">
+      </div>
+      <div class="form-label-group">
+        <label class="field-label">Send to</label>
+        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+          <label style="font-size:0.85rem;display:flex;align-items:center;gap:0.3rem;"><input type="checkbox" class="notifRoleCheck" value="player" checked> Player</label>
+          <label style="font-size:0.85rem;display:flex;align-items:center;gap:0.3rem;"><input type="checkbox" class="notifRoleCheck" value="varsity" checked> Varsity</label>
+          <label style="font-size:0.85rem;display:flex;align-items:center;gap:0.3rem;"><input type="checkbox" class="notifRoleCheck" value="jv" checked> JV</label>
+          <label style="font-size:0.85rem;display:flex;align-items:center;gap:0.3rem;"><input type="checkbox" class="notifRoleCheck" value="coach" checked> Coach</label>
+          <label style="font-size:0.85rem;display:flex;align-items:center;gap:0.3rem;"><input type="checkbox" class="notifRoleCheck" value="rep" checked> Team Rep</label>
+          <label style="font-size:0.85rem;display:flex;align-items:center;gap:0.3rem;"><input type="checkbox" class="notifRoleCheck" value="alumni"> Alumni</label>
+          <label style="font-size:0.85rem;display:flex;align-items:center;gap:0.3rem;"><input type="checkbox" class="notifRoleCheck" value="prospect"> Prospect</label>
+          <label style="font-size:0.85rem;display:flex;align-items:center;gap:0.3rem;"><input type="checkbox" class="notifRoleCheck" value="member"> Member</label>
+        </div>
+      </div>
+      <div class="form-buttons">
+        <button id="sendNotifBtn" class="btn-primary">Send Notification</button>
+      </div>
+      <p id="notifStatus" class="save-status"></p>
+    </div>
+
     <div id="membersTab" class="tab-content">
       <h2>Manage Users</h2>
       <div style="display:flex;gap:1rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
@@ -1247,10 +1282,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=146"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=146"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=146"></script>
-<script type="module" src="/assets/js/game-stats.js?v=146"></script>
+<script type="module" src="/assets/js/admin.js?v=147"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=147"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=147"></script>
+<script type="module" src="/assets/js/game-stats.js?v=147"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";

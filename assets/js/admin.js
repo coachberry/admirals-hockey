@@ -2,6 +2,7 @@ import { showFramer } from '/assets/js/image-framer.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, getDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js";
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -17,6 +18,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
+const functions = getFunctions(app);
 
 // ============================================
 // AUTH
@@ -128,6 +130,47 @@ async function showDashboard() {
 // showDashboard is called by the Firebase auth handler in admin.html
 // when _firebaseAdminUser is set. We expose it on window for that.
 window.showDashboard = showDashboard;
+
+const sendNotifBtn = document.getElementById('sendNotifBtn');
+if (sendNotifBtn) {
+  sendNotifBtn.addEventListener('click', async () => {
+    const title = document.getElementById('notifTitle').value.trim();
+    const body = document.getElementById('notifBody').value.trim();
+    const url = document.getElementById('notifUrl').value.trim();
+    const status = document.getElementById('notifStatus');
+
+    if (!title || !body) {
+      status.textContent = 'Title and message are required';
+      status.style.color = '#c62828';
+      return;
+    }
+
+    const targetRoles = Array.from(document.querySelectorAll('.notifRoleCheck:checked')).map(c => c.value);
+    if (!targetRoles.length) {
+      status.textContent = 'Select at least one role to send to';
+      status.style.color = '#c62828';
+      return;
+    }
+
+    status.textContent = 'Sending...';
+    status.style.color = '#666';
+    sendNotifBtn.disabled = true;
+
+    try {
+      const sendFn = httpsCallable(functions, 'sendManualNotification');
+      const result = await sendFn({ title, body, url, targetRoles });
+      status.textContent = `✅ Sent to ${result.data.sent} device(s)${result.data.failed ? ', ' + result.data.failed + ' failed' : ''}.`;
+      status.style.color = 'green';
+      document.getElementById('notifTitle').value = '';
+      document.getElementById('notifBody').value = '';
+      document.getElementById('notifUrl').value = '';
+    } catch (err) {
+      status.textContent = 'Error: ' + err.message;
+      status.style.color = '#c62828';
+    }
+    sendNotifBtn.disabled = false;
+  });
+}
 
 
 // ============================================
