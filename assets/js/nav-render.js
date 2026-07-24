@@ -130,6 +130,10 @@ async function init() {
       const mSnap = await getDoc(doc(db, 'members', user.uid));
       const profile = mSnap.exists() ? mSnap.data() : null;
       if (profile && user.email === 'coachberry03@gmail.com') profile.role = 'superadmin';
+      // Override with preview role if set
+      if (window._previewRole && window._previewRole !== 'public') {
+        if (profile) profile.role = window._previewRole;
+      }
       applyChatVisibility(!!(profile && allowedRoles.includes(profile.role)));
     } catch (e) { applyChatVisibility(false); }
   });

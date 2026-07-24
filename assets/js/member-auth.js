@@ -275,6 +275,11 @@ if (signupBtn) signupBtn.onclick = () => showMemberModal('apply');
 // MOBILE AUTH BUTTONS SYNC
 // ============================================
 function syncMobileAuthButtons() {
+  // In preview mode, don't show admin buttons
+  if (window._previewRole) {
+    const adminBtn = document.getElementById('adminBtn') || document.querySelector('a[href="/admin"]');
+    if (adminBtn) adminBtn.style.display = 'none';
+  }
   const container = document.getElementById('mobileAuthButtons');
   if (!container) return;
   container.innerHTML = '';
