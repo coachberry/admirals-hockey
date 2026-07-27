@@ -68,6 +68,10 @@ header {
   width: 100%;
 }
 
+#notifBellWrap {
+  margin-left: 1.5rem;
+}
+
 .mobile-auth-buttons {
   display: none;
 }
