@@ -4,6 +4,7 @@
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDoc, getDocs, doc, onSnapshot, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
@@ -17,6 +18,10 @@ const firebaseConfig = {
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const functions = getFunctions(app);
+
+let ALL_MEMBERS_W = [];
+let pendingMentionsW = [];
 
 let currentUser = null;
 let currentProfile = null;
@@ -71,7 +76,10 @@ function injectWidget() {
       </div>
       <div id="widgetMessages" style="flex:1;overflow-y:auto;padding:0.75rem;
         display:flex;flex-direction:column;gap:0.5rem;font-size:0.85rem;"></div>
-      <div id="widgetInputArea" style="padding:0.6rem;border-top:1px solid #f0f0f0;display:none;">
+      <div id="widgetInputArea" style="padding:0.6rem;border-top:1px solid #f0f0f0;display:none;position:relative;">
+        <div id="widgetMentionDropdown" style="display:none;position:absolute;bottom:100%;left:0.6rem;right:0.6rem;
+          margin-bottom:4px;background:white;border:1px solid #ddd;border-radius:8px;
+          box-shadow:0 -2px 10px rgba(0,0,0,0.12);max-height:140px;overflow-y:auto;z-index:1001;"></div>
         <div style="display:flex;gap:0.5rem;">
           <input type="text" id="widgetInput" placeholder="Message..." style="
             flex:1;padding:0.5rem 0.75rem;border:1px solid #ddd;border-radius:6px;
@@ -94,7 +102,26 @@ function injectWidget() {
 
   // Handle Enter key in widget input
   document.getElementById('widgetInput')?.addEventListener('keydown', e => {
+    const dd = document.getElementById('widgetMentionDropdown');
+    if (dd && dd.style.display === 'block') {
+      if (e.key === 'Escape') { dd.style.display = 'none'; return; }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const first = dd.querySelector('.widget-mention-item');
+        if (first) first.click();
+        return;
+      }
+    }
     if (e.key === 'Enter') sendWidgetMessage();
+  });
+
+  document.getElementById('widgetInput')?.addEventListener('input', function() {
+    handleWidgetMentionTrigger(this);
+  });
+
+  document.addEventListener('click', (e) => {
+    const dd = document.getElementById('widgetMentionDropdown');
+    if (dd && !dd.contains(e.target) && e.target.id !== 'widgetInput') dd.style.display = 'none';
   });
 
   document.getElementById('widgetChannelSelect')?.addEventListener('change', e => {
@@ -135,6 +162,14 @@ window.sendWidgetMessage = async function() {
     text,
     timestamp: serverTimestamp()
   });
+
+  const mentionedUidsW = new Set();
+  pendingMentionsW.forEach(pm => {
+    if (text.includes('@' + pm.name)) mentionedUidsW.add(pm.uid);
+  });
+  mentionedUidsW.forEach(uid => notifyWidgetMention(uid, text, currentChannel.name || 'general'));
+  pendingMentionsW = [];
+  hideWidgetMentionDropdown();
 };
 
 function updateBadge() {
@@ -196,6 +231,89 @@ async function loadChannels() {
   }
 }
 
+async function loadAllMembersW() {
+  const snap = await getDocs(collection(db, 'members'));
+  ALL_MEMBERS_W = [];
+  snap.forEach(d => {
+    if (d.id === currentUser?.uid) return;
+    const m = d.data();
+    const roles = [m.role, ...(m.roles || []), ...(m.teams || [])].filter(Boolean);
+    ALL_MEMBERS_W.push({ uid: d.id, name: m.displayName || m.email || 'Member', roles });
+  });
+}
+
+function widgetMentionCandidates(channel) {
+  if (!channel) return [];
+  const readRoles = channel.readRoles || [];
+  if (!readRoles.length) return ALL_MEMBERS_W;
+  return ALL_MEMBERS_W.filter(m => m.roles.some(r => readRoles.includes(r)));
+}
+
+function hideWidgetMentionDropdown() {
+  const dd = document.getElementById('widgetMentionDropdown');
+  if (dd) dd.style.display = 'none';
+}
+
+function escapeHtmlW(text) {
+  return (text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function insertWidgetMention(uid, name, atIndex, input) {
+  const val = input.value;
+  const cursor = input.selectionStart;
+  const before = val.slice(0, atIndex);
+  const after = val.slice(cursor);
+  const newVal = before + '@' + name + ' ' + after;
+  input.value = newVal;
+  const newCursor = (before + '@' + name + ' ').length;
+  input.setSelectionRange(newCursor, newCursor);
+  input.focus();
+  pendingMentionsW.push({ uid, name });
+  hideWidgetMentionDropdown();
+}
+
+function showWidgetMentionDropdown(partial, atIndex, input) {
+  const candidates = widgetMentionCandidates(currentChannel);
+  const matches = candidates.filter(m => m.name.toLowerCase().startsWith(partial.toLowerCase())).slice(0, 5);
+  const dd = document.getElementById('widgetMentionDropdown');
+  if (!dd || !matches.length) { hideWidgetMentionDropdown(); return; }
+  dd.innerHTML = matches.map(m => `<div class="widget-mention-item" data-uid="${m.uid}" data-name="${escapeHtmlW(m.name)}"
+    style="padding:0.45rem 0.75rem;cursor:pointer;font-size:0.8rem;color:#333;">${escapeHtmlW(m.name)}</div>`).join('');
+  dd.style.display = 'block';
+  dd.querySelectorAll('.widget-mention-item').forEach(item => {
+    item.addEventListener('mouseenter', () => item.style.background = '#fdf3f0');
+    item.addEventListener('mouseleave', () => item.style.background = 'white');
+    item.addEventListener('click', () => insertWidgetMention(item.dataset.uid, item.dataset.name, atIndex, input));
+  });
+}
+
+function handleWidgetMentionTrigger(input) {
+  const val = input.value;
+  const cursor = input.selectionStart;
+  const uptoCursor = val.slice(0, cursor);
+  const atIndex = uptoCursor.lastIndexOf('@');
+  if (atIndex === -1) { hideWidgetMentionDropdown(); return; }
+  const textAfterAt = uptoCursor.slice(atIndex + 1);
+  if (/\s/.test(textAfterAt) || textAfterAt.length > 30) { hideWidgetMentionDropdown(); return; }
+  const charBefore = atIndex > 0 ? uptoCursor[atIndex - 1] : ' ';
+  if (!/\s/.test(charBefore) && atIndex !== 0) { hideWidgetMentionDropdown(); return; }
+  showWidgetMentionDropdown(textAfterAt, atIndex, input);
+}
+
+async function notifyWidgetMention(uid, text, channelName) {
+  try {
+    const fn = httpsCallable(functions, 'sendMentionNotification');
+    await fn({
+      targetUid: uid,
+      title: (currentProfile?.displayName || 'Someone') + ' mentioned you in #' + channelName,
+      body: text.slice(0, 120),
+      url: '/chat'
+    });
+  } catch (err) {
+    console.error('notifyWidgetMention error:', err);
+  }
+}
+
 function subscribeToChannel(channel) {
   currentChannel = channel;
   localStorage.setItem('chat_widget_channel', channel.id);
@@ -239,6 +357,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   await loadChannels();
+  await loadAllMembersW();
   const memberRoles = [currentProfile.role, ...(currentProfile.roles || []), ...(currentProfile.teams || [])].filter(Boolean);
   const readable = CHANNELS.filter(c => {
     const readRoles = c.readRoles || [];
