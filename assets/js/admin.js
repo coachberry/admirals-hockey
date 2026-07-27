@@ -1309,6 +1309,15 @@ document.getElementById('addNewsBtn').addEventListener('click', () => {
   document.getElementById('newsForm').style.display = 'block';
 });
 document.getElementById('cancelNewsBtn').addEventListener('click', () => document.getElementById('newsForm').style.display = 'none');
+
+const newsSendNotifCb = document.getElementById('newsSendNotif');
+if (newsSendNotifCb) {
+  buildNotifRoleCheckboxes('newsNotifRoles');
+  newsSendNotifCb.addEventListener('change', function() {
+    document.getElementById('newsNotifRoles').style.display = this.checked ? 'flex' : 'none';
+  });
+}
+
 document.getElementById('saveNewsBtn').addEventListener('click', async () => {
   const id = document.getElementById('newsId').value || Date.now().toString();
   // Handle news image upload
@@ -1356,6 +1365,15 @@ document.getElementById('saveNewsBtn').addEventListener('click', async () => {
   });
   const status = document.getElementById('newsSaveStatus');
   if (status) { status.textContent = '✅ Saved!'; status.style.color = 'green'; }
+
+  if (document.getElementById('newsSendNotif')?.checked) {
+    const notifRoles = Array.from(document.querySelectorAll('#newsNotifRoles .notifRoleCb:checked')).map(c => c.value);
+    if (notifRoles.length) {
+      const titleText = document.getElementById('newsTitle').value || 'New Post';
+      sendRoleNotifications(notifRoles, 'News: ' + titleText, summary || 'Check out the latest news.', '/news');
+    }
+  }
+
   setTimeout(() => {
     document.getElementById('newsForm').style.display = 'none';
     loadNews();

@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=167">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=168">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=167">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=167">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=168">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=168">
 </head>
 <body>
 
@@ -293,6 +293,13 @@
             <input type="number" id="newsHomeOrder" min="1" max="4" placeholder="1-4" style="width:60px;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:0.85rem;">
             <span style="font-size:0.8rem;color:#999;margin-left:0.5rem;">(1 = first story shown)</span>
           </div>
+        </div>
+
+        <div class="form-label-group" style="margin-top:0.75rem;">
+          <label style="display:flex;align-items:center;gap:0.4rem;">
+            <input type="checkbox" id="newsSendNotif"> Send Notification?
+          </label>
+          <div id="newsNotifRoles" style="display:none;flex-wrap:wrap;gap:0.5rem;margin-top:0.6rem;"></div>
         </div>
 
         <div class="form-buttons">
@@ -1275,10 +1282,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=167"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=167"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=167"></script>
-<script type="module" src="/assets/js/game-stats.js?v=167"></script>
+<script type="module" src="/assets/js/admin.js?v=168"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=168"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=168"></script>
+<script type="module" src="/assets/js/game-stats.js?v=168"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
