@@ -1020,6 +1020,13 @@ function createGameModal() {
           </div>
         </div>
 
+        <div class="form-label-group" style="margin-top:0.75rem;">
+          <label style="display:flex;align-items:center;gap:0.4rem;">
+            <input type="checkbox" id="gameSendNotif"> Send Notification?
+          </label>
+          <div id="gameNotifRoles" style="display:none;flex-wrap:wrap;gap:0.5rem;margin-top:0.6rem;"></div>
+        </div>
+
         <div class="form-buttons">
           <button id="saveGameBtn" class="btn-primary">Save Game</button>
           <button id="cancelGameBtn" class="btn-secondary">Cancel</button>
@@ -1066,6 +1073,14 @@ function createGameModal() {
     const rink = savedRinks.find(r => r.name === name);
     if (rink) document.getElementById('gameRinkAddress').value = rink.address;
   });
+
+  const gameSendNotifCb = document.getElementById('gameSendNotif');
+  if (gameSendNotifCb) {
+    buildNotifRoleCheckboxes('gameNotifRoles');
+    gameSendNotifCb.addEventListener('change', function() {
+      document.getElementById('gameNotifRoles').style.display = this.checked ? 'flex' : 'none';
+    });
+  }
 
   document.getElementById('saveGameBtn').addEventListener('click', async () => {
     const seasonId = document.getElementById('scheduleSeasonSelect').value;
@@ -1128,6 +1143,16 @@ function createGameModal() {
 
     status.textContent = '✅ Saved!';
     status.style.color = 'green';
+
+    if (document.getElementById('gameSendNotif')?.checked) {
+      const notifRoles = Array.from(document.querySelectorAll('#gameNotifRoles .notifRoleCb:checked')).map(c => c.value);
+      if (notifRoles.length) {
+        const oppText = game.opponent ? ('vs ' + game.opponent) : 'New Game Added';
+        const bodyText = (game.date || '') + (game.rinkName ? (' at ' + game.rinkName) : '');
+        sendRoleNotifications(notifRoles, oppText, bodyText || 'Check the schedule for details.', '/schedule');
+      }
+    }
+
     setTimeout(() => {
       document.getElementById('gameModal').classList.remove('active');
       loadScheduleGames(seasonId);
