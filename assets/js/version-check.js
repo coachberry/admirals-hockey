@@ -27,14 +27,20 @@
   }
 
   function finishUpdate() {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function(regs) {
-        Promise.all(regs.map(function(r) { return r.update(); }))
-          .finally(function() { window.location.reload(true); });
-      }).catch(function() { window.location.reload(true); });
-    } else {
-      window.location.reload(true);
-    }
+    fetch('/version.json?t=' + Date.now(), { cache: 'no-store' })
+      .then(function(r) { return r.json(); })
+      .then(function(data) { localStorage.setItem('admirals_app_version', data.version); })
+      .catch(function() {})
+      .finally(function() {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(regs) {
+            Promise.all(regs.map(function(r) { return r.update(); }))
+              .finally(function() { window.location.reload(); });
+          }).catch(function() { window.location.reload(); });
+        } else {
+          window.location.reload();
+        }
+      });
   }
 
   function checkVersion() {
@@ -43,12 +49,12 @@
       .then(function(data) {
         var latest = data.version;
         var stored = localStorage.getItem('admirals_app_version');
-        if (stored && parseInt(stored) < parseInt(latest)) {
-          showUpdateBanner();
-        }
-        localStorage.setItem('admirals_app_version_latest', latest);
         if (!stored) {
           localStorage.setItem('admirals_app_version', latest);
+          return;
+        }
+        if (parseInt(stored) < parseInt(latest)) {
+          showUpdateBanner();
         }
       })
       .catch(function() {});
