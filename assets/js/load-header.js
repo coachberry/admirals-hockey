@@ -46,6 +46,13 @@
   document.body.appendChild(navScript);
 })();
 
+// Load version checker for PWA update prompts
+(function() {
+  var script = document.createElement('script');
+  script.src = '/assets/js/version-check.js';
+  document.head.appendChild(script);
+})();
+
 // Register service worker for PWA install capability
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

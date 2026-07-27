@@ -30,4 +30,9 @@ for f in files:
         print(f"  updated: {f}")
 
 print(f"Done. {replaced} files updated to v={new_v}")
+
+# Write version.json for PWA update detection
+with open('version.json', 'w') as vf:
+    vf.write('{"version": ' + str(new_v) + '}')
+print(f"version.json updated to {new_v}")
 PYEOF
