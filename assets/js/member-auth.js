@@ -3,6 +3,7 @@
 // ============================================
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { initPushNotifications } from "/assets/js/push-notifications.js?v=1";
+import { initNotificationCenter } from "/assets/js/notifications.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -215,6 +216,9 @@ onAuthStateChanged(auth, async (user) => {
 
     // Set up push notifications (non-blocking)
     initPushNotifications(app, user).catch(() => {});
+
+    // Set up in-app notification center
+    try { initNotificationCenter(app, user.uid); } catch(e) {}
 
     if (loginBtn) {
       loginBtn.textContent = 'My Profile';
