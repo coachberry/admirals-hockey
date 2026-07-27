@@ -78,6 +78,34 @@ exports.sendManualNotification = onCall(async (request) => {
 });
 
 // ============================================
+// Chat @mention push + in-app notification (any authenticated member)
+// ============================================
+exports.sendMentionNotification = onCall(async (request) => {
+  const { targetUid, title, body, url } = request.data;
+  const auth = request.auth;
+
+  if (!auth) throw new HttpsError("unauthenticated", "Must be logged in");
+  if (!targetUid || !title || !body) {
+    throw new HttpsError("invalid-argument", "targetUid, title, and body required");
+  }
+  if (targetUid === auth.uid) return { sent: 0, failed: 0 }; // don't notify yourself
+
+  const targetSnap = await db.collection("members").doc(targetUid).get();
+  if (!targetSnap.exists) throw new HttpsError("not-found", "Target member not found");
+
+  // Write in-app notification
+  const nid = Date.now().toString() + Math.random().toString(36).slice(2, 8);
+  await db.collection("members").doc(targetUid).collection("notifications").doc(nid).set({
+    title, body, url: url || "/", read: false, timestamp: Date.now()
+  });
+
+  // Send push
+  const result = await sendPushToMembers([targetUid], title, body, url);
+  logger.info("Mention notification sent", { targetUid, ...result });
+  return result;
+});
+
+// ============================================
 // Scheduled RSVP reminder check (daily at 9am Central)
 // ============================================
 exports.rsvpReminderCheck = onSchedule(
