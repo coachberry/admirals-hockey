@@ -647,6 +647,10 @@ footer {
     display: none !important;
   }
 
+  #notifBellWrap {
+    display: block !important;
+  }
+
   /* Mobile auth buttons inside dropdown */
   .mobile-auth-buttons {
     display: flex !important;
