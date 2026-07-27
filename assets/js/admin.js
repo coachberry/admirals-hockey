@@ -1,6 +1,6 @@
 import { showFramer } from '/assets/js/image-framer.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, getDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, getDoc, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js";
 
@@ -23,25 +23,90 @@ const functions = getFunctions(app);
 // ============================================
 // SHARED: send in-app + push notifications to members with matching roles
 // ============================================
+async function computeRoleRecipients(targetRoles) {
+  if (!targetRoles || !targetRoles.length) return [];
+  const membersSnap = await getDocs(collection(db, 'members'));
+  const recipients = [];
+  membersSnap.forEach(d => {
+    const m = d.data();
+    const mRoles = [m.role, ...(m.roles || []), ...(m.teams || [])].filter(Boolean);
+    if (mRoles.some(r => targetRoles.includes(r))) {
+      recipients.push({ uid: d.id, name: m.displayName || m.email || 'Member' });
+    }
+  });
+  return recipients;
+}
+
+async function logNotification(title, body, url, targetRoles, recipients) {
+  try {
+    const id = Date.now().toString() + Math.random().toString(36).slice(2, 8);
+    await setDoc(doc(db, 'notificationLog', id), {
+      title, body, url: url || '',
+      targetRoles: targetRoles || [],
+      recipientCount: recipients.length,
+      recipients: recipients.map(r => ({ uid: r.uid, name: r.name })),
+      sentBy: window._firebaseAdminUser || 'admin',
+      sentAt: Date.now()
+    });
+  } catch (err) {
+    console.error('logNotification error:', err);
+  }
+}
+
+async function loadNotificationHistory() {
+  const container = document.getElementById('notifHistoryList');
+  if (!container) return;
+  container.innerHTML = '<div class="empty-state">Loading...</div>';
+  try {
+    const q = query(collection(db, 'notificationLog'), orderBy('sentAt', 'desc'), limit(50));
+    const snap = await getDocs(q);
+    if (snap.empty) {
+      container.innerHTML = '<div class="empty-state">No notifications sent yet</div>';
+      return;
+    }
+    let html = '';
+    snap.forEach(d => {
+      const n = d.data();
+      const dateStr = new Date(n.sentAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+      const roles = (n.targetRoles || []).length ? n.targetRoles.join(', ') : 'All';
+      const recipientNames = (n.recipients || []).map(r => r.name).join(', ') || 'None';
+      html += `
+        <div class="item-card" style="padding:0.75rem 1rem;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;cursor:pointer;" onclick="const d=this.nextElementSibling; d.style.display = d.style.display === 'block' ? 'none' : 'block';">
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;">${n.title || ''}</div>
+              <div style="font-size:0.8rem;color:#666;margin-top:2px;">${n.body || ''}</div>
+              <div style="font-size:0.75rem;color:#999;margin-top:4px;">${dateStr} &bull; Roles: ${roles} &bull; ${n.recipientCount || 0} recipient(s)</div>
+            </div>
+            <span style="color:#5D1725;font-size:0.75rem;white-space:nowrap;flex-shrink:0;">Details &#9662;</span>
+          </div>
+          <div style="display:none;margin-top:0.5rem;padding-top:0.5rem;border-top:1px solid #f0f0f0;font-size:0.8rem;color:#555;">
+            ${recipientNames}
+          </div>
+        </div>`;
+    });
+    container.innerHTML = html;
+  } catch (err) {
+    console.error('loadNotificationHistory error:', err);
+    container.innerHTML = '<div class="empty-state">Could not load history</div>';
+  }
+}
+
 async function sendRoleNotifications(targetRoles, title, body, url) {
   if (!targetRoles || !targetRoles.length) return;
   try {
-    const membersSnap = await getDocs(collection(db, 'members'));
-    const writes = [];
-    membersSnap.forEach(d => {
-      const m = d.data();
-      const mRoles = [m.role, ...(m.roles || []), ...(m.teams || [])].filter(Boolean);
-      if (mRoles.some(r => targetRoles.includes(r))) {
-        const nid = Date.now().toString() + Math.random().toString(36).slice(2, 8);
-        writes.push(setDoc(doc(db, 'members', d.id, 'notifications', nid), {
-          title, body, url: url || '/', read: false, timestamp: Date.now()
-        }));
-      }
+    const recipients = await computeRoleRecipients(targetRoles);
+    const writes = recipients.map(r => {
+      const nid = Date.now().toString() + Math.random().toString(36).slice(2, 8);
+      return setDoc(doc(db, 'members', r.uid, 'notifications', nid), {
+        title, body, url: url || '/', read: false, timestamp: Date.now()
+      });
     });
     await Promise.all(writes);
     // Also trigger push notification via Cloud Function
     const sendFn = httpsCallable(functions, 'sendManualNotification');
     await sendFn({ title, body, url, targetRoles });
+    await logNotification(title, body, url, targetRoles, recipients);
   } catch (err) {
     console.error('sendRoleNotifications error:', err);
   }
@@ -219,13 +284,16 @@ if (sendNotifBtn) {
     sendNotifBtn.disabled = true;
 
     try {
+      const recipients = await computeRoleRecipients(targetRoles);
       const sendFn = httpsCallable(functions, 'sendManualNotification');
       const result = await sendFn({ title, body, url, targetRoles });
+      await logNotification(title, body, url, targetRoles, recipients);
       status.textContent = `✅ Sent to ${result.data.sent} device(s)${result.data.failed ? ', ' + result.data.failed + ' failed' : ''}.`;
       status.style.color = 'green';
       document.getElementById('notifTitle').value = '';
       document.getElementById('notifBody').value = '';
       document.getElementById('notifUrl').value = '';
+      loadNotificationHistory();
     } catch (err) {
       status.textContent = 'Error: ' + err.message;
       status.style.color = '#c62828';
@@ -233,6 +301,8 @@ if (sendNotifBtn) {
     sendNotifBtn.disabled = false;
   });
 }
+
+document.querySelector('[data-tab="notifications"]')?.addEventListener('click', loadNotificationHistory);
 
 
 // ============================================

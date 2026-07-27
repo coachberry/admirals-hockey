@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=172">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=173">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=172">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=172">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=173">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=173">
 </head>
 <body>
 
@@ -616,6 +616,11 @@
         <button id="sendNotifBtn" class="btn-primary">Send Notification</button>
       </div>
       <p id="notifStatus" class="save-status"></p>
+
+      <div style="margin-top:2rem;">
+        <h3 style="font-size:1rem;margin-bottom:0.75rem;">Notification History</h3>
+        <div id="notifHistoryList" class="items-list"><div class="empty-state">Loading...</div></div>
+      </div>
     </div>
 
     <div id="membersTab" class="tab-content">
@@ -1282,10 +1287,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=172"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=172"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=172"></script>
-<script type="module" src="/assets/js/game-stats.js?v=172"></script>
+<script type="module" src="/assets/js/admin.js?v=173"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=173"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=173"></script>
+<script type="module" src="/assets/js/game-stats.js?v=173"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
