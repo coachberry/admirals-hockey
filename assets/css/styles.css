@@ -648,11 +648,9 @@ footer {
   }
 
   #notifBellWrap {
-    display: block !important;
-    position: fixed !important;
-    top: 14px !important;
-    right: 68px !important;
-    z-index: 1001;
+    display: flex !important;
+    align-items: center;
+    margin-right: 0.75rem;
   }
 
   /* Mobile auth buttons inside dropdown */
