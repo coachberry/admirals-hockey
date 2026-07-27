@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=169">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=170">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=169">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=170">
   <title>Team Chat - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=169">
-  <script src="/assets/js/page-guard.js?v=169"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=170">
+  <script src="/assets/js/page-guard.js?v=170"></script>
   <style>
     .chat-layout {
       display: grid;
@@ -347,7 +347,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=169"></script>
+<script src="/assets/js/load-header.js?v=170"></script>
 
 <div class="main-container" style="padding-top:1rem;">
 
@@ -605,8 +605,16 @@
     snap.forEach(d => {
       if (d.id === currentUser?.uid) return;
       const m = d.data();
-      ALL_MEMBERS.push({ uid: d.id, name: m.displayName || m.email || 'Member' });
+      const roles = [m.role, ...(m.roles || []), ...(m.teams || [])].filter(Boolean);
+      ALL_MEMBERS.push({ uid: d.id, name: m.displayName || m.email || 'Member', roles });
     });
+  }
+
+  function channelMentionCandidates(channel) {
+    if (!channel) return [];
+    const readRoles = channel.readRoles || [];
+    if (!readRoles.length) return ALL_MEMBERS; // no restriction = everyone
+    return ALL_MEMBERS.filter(m => m.roles.some(r => readRoles.includes(r)));
   }
 
   function hideMentionDropdown() {
@@ -629,7 +637,8 @@
   }
 
   function showMentionDropdown(partial, atIndex, input) {
-    const matches = ALL_MEMBERS.filter(m => m.name.toLowerCase().startsWith(partial.toLowerCase())).slice(0, 6);
+    const candidates = channelMentionCandidates(currentChannel);
+    const matches = candidates.filter(m => m.name.toLowerCase().startsWith(partial.toLowerCase())).slice(0, 6);
     const dd = document.getElementById('mentionDropdown');
     if (!dd || !matches.length) { hideMentionDropdown(); return; }
     dd.innerHTML = matches.map(m => `<div class="mention-item" data-uid="${m.uid}" data-name="${escapeHtml(m.name)}">${escapeHtml(m.name)}</div>`).join('');
@@ -771,6 +780,6 @@ document.addEventListener('click', e => {
 });
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=169"></script>
+<script type="module" src="/assets/js/member-auth.js?v=170"></script>
 </body>
 </html>
