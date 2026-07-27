@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=159">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=160">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=159">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=159">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=160">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=160">
 </head>
 <body>
 
@@ -1017,6 +1017,12 @@
         <label class="field-label">Invite Roles (who can RSVP)</label>
         <div id="teamEventRoles" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.25rem;"></div>
       </div>
+      <div class="form-label-group" style="background:#f8f4f0;border:1px solid #e8d5c0;border-radius:8px;padding:0.85rem;">
+        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-weight:600;color:#5D1725;font-size:0.9rem;">
+          <input type="checkbox" id="teamEventSendNotif"> Send Notification?
+        </label>
+        <div id="teamEventNotifRoles" style="display:none;flex-wrap:wrap;gap:0.5rem;margin-top:0.6rem;"></div>
+      </div>
       <div class="form-buttons">
         <button id="saveTeamEventBtn" class="btn-primary">Save Event</button>
         <button id="cancelTeamEventBtn" class="btn-secondary">Cancel</button>
@@ -1269,10 +1275,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=159"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=159"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=159"></script>
-<script type="module" src="/assets/js/game-stats.js?v=159"></script>
+<script type="module" src="/assets/js/admin.js?v=160"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=160"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=160"></script>
+<script type="module" src="/assets/js/game-stats.js?v=160"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";

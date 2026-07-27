@@ -21,6 +21,44 @@ const storage = getStorage(app);
 const functions = getFunctions(app);
 
 // ============================================
+// SHARED: send in-app + push notifications to members with matching roles
+// ============================================
+async function sendRoleNotifications(targetRoles, title, body, url) {
+  if (!targetRoles || !targetRoles.length) return;
+  try {
+    const membersSnap = await getDocs(collection(db, 'members'));
+    const writes = [];
+    membersSnap.forEach(d => {
+      const m = d.data();
+      const mRoles = [m.role, ...(m.roles || []), ...(m.teams || [])].filter(Boolean);
+      if (mRoles.some(r => targetRoles.includes(r))) {
+        const nid = Date.now().toString() + Math.random().toString(36).slice(2, 8);
+        writes.push(setDoc(doc(db, 'members', d.id, 'notifications', nid), {
+          title, body, url: url || '/', read: false, timestamp: Date.now()
+        }));
+      }
+    });
+    await Promise.all(writes);
+    // Also trigger push notification via Cloud Function
+    const sendFn = httpsCallable(functions, 'sendManualNotification');
+    await sendFn({ title, body, url, targetRoles });
+  } catch (err) {
+    console.error('sendRoleNotifications error:', err);
+  }
+}
+
+function buildNotifRoleCheckboxes(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const roles = [
+    { id: 'player', label: 'Player' }, { id: 'varsity', label: 'Varsity' }, { id: 'jv', label: 'JV' },
+    { id: 'coach', label: 'Coach' }, { id: 'rep', label: 'Team Rep' }, { id: 'alumni', label: 'Alumni' },
+    { id: 'prospect', label: 'Prospect' }, { id: 'member', label: 'Member' },
+  ];
+  container.innerHTML = roles.map(r => `<label style="font-size:0.8rem;display:flex;align-items:center;gap:0.3rem;"><input type="checkbox" class="notifRoleCb" value="${r.id}"> ${r.label}</label>`).join('');
+}
+
+// ============================================
 // MASTER PAGE LIST — single source of truth
 // Add a new page here ONCE and it will automatically appear in:
 // Pages visibility, Footer Quick Links, and Page Hero settings.
@@ -3545,6 +3583,14 @@ window.deleteTeamEvent = async (id) => {
 
 document.getElementById('addTeamEventBtn').addEventListener('click', () => openTeamEventModal());
 
+const teamEventSendNotifCb = document.getElementById('teamEventSendNotif');
+if (teamEventSendNotifCb) {
+  buildNotifRoleCheckboxes('teamEventNotifRoles');
+  teamEventSendNotifCb.addEventListener('change', function() {
+    document.getElementById('teamEventNotifRoles').style.display = this.checked ? 'flex' : 'none';
+  });
+}
+
 document.getElementById('saveTeamEventBtn').addEventListener('click', async () => {
   const name = document.getElementById('teamEventName').value.trim();
   if (!name) { alert('Please enter an event name'); return; }
@@ -3562,6 +3608,14 @@ document.getElementById('saveTeamEventBtn').addEventListener('click', async () =
     updatedAt: new Date().toISOString()
   }, { merge: true });
   document.getElementById('teamEventStatus').textContent = '✅ Saved!';
+
+  if (document.getElementById('teamEventSendNotif')?.checked) {
+    const notifRoles = Array.from(document.querySelectorAll('#teamEventNotifRoles .notifRoleCb:checked')).map(c => c.value);
+    if (notifRoles.length) {
+      sendRoleNotifications(notifRoles, 'New Event: ' + name, document.getElementById('teamEventLocation').value.trim() || 'Check the events page for details.', '/events');
+    }
+  }
+
   setTimeout(() => teamEventModal.classList.remove('active'), 800);
   loadTeamEventsAdmin();
 });
