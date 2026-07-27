@@ -650,8 +650,8 @@ footer {
   #notifBellWrap {
     display: block !important;
     position: fixed !important;
-    top: 12px !important;
-    right: 60px !important;
+    top: 14px !important;
+    right: 68px !important;
     z-index: 1001;
   }
 
