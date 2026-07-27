@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=168">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=169">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=168">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=169">
   <title>Team Chat - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=168">
-  <script src="/assets/js/page-guard.js?v=168"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=169">
+  <script src="/assets/js/page-guard.js?v=169"></script>
   <style>
     .chat-layout {
       display: grid;
@@ -217,6 +217,33 @@
       padding: 0.75rem 1.25rem;
       border-top: 1px solid #f0f0f0;
       flex-shrink: 0;
+      position: relative;
+    }
+
+    .mention-dropdown {
+      position: absolute;
+      bottom: 100%;
+      left: 1.25rem;
+      right: 1.25rem;
+      margin-bottom: 4px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.12);
+      max-height: 180px;
+      overflow-y: auto;
+      z-index: 50;
+    }
+
+    .mention-item {
+      padding: 0.55rem 0.9rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: #333;
+    }
+
+    .mention-item:hover {
+      background: #fdf3f0;
     }
 
     .chat-input-row {
@@ -320,7 +347,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=168"></script>
+<script src="/assets/js/load-header.js?v=169"></script>
 
 <div class="main-container" style="padding-top:1rem;">
 
@@ -356,6 +383,7 @@
           <div class="no-access-msg">Select a channel</div>
         </div>
         <div class="chat-input-area" id="chatInputArea" style="display:none;">
+          <div class="mention-dropdown" id="mentionDropdown" style="display:none;"></div>
           <div class="chat-input-row">
             <textarea class="chat-input" id="chatInput" placeholder="Message #general..." rows="1"></textarea>
             <button class="chat-send-btn" id="chatSendBtn">Send</button>
@@ -399,6 +427,7 @@
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, collection, addDoc, getDocs, getDoc, doc, deleteDoc, onSnapshot, query, orderBy, limit, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js";
 
   const app = getApps().length ? getApps()[0] : initializeApp({
     apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
@@ -410,8 +439,11 @@
   });
   const auth = getAuth(app);
   const db = getFirestore(app);
+  const functions = getFunctions(app);
 
   let CHANNELS = [];
+  let ALL_MEMBERS = [];
+  let pendingMentions = [];
 
   async function loadChannels() {
     const snap = await getDocs(collection(db, 'chatChannels'));
@@ -567,6 +599,73 @@
     return (text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
   }
 
+  async function loadAllMembers() {
+    const snap = await getDocs(collection(db, 'members'));
+    ALL_MEMBERS = [];
+    snap.forEach(d => {
+      if (d.id === currentUser?.uid) return;
+      const m = d.data();
+      ALL_MEMBERS.push({ uid: d.id, name: m.displayName || m.email || 'Member' });
+    });
+  }
+
+  function hideMentionDropdown() {
+    const dd = document.getElementById('mentionDropdown');
+    if (dd) dd.style.display = 'none';
+  }
+
+  function insertMention(uid, name, atIndex, input) {
+    const val = input.value;
+    const cursor = input.selectionStart;
+    const before = val.slice(0, atIndex);
+    const after = val.slice(cursor);
+    const newVal = before + '@' + name + ' ' + after;
+    input.value = newVal;
+    const newCursor = (before + '@' + name + ' ').length;
+    input.setSelectionRange(newCursor, newCursor);
+    input.focus();
+    pendingMentions.push({ uid, name });
+    hideMentionDropdown();
+  }
+
+  function showMentionDropdown(partial, atIndex, input) {
+    const matches = ALL_MEMBERS.filter(m => m.name.toLowerCase().startsWith(partial.toLowerCase())).slice(0, 6);
+    const dd = document.getElementById('mentionDropdown');
+    if (!dd || !matches.length) { hideMentionDropdown(); return; }
+    dd.innerHTML = matches.map(m => `<div class="mention-item" data-uid="${m.uid}" data-name="${escapeHtml(m.name)}">${escapeHtml(m.name)}</div>`).join('');
+    dd.style.display = 'block';
+    dd.querySelectorAll('.mention-item').forEach(item => {
+      item.addEventListener('click', () => insertMention(item.dataset.uid, item.dataset.name, atIndex, input));
+    });
+  }
+
+  function handleMentionTrigger(input) {
+    const val = input.value;
+    const cursor = input.selectionStart;
+    const uptoCursor = val.slice(0, cursor);
+    const atIndex = uptoCursor.lastIndexOf('@');
+    if (atIndex === -1) { hideMentionDropdown(); return; }
+    const textAfterAt = uptoCursor.slice(atIndex + 1);
+    if (/\s/.test(textAfterAt) || textAfterAt.length > 30) { hideMentionDropdown(); return; }
+    const charBefore = atIndex > 0 ? uptoCursor[atIndex - 1] : ' ';
+    if (!/\s/.test(charBefore) && atIndex !== 0) { hideMentionDropdown(); return; }
+    showMentionDropdown(textAfterAt, atIndex, input);
+  }
+
+  async function notifyMention(uid, text, channelName) {
+    try {
+      const fn = httpsCallable(functions, 'sendMentionNotification');
+      await fn({
+        targetUid: uid,
+        title: (currentProfile?.displayName || 'Someone') + ' mentioned you in #' + channelName,
+        body: text.slice(0, 120),
+        url: '/chat'
+      });
+    } catch (err) {
+      console.error('notifyMention error:', err);
+    }
+  }
+
   async function sendMessage() {
     const input = document.getElementById('chatInput');
     const text = input.value.trim();
@@ -582,6 +681,14 @@
       text,
       timestamp: serverTimestamp()
     });
+
+    const mentionedUids = new Set();
+    pendingMentions.forEach(pm => {
+      if (text.includes('@' + pm.name)) mentionedUids.add(pm.uid);
+    });
+    mentionedUids.forEach(uid => notifyMention(uid, text, currentChannel.name || 'general'));
+    pendingMentions = [];
+    hideMentionDropdown();
   }
 
   window.deleteMessage = async function(channelId, msgId) {
@@ -592,13 +699,29 @@
   // Send on button click or Enter
   document.getElementById('chatSendBtn').addEventListener('click', sendMessage);
   document.getElementById('chatInput').addEventListener('keydown', e => {
+    const dd = document.getElementById('mentionDropdown');
+    if (dd && dd.style.display === 'block') {
+      if (e.key === 'Escape') { dd.style.display = 'none'; return; }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const first = dd.querySelector('.mention-item');
+        if (first) first.click();
+        return;
+      }
+    }
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+
+  document.addEventListener('click', (e) => {
+    const dd = document.getElementById('mentionDropdown');
+    if (dd && !dd.contains(e.target) && e.target.id !== 'chatInput') dd.style.display = 'none';
   });
 
   // Auto-resize textarea
   document.getElementById('chatInput').addEventListener('input', function() {
     this.style.height = 'auto';
     this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    handleMentionTrigger(this);
   });
 
   onAuthStateChanged(auth, async (user) => {
@@ -626,6 +749,7 @@
     document.getElementById('chatUserLabel').textContent = currentProfile.displayName || user.email;
 
     await loadChannels();
+    await loadAllMembers();
     buildChannelList();
   });
 
@@ -647,6 +771,6 @@ document.addEventListener('click', e => {
 });
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=168"></script>
+<script type="module" src="/assets/js/member-auth.js?v=169"></script>
 </body>
 </html>
