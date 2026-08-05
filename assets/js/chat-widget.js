@@ -62,10 +62,16 @@ function injectWidget() {
         display:flex;align-items:center;justify-content:space-between;">
         <div style="min-width:0;flex:1;">
           <div style="color:white;font-weight:700;font-size:0.95rem;">⚓ Team Chat</div>
-          <select id="widgetChannelSelect" style="
-            margin-top:2px;background:transparent;color:rgba(255,255,255,0.85);
-            font-size:0.75rem;border:none;outline:none;cursor:pointer;max-width:100%;">
-          </select>
+          <div style="position:relative;display:inline-block;margin-top:4px;max-width:100%;">
+            <select id="widgetChannelSelect" style="
+              background:rgba(255,255,255,0.18);color:white;font-weight:600;
+              font-size:0.75rem;border:none;outline:none;cursor:pointer;max-width:100%;
+              padding:3px 20px 3px 8px;border-radius:10px;appearance:none;-webkit-appearance:none;-moz-appearance:none;">
+            </select>
+            <span id="widgetChannelChevron" style="position:absolute;right:7px;top:50%;
+              transform:translateY(-50%);color:rgba(255,255,255,0.9);font-size:0.6rem;
+              pointer-events:none;display:none;">▾</span>
+          </div>
         </div>
         <div style="display:flex;gap:0.5rem;align-items:center;flex-shrink:0;">
           <a href="/chat" style="color:rgba(255,255,255,0.8);font-size:0.75rem;text-decoration:none;
@@ -374,9 +380,11 @@ onAuthStateChanged(auth, async (user) => {
 
   // Populate channel dropdown
   const select = document.getElementById('widgetChannelSelect');
+  const chevron = document.getElementById('widgetChannelChevron');
   if (select) {
     select.innerHTML = readable.map(c => `<option value="${c.id}">${c.icon ? c.icon + ' ' : ''}${c.name}</option>`).join('');
-    select.style.display = readable.length > 1 ? 'block' : (readable.length === 1 ? 'block' : 'none');
+    select.style.display = readable.length ? 'inline-block' : 'none';
+    if (chevron) chevron.style.display = readable.length > 1 ? 'inline' : 'none';
   }
 
   // Restore previously selected channel if still readable, else default to first
