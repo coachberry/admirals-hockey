@@ -1322,7 +1322,7 @@ async function loadScheduleGames(seasonId) {
       </div>
       <div style="display:flex;gap:0.5rem;">
         <button class="btn-stats" onclick="openGameStats('${g.id}', '${seasonIdForStats}')">Stats</button>
-        <button class="btn-edit" onclick="viewScheduleGameRsvp('${g.id}','${currentSeasonId}')">📋 RSVPs</button>
+        <button class="btn-edit" onclick="viewScheduleGameRsvp('${g.id}','${seasonIdForStats}')">📋 RSVPs</button>
         <button class="btn-edit" onclick="editGame('${g.id}')">Edit</button>
         <button class="btn-delete" onclick="deleteGame('${g.id}')">Delete</button>
       </div>
