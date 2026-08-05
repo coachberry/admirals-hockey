@@ -2,22 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=173">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=174">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=173">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=174">
   <title>Schedule - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=173">
-  <link rel="stylesheet" href="/assets/css/schedule-styles.css?v=173">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=173">
-  <script src="/assets/js/page-guard.js?v=173"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=174">
+  <link rel="stylesheet" href="/assets/css/schedule-styles.css?v=174">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=174">
+  <script src="/assets/js/page-guard.js?v=174"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=173" defer></script>
-<script src="/assets/js/load-header.js?v=173"></script>
+<script src="/assets/js/load-hero.js?v=174" defer></script>
+<script src="/assets/js/load-header.js?v=174"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -124,7 +124,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=173"></script>
+<script src="/assets/js/load-footer.js?v=174"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -348,6 +348,25 @@
   }
 
   function buildGameRow(game, seasonId) {
+    if (game.gameType === 'Practice') {
+      const row = document.createElement('div');
+      row.className = 'game-row game-upcoming';
+      row.innerHTML = `
+        <div class="game-row-date">
+          <div class="game-row-datestr">${formatDate(game.date)}</div>
+          <div class="game-row-time">${formatTime(game.time, game.timezone)}</div>
+        </div>
+        <div class="game-row-main">
+          <div class="game-row-type">Practice</div>
+          <div class="game-row-matchup">
+            <span class="game-row-opponent" style="font-style:italic;color:#666;">${game.notes || 'Team Practice'}</span>
+          </div>
+          <div class="game-row-rink">${game.rinkName}${game.rinkAddress ? ' · '+game.rinkAddress : ''}</div>
+        </div>
+        <div class="game-row-result"></div>
+      `;
+      return row;
+    }
     const homeAway = game.homeAway === 'Home' ? 'vs.' : '@';
     const typeLabel = gameTypeLabel(game);
     const hasResult = game.result && game.teamScore !== undefined && game.opponentScore !== undefined;
@@ -420,7 +439,7 @@
     document.getElementById('seasonStatsBar').style.display = 'flex';
 
     const today = new Date(); today.setHours(0,0,0,0);
-    const nextGame = games.find(g => !g.result && new Date(g.date+'T12:00:00') >= today);
+    const nextGame = games.find(g => g.gameType !== 'Practice' && !g.result && new Date(g.date+'T12:00:00') >= today);
     const gamesWithResult = games.filter(g => g.result);
     const lastGame = gamesWithResult.length ? gamesWithResult[gamesWithResult.length-1] : null;
 
@@ -597,7 +616,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=173"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=173"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=174"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=174"></script>
 </body>
 </html>

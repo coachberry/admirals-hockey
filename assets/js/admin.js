@@ -944,6 +944,7 @@ function showGameModal(data = null) {
     document.getElementById('gameTeamScore').value = data.teamScore ?? '';
     document.getElementById('gameOpponentScore').value = data.opponentScore ?? '';
     document.getElementById('scoreFields').style.display = data.result ? 'grid' : 'none';
+    document.getElementById('gamePracticeNotes').value = data.notes || '';
     window._editingGameLogo = data?.opponentLogo || '';
   if (data.opponentLogo) {
       document.getElementById('gameOpponentLogoPreview').innerHTML = `<img src="${data.opponentLogo}" style="height:50px;object-fit:contain;">`;
@@ -952,7 +953,7 @@ function showGameModal(data = null) {
   } else {
     ['gameDate','gameTime','gameTimezone','gameGameType','gameLeagueName','gameTournamentName',
      'gameSubtype','gameOpponent','gameHomeAway','gameRinkName','gameRinkAddress','gameResult',
-     'gameTeamScore','gameOpponentScore'].forEach(id => {
+     'gameTeamScore','gameOpponentScore','gamePracticeNotes'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
@@ -998,6 +999,7 @@ function createGameModal() {
               <option value="Exhibition">Exhibition</option>
               <option value="League">League</option>
               <option value="Tournament">Tournament</option>
+              <option value="Practice">Practice</option>
             </select>
           </div>
           <div class="form-label-group">
@@ -1026,7 +1028,7 @@ function createGameModal() {
           </div>
         </div>
 
-        <div class="form-row">
+        <div class="form-row" id="opponentRow">
           <div class="form-label-group">
             <label class="field-label">Opponent</label>
             <input type="text" id="gameOpponent" placeholder="Opponent Name">
@@ -1041,7 +1043,7 @@ function createGameModal() {
           </div>
         </div>
 
-        <div class="photo-upload-section" style="margin-bottom:0.75rem;">
+        <div class="photo-upload-section" id="opponentLogoSection" style="margin-bottom:0.75rem;">
           <label class="field-label">Opponent Logo (optional)</label>
           <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.4rem;">
             <div id="gameOpponentLogoPreview" class="opp-logo-admin-preview"></div>
@@ -1051,6 +1053,11 @@ function createGameModal() {
             </label>
             <button type="button" id="removeOpponentLogo" class="btn-delete photo-btn" style="font-size:0.8rem;display:none;">Remove</button>
           </div>
+        </div>
+
+        <div class="form-label-group" id="practiceNotesField" style="display:none;">
+          <label class="field-label">Practice Notes (optional)</label>
+          <textarea id="gamePracticeNotes" rows="2" placeholder="e.g. Full ice, focus on breakouts"></textarea>
         </div>
 
         <div class="form-row">
@@ -1066,7 +1073,7 @@ function createGameModal() {
           </div>
         </div>
 
-        <div class="form-label-group" style="margin-top:1rem;">
+        <div class="form-label-group" id="resultSection" style="margin-top:1rem;">
           <label class="field-label" style="color:#5D1725;">Result</label>
           <select id="gameResult">
             <option value="">No Result Yet</option>
@@ -1177,23 +1184,26 @@ function createGameModal() {
       } catch(e) { console.error('Logo upload failed:', e); }
     }
 
+    const isPractice = gameType === 'Practice';
+
     const game = {
       id,
       date: document.getElementById('gameDate').value,
       time: document.getElementById('gameTime').value,
       timezone: document.getElementById('gameTimezone').value,
       gameType,
-      subtype: document.getElementById('gameSubtype').value,
+      subtype: isPractice ? '' : document.getElementById('gameSubtype').value,
       leagueName: gameType === 'League' ? leagueName : '',
       tournamentName: gameType === 'Tournament' ? tournamentName : '',
-      opponent: document.getElementById('gameOpponent').value,
-      homeAway: document.getElementById('gameHomeAway').value,
+      opponent: isPractice ? '' : document.getElementById('gameOpponent').value,
+      homeAway: isPractice ? '' : document.getElementById('gameHomeAway').value,
       rinkName,
       rinkAddress,
-      opponentLogo,
-      result,
-      teamScore: result ? parseInt(document.getElementById('gameTeamScore').value) || 0 : null,
-      opponentScore: result ? parseInt(document.getElementById('gameOpponentScore').value) || 0 : null,
+      opponentLogo: isPractice ? '' : opponentLogo,
+      result: isPractice ? '' : result,
+      teamScore: isPractice ? null : (result ? parseInt(document.getElementById('gameTeamScore').value) || 0 : null),
+      opponentScore: isPractice ? null : (result ? parseInt(document.getElementById('gameOpponentScore').value) || 0 : null),
+      notes: isPractice ? document.getElementById('gamePracticeNotes').value.trim() : '',
     };
 
     await setDoc(doc(db, 'seasons', seasonId, 'schedule', id), game);
@@ -1232,12 +1242,24 @@ function createGameModal() {
 
 function toggleGameTypeFields() {
   const type = document.getElementById('gameGameType')?.value;
+  const isPractice = type === 'Practice';
   const leagueField = document.getElementById('leagueField');
   const tournamentField = document.getElementById('tournamentField');
   const subtypeField = document.getElementById('gameSubtype')?.parentElement;
-  if (leagueField) leagueField.style.display = type === 'League' ? 'block' : 'none';
-  if (tournamentField) tournamentField.style.display = type === 'Tournament' ? 'block' : 'none';
-  if (subtypeField) subtypeField.style.display = type === 'Exhibition' ? 'none' : 'block';
+  if (leagueField) leagueField.style.display = (!isPractice && type === 'League') ? 'block' : 'none';
+  if (tournamentField) tournamentField.style.display = (!isPractice && type === 'Tournament') ? 'block' : 'none';
+  if (subtypeField) subtypeField.style.display = (!isPractice && type !== 'Exhibition') ? 'block' : 'none';
+
+  const opponentRow = document.getElementById('opponentRow');
+  const opponentLogoSection = document.getElementById('opponentLogoSection');
+  const resultSection = document.getElementById('resultSection');
+  const scoreFields = document.getElementById('scoreFields');
+  const practiceNotesField = document.getElementById('practiceNotesField');
+  if (opponentRow) opponentRow.style.display = isPractice ? 'none' : 'flex';
+  if (opponentLogoSection) opponentLogoSection.style.display = isPractice ? 'none' : 'block';
+  if (resultSection) resultSection.style.display = isPractice ? 'none' : 'block';
+  if (scoreFields && isPractice) scoreFields.style.display = 'none';
+  if (practiceNotesField) practiceNotesField.style.display = isPractice ? 'block' : 'none';
 }
 
 async function loadSavedOptions() {
