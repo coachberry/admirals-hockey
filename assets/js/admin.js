@@ -2810,23 +2810,35 @@ window.viewScheduleGameRsvp = async function(gameId, seasonId) {
   const rsvps = {};
   rsvpSnap.forEach(d => { rsvps[d.id] = d.data(); });
 
-  // Load linked varsity roster players
+  // Load full varsity roster (linked and unlinked) — players and coaches
   const playersSnap = await getDocs(collection(db, 'roster', seasonId, 'players'));
   const players = [];
-  playersSnap.forEach(d => { const p = d.data(); if (p.memberUid) players.push(p); });
+  playersSnap.forEach(d => players.push(d.data()));
   players.sort((a,b) => parseInt(a.number||99) - parseInt(b.number||99));
 
-  const inList = players.filter(p => rsvps[p.memberUid]?.response === 'yes');
-  const outList = players.filter(p => rsvps[p.memberUid]?.response === 'no');
-  const pending = players.filter(p => !rsvps[p.memberUid]);
+  const coachesSnap = await getDocs(collection(db, 'roster', seasonId, 'coaches'));
+  const coaches = [];
+  coachesSnap.forEach(d => coaches.push(d.data()));
+  coaches.sort((a,b) => (a.name||'').localeCompare(b.name||''));
 
-  function playerRow(p, resp) {
+  const rsvpKey = (p) => p.memberUid || 'manual_' + p.name.replace(/[^a-zA-Z0-9]/g, '_');
+
+  const inList = players.filter(p => rsvps[rsvpKey(p)]?.response === 'yes');
+  const outList = players.filter(p => rsvps[rsvpKey(p)]?.response === 'no');
+  const pending = players.filter(p => !rsvps[rsvpKey(p)]);
+
+  const coachInList = coaches.filter(c => rsvps[rsvpKey(c)]?.response === 'yes');
+  const coachOutList = coaches.filter(c => rsvps[rsvpKey(c)]?.response === 'no');
+  const coachPending = coaches.filter(c => !rsvps[rsvpKey(c)]);
+
+  function playerRow(p, resp, showNumber) {
     const inA = resp === 'yes'; const outA = resp === 'no';
+    const key = rsvpKey(p);
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:0.88rem;">
-      <span>${p.number ? '<strong>#'+p.number+'</strong> ' : ''}${p.name}</span>
+      <span>${showNumber && p.number ? '<strong>#'+p.number+'</strong> ' : ''}${p.name}${!p.memberUid ? ' <span style="color:#aaa;font-size:0.75rem;">(unlinked)</span>' : ''}</span>
       <div style="display:flex;gap:0.3rem;">
-        <button onclick="adminSetScheduleRsvp('${gameId}','${seasonId}','${p.memberUid}','${p.name}','yes',${inA})" style="border-radius:4px;padding:2px 8px;font-size:0.75rem;font-weight:600;cursor:pointer;border:1.5px solid #2e7d32;background:${inA?'#2e7d32':'white'};color:${inA?'white':'#2e7d32'};">✅ In</button>
-        <button onclick="adminSetScheduleRsvp('${gameId}','${seasonId}','${p.memberUid}','${p.name}','no',${outA})" style="border-radius:4px;padding:2px 8px;font-size:0.75rem;font-weight:600;cursor:pointer;border:1.5px solid #c62828;background:${outA?'#c62828':'white'};color:${outA?'white':'#c62828'};">❌ Out</button>
+        <button onclick="adminSetScheduleRsvp('${gameId}','${seasonId}','${key}','${p.name}','yes',${inA})" style="border-radius:4px;padding:2px 8px;font-size:0.75rem;font-weight:600;cursor:pointer;border:1.5px solid #2e7d32;background:${inA?'#2e7d32':'white'};color:${inA?'white':'#2e7d32'};">✅ In</button>
+        <button onclick="adminSetScheduleRsvp('${gameId}','${seasonId}','${key}','${p.name}','no',${outA})" style="border-radius:4px;padding:2px 8px;font-size:0.75rem;font-weight:600;cursor:pointer;border:1.5px solid #c62828;background:${outA?'#c62828':'white'};color:${outA?'white':'#c62828'};">❌ Out</button>
       </div>
     </div>`;
   }
@@ -2837,7 +2849,10 @@ window.viewScheduleGameRsvp = async function(gameId, seasonId) {
       <span style="color:#c62828;">❌ Out: ${outList.length}</span>
       <span style="color:#888;">⏳ No RSVP: ${pending.length}</span>
     </div>
-    ${players.length === 0 ? '<p style="color:#999;font-style:italic;">No linked players on this roster. Link players to member accounts first.</p>' : [...inList,...outList,...pending].map(p => playerRow(p, rsvps[p.memberUid]?.response)).join('')}`;
+    <div style="font-weight:700;font-size:0.85rem;color:#5D1725;margin:0.75rem 0 0.25rem;">Players</div>
+    ${players.length === 0 ? '<p style="color:#999;font-style:italic;">No players on this roster yet.</p>' : [...inList,...outList,...pending].map(p => playerRow(p, rsvps[rsvpKey(p)]?.response, true)).join('')}
+    <div style="font-weight:700;font-size:0.85rem;color:#5D1725;margin:1rem 0 0.25rem;">Coaches</div>
+    ${coaches.length === 0 ? '<p style="color:#999;font-style:italic;">No coaches on this roster yet.</p>' : [...coachInList,...coachOutList,...coachPending].map(c => playerRow(c, rsvps[rsvpKey(c)]?.response, false)).join('')}`;
 };
 
 window.adminSetScheduleRsvp = async function(gameId, seasonId, uid, name, response, isActive) {
