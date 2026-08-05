@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=178">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=179">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=178">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=179">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=178">
-  <script src="/assets/js/page-guard.js?v=178"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=179">
+  <script src="/assets/js/page-guard.js?v=179"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -293,7 +293,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=178"></script>
+<script src="/assets/js/load-header.js?v=179"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -557,7 +557,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=178"></script>
+<script src="/assets/js/load-footer.js?v=179"></script>
 
 <!-- MEMBER MODAL v2 -->
 <!-- CHANGE PASSWORD MODAL -->
@@ -750,7 +750,7 @@ function showSection(name) {
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=178"></script>
+<script type="module" src="/assets/js/member-auth.js?v=179"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -1057,11 +1057,21 @@ function showSection(name) {
           const sd = seasonDoc.data();
           if (sd.varsityScheduleHidden) continue;
           const gamesSnap = await getDocs(collection(db, 'seasons', seasonDoc.id, 'schedule'));
-          gamesSnap.forEach(g => {
+          for (const g of gamesSnap.docs) {
             const gd = g.data();
-            if (!gd.date || gd.date < today) return;
-            items.push({ type: 'varsity', date: gd.date, time: gd.time, label: 'vs ' + (gd.opponent || 'TBD'), sublabel: 'Varsity · ' + sd.label, rsvp: null, canRsvp: false });
-          });
+            if (!gd.date || gd.date < today) continue;
+            const isPractice = gd.gameType === 'Practice';
+            const rsvpDoc = await getDoc(doc(db, 'seasons', seasonDoc.id, 'schedule', g.id, 'rsvps', currentUser.uid));
+            const rsvp = rsvpDoc.exists() ? rsvpDoc.data().response : null;
+            items.push({
+              type: 'varsity',
+              practice: isPractice,
+              date: gd.date, time: gd.time,
+              label: isPractice ? (gd.notes || 'Team Practice') : ('vs ' + (gd.opponent || 'TBD')),
+              sublabel: (isPractice ? 'Varsity Practice · ' : 'Varsity · ') + sd.label,
+              rsvp, gameId: g.id, seasonId: seasonDoc.id, canRsvp: true
+            });
+          }
         }
       } catch(e) { console.error('Varsity schedule error:', e); }
     }
@@ -1074,11 +1084,21 @@ function showSection(name) {
           const sd = seasonDoc.data();
           if (!sd.jvEnabled || sd.jvScheduleHidden) continue;
           const gamesSnap = await getDocs(collection(db, 'jv-schedule', seasonDoc.id, 'games'));
-          gamesSnap.forEach(g => {
+          for (const g of gamesSnap.docs) {
             const gd = g.data();
-            if (!gd.date || gd.date < today) return;
-            items.push({ type: 'jv', date: gd.date, time: gd.time, label: 'vs ' + (gd.opponent || 'TBD'), sublabel: 'JV · ' + sd.label, rsvp: null, canRsvp: false });
-          });
+            if (!gd.date || gd.date < today) continue;
+            const isPractice = gd.gameType === 'Practice';
+            const rsvpDoc = await getDoc(doc(db, 'jv-schedule', seasonDoc.id, 'games', g.id, 'rsvps', currentUser.uid));
+            const rsvp = rsvpDoc.exists() ? rsvpDoc.data().response : null;
+            items.push({
+              type: 'jv',
+              practice: isPractice,
+              date: gd.date, time: gd.time,
+              label: isPractice ? (gd.notes || 'Team Practice') : ('vs ' + (gd.opponent || 'TBD')),
+              sublabel: (isPractice ? 'JV Practice · ' : 'JV · ') + sd.label,
+              rsvp, gameId: g.id, seasonId: seasonDoc.id, canRsvp: true
+            });
+          }
         }
       } catch(e) { console.error('JV schedule error:', e); }
     }
@@ -1112,8 +1132,8 @@ function showSection(name) {
       const d = new Date(item.date + 'T12:00:00');
       const dateStr = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
       const timeStr = item.time ? (() => { const p = item.time.split(':'); const hr = parseInt(p[0]); return (hr%12||12)+':'+p[1]+' '+(hr>=12?'PM':'AM'); })() : '';
-      const typeColor = item.type==='varsity'?'#5D1725':item.type==='jv'?'#1565c0':item.type==='summer'?'#2e7d32':'#e65100';
-      const typeLabel = item.type==='varsity'?'Varsity':item.type==='jv'?'JV':item.type==='summer'?'Summer':'Event';
+      const typeColor = item.practice?'#757575':(item.type==='varsity'?'#5D1725':item.type==='jv'?'#1565c0':item.type==='summer'?'#2e7d32':'#e65100');
+      const typeLabel = item.practice?(item.type==='jv'?'JV Practice':'Practice'):(item.type==='varsity'?'Varsity':item.type==='jv'?'JV':item.type==='summer'?'Summer':'Event');
 
       let rsvpHtml = '';
       if (item.canRsvp) {
@@ -1128,6 +1148,11 @@ function showSection(name) {
           rsvpHtml = '<div style="display:flex;gap:0.4rem;margin-top:0.5rem;">'
             + '<button data-etype="summer" data-sid="'+item.seasonId+'" data-gid="'+item.gameId+'" data-resp="yes" data-active="'+inActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:'+(inActive?'#2e7d32':'white')+';color:'+(inActive?'white':'#2e7d32')+';">In</button>'
             + '<button data-etype="summer" data-sid="'+item.seasonId+'" data-gid="'+item.gameId+'" data-resp="no" data-active="'+outActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:'+(outActive?'#c62828':'white')+';color:'+(outActive?'white':'#c62828')+';">Out</button>'
+            + '</div>';
+        } else if (item.type === 'varsity' || item.type === 'jv') {
+          rsvpHtml = '<div style="display:flex;gap:0.4rem;margin-top:0.5rem;">'
+            + '<button data-etype="'+item.type+'" data-sid="'+item.seasonId+'" data-gid="'+item.gameId+'" data-resp="yes" data-active="'+inActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:'+(inActive?'#2e7d32':'white')+';color:'+(inActive?'white':'#2e7d32')+';">In</button>'
+            + '<button data-etype="'+item.type+'" data-sid="'+item.seasonId+'" data-gid="'+item.gameId+'" data-resp="no" data-active="'+outActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:'+(outActive?'#c62828':'white')+';color:'+(outActive?'white':'#c62828')+';">Out</button>'
             + '</div>';
         }
       }
@@ -1176,6 +1201,12 @@ function showSection(name) {
           if (isActive) { await deleteDoc(rsvpRef); } else { await setDoc(rsvpRef, { response: resp, name: currentProfile.displayName, timestamp: new Date().toISOString() }); }
         } else if (etype === 'summer') {
           const rsvpRef = doc(db, 'summer', btn.dataset.sid, 'games', btn.dataset.gid, 'rsvps', currentUser.uid);
+          if (isActive) { await deleteDoc(rsvpRef); } else { await setDoc(rsvpRef, { response: resp, uid: currentUser.uid, name: currentProfile.displayName, timestamp: new Date().toISOString() }); }
+        } else if (etype === 'varsity') {
+          const rsvpRef = doc(db, 'seasons', btn.dataset.sid, 'schedule', btn.dataset.gid, 'rsvps', currentUser.uid);
+          if (isActive) { await deleteDoc(rsvpRef); } else { await setDoc(rsvpRef, { response: resp, uid: currentUser.uid, name: currentProfile.displayName, timestamp: new Date().toISOString() }); }
+        } else if (etype === 'jv') {
+          const rsvpRef = doc(db, 'jv-schedule', btn.dataset.sid, 'games', btn.dataset.gid, 'rsvps', currentUser.uid);
           if (isActive) { await deleteDoc(rsvpRef); } else { await setDoc(rsvpRef, { response: resp, uid: currentUser.uid, name: currentProfile.displayName, timestamp: new Date().toISOString() }); }
         }
       });
