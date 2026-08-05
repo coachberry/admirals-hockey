@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=179">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=180">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=179">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=179">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=180">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=180">
 </head>
 <body>
 
@@ -1056,13 +1056,26 @@
       <input type="hidden" id="jvGameSeasonId">
       <div class="form-label-group"><label class="field-label">Date</label><input type="date" id="jvGameDate"></div>
       <div class="form-label-group"><label class="field-label">Time</label><input type="time" id="jvGameTime"></div>
-      <div class="form-label-group"><label class="field-label">Opponent</label><input type="text" id="jvGameOpponent" placeholder="e.g. Hendersonville"></div>
+      <div class="form-label-group">
+        <label class="field-label">Type</label>
+        <select id="jvGameType">
+          <option value="Game">Game</option>
+          <option value="Practice">Practice</option>
+        </select>
+      </div>
+      <div class="form-label-group" id="jvOpponentField"><label class="field-label">Opponent</label><input type="text" id="jvGameOpponent" placeholder="e.g. Hendersonville"></div>
       <div class="form-label-group"><label class="field-label">Location</label><input type="text" id="jvGameLocation" placeholder="e.g. Ford Ice Center"></div>
-      <label class="captain-label"><input type="checkbox" id="jvGameHome"> Home game</label>
-      <label class="captain-label" style="margin-top:0.5rem;"><input type="checkbox" id="jvGamePlayed" onchange="document.getElementById('jvGameScoreFields').style.display=this.checked?'block':'none'"> Game played</label>
-      <div id="jvGameScoreFields" style="display:none;margin-top:0.75rem;">
-        <div class="form-label-group"><label class="field-label">Admirals Score</label><input type="number" id="jvGameHomeScore" min="0"></div>
-        <div class="form-label-group"><label class="field-label">Opponent Score</label><input type="number" id="jvGameAwayScore" min="0"></div>
+      <div id="jvHomeField"><label class="captain-label"><input type="checkbox" id="jvGameHome"> Home game</label></div>
+      <div id="jvPlayedSection">
+        <label class="captain-label" style="margin-top:0.5rem;"><input type="checkbox" id="jvGamePlayed" onchange="document.getElementById('jvGameScoreFields').style.display=this.checked?'block':'none'"> Game played</label>
+        <div id="jvGameScoreFields" style="display:none;margin-top:0.75rem;">
+          <div class="form-label-group"><label class="field-label">Admirals Score</label><input type="number" id="jvGameHomeScore" min="0"></div>
+          <div class="form-label-group"><label class="field-label">Opponent Score</label><input type="number" id="jvGameAwayScore" min="0"></div>
+        </div>
+      </div>
+      <div class="form-label-group" id="jvPracticeNotesField" style="display:none;">
+        <label class="field-label">Practice Notes (optional)</label>
+        <textarea id="jvGameNotes" rows="2" placeholder="e.g. Full ice, focus on breakouts"></textarea>
       </div>
       <div class="form-buttons">
         <button id="saveJvGameBtn" class="btn-primary">Save Game</button>
@@ -1287,10 +1300,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=179"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=179"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=179"></script>
-<script type="module" src="/assets/js/game-stats.js?v=179"></script>
+<script type="module" src="/assets/js/admin.js?v=180"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=180"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=180"></script>
+<script type="module" src="/assets/js/game-stats.js?v=180"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";

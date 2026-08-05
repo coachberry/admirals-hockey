@@ -2,22 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=179">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=180">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=179">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=180">
   <title>JV Schedule - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=179">
-  <link rel="stylesheet" href="/assets/css/schedule-styles.css?v=179">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=179">
-  <script src="/assets/js/page-guard.js?v=179"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=180">
+  <link rel="stylesheet" href="/assets/css/schedule-styles.css?v=180">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=180">
+  <script src="/assets/js/page-guard.js?v=180"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=179" defer></script>
-<script src="/assets/js/load-header.js?v=179"></script>
+<script src="/assets/js/load-hero.js?v=180" defer></script>
+<script src="/assets/js/load-header.js?v=180"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -124,7 +124,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=179"></script>
+<script src="/assets/js/load-footer.js?v=180"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -194,8 +194,11 @@
   gameViewModal.addEventListener('click', e => { if (e.target === gameViewModal) gameViewModal.classList.remove('active'); });
 
   async function openGameViewModal(game, seasonId) {
-    const homeAway = game.homeAway === 'Home' ? 'vs.' : '@';
-    const resultColor = resultColors[game.result] || '#333';
+    const homeAway = game.isHome ? 'vs.' : '@';
+    const hasResult = game.played && game.homeScore != null && game.awayScore != null;
+    const hs = parseInt(game.homeScore)||0, as = parseInt(game.awayScore)||0;
+    const resLabel = hs>as ? 'W' : hs<as ? 'L' : 'T';
+    const resultColor = hs>as ? '#2e7d32' : hs<as ? '#c62828' : '#666';
 
     document.getElementById('gvmHeader').innerHTML = `
       <div class="gvm-header-inner">
@@ -204,19 +207,18 @@
           ${opponentLogoHTML(game, 48)}
           <span class="gvm-opponent">${game.opponent}</span>
         </div>
-        ${game.result
-          ? `<div class="gvm-result" style="color:${resultColor}">${resultLabel[game.result]} ${game.teamScore}-${game.opponentScore}</div>`
+        ${hasResult
+          ? `<div class="gvm-result" style="color:${resultColor}">${resLabel} ${game.homeScore}-${game.awayScore}</div>`
           : '<div class="gvm-no-result">No Result Yet</div>'}
       </div>
       <div class="gvm-meta">
         <span>${formatDate(game.date)} · ${formatTime(game.time, game.timezone)}</span>
-        <span>${gameTypeLabel(game)}</span>
-        <span>${game.rinkName}${game.rinkAddress ? ' · ' + game.rinkAddress : ''}</span>
+        <span>${game.location || ''}</span>
       </div>
     `;
 
     // Load team stats
-    const tsSnap = await getDoc(doc(db, 'seasons', seasonId, 'schedule', game.id, 'teamstats', 'game'));
+    const tsSnap = await getDoc(doc(db, 'jv-schedule', seasonId, 'games', game.id, 'teamstats', 'game'));
     const ts = tsSnap.exists() ? tsSnap.data() : null;
     const gvmTeamStats = document.getElementById('gvmTeamStats');
 
@@ -238,14 +240,14 @@
     }
 
     // Load roster for name/number lookup
-    const rosterSnap = await getDocs(collection(db, 'roster', seasonId, 'players'));
+    const rosterSnap = await getDocs(collection(db, 'jv-roster', seasonId, 'players'));
     const rosterMap = {};
     rosterSnap.forEach(d => { rosterMap[d.id] = d.data(); });
     // Add EMPTY NET
     rosterMap['EMPTY_NET'] = { name: 'EMPTY NET', number: '0', position: 'Goaltender' };
 
     // Load skater stats
-    const skaterSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule', game.id, 'skaterstats'));
+    const skaterSnap = await getDocs(collection(db, 'jv-schedule', seasonId, 'games', game.id, 'skaterstats'));
     const skaters = [];
     skaterSnap.forEach(d => {
       const s = d.data();
@@ -281,7 +283,7 @@
     document.getElementById('gvmGwgKey').style.display = hasGWG ? 'block' : 'none';
 
     // Load goalie stats
-    const goalieSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule', game.id, 'goaliestats'));
+    const goalieSnap = await getDocs(collection(db, 'jv-schedule', seasonId, 'games', game.id, 'goaliestats'));
     const goalies = [];
     goalieSnap.forEach(d => {
       const g = d.data();
@@ -329,49 +331,71 @@
   // SCHEDULE
   // ============================================
   function buildFeaturedContent(game, showResult) {
-    const homeAway = game.homeAway === 'Home' ? 'vs.' : '@';
-    const typeLabel = gameTypeLabel(game);
-    const resultHTML = showResult && game.result
-      ? `<div class="featured-result" style="color:${resultColors[game.result]||'#333'}">${resultLabel[game.result]} ${game.teamScore}-${game.opponentScore}</div>` : '';
+    const homeAway = game.isHome ? 'vs.' : '@';
+    const hasResult = game.played && game.homeScore != null && game.awayScore != null;
+    const hs = parseInt(game.homeScore)||0, as = parseInt(game.awayScore)||0;
+    const resLabel = hs>as ? 'W' : hs<as ? 'L' : 'T';
+    const resColor = hs>as ? '#2e7d32' : hs<as ? '#c62828' : '#666';
+    const resultHTML = showResult && hasResult
+      ? `<div class="featured-result" style="color:${resColor}">${resLabel} ${game.homeScore}-${game.awayScore}</div>` : '';
     return `
       <div class="featured-game-inner">
-        <div class="featured-meta">${typeLabel}</div>
         <div class="featured-date">${formatDate(game.date)} · ${formatTime(game.time, game.timezone)}</div>
         <div class="featured-matchup">
           <span class="featured-homeaway">${homeAway}</span>
           ${opponentLogoHTML(game, 40)}
           <span class="featured-opponent">${game.opponent}</span>
         </div>
-        <div class="featured-rink">${game.rinkName}${game.rinkAddress ? ' · '+game.rinkAddress : ''}</div>
+        <div class="featured-rink">${game.location || ''}</div>
         ${resultHTML}
       </div>`;
   }
 
   function buildGameRow(game, seasonId) {
-    const homeAway = game.homeAway === 'Home' ? 'vs.' : '@';
-    const typeLabel = gameTypeLabel(game);
-    const hasResult = game.result && game.teamScore !== undefined && game.opponentScore !== undefined;
+    if (game.gameType === 'Practice') {
+      const row = document.createElement('div');
+      row.className = 'game-row game-upcoming';
+      row.innerHTML = `
+        <div class="game-row-date">
+          <div class="game-row-datestr">${formatDate(game.date)}</div>
+          <div class="game-row-time">${formatTime(game.time, game.timezone)}</div>
+        </div>
+        <div class="game-row-main">
+          <div class="game-row-type">Practice</div>
+          <div class="game-row-matchup">
+            <span class="game-row-opponent" style="font-style:italic;color:#666;">${game.notes || 'Team Practice'}</span>
+          </div>
+          <div class="game-row-rink">${game.location || ''}</div>
+        </div>
+        <div class="game-row-result"></div>
+      `;
+      return row;
+    }
+    const homeAway = game.isHome ? 'vs.' : '@';
+    const hasResult = game.played && game.homeScore != null && game.awayScore != null;
+    const hs = parseInt(game.homeScore)||0, as = parseInt(game.awayScore)||0;
+    const resLabel = hs>as ? 'W' : hs<as ? 'L' : 'T';
+    const resColor = hs>as ? '#2e7d32' : hs<as ? '#c62828' : '#666';
     const resultHTML = hasResult
-      ? `<div class="game-result" style="color:${resultColors[game.result]||'#333'}">
-           <span class="result-badge">${resultLabel[game.result]}</span>
-           <span class="result-score">${game.teamScore}-${game.opponentScore}</span>
+      ? `<div class="game-result" style="color:${resColor}">
+           <span class="result-badge">${resLabel}</span>
+           <span class="result-score">${game.homeScore}-${game.awayScore}</span>
          </div>` : '';
-    const isPlayoff = game.subtype === 'Playoffs' || game.subtype === 'Championship';
     const row = document.createElement('div');
-    row.className = `game-row${hasResult ? ' game-past' : ' game-upcoming'}${isPlayoff ? ' game-playoff' : ''}`;
+    row.className = `game-row${hasResult ? ' game-past' : ' game-upcoming'}`;
     row.innerHTML = `
       <div class="game-row-date">
         <div class="game-row-datestr">${formatDate(game.date)}</div>
         <div class="game-row-time">${formatTime(game.time, game.timezone)}</div>
       </div>
       <div class="game-row-main">
-        <div class="game-row-type">${typeLabel}</div>
+        <div class="game-row-type"></div>
         <div class="game-row-matchup">
           <span class="game-row-homeaway">${homeAway}</span>
           ${opponentLogoHTML(game, 36)}
           <span class="game-row-opponent">${game.opponent}</span>
         </div>
-        <div class="game-row-rink">${game.rinkName}${game.rinkAddress ? ' · '+game.rinkAddress : ''}</div>
+        <div class="game-row-rink">${game.location || ''}</div>
       </div>
       <div class="game-row-result">${resultHTML}</div>
     `;
@@ -399,29 +423,25 @@
 
     games.sort((a, b) => new Date(a.date+'T'+(a.time||'00:00')) - new Date(b.date+'T'+(b.time||'00:00')));
 
-    let gf=0, ga=0, regW=0, regL=0, regT=0, playoffW=0, playoffL=0, playoffT=0;
+    let gf=0, ga=0, regW=0, regL=0, regT=0;
     games.forEach(g => {
-      if (!g.result) return;
-      const isPlayoff = g.subtype === 'Playoffs' || g.subtype === 'Championship';
-      const win = g.result==='W'||g.result==='OTW'||g.result==='SOW';
-      const loss = g.result==='L'||g.result==='OTL'||g.result==='SOL';
-      const tie = g.result==='T';
-      if (isPlayoff) { if(win)playoffW++; else if(loss)playoffL++; else if(tie)playoffT++; }
-      else { if(win)regW++; else if(loss)regL++; else if(tie)regT++; }
-      if (g.teamScore!=null) gf += parseInt(g.teamScore)||0;
-      if (g.opponentScore!=null) ga += parseInt(g.opponentScore)||0;
+      if (g.gameType === 'Practice' || !g.played) return;
+      const hs = parseInt(g.homeScore)||0, as = parseInt(g.awayScore)||0;
+      if (hs>as) regW++; else if (hs<as) regL++; else regT++;
+      gf += hs;
+      ga += as;
     });
 
     document.getElementById('statsRegRecord').textContent = `${regW}-${regL}-${regT}`;
-    document.getElementById('statsPlayoffRecord').textContent = `${playoffW}-${playoffL}-${playoffT}`;
-    document.getElementById('statsTotalRecord').textContent = `${regW+playoffW}-${regL+playoffL}-${regT+playoffT}`;
+    document.getElementById('statsPlayoffRecord').textContent = `0-0-0`;
+    document.getElementById('statsTotalRecord').textContent = `${regW}-${regL}-${regT}`;
     document.getElementById('statsGF').textContent = gf;
     document.getElementById('statsGA').textContent = ga;
     document.getElementById('seasonStatsBar').style.display = 'flex';
 
     const today = new Date(); today.setHours(0,0,0,0);
-    const nextGame = games.find(g => !g.result && new Date(g.date+'T12:00:00') >= today);
-    const gamesWithResult = games.filter(g => g.result);
+    const nextGame = games.find(g => g.gameType !== 'Practice' && !g.played && new Date(g.date+'T12:00:00') >= today);
+    const gamesWithResult = games.filter(g => g.gameType !== 'Practice' && g.played);
     const lastGame = gamesWithResult.length ? gamesWithResult[gamesWithResult.length-1] : null;
 
     const featuredEl = document.getElementById('featuredGames');
@@ -598,7 +618,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=179"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=179"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=180"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=180"></script>
 </body>
 </html>

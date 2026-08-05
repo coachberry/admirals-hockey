@@ -3555,11 +3555,16 @@ async function loadJvGames(seasonId) {
     const item = document.createElement('div');
     item.className = 'item';
     const d = g.date ? new Date(g.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }) : 'TBD';
+    const isPractice = g.gameType === 'Practice';
     const score = g.played ? ` — ${g.homeScore || 0}-${g.awayScore || 0}` : '';
+    const titleHtml = isPractice ? `<strong>🏒 Practice</strong>` : `<strong>vs. ${g.opponent || 'TBD'}${score}</strong>`;
+    const subHtml = isPractice
+      ? `${d}${g.time ? ' · ' + g.time : ''}${g.location ? ' · ' + g.location : ''}${g.notes ? ' · ' + g.notes : ''}`
+      : `${d}${g.time ? ' · ' + g.time : ''}${g.location ? ' · ' + g.location : ''}${g.played ? ' · FINAL' : ' · Upcoming'}`;
     item.innerHTML = `
       <div class="item-info"><div>
-        <strong>vs. ${g.opponent || 'TBD'}${score}</strong>
-        <span>${d}${g.time ? ' · ' + g.time : ''}${g.location ? ' · ' + g.location : ''}${g.played ? ' · FINAL' : ' · Upcoming'}</span>
+        ${titleHtml}
+        <span>${subHtml}</span>
       </div></div>
       <div style="display:flex;gap:0.5rem;">
         <button class="btn-edit" onclick="editJvGame('${g.id}','${seasonId}')">Edit</button>
@@ -3580,6 +3585,20 @@ window.deleteJvGame = async (id, seasonId) => {
   loadJvGames(seasonId);
 };
 
+function toggleJvGameTypeFields() {
+  const type = document.getElementById('jvGameType')?.value;
+  const isPractice = type === 'Practice';
+  const opponentField = document.getElementById('jvOpponentField');
+  const homeField = document.getElementById('jvHomeField');
+  const playedSection = document.getElementById('jvPlayedSection');
+  const practiceNotesField = document.getElementById('jvPracticeNotesField');
+  if (opponentField) opponentField.style.display = isPractice ? 'none' : 'block';
+  if (homeField) homeField.style.display = isPractice ? 'none' : 'block';
+  if (playedSection) playedSection.style.display = isPractice ? 'none' : 'block';
+  if (practiceNotesField) practiceNotesField.style.display = isPractice ? 'block' : 'none';
+}
+document.getElementById('jvGameType')?.addEventListener('change', toggleJvGameTypeFields);
+
 function openJvGameModal(data, seasonId) {
   const modal = document.getElementById('jvGameModal');
   if (!modal) return;
@@ -3587,6 +3606,7 @@ function openJvGameModal(data, seasonId) {
   document.getElementById('jvGameSeasonId').value = seasonId;
   document.getElementById('jvGameDate').value = data?.date || '';
   document.getElementById('jvGameTime').value = data?.time || '';
+  document.getElementById('jvGameType').value = data?.gameType || 'Game';
   document.getElementById('jvGameOpponent').value = data?.opponent || '';
   document.getElementById('jvGameLocation').value = data?.location || '';
   document.getElementById('jvGameHome').checked = data?.isHome || false;
@@ -3594,6 +3614,8 @@ function openJvGameModal(data, seasonId) {
   document.getElementById('jvGameHomeScore').value = data?.homeScore ?? '';
   document.getElementById('jvGameAwayScore').value = data?.awayScore ?? '';
   document.getElementById('jvGameScoreFields').style.display = data?.played ? 'block' : 'none';
+  document.getElementById('jvGameNotes').value = data?.notes || '';
+  toggleJvGameTypeFields();
   modal.classList.add('active');
 }
 
@@ -3608,16 +3630,20 @@ if (saveJvGameBtn) {
   saveJvGameBtn.addEventListener('click', async () => {
     const seasonId = document.getElementById('jvGameSeasonId').value;
     const id = document.getElementById('jvGameId').value || Date.now().toString();
-    const played = document.getElementById('jvGamePlayed').checked;
+    const gameType = document.getElementById('jvGameType').value;
+    const isPractice = gameType === 'Practice';
+    const played = isPractice ? false : document.getElementById('jvGamePlayed').checked;
     await setDoc(doc(db, 'jv-schedule', seasonId, 'games', id), {
       date: document.getElementById('jvGameDate').value,
       time: document.getElementById('jvGameTime').value,
-      opponent: document.getElementById('jvGameOpponent').value.trim(),
+      gameType,
+      opponent: isPractice ? '' : document.getElementById('jvGameOpponent').value.trim(),
       location: document.getElementById('jvGameLocation').value.trim(),
-      isHome: document.getElementById('jvGameHome').checked,
+      isHome: isPractice ? false : document.getElementById('jvGameHome').checked,
       played,
-      homeScore: played ? parseInt(document.getElementById('jvGameHomeScore').value) || 0 : null,
-      awayScore: played ? parseInt(document.getElementById('jvGameAwayScore').value) || 0 : null,
+      homeScore: (played) ? parseInt(document.getElementById('jvGameHomeScore').value) || 0 : null,
+      awayScore: (played) ? parseInt(document.getElementById('jvGameAwayScore').value) || 0 : null,
+      notes: isPractice ? document.getElementById('jvGameNotes').value.trim() : '',
     }, { merge: true });
     document.getElementById('jvGameModal').classList.remove('active');
     loadJvGames(seasonId);
