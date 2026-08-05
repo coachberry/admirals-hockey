@@ -774,8 +774,21 @@ document.getElementById('addBoardBtn').addEventListener('click', () => { window.
 // ============================================
 // LOAD ROSTER
 // ============================================
+let _rosterMembersMap = {};
+
+async function loadMembersMap() {
+  const snap = await getDocs(collection(db, 'members'));
+  const map = {};
+  snap.forEach(d => {
+    const m = d.data();
+    map[d.id] = m.displayName || m.email || 'Member';
+  });
+  return map;
+}
+
 async function loadRoster(seasonId) {
   if (!seasonId) return;
+  _rosterMembersMap = await loadMembersMap();
   await loadPlayers(seasonId);
   await loadCoaches(seasonId);
   await loadBoardMembers(seasonId);
@@ -835,11 +848,28 @@ window.linkRosterMember = async function(seasonId, collName, playerId, currentUi
     if (hasTeam || isPlayer) members.push(m);
   });
   members.sort((a,b) => (a.displayName||'').localeCompare(b.displayName||''));
+
+  // Find member accounts already linked to a DIFFERENT roster entry this season (players/coaches/boards)
+  const usedUids = new Set();
+  const subCollections = rosterCollection === 'jv-roster' ? ['players', 'coaches'] : ['players', 'coaches', 'boards'];
+  for (const cn of subCollections) {
+    const rSnap = await getDocs(collection(db, rosterCollection, seasonId, cn));
+    rSnap.forEach(d => {
+      if (d.id === playerId && cn === collName) return; // skip this same entry
+      const data = d.data();
+      if (data.memberUid) usedUids.add(data.memberUid);
+    });
+  }
+  const availableMembers = members.filter(m => !usedUids.has(m.id) || m.id === currentUid);
+  const currentLinked = currentUid ? members.find(m => m.id === currentUid) : null;
+  const currentLinkedName = currentLinked ? (currentLinked.displayName || currentLinked.email) : (currentUid ? currentUid : '');
+
   const modal = document.createElement('div');
   modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
-  const options = members.map(m => '<option value="' + m.id + '"' + (currentUid===m.id?' selected':'') + '>' + (m.displayName||m.email) + ' (' + m.role + ')</option>').join('');
+  const options = availableMembers.map(m => '<option value="' + m.id + '"' + (currentUid===m.id?' selected':'') + '>' + (m.displayName||m.email) + ' (' + m.role + ')</option>').join('');
   modal.innerHTML = '<div style="background:white;border-radius:8px;padding:1.5rem;max-width:400px;width:90%;">'
     + '<h3 style="margin-bottom:1rem;">Link to Member Account</h3>'
+    + (currentLinkedName ? '<div style="margin-bottom:0.75rem;font-size:0.85rem;color:#2e7d32;">Currently linked to: <strong>' + currentLinkedName + '</strong></div>' : '')
     + '<select id="rosterMemberPicker" style="width:100%;padding:0.6rem;border:1px solid #ddd;border-radius:6px;font-size:0.9rem;margin-bottom:1rem;"><option value="">-- No link --</option>' + options + '</select>'
     + '<div style="display:flex;gap:0.5rem;">'
     + '<button id="rmpSave" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.6rem 1.2rem;cursor:pointer;font-weight:600;">Save</button>'
@@ -868,10 +898,11 @@ function buildRosterItem(m) {
   const subtitle = m.type === 'player' ? `${m.position} | ${m.grade}` : m.title || '';
   const captainLabel = m.captain ? ' - Captain' : m.alternate ? ' - Alternate Captain' : '';
   const label = m.type === 'player' ? `#${m.number} - ${m.name}${captainLabel}` : m.name;
+  const linkedName = m.memberUid ? (_rosterMembersMap[m.memberUid] || 'Unknown member') : '';
   item.innerHTML = `
     <div class="item-info">
       ${m.photoURL ? `<img src="${m.photoURL}" class="item-photo">` : ''}
-      <div><strong>${label}</strong><span>${subtitle}</span></div>
+      <div><strong>${label}</strong><span>${subtitle}</span>${linkedName ? `<span style="display:block;color:#2e7d32;font-size:0.75rem;margin-top:2px;">🔗 Linked to: ${linkedName}</span>` : ''}</div>
     </div>
     <div>
       <button class="btn-secondary" style="font-size:0.75rem;padding:3px 8px;background:${m.memberUid?'white':'#c62828'};color:${m.memberUid?'#2e7d32':'white'};border-color:${m.memberUid?'#2e7d32':'#c62828'};" onclick="linkRosterMember(window._rosterMode==='jv'?(window._jvSaveSeasonId||window.jvCurrentSeasonId):window.currentSeasonId,'${m.type==='player'?'players':m.type==='coach'?'coaches':'boards'}','${m.id}','${m.memberUid||''}',window._rosterMode==='jv'?'jv-roster':'roster')" title="${m.memberUid?'Linked - click to change':'Not linked - click to link'}">${m.memberUid?'🔗 Linked':'Link'}</button>
@@ -3402,6 +3433,7 @@ async function loadJvRosterSeasons() {
 
 async function loadJvRoster(seasonId) {
   if (!seasonId) return;
+  _rosterMembersMap = await loadMembersMap();
   await loadJvPlayers(seasonId);
   await loadJvCoaches(seasonId);
 }
@@ -3435,10 +3467,12 @@ function buildJvRosterItem(m, type, seasonId) {
   item.className = 'item';
   const label = type === 'player' ? `${m.number ? '#' + m.number + ' - ' : ''}${m.name}` : m.name;
   const sub = type === 'player' ? m.position || '' : m.title || '';
+  const linkedName = m.memberUid ? (_rosterMembersMap[m.memberUid] || 'Unknown member') : '';
   item.innerHTML = `
     <div class="item-info"><div>
       <strong>${label}</strong>
       <span>${sub}</span>
+      ${linkedName ? `<span style="display:block;color:#2e7d32;font-size:0.75rem;margin-top:2px;">🔗 Linked to: ${linkedName}</span>` : ''}
     </div></div>
     <div style="display:flex;gap:0.5rem;">
       <button class="btn-secondary" style="font-size:0.75rem;padding:3px 8px;background:${m.memberUid?'white':'#c62828'};color:${m.memberUid?'#2e7d32':'white'};border-color:${m.memberUid?'#2e7d32':'#c62828'};" onclick="linkRosterMember('${seasonId}','${type==='player'?'players':'coaches'}','${m.id || m.name}','${m.memberUid||''}','jv-roster')" title="${m.memberUid?'Linked - click to change':'Not linked - click to link'}">${m.memberUid?'🔗 Linked':'Link'}</button>
