@@ -269,7 +269,8 @@ window.showApplyFields = function(role) {
 };
 
 const modal = document.getElementById('memberModal');
-if (modal) modal.addEventListener('click', e => { if (e.target === modal) hideMemberModal(); });
+// Click-outside-to-close intentionally disabled: this modal contains form inputs,
+// and accidental clicks while selecting text can close it and lose entered data.
 
 const signupBtn = document.getElementById('memberSignupBtn');
 if (signupBtn) signupBtn.onclick = () => showMemberModal('apply');

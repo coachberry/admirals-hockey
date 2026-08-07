@@ -1180,7 +1180,7 @@ function createGameModal() {
 
   document.getElementById('closeGameModal').addEventListener('click', () => modal.classList.remove('active'));
   document.getElementById('cancelGameBtn').addEventListener('click', () => modal.classList.remove('active'));
-  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
+  // Click-outside-to-close intentionally disabled: this is a form modal.
 
   document.getElementById('gameGameType').addEventListener('change', toggleGameTypeFields);
   document.getElementById('gameResult').addEventListener('change', () => {
