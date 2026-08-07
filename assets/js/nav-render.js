@@ -40,6 +40,13 @@ async function init() {
         newToggle.classList.toggle('open');
         navUl.classList.toggle('open');
       });
+      // Auto-close the mobile menu when a nav link is tapped
+      navUl.querySelectorAll('a').forEach(function(link) {
+        link.addEventListener('click', function() {
+          newToggle.classList.remove('open');
+          navUl.classList.remove('open');
+        });
+      });
     }
   }
 
