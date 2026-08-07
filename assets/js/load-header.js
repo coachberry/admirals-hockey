@@ -49,7 +49,7 @@
 // Load version checker for PWA update prompts
 (function() {
   var script = document.createElement('script');
-  script.src = '/assets/js/version-check.js';
+  script.src = '/assets/js/version-check.js?t=' + Date.now();
   document.head.appendChild(script);
 })();
 
