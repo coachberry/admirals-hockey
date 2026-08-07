@@ -27,10 +27,55 @@ let currentUser = null;
 let currentProfile = null;
 let isOpen = false;
 let unsubscribe = null;
-let lastSeenCount = parseInt(localStorage.getItem('chat_lastSeen') || '0');
-let totalMessages = 0;
 let CHANNELS = [];
 let currentChannel = null;
+let readableChannelsCache = [];
+let unreadByChannel = {};
+let totalUnread = 0;
+
+function getLastRead(channelId) {
+  return parseInt(localStorage.getItem('chat_lastRead_' + channelId) || '0');
+}
+function setLastRead(channelId, ms) {
+  localStorage.setItem('chat_lastRead_' + channelId, String(ms));
+}
+function msOf(ts) {
+  if (!ts) return 0;
+  if (typeof ts.toMillis === 'function') return ts.toMillis();
+  if (ts.seconds) return ts.seconds * 1000;
+  return 0;
+}
+
+// Count messages newer than this channel's last-read marker, excluding the current user's own messages
+async function computeUnreadForChannel(channelId) {
+  try {
+    const lastRead = getLastRead(channelId);
+    const snap = await getDocs(query(collection(db, 'chat', channelId, 'messages'), orderBy('timestamp', 'desc'), limit(100)));
+    let count = 0;
+    snap.forEach(d => {
+      const m = d.data();
+      if (m.uid !== currentUser?.uid && msOf(m.timestamp) > lastRead) count++;
+    });
+    return count;
+  } catch (e) {
+    return 0;
+  }
+}
+
+function recomputeTotalUnread() {
+  totalUnread = Object.values(unreadByChannel).reduce((a, b) => a + b, 0);
+  updateBadge();
+}
+
+// Refresh unread counts for all readable channels except the one currently open/active
+async function refreshAllUnreadCounts() {
+  const results = await Promise.all(readableChannelsCache.map(async ch => {
+    if (isOpen && currentChannel && ch.id === currentChannel.id) return { id: ch.id, count: 0 };
+    return { id: ch.id, count: await computeUnreadForChannel(ch.id) };
+  }));
+  results.forEach(r => { unreadByChannel[r.id] = r.count; });
+  recomputeTotalUnread();
+}
 
 // Only show widget on non-chat pages
 if (window.location.pathname.includes('chat.html') || window.location.pathname === '/chat') {
@@ -143,9 +188,11 @@ window.toggleChatWidget = function() {
   bubble.style.transform = isOpen ? 'scale(0.9)' : 'scale(1)';
 
   if (isOpen) {
-    lastSeenCount = totalMessages;
-    localStorage.setItem('chat_lastSeen', lastSeenCount);
-    updateBadge();
+    if (currentChannel) {
+      setLastRead(currentChannel.id, Date.now());
+      unreadByChannel[currentChannel.id] = 0;
+    }
+    refreshAllUnreadCounts();
     document.getElementById('widgetMessages').scrollTop = 999999;
   }
 };
@@ -180,7 +227,7 @@ window.sendWidgetMessage = async function() {
 function updateBadge() {
   const badge = document.getElementById('chatBadge');
   if (!badge) return;
-  const unread = Math.max(0, totalMessages - lastSeenCount);
+  const unread = totalUnread;
   if (unread > 0 && !isOpen) {
     badge.textContent = unread > 99 ? '99+' : unread;
     badge.style.display = 'flex';
@@ -190,8 +237,17 @@ function updateBadge() {
 }
 
 function renderWidgetMessages(messages) {
-  totalMessages = messages.length;
-  updateBadge();
+  if (currentChannel) {
+    if (isOpen) {
+      // Actively viewing this channel right now — treat as fully read
+      setLastRead(currentChannel.id, Date.now());
+      unreadByChannel[currentChannel.id] = 0;
+    } else {
+      const lastRead = getLastRead(currentChannel.id);
+      unreadByChannel[currentChannel.id] = messages.filter(m => m.uid !== currentUser?.uid && msOf(m.timestamp) > lastRead).length;
+    }
+    recomputeTotalUnread();
+  }
 
   const container = document.getElementById('widgetMessages');
   if (!container) return;
@@ -379,6 +435,8 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
+  readableChannelsCache = readable;
+
   bubble.style.display = 'flex';
   document.getElementById('widgetLoginPrompt').style.display = 'none';
 
@@ -395,4 +453,5 @@ onAuthStateChanged(auth, async (user) => {
   const saved = localStorage.getItem('chat_widget_channel');
   const initial = readable.find(c => c.id === saved) || readable[0];
   subscribeToChannel(initial);
+  refreshAllUnreadCounts();
 });
