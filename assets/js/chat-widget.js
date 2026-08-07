@@ -324,6 +324,11 @@ function subscribeToChannel(channel) {
   localStorage.setItem('chat_widget_channel', channel.id);
 
   if (unsubscribe) unsubscribe();
+
+  // Show loading state immediately so switching doesn't look frozen while messages load
+  const widgetMessagesEl = document.getElementById('widgetMessages');
+  if (widgetMessagesEl) widgetMessagesEl.innerHTML = '<div style="text-align:center;color:#999;padding:1rem;font-size:0.82rem;">Loading messages...</div>';
+
   const q = query(collection(db, 'chat', channel.id, 'messages'), orderBy('timestamp', 'asc'), limit(50));
   unsubscribe = onSnapshot(q, snap => {
     renderWidgetMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })));

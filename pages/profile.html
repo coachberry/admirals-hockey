@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=184">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=185">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=184">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=185">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=184">
-  <script src="/assets/js/page-guard.js?v=184"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=185">
+  <script src="/assets/js/page-guard.js?v=185"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -293,7 +293,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=184"></script>
+<script src="/assets/js/load-header.js?v=185"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -557,7 +557,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=184"></script>
+<script src="/assets/js/load-footer.js?v=185"></script>
 
 <!-- MEMBER MODAL v2 -->
 <!-- CHANGE PASSWORD MODAL -->
@@ -750,7 +750,7 @@ function showSection(name) {
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=184"></script>
+<script type="module" src="/assets/js/member-auth.js?v=185"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -1040,9 +1040,7 @@ function showSection(name) {
             const gameTeams = [g.homeTeamId, g.awayTeamId];
             if (!gameTeams.includes(teamDoc.id)) continue;
             if (!g.date || g.date < today) continue;
-            const rsvpDoc = await getDoc(doc(db, 'summer', seasonId, 'games', gameDoc.id, 'rsvps', currentUser.uid));
-            const rsvp = rsvpDoc.exists() ? rsvpDoc.data().response : null;
-            items.push({ type: 'summer', date: g.date, time: g.time, label: team.name + ' vs ' + (g.homeTeamId === teamDoc.id ? (summerTeams && summerTeams[g.awayTeamId]?.name || 'Opponent') : (summerTeams && summerTeams[g.homeTeamId]?.name || 'Opponent')), sublabel: 'Summer Hockey · ' + (seasonId), rsvp, gameId: gameDoc.id, seasonId, canRsvp: true });
+            items.push({ type: 'summer', date: g.date, time: g.time, label: team.name + ' vs ' + (g.homeTeamId === teamDoc.id ? (summerTeams && summerTeams[g.awayTeamId]?.name || 'Opponent') : (summerTeams && summerTeams[g.homeTeamId]?.name || 'Opponent')), sublabel: 'Summer Hockey · ' + (seasonId), rsvp: null, gameId: gameDoc.id, seasonId, canRsvp: true, _rsvpRef: doc(db, 'summer', seasonId, 'games', gameDoc.id, 'rsvps', currentUser.uid) });
           }
         }
       }
@@ -1061,15 +1059,14 @@ function showSection(name) {
             const gd = g.data();
             if (!gd.date || gd.date < today) continue;
             const isPractice = gd.gameType === 'Practice';
-            const rsvpDoc = await getDoc(doc(db, 'seasons', seasonDoc.id, 'schedule', g.id, 'rsvps', currentUser.uid));
-            const rsvp = rsvpDoc.exists() ? rsvpDoc.data().response : null;
             items.push({
               type: 'varsity',
               practice: isPractice,
               date: gd.date, time: gd.time,
               label: isPractice ? (gd.notes || 'Team Practice') : ('vs ' + (gd.opponent || 'TBD')),
               sublabel: (isPractice ? 'Varsity Practice · ' : 'Varsity · ') + sd.label,
-              rsvp, gameId: g.id, seasonId: seasonDoc.id, canRsvp: true
+              rsvp: null, gameId: g.id, seasonId: seasonDoc.id, canRsvp: true,
+              _rsvpRef: doc(db, 'seasons', seasonDoc.id, 'schedule', g.id, 'rsvps', currentUser.uid)
             });
           }
         }
@@ -1088,15 +1085,14 @@ function showSection(name) {
             const gd = g.data();
             if (!gd.date || gd.date < today) continue;
             const isPractice = gd.gameType === 'Practice';
-            const rsvpDoc = await getDoc(doc(db, 'jv-schedule', seasonDoc.id, 'games', g.id, 'rsvps', currentUser.uid));
-            const rsvp = rsvpDoc.exists() ? rsvpDoc.data().response : null;
             items.push({
               type: 'jv',
               practice: isPractice,
               date: gd.date, time: gd.time,
               label: isPractice ? (gd.notes || 'Team Practice') : ('vs ' + (gd.opponent || 'TBD')),
               sublabel: (isPractice ? 'JV Practice · ' : 'JV · ') + sd.label,
-              rsvp, gameId: g.id, seasonId: seasonDoc.id, canRsvp: true
+              rsvp: null, gameId: g.id, seasonId: seasonDoc.id, canRsvp: true,
+              _rsvpRef: doc(db, 'jv-schedule', seasonDoc.id, 'games', g.id, 'rsvps', currentUser.uid)
             });
           }
         }
@@ -1114,11 +1110,17 @@ function showSection(name) {
         const canRsvp = invitedRoles.length > 0 && memberAllRoles.some(r => invitedRoles.includes(r));
         const canSee = e.public !== false || canRsvp;
         if (!canSee) continue;
-        const rsvpDoc = await getDoc(doc(db, 'teamEvents', teDoc.id, 'rsvps', currentUser.uid));
-        const rsvp = rsvpDoc.exists() ? rsvpDoc.data().response : null;
-        items.push({ type: 'event', date: e.date, time: e.time, label: e.name, sublabel: e.location || 'Team Event', rsvp, eventId: teDoc.id, canRsvp });
+        items.push({ type: 'event', date: e.date, time: e.time, label: e.name, sublabel: e.location || 'Team Event', rsvp: null, eventId: teDoc.id, canRsvp, _rsvpRef: doc(db, 'teamEvents', teDoc.id, 'rsvps', currentUser.uid) });
       }
     } catch(e) { console.error('Team events error:', e); }
+
+    // Fetch all RSVP statuses in parallel (instead of one-at-a-time) for speed
+    await Promise.all(items.filter(i => i._rsvpRef).map(async i => {
+      try {
+        const snap = await getDoc(i._rsvpRef);
+        i.rsvp = snap.exists() ? snap.data().response : null;
+      } catch(e) { /* leave as null on failure */ }
+    }));
 
     // Sort all by date
     items.sort((a, b) => (a.date + (a.time||'')).localeCompare(b.date + (b.time||'')));

@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=184">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=185">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=184">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=185">
   <title>Team Chat - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=184">
-  <script src="/assets/js/page-guard.js?v=184"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=185">
+  <script src="/assets/js/page-guard.js?v=185"></script>
   <style>
     .chat-layout {
       display: grid;
@@ -347,7 +347,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=184"></script>
+<script src="/assets/js/load-header.js?v=185"></script>
 
 <div class="main-container" style="padding-top:1rem;">
 
@@ -547,6 +547,9 @@
 
     // Unsubscribe previous listener
     if (unsubscribeMessages) unsubscribeMessages();
+
+    // Show loading state immediately so switching doesn't look frozen while messages load
+    document.getElementById('chatMessages').innerHTML = '<div class="no-access-msg">Loading messages...</div>';
 
     // Listen for messages
     const q = query(collection(db, 'chat', channelId, 'messages'), orderBy('timestamp', 'asc'), limit(100));
@@ -780,6 +783,6 @@ document.addEventListener('click', e => {
 });
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=184"></script>
+<script type="module" src="/assets/js/member-auth.js?v=185"></script>
 </body>
 </html>
