@@ -62,15 +62,14 @@ function injectWidget() {
         display:flex;align-items:center;justify-content:space-between;">
         <div style="min-width:0;flex:1;">
           <div style="color:white;font-weight:700;font-size:0.95rem;">⚓ Team Chat</div>
-          <div style="position:relative;display:inline-block;margin-top:4px;max-width:100%;">
+          <div style="display:flex;align-items:center;gap:3px;margin-top:4px;max-width:100%;">
             <select id="widgetChannelSelect" style="
               background:rgba(255,255,255,0.18);color:white;font-weight:600;
               font-size:0.75rem;border:none;outline:none;cursor:pointer;max-width:100%;
-              padding:3px 20px 3px 8px;border-radius:10px;appearance:none;-webkit-appearance:none;-moz-appearance:none;">
+              padding:3px 8px;border-radius:10px;">
             </select>
-            <span id="widgetChannelChevron" style="position:absolute;right:7px;top:50%;
-              transform:translateY(-50%);color:rgba(255,255,255,0.9);font-size:0.6rem;
-              pointer-events:none;display:none;">▾</span>
+            <span id="widgetChannelChevron" style="color:rgba(255,255,255,0.9);font-size:0.6rem;
+              display:none;flex-shrink:0;">▾</span>
           </div>
         </div>
         <div style="display:flex;gap:0.5rem;align-items:center;flex-shrink:0;">
