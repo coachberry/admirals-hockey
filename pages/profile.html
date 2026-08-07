@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=187">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=188">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=187">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=188">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=187">
-  <script src="/assets/js/page-guard.js?v=187"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=188">
+  <script src="/assets/js/page-guard.js?v=188"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -293,7 +293,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=187"></script>
+<script src="/assets/js/load-header.js?v=188"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -557,7 +557,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=187"></script>
+<script src="/assets/js/load-footer.js?v=188"></script>
 
 <!-- MEMBER MODAL v2 -->
 <!-- CHANGE PASSWORD MODAL -->
@@ -750,7 +750,7 @@ function showSection(name) {
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=187"></script>
+<script type="module" src="/assets/js/member-auth.js?v=188"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -1023,41 +1023,57 @@ function showSection(name) {
     const today = new Date().toISOString().split('T')[0];
     const items = [];
 
-    // 1. Summer Hockey games (linked via memberUid)
+    const teams = currentProfile.teams || [];
+    const wantsVarsity = ['varsity','player','coach','admin','superadmin'].includes(role) || teams.includes('varsity');
+    const wantsJv = ['jv','coach','admin','superadmin'].includes(role) || teams.includes('jv');
+
+    // Fetch the shared 'seasons' collection ONCE (was being fetched separately for varsity and JV)
+    const seasonsSnapPromise = (wantsVarsity || wantsJv) ? getDocs(collection(db, 'seasons')) : Promise.resolve(null);
+
+    // 1. Summer Hockey games (linked via memberUid) — discover seasons/teams/games in parallel
     try {
       const summerSeasonsSnap = await getDocs(collection(db, 'summer'));
-      for (const seasonDoc of summerSeasonsSnap.docs) {
-        const seasonId = seasonDoc.id;
-        const teamsSnap = await getDocs(collection(db, 'summer', seasonId, 'teams'));
-        for (const teamDoc of teamsSnap.docs) {
+      const teamsSnaps = await Promise.all(summerSeasonsSnap.docs.map(seasonDoc =>
+        getDocs(collection(db, 'summer', seasonDoc.id, 'teams')).then(snap => ({ seasonId: seasonDoc.id, snap }))
+      ));
+      const myTeams = [];
+      teamsSnaps.forEach(({ seasonId, snap }) => {
+        snap.docs.forEach(teamDoc => {
           const team = teamDoc.data();
           const roster = Array.isArray(team.roster) ? team.roster : [];
-          const isOnTeam = roster.some(p => p.memberUid === currentUser.uid);
-          if (!isOnTeam) continue;
-          const gamesSnap = await getDocs(collection(db, 'summer', seasonId, 'games'));
-          for (const gameDoc of gamesSnap.docs) {
-            const g = gameDoc.data();
-            const gameTeams = [g.homeTeamId, g.awayTeamId];
-            if (!gameTeams.includes(teamDoc.id)) continue;
-            if (!g.date || g.date < today) continue;
-            items.push({ type: 'summer', date: g.date, time: g.time, label: team.name + ' vs ' + (g.homeTeamId === teamDoc.id ? (summerTeams && summerTeams[g.awayTeamId]?.name || 'Opponent') : (summerTeams && summerTeams[g.homeTeamId]?.name || 'Opponent')), sublabel: 'Summer Hockey · ' + (seasonId), rsvp: null, gameId: gameDoc.id, seasonId, canRsvp: true, _rsvpRef: doc(db, 'summer', seasonId, 'games', gameDoc.id, 'rsvps', currentUser.uid) });
+          if (roster.some(p => p.memberUid === currentUser.uid)) {
+            myTeams.push({ seasonId, teamId: teamDoc.id, team });
           }
-        }
-      }
+        });
+      });
+      const gamesSnaps = await Promise.all(myTeams.map(t =>
+        getDocs(collection(db, 'summer', t.seasonId, 'games')).then(snap => ({ ...t, snap }))
+      ));
+      gamesSnaps.forEach(({ seasonId, teamId, team, snap }) => {
+        snap.docs.forEach(gameDoc => {
+          const g = gameDoc.data();
+          const gameTeams = [g.homeTeamId, g.awayTeamId];
+          if (!gameTeams.includes(teamId)) return;
+          if (!g.date || g.date < today) return;
+          items.push({ type: 'summer', date: g.date, time: g.time, label: team.name + ' vs ' + (g.homeTeamId === teamId ? (summerTeams && summerTeams[g.awayTeamId]?.name || 'Opponent') : (summerTeams && summerTeams[g.homeTeamId]?.name || 'Opponent')), sublabel: 'Summer Hockey · ' + seasonId, rsvp: null, gameId: gameDoc.id, seasonId, canRsvp: true, _rsvpRef: doc(db, 'summer', seasonId, 'games', gameDoc.id, 'rsvps', currentUser.uid) });
+        });
+      });
     } catch(e) { console.error('Summer games error:', e); }
 
-    // 2. Varsity schedule (if varsity or player role)
-    const teams = currentProfile.teams || [];
-    if (['varsity','player','coach','admin','superadmin'].includes(role) || teams.includes('varsity')) {
+    const seasonsSnap = await seasonsSnapPromise;
+
+    // 2. Varsity schedule (if varsity or player role) — fetch all seasons' games in parallel
+    if (wantsVarsity && seasonsSnap) {
       try {
-        const seasonsSnap = await getDocs(collection(db, 'seasons'));
-        for (const seasonDoc of seasonsSnap.docs) {
+        const relevantSeasons = seasonsSnap.docs.filter(d => !d.data().varsityScheduleHidden);
+        const gamesSnaps = await Promise.all(relevantSeasons.map(seasonDoc =>
+          getDocs(collection(db, 'seasons', seasonDoc.id, 'schedule')).then(snap => ({ seasonDoc, snap }))
+        ));
+        gamesSnaps.forEach(({ seasonDoc, snap }) => {
           const sd = seasonDoc.data();
-          if (sd.varsityScheduleHidden) continue;
-          const gamesSnap = await getDocs(collection(db, 'seasons', seasonDoc.id, 'schedule'));
-          for (const g of gamesSnap.docs) {
+          snap.docs.forEach(g => {
             const gd = g.data();
-            if (!gd.date || gd.date < today) continue;
+            if (!gd.date || gd.date < today) return;
             const isPractice = gd.gameType === 'Practice';
             items.push({
               type: 'varsity',
@@ -1068,22 +1084,23 @@ function showSection(name) {
               rsvp: null, gameId: g.id, seasonId: seasonDoc.id, canRsvp: true,
               _rsvpRef: doc(db, 'seasons', seasonDoc.id, 'schedule', g.id, 'rsvps', currentUser.uid)
             });
-          }
-        }
+          });
+        });
       } catch(e) { console.error('Varsity schedule error:', e); }
     }
 
-    // 3. JV schedule (if jv role)
-    if (['jv','coach','admin','superadmin'].includes(role) || teams.includes('jv')) {
+    // 3. JV schedule (if jv role) — fetch all seasons' games in parallel
+    if (wantsJv && seasonsSnap) {
       try {
-        const seasonsSnap = await getDocs(collection(db, 'seasons'));
-        for (const seasonDoc of seasonsSnap.docs) {
+        const relevantSeasons = seasonsSnap.docs.filter(d => d.data().jvEnabled && !d.data().jvScheduleHidden);
+        const gamesSnaps = await Promise.all(relevantSeasons.map(seasonDoc =>
+          getDocs(collection(db, 'jv-schedule', seasonDoc.id, 'games')).then(snap => ({ seasonDoc, snap }))
+        ));
+        gamesSnaps.forEach(({ seasonDoc, snap }) => {
           const sd = seasonDoc.data();
-          if (!sd.jvEnabled || sd.jvScheduleHidden) continue;
-          const gamesSnap = await getDocs(collection(db, 'jv-schedule', seasonDoc.id, 'games'));
-          for (const g of gamesSnap.docs) {
+          snap.docs.forEach(g => {
             const gd = g.data();
-            if (!gd.date || gd.date < today) continue;
+            if (!gd.date || gd.date < today) return;
             const isPractice = gd.gameType === 'Practice';
             items.push({
               type: 'jv',
@@ -1094,8 +1111,8 @@ function showSection(name) {
               rsvp: null, gameId: g.id, seasonId: seasonDoc.id, canRsvp: true,
               _rsvpRef: doc(db, 'jv-schedule', seasonDoc.id, 'games', g.id, 'rsvps', currentUser.uid)
             });
-          }
-        }
+          });
+        });
       } catch(e) { console.error('JV schedule error:', e); }
     }
 
