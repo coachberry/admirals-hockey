@@ -775,20 +775,42 @@ document.getElementById('addBoardBtn').addEventListener('click', () => { window.
 // LOAD ROSTER
 // ============================================
 let _rosterMembersMap = {};
+let _rosterMembersByName = {};
+let _rosterUsedUids = new Set();
 
 async function loadMembersMap() {
   const snap = await getDocs(collection(db, 'members'));
   const map = {};
+  const byName = {};
   snap.forEach(d => {
     const m = d.data();
-    map[d.id] = m.displayName || m.email || 'Member';
+    const name = m.displayName || m.email || 'Member';
+    map[d.id] = name;
+    const key = (m.displayName || '').trim().toLowerCase();
+    if (key) byName[key] = { uid: d.id, name };
   });
-  return map;
+  return { map, byName };
+}
+
+async function loadUsedUids(rosterCollection, seasonId) {
+  const usedUids = new Set();
+  const subCollections = rosterCollection === 'jv-roster' ? ['players', 'coaches'] : ['players', 'coaches', 'boards'];
+  for (const cn of subCollections) {
+    const rSnap = await getDocs(collection(db, rosterCollection, seasonId, cn));
+    rSnap.forEach(d => {
+      const data = d.data();
+      if (data.memberUid) usedUids.add(data.memberUid);
+    });
+  }
+  return usedUids;
 }
 
 async function loadRoster(seasonId) {
   if (!seasonId) return;
-  _rosterMembersMap = await loadMembersMap();
+  const { map, byName } = await loadMembersMap();
+  _rosterMembersMap = map;
+  _rosterMembersByName = byName;
+  _rosterUsedUids = await loadUsedUids('roster', seasonId);
   await loadPlayers(seasonId);
   await loadCoaches(seasonId);
   await loadBoardMembers(seasonId);
@@ -899,10 +921,21 @@ function buildRosterItem(m) {
   const captainLabel = m.captain ? ' - Captain' : m.alternate ? ' - Alternate Captain' : '';
   const label = m.type === 'player' ? `#${m.number} - ${m.name}${captainLabel}` : m.name;
   const linkedName = m.memberUid ? (_rosterMembersMap[m.memberUid] || 'Unknown member') : '';
+  let statusHtml = '';
+  if (linkedName) {
+    statusHtml = `<span style="display:block;color:#2e7d32;font-size:0.75rem;margin-top:2px;">🔗 Linked to: ${linkedName}</span>`;
+  } else {
+    const possibleMatch = _rosterMembersByName[(m.name || '').trim().toLowerCase()];
+    if (possibleMatch && !_rosterUsedUids.has(possibleMatch.uid)) {
+      statusHtml = `<span style="display:block;color:#e65100;font-size:0.75rem;margin-top:2px;">⚠️ Account found (${possibleMatch.name}) — not linked</span>`;
+    } else {
+      statusHtml = `<span style="display:block;color:#999;font-size:0.75rem;margin-top:2px;">No account found</span>`;
+    }
+  }
   item.innerHTML = `
     <div class="item-info">
       ${m.photoURL ? `<img src="${m.photoURL}" class="item-photo">` : ''}
-      <div><strong>${label}</strong><span>${subtitle}</span>${linkedName ? `<span style="display:block;color:#2e7d32;font-size:0.75rem;margin-top:2px;">🔗 Linked to: ${linkedName}</span>` : ''}</div>
+      <div><strong>${label}</strong><span>${subtitle}</span>${statusHtml}</div>
     </div>
     <div>
       <button class="btn-secondary" style="font-size:0.75rem;padding:3px 8px;background:${m.memberUid?'white':'#c62828'};color:${m.memberUid?'#2e7d32':'white'};border-color:${m.memberUid?'#2e7d32':'#c62828'};" onclick="linkRosterMember(window._rosterMode==='jv'?(window._jvSaveSeasonId||window.jvCurrentSeasonId):window.currentSeasonId,'${m.type==='player'?'players':m.type==='coach'?'coaches':'boards'}','${m.id}','${m.memberUid||''}',window._rosterMode==='jv'?'jv-roster':'roster')" title="${m.memberUid?'Linked - click to change':'Not linked - click to link'}">${m.memberUid?'🔗 Linked':'Link'}</button>
@@ -3433,7 +3466,10 @@ async function loadJvRosterSeasons() {
 
 async function loadJvRoster(seasonId) {
   if (!seasonId) return;
-  _rosterMembersMap = await loadMembersMap();
+  const { map, byName } = await loadMembersMap();
+  _rosterMembersMap = map;
+  _rosterMembersByName = byName;
+  _rosterUsedUids = await loadUsedUids('jv-roster', seasonId);
   await loadJvPlayers(seasonId);
   await loadJvCoaches(seasonId);
 }
@@ -3468,11 +3504,22 @@ function buildJvRosterItem(m, type, seasonId) {
   const label = type === 'player' ? `${m.number ? '#' + m.number + ' - ' : ''}${m.name}` : m.name;
   const sub = type === 'player' ? m.position || '' : m.title || '';
   const linkedName = m.memberUid ? (_rosterMembersMap[m.memberUid] || 'Unknown member') : '';
+  let jvStatusHtml = '';
+  if (linkedName) {
+    jvStatusHtml = `<span style="display:block;color:#2e7d32;font-size:0.75rem;margin-top:2px;">🔗 Linked to: ${linkedName}</span>`;
+  } else {
+    const possibleMatch = _rosterMembersByName[(m.name || '').trim().toLowerCase()];
+    if (possibleMatch && !_rosterUsedUids.has(possibleMatch.uid)) {
+      jvStatusHtml = `<span style="display:block;color:#e65100;font-size:0.75rem;margin-top:2px;">⚠️ Account found (${possibleMatch.name}) — not linked</span>`;
+    } else {
+      jvStatusHtml = `<span style="display:block;color:#999;font-size:0.75rem;margin-top:2px;">No account found</span>`;
+    }
+  }
   item.innerHTML = `
     <div class="item-info"><div>
       <strong>${label}</strong>
       <span>${sub}</span>
-      ${linkedName ? `<span style="display:block;color:#2e7d32;font-size:0.75rem;margin-top:2px;">🔗 Linked to: ${linkedName}</span>` : ''}
+      ${jvStatusHtml}
     </div></div>
     <div style="display:flex;gap:0.5rem;">
       <button class="btn-secondary" style="font-size:0.75rem;padding:3px 8px;background:${m.memberUid?'white':'#c62828'};color:${m.memberUid?'#2e7d32':'white'};border-color:${m.memberUid?'#2e7d32':'#c62828'};" onclick="linkRosterMember('${seasonId}','${type==='player'?'players':'coaches'}','${m.id || m.name}','${m.memberUid||''}','jv-roster')" title="${m.memberUid?'Linked - click to change':'Not linked - click to link'}">${m.memberUid?'🔗 Linked':'Link'}</button>
