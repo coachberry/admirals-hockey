@@ -5,7 +5,8 @@ const VAPID_KEY = "BCbLDoNo9nX8669RUa_E_Jne-_EjXXtai1-UeOkJhWU_fRSEGOQsF0KXPXAym
 
 function showDebug(msg) { /* debug disabled */ }
 
-export async function initPushNotifications(app, user) {
+export async function initPushNotifications(app, user, options) {
+  const requirePrompt = options && options.requirePrompt;
   showDebug('--- Push init started ---');
   if (!('serviceWorker' in navigator)) { showDebug('ERROR: no serviceWorker support'); return; }
   if (!('Notification' in window)) { showDebug('ERROR: no Notification support'); return; }
@@ -17,6 +18,12 @@ export async function initPushNotifications(app, user) {
     if (Notification.permission === 'denied') { showDebug('ERROR: permission denied'); return; }
 
     if (Notification.permission === 'default') {
+      // IMPORTANT: Notification.requestPermission() must be triggered by a direct user
+      // gesture (e.g. a button click) — some mobile browsers (notably iOS Safari) will
+      // silently hang this call indefinitely if invoked automatically on page load,
+      // which previously caused long freezes across the site on every page navigation.
+      // So on automatic calls (no explicit user click), skip prompting entirely.
+      if (!requirePrompt) { showDebug('Skipping auto-prompt (no user gesture)'); return; }
       showDebug('Requesting permission...');
       const perm = await Notification.requestPermission();
       showDebug('Permission result: ' + perm);

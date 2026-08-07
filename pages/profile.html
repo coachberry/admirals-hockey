@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=189">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=190">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=189">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=190">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=189">
-  <script src="/assets/js/page-guard.js?v=189"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=190">
+  <script src="/assets/js/page-guard.js?v=190"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -293,7 +293,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=189"></script>
+<script src="/assets/js/load-header.js?v=190"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -316,6 +316,18 @@
 
   <!-- PROFILE LAYOUT -->
   <div id="profileLayout" class="profile-layout" style="display:none;">
+
+    <!-- PUSH NOTIFICATIONS OPT-IN -->
+    <div id="pushNotifBanner" style="display:none;grid-column:1/-1;background:#eef5ff;border:1px solid #90caf9;border-radius:8px;padding:1rem 1.25rem;margin-bottom:0.5rem;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <span style="font-size:1.4rem;flex-shrink:0;">🔔</span>
+        <div>
+          <div style="font-weight:700;color:#333;">Enable Push Notifications</div>
+          <div style="font-size:0.85rem;color:#555;">Get alerts for schedule changes, news, and messages.</div>
+        </div>
+      </div>
+      <button id="pushNotifEnableBtn" class="btn-primary" style="flex-shrink:0;">Enable</button>
+    </div>
 
     <!-- PROFILE ALERTS -->
     <div id="profileAlertBanner" style="display:none;grid-column:1/-1;background:#fff8e1;border:1px solid #f0c040;border-radius:8px;padding:1rem 1.25rem;margin-bottom:0.5rem;display:none;align-items:flex-start;gap:0.75rem;">
@@ -557,7 +569,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=189"></script>
+<script src="/assets/js/load-footer.js?v=190"></script>
 
 <!-- MEMBER MODAL v2 -->
 <!-- CHANGE PASSWORD MODAL -->
@@ -750,12 +762,13 @@ function showSection(name) {
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=189"></script>
+<script type="module" src="/assets/js/member-auth.js?v=190"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { initPushNotifications } from "/assets/js/push-notifications.js?v=190";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
@@ -778,6 +791,18 @@ function showSection(name) {
   document.getElementById('notLoggedIn').style.display = 'none';
   document.getElementById('profileLayout').style.display = 'none';
 
+  document.getElementById('pushNotifEnableBtn')?.addEventListener('click', async () => {
+    const btn = document.getElementById('pushNotifEnableBtn');
+    btn.disabled = true;
+    btn.textContent = 'Enabling...';
+    try {
+      await initPushNotifications(app, currentUser, { requirePrompt: true });
+    } catch (e) {
+      console.error('Push notification enable error:', e);
+    }
+    document.getElementById('pushNotifBanner').style.display = 'none';
+  });
+
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       currentUser = user;
@@ -799,6 +824,12 @@ function showSection(name) {
       showProfile(user, currentProfile);
       // Show contextual alert
       await showProfileAlert(user, currentProfile);
+
+      // Show "Enable Notifications" banner only if the browser supports it and permission is still undecided
+      const pushBanner = document.getElementById('pushNotifBanner');
+      if (pushBanner && 'Notification' in window && Notification.permission === 'default') {
+        pushBanner.style.display = 'flex';
+      }
     } else {
       document.getElementById('notLoggedIn').style.display = 'block';
       document.getElementById('profileLayout').style.display = 'none';
