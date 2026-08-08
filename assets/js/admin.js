@@ -2874,6 +2874,8 @@ window.viewScheduleGameRsvp = async function(gameId, seasonId) {
   modal.classList.add('active');
   document.getElementById('rsvpViewerContent').innerHTML = '<p style="color:#999;">Loading...</p>';
 
+  try {
+
   const gSnap = await getDoc(doc(db, 'seasons', seasonId, 'schedule', gameId));
   const g = gSnap.exists() ? gSnap.data() : {};
   const d = g.date ? new Date(g.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }) : '';
@@ -2926,6 +2928,11 @@ window.viewScheduleGameRsvp = async function(gameId, seasonId) {
     ${players.length === 0 ? '<p style="color:#999;font-style:italic;">No players on this roster yet.</p>' : [...inList,...outList,...pending].map(p => playerRow(p, rsvps[rsvpKey(p)]?.response, true)).join('')}
     <div style="font-weight:700;font-size:0.85rem;color:#5D1725;margin:1rem 0 0.25rem;">Coaches</div>
     ${coaches.length === 0 ? '<p style="color:#999;font-style:italic;">No coaches on this roster yet.</p>' : [...coachInList,...coachOutList,...coachPending].map(c => playerRow(c, rsvps[rsvpKey(c)]?.response, false)).join('')}`;
+
+  } catch (err) {
+    console.error('viewScheduleGameRsvp error:', err);
+    document.getElementById('rsvpViewerContent').innerHTML = '<p style="color:#c62828;">Could not load RSVPs. Please close this and try again.</p>';
+  }
 };
 
 window.adminSetScheduleRsvp = async function(gameId, seasonId, uid, name, response, isActive) {
