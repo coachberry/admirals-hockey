@@ -807,10 +807,19 @@ async function loadUsedUids(rosterCollection, seasonId) {
 
 async function loadRoster(seasonId) {
   if (!seasonId) return;
-  const { map, byName } = await loadMembersMap();
-  _rosterMembersMap = map;
-  _rosterMembersByName = byName;
-  _rosterUsedUids = await loadUsedUids('roster', seasonId);
+  // Wrap in try/catch: if this enhancement data fails to load (e.g. network hiccup),
+  // the actual roster must still load rather than the whole tab silently breaking.
+  try {
+    const { map, byName } = await loadMembersMap();
+    _rosterMembersMap = map;
+    _rosterMembersByName = byName;
+    _rosterUsedUids = await loadUsedUids('roster', seasonId);
+  } catch (e) {
+    console.error('loadRoster: linked-status data failed to load, continuing without it', e);
+    _rosterMembersMap = {};
+    _rosterMembersByName = {};
+    _rosterUsedUids = new Set();
+  }
   await loadPlayers(seasonId);
   await loadCoaches(seasonId);
   await loadBoardMembers(seasonId);
@@ -3466,10 +3475,17 @@ async function loadJvRosterSeasons() {
 
 async function loadJvRoster(seasonId) {
   if (!seasonId) return;
-  const { map, byName } = await loadMembersMap();
-  _rosterMembersMap = map;
-  _rosterMembersByName = byName;
-  _rosterUsedUids = await loadUsedUids('jv-roster', seasonId);
+  try {
+    const { map, byName } = await loadMembersMap();
+    _rosterMembersMap = map;
+    _rosterMembersByName = byName;
+    _rosterUsedUids = await loadUsedUids('jv-roster', seasonId);
+  } catch (e) {
+    console.error('loadJvRoster: linked-status data failed to load, continuing without it', e);
+    _rosterMembersMap = {};
+    _rosterMembersByName = {};
+    _rosterUsedUids = new Set();
+  }
   await loadJvPlayers(seasonId);
   await loadJvCoaches(seasonId);
 }
