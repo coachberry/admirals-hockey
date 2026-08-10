@@ -923,6 +923,41 @@ window.linkRosterMember = async function(seasonId, collName, playerId, currentUi
   };
 };
 
+window.linkRosterParents = async function(seasonId, collName, playerId, currentParentUids, rosterCollection) {
+  const snap = await getDocs(collection(db, 'members'));
+  const members = [];
+  snap.forEach(d => members.push({ id: d.id, ...d.data() }));
+  members.sort((a,b) => (a.displayName||'').localeCompare(b.displayName||''));
+
+  const currentSet = new Set(currentParentUids || []);
+
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  const checkboxesHtml = members.map(m => `
+    <label style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0;border-bottom:1px solid #f5f5f5;font-size:0.88rem;">
+      <input type="checkbox" class="parentLinkCb" value="${m.id}" ${currentSet.has(m.id) ? 'checked' : ''}>
+      ${m.displayName || m.email} <span style="color:#999;font-size:0.75rem;">(${m.role || 'member'})</span>
+    </label>`).join('');
+
+  modal.innerHTML = `<div style="background:white;border-radius:8px;padding:1.5rem;max-width:420px;width:90%;max-height:80vh;display:flex;flex-direction:column;">
+    <h3 style="margin-bottom:0.5rem;">Link Parent(s)</h3>
+    <p style="font-size:0.8rem;color:#666;margin-bottom:0.75rem;">Select all member accounts that should be able to see this player's schedule and RSVP for them.</p>
+    <div style="overflow-y:auto;flex:1;margin-bottom:1rem;border:1px solid #eee;border-radius:6px;padding:0 0.75rem;">${checkboxesHtml}</div>
+    <div style="display:flex;gap:0.5rem;">
+      <button id="rpSave" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.6rem 1.2rem;cursor:pointer;font-weight:600;">Save</button>
+      <button id="rpCancel" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:0.6rem 1.2rem;cursor:pointer;">Cancel</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+  modal.querySelector('#rpCancel').onclick = () => modal.remove();
+  modal.querySelector('#rpSave').onclick = async () => {
+    const selected = Array.from(modal.querySelectorAll('.parentLinkCb:checked')).map(cb => cb.value);
+    await setDoc(doc(db, rosterCollection, seasonId, collName, playerId), { parentUids: selected }, { merge: true });
+    modal.remove();
+    if (rosterCollection === 'jv-roster') loadJvRoster(seasonId); else loadRoster(seasonId);
+  };
+};
+
 function buildRosterItem(m) {
   const item = document.createElement('div');
   item.className = 'item';
@@ -941,13 +976,18 @@ function buildRosterItem(m) {
       statusHtml = `<span style="display:block;color:#999;font-size:0.75rem;margin-top:2px;">No account found</span>`;
     }
   }
+  const parentUids = Array.isArray(m.parentUids) ? m.parentUids : [];
+  const parentNames = parentUids.map(uid => _rosterMembersMap[uid] || 'Unknown').filter(Boolean);
+  const parentsHtml = (m.type === 'player' && parentNames.length)
+    ? `<span style="display:block;color:#1565c0;font-size:0.75rem;margin-top:2px;">👪 Parent(s): ${parentNames.join(', ')}</span>` : '';
   item.innerHTML = `
     <div class="item-info">
       ${m.photoURL ? `<img src="${m.photoURL}" class="item-photo">` : ''}
-      <div><strong>${label}</strong><span>${subtitle}</span>${statusHtml}</div>
+      <div><strong>${label}</strong><span>${subtitle}</span>${statusHtml}${parentsHtml}</div>
     </div>
     <div>
       <button class="btn-secondary" style="font-size:0.75rem;padding:3px 8px;background:${m.memberUid?'white':'#c62828'};color:${m.memberUid?'#2e7d32':'white'};border-color:${m.memberUid?'#2e7d32':'#c62828'};" onclick="linkRosterMember(window._rosterMode==='jv'?(window._jvSaveSeasonId||window.jvCurrentSeasonId):window.currentSeasonId,'${m.type==='player'?'players':m.type==='coach'?'coaches':'boards'}','${m.id}','${m.memberUid||''}',window._rosterMode==='jv'?'jv-roster':'roster')" title="${m.memberUid?'Linked - click to change':'Not linked - click to link'}">${m.memberUid?'🔗 Linked':'Link'}</button>
+      ${m.type === 'player' ? `<button class="btn-secondary" style="font-size:0.75rem;padding:3px 8px;" onclick='linkRosterParents(window._rosterMode==="jv"?(window._jvSaveSeasonId||window.jvCurrentSeasonId):window.currentSeasonId,"players","${m.id}",${JSON.stringify(parentUids)},window._rosterMode==="jv"?"jv-roster":"roster")'>👪 Parents${parentUids.length ? ' (' + parentUids.length + ')' : ''}</button>` : ''}
       <button class="btn-edit" onclick="editMember('${m.id}', '${m.type}')">Edit</button>
       <button class="btn-delete" onclick="deleteRosterMember('${m.id}', '${m.type}')">Delete</button>
     </div>
