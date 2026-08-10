@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=200">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=201">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=200">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=201">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=200">
-  <script src="/assets/js/page-guard.js?v=200"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=201">
+  <script src="/assets/js/page-guard.js?v=201"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -293,7 +293,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=200"></script>
+<script src="/assets/js/load-header.js?v=201"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -569,7 +569,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=200"></script>
+<script src="/assets/js/load-footer.js?v=201"></script>
 
 <!-- MEMBER MODAL v2 -->
 <!-- CHANGE PASSWORD MODAL -->
@@ -762,13 +762,13 @@ function showSection(name) {
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=200"></script>
+<script type="module" src="/assets/js/member-auth.js?v=201"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { initPushNotifications } from "/assets/js/push-notifications.js?v=200";
+  import { initPushNotifications } from "/assets/js/push-notifications.js?v=201";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
@@ -1058,35 +1058,63 @@ function showSection(name) {
     const wantsVarsity = ['varsity','player','coach','admin','superadmin'].includes(role) || teams.includes('varsity');
     const wantsJv = ['jv','coach','admin','superadmin'].includes(role) || teams.includes('jv');
 
-    // Fetch the shared 'seasons' collection ONCE (was being fetched separately for varsity and JV)
-    const seasonsSnapPromise = (wantsVarsity || wantsJv) ? getDocs(collection(db, 'seasons')) : Promise.resolve(null);
+    // Fetch the shared 'seasons' collection ONCE. Always fetched (not gated by wantsVarsity/wantsJv)
+    // since a parent-only account may need it to find their linked children's games.
+    const seasonsSnapPromise = getDocs(collection(db, 'seasons'));
 
-    // 1. Summer Hockey games (linked via memberUid) — discover seasons/teams/games in parallel
+    function childRsvpKey(player) {
+      return player.memberUid || 'manual_' + (player.name || '').replace(/[^a-zA-Z0-9]/g, '_');
+    }
+
+    // 1. Summer Hockey games — self (linked via memberUid) AND any linked children (via parentUids)
     try {
       const summerSeasonsSnap = await getDocs(collection(db, 'summer'));
       const teamsSnaps = await Promise.all(summerSeasonsSnap.docs.map(seasonDoc =>
         getDocs(collection(db, 'summer', seasonDoc.id, 'teams')).then(snap => ({ seasonId: seasonDoc.id, snap }))
       ));
-      const myTeams = [];
+      // Each entry represents either "me" or "my child" on a specific team
+      const relevantEntries = [];
       teamsSnaps.forEach(({ seasonId, snap }) => {
         snap.docs.forEach(teamDoc => {
           const team = teamDoc.data();
           const roster = Array.isArray(team.roster) ? team.roster : [];
           if (roster.some(p => p.memberUid === currentUser.uid)) {
-            myTeams.push({ seasonId, teamId: teamDoc.id, team });
+            relevantEntries.push({ seasonId, teamId: teamDoc.id, team, forChild: null, targetUid: currentUser.uid });
           }
+          roster.forEach(p => {
+            if (Array.isArray(p.parentUids) && p.parentUids.includes(currentUser.uid)) {
+              relevantEntries.push({ seasonId, teamId: teamDoc.id, team, forChild: p.name, targetUid: childRsvpKey(p) });
+            }
+          });
         });
       });
-      const gamesSnaps = await Promise.all(myTeams.map(t =>
-        getDocs(collection(db, 'summer', t.seasonId, 'games')).then(snap => ({ ...t, snap }))
+      // Dedupe season+team combos before fetching games (e.g. multiple linked kids on the same team)
+      const uniqueSeasonTeam = {};
+      relevantEntries.forEach(e => { uniqueSeasonTeam[e.seasonId + '|' + e.teamId] = e; });
+      const gamesSnaps = await Promise.all(Object.values(uniqueSeasonTeam).map(e =>
+        getDocs(collection(db, 'summer', e.seasonId, 'games')).then(snap => ({ seasonId: e.seasonId, teamId: e.teamId, snap }))
       ));
-      gamesSnaps.forEach(({ seasonId, teamId, team, snap }) => {
+      const gamesByKey = {};
+      gamesSnaps.forEach(g => { gamesByKey[g.seasonId + '|' + g.teamId] = g.snap; });
+
+      relevantEntries.forEach(({ seasonId, teamId, team, forChild, targetUid }) => {
+        const snap = gamesByKey[seasonId + '|' + teamId];
+        if (!snap) return;
         snap.docs.forEach(gameDoc => {
           const g = gameDoc.data();
           const gameTeams = [g.homeTeamId, g.awayTeamId];
           if (!gameTeams.includes(teamId)) return;
           if (!g.date || g.date < today) return;
-          items.push({ type: 'summer', date: g.date, time: g.time, label: team.name + ' vs ' + (g.homeTeamId === teamId ? (summerTeams && summerTeams[g.awayTeamId]?.name || 'Opponent') : (summerTeams && summerTeams[g.homeTeamId]?.name || 'Opponent')), sublabel: 'Summer Hockey · ' + seasonId, rsvp: null, gameId: gameDoc.id, seasonId, canRsvp: true, _rsvpRef: doc(db, 'summer', seasonId, 'games', gameDoc.id, 'rsvps', currentUser.uid) });
+          const opponentName = g.homeTeamId === teamId ? (summerTeams && summerTeams[g.awayTeamId]?.name || 'Opponent') : (summerTeams && summerTeams[g.homeTeamId]?.name || 'Opponent');
+          items.push({
+            type: 'summer',
+            forChild,
+            date: g.date, time: g.time,
+            label: team.name + ' vs ' + opponentName + (forChild ? ' — ' + forChild : ''),
+            sublabel: 'Summer Hockey · ' + seasonId,
+            rsvp: null, gameId: gameDoc.id, seasonId, canRsvp: true, targetUid,
+            _rsvpRef: doc(db, 'summer', seasonId, 'games', gameDoc.id, 'rsvps', targetUid)
+          });
         });
       });
     } catch(e) { console.error('Summer games error:', e); }
@@ -1112,7 +1140,7 @@ function showSection(name) {
               date: gd.date, time: gd.time,
               label: isPractice ? (gd.notes || 'Team Practice') : ('vs ' + (gd.opponent || 'TBD')),
               sublabel: (isPractice ? 'Varsity Practice · ' : 'Varsity · ') + sd.label,
-              rsvp: null, gameId: g.id, seasonId: seasonDoc.id, canRsvp: true,
+              rsvp: null, gameId: g.id, seasonId: seasonDoc.id, canRsvp: true, targetUid: currentUser.uid,
               _rsvpRef: doc(db, 'seasons', seasonDoc.id, 'schedule', g.id, 'rsvps', currentUser.uid)
             });
           });
@@ -1139,12 +1167,91 @@ function showSection(name) {
               date: gd.date, time: gd.time,
               label: isPractice ? (gd.notes || 'Team Practice') : ('vs ' + (gd.opponent || 'TBD')),
               sublabel: (isPractice ? 'JV Practice · ' : 'JV · ') + sd.label,
-              rsvp: null, gameId: g.id, seasonId: seasonDoc.id, canRsvp: true,
+              rsvp: null, gameId: g.id, seasonId: seasonDoc.id, canRsvp: true, targetUid: currentUser.uid,
               _rsvpRef: doc(db, 'jv-schedule', seasonDoc.id, 'games', g.id, 'rsvps', currentUser.uid)
             });
           });
         });
       } catch(e) { console.error('JV schedule error:', e); }
+    }
+
+    // 3.5. Linked children's Varsity + JV games/practices (via parentUids on the roster) — for any parent, regardless of their own role
+    if (seasonsSnap) {
+      try {
+        const allSeasons = seasonsSnap.docs;
+
+        const varsitySeasons = allSeasons.filter(d => !d.data().varsityScheduleHidden);
+        const vData = await Promise.all(varsitySeasons.map(async seasonDoc => {
+          const [rosterSnap, gamesSnap] = await Promise.all([
+            getDocs(collection(db, 'roster', seasonDoc.id, 'players')),
+            getDocs(collection(db, 'seasons', seasonDoc.id, 'schedule'))
+          ]);
+          return { seasonDoc, rosterSnap, gamesSnap };
+        }));
+        vData.forEach(({ seasonDoc, rosterSnap, gamesSnap }) => {
+          const sd = seasonDoc.data();
+          const myChildren = [];
+          rosterSnap.forEach(pDoc => {
+            const p = pDoc.data();
+            if (Array.isArray(p.parentUids) && p.parentUids.includes(currentUser.uid)) myChildren.push(p);
+          });
+          if (!myChildren.length) return;
+          gamesSnap.docs.forEach(g => {
+            const gd = g.data();
+            if (!gd.date || gd.date < today) return;
+            const isPractice = gd.gameType === 'Practice';
+            myChildren.forEach(child => {
+              const targetUid = childRsvpKey(child);
+              items.push({
+                type: 'varsity',
+                practice: isPractice,
+                forChild: child.name,
+                date: gd.date, time: gd.time,
+                label: (isPractice ? (gd.notes || 'Team Practice') : ('vs ' + (gd.opponent || 'TBD'))) + ' — ' + child.name,
+                sublabel: (isPractice ? 'Varsity Practice · ' : 'Varsity · ') + sd.label,
+                rsvp: null, gameId: g.id, seasonId: seasonDoc.id, canRsvp: true, targetUid,
+                _rsvpRef: doc(db, 'seasons', seasonDoc.id, 'schedule', g.id, 'rsvps', targetUid)
+              });
+            });
+          });
+        });
+
+        const jvSeasons = allSeasons.filter(d => d.data().jvEnabled && !d.data().jvScheduleHidden);
+        const jData = await Promise.all(jvSeasons.map(async seasonDoc => {
+          const [rosterSnap, gamesSnap] = await Promise.all([
+            getDocs(collection(db, 'jv-roster', seasonDoc.id, 'players')),
+            getDocs(collection(db, 'jv-schedule', seasonDoc.id, 'games'))
+          ]);
+          return { seasonDoc, rosterSnap, gamesSnap };
+        }));
+        jData.forEach(({ seasonDoc, rosterSnap, gamesSnap }) => {
+          const sd = seasonDoc.data();
+          const myChildren = [];
+          rosterSnap.forEach(pDoc => {
+            const p = pDoc.data();
+            if (Array.isArray(p.parentUids) && p.parentUids.includes(currentUser.uid)) myChildren.push(p);
+          });
+          if (!myChildren.length) return;
+          gamesSnap.docs.forEach(g => {
+            const gd = g.data();
+            if (!gd.date || gd.date < today) return;
+            const isPractice = gd.gameType === 'Practice';
+            myChildren.forEach(child => {
+              const targetUid = childRsvpKey(child);
+              items.push({
+                type: 'jv',
+                practice: isPractice,
+                forChild: child.name,
+                date: gd.date, time: gd.time,
+                label: (isPractice ? (gd.notes || 'Team Practice') : ('vs ' + (gd.opponent || 'TBD'))) + ' — ' + child.name,
+                sublabel: (isPractice ? 'JV Practice · ' : 'JV · ') + sd.label,
+                rsvp: null, gameId: g.id, seasonId: seasonDoc.id, canRsvp: true, targetUid,
+                _rsvpRef: doc(db, 'jv-schedule', seasonDoc.id, 'games', g.id, 'rsvps', targetUid)
+              });
+            });
+          });
+        });
+      } catch(e) { console.error('Linked children (Varsity/JV) error:', e); }
     }
 
     // 4. Team Events
@@ -1196,13 +1303,13 @@ function showSection(name) {
             + '</div>';
         } else if (item.type === 'summer') {
           rsvpHtml = '<div style="display:flex;gap:0.4rem;margin-top:0.5rem;">'
-            + '<button data-etype="summer" data-sid="'+item.seasonId+'" data-gid="'+item.gameId+'" data-resp="yes" data-active="'+inActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:'+(inActive?'#2e7d32':'white')+';color:'+(inActive?'white':'#2e7d32')+';">In</button>'
-            + '<button data-etype="summer" data-sid="'+item.seasonId+'" data-gid="'+item.gameId+'" data-resp="no" data-active="'+outActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:'+(outActive?'#c62828':'white')+';color:'+(outActive?'white':'#c62828')+';">Out</button>'
+            + '<button data-etype="summer" data-sid="'+item.seasonId+'" data-gid="'+item.gameId+'" data-uid="'+item.targetUid+'" data-childname="'+(item.forChild||'')+'" data-resp="yes" data-active="'+inActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:'+(inActive?'#2e7d32':'white')+';color:'+(inActive?'white':'#2e7d32')+';">In</button>'
+            + '<button data-etype="summer" data-sid="'+item.seasonId+'" data-gid="'+item.gameId+'" data-uid="'+item.targetUid+'" data-childname="'+(item.forChild||'')+'" data-resp="no" data-active="'+outActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:'+(outActive?'#c62828':'white')+';color:'+(outActive?'white':'#c62828')+';">Out</button>'
             + '</div>';
         } else if (item.type === 'varsity' || item.type === 'jv') {
           rsvpHtml = '<div style="display:flex;gap:0.4rem;margin-top:0.5rem;">'
-            + '<button data-etype="'+item.type+'" data-sid="'+item.seasonId+'" data-gid="'+item.gameId+'" data-resp="yes" data-active="'+inActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:'+(inActive?'#2e7d32':'white')+';color:'+(inActive?'white':'#2e7d32')+';">In</button>'
-            + '<button data-etype="'+item.type+'" data-sid="'+item.seasonId+'" data-gid="'+item.gameId+'" data-resp="no" data-active="'+outActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:'+(outActive?'#c62828':'white')+';color:'+(outActive?'white':'#c62828')+';">Out</button>'
+            + '<button data-etype="'+item.type+'" data-sid="'+item.seasonId+'" data-gid="'+item.gameId+'" data-uid="'+item.targetUid+'" data-childname="'+(item.forChild||'')+'" data-resp="yes" data-active="'+inActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #2e7d32;background:'+(inActive?'#2e7d32':'white')+';color:'+(inActive?'white':'#2e7d32')+';">In</button>'
+            + '<button data-etype="'+item.type+'" data-sid="'+item.seasonId+'" data-gid="'+item.gameId+'" data-uid="'+item.targetUid+'" data-childname="'+(item.forChild||'')+'" data-resp="no" data-active="'+outActive+'" class="sch-rsvp-btn" style="border-radius:4px;padding:4px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #c62828;background:'+(outActive?'#c62828':'white')+';color:'+(outActive?'white':'#c62828')+';">Out</button>'
             + '</div>';
         }
       }
@@ -1245,19 +1352,30 @@ function showSection(name) {
           }
         });
 
-        // Save to Firestore in background
+        // Save to Firestore in background. For varsity/jv/summer, the target uid is either the
+        // person's own uid (self-RSVP) or their linked child's rsvp key (parent RSVPing for a child) —
+        // never hardcode currentUser.uid here, or a parent's click would silently save under their own
+        // account instead of the child's.
         if (etype === 'event') {
           const rsvpRef = doc(db, 'teamEvents', btn.dataset.id, 'rsvps', currentUser.uid);
           if (isActive) { await deleteDoc(rsvpRef); } else { await setDoc(rsvpRef, { response: resp, name: currentProfile.displayName, timestamp: new Date().toISOString() }); }
-        } else if (etype === 'summer') {
-          const rsvpRef = doc(db, 'summer', btn.dataset.sid, 'games', btn.dataset.gid, 'rsvps', currentUser.uid);
-          if (isActive) { await deleteDoc(rsvpRef); } else { await setDoc(rsvpRef, { response: resp, uid: currentUser.uid, name: currentProfile.displayName, timestamp: new Date().toISOString() }); }
-        } else if (etype === 'varsity') {
-          const rsvpRef = doc(db, 'seasons', btn.dataset.sid, 'schedule', btn.dataset.gid, 'rsvps', currentUser.uid);
-          if (isActive) { await deleteDoc(rsvpRef); } else { await setDoc(rsvpRef, { response: resp, uid: currentUser.uid, name: currentProfile.displayName, timestamp: new Date().toISOString() }); }
-        } else if (etype === 'jv') {
-          const rsvpRef = doc(db, 'jv-schedule', btn.dataset.sid, 'games', btn.dataset.gid, 'rsvps', currentUser.uid);
-          if (isActive) { await deleteDoc(rsvpRef); } else { await setDoc(rsvpRef, { response: resp, uid: currentUser.uid, name: currentProfile.displayName, timestamp: new Date().toISOString() }); }
+        } else if (etype === 'summer' || etype === 'varsity' || etype === 'jv') {
+          const targetUid = btn.dataset.uid;
+          const childName = btn.dataset.childname;
+          const displayName = childName ? (childName + ' (RSVP by parent: ' + (currentProfile.displayName || '') + ')') : currentProfile.displayName;
+          const path = etype === 'summer' ? ['summer', btn.dataset.sid, 'games', btn.dataset.gid, 'rsvps', targetUid]
+            : etype === 'varsity' ? ['seasons', btn.dataset.sid, 'schedule', btn.dataset.gid, 'rsvps', targetUid]
+            : ['jv-schedule', btn.dataset.sid, 'games', btn.dataset.gid, 'rsvps', targetUid];
+          const rsvpRef = doc(db, ...path);
+          if (isActive) {
+            await deleteDoc(rsvpRef);
+          } else {
+            await setDoc(rsvpRef, {
+              response: resp, uid: targetUid, name: displayName,
+              submittedBy: currentUser.uid, submittedByName: currentProfile.displayName,
+              timestamp: new Date().toISOString()
+            });
+          }
         }
       });
     });
