@@ -34,7 +34,13 @@ let unreadByChannel = {};
 let totalUnread = 0;
 
 function getLastRead(channelId) {
-  return parseInt(localStorage.getItem('chat_lastRead_' + channelId) || '0');
+  const stored = localStorage.getItem('chat_lastRead_' + channelId);
+  if (stored) return parseInt(stored);
+  // First time we've ever tracked this channel — treat "now" as the baseline so the
+  // entire pre-existing message history doesn't get counted as unread all at once.
+  const now = Date.now();
+  setLastRead(channelId, now);
+  return now;
 }
 function setLastRead(channelId, ms) {
   localStorage.setItem('chat_lastRead_' + channelId, String(ms));
