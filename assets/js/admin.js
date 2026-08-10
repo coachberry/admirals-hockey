@@ -926,7 +926,12 @@ window.linkRosterMember = async function(seasonId, collName, playerId, currentUi
 window.linkRosterParents = async function(seasonId, collName, playerId, currentParentUids, rosterCollection) {
   const snap = await getDocs(collection(db, 'members'));
   const members = [];
-  snap.forEach(d => members.push({ id: d.id, ...d.data() }));
+  snap.forEach(d => {
+    const m = { id: d.id, ...d.data() };
+    // Players themselves shouldn't show up as candidates for parent-linking
+    const isPlayer = m.role === 'player' || (Array.isArray(m.roles) && m.roles.includes('player'));
+    if (!isPlayer) members.push(m);
+  });
   members.sort((a,b) => (a.displayName||'').localeCompare(b.displayName||''));
 
   const currentSet = new Set(currentParentUids || []);
