@@ -932,7 +932,12 @@ window.linkRosterParents = async function(seasonId, collName, playerId, currentP
     const isPlayer = m.role === 'player' || (Array.isArray(m.roles) && m.roles.includes('player'));
     if (!isPlayer) members.push(m);
   });
-  members.sort((a,b) => (a.displayName||'').localeCompare(b.displayName||''));
+  members.sort((a,b) => {
+    const aIsParent = a.role === 'parent' || (Array.isArray(a.roles) && a.roles.includes('parent'));
+    const bIsParent = b.role === 'parent' || (Array.isArray(b.roles) && b.roles.includes('parent'));
+    if (aIsParent !== bIsParent) return aIsParent ? -1 : 1;
+    return (a.displayName||'').localeCompare(b.displayName||'');
+  });
 
   const currentSet = new Set(currentParentUids || []);
 
