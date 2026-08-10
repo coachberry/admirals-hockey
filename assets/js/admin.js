@@ -2576,6 +2576,8 @@ async function loadMembersTab() {
   if (!list) return;
   list.innerHTML = '<div class="empty-state">Loading...</div>';
 
+  try {
+
   const snap = await getDocs(collection(db, 'members'));
   const members = [];
   snap.forEach(d => members.push({ id: d.id, ...d.data() }));
@@ -2626,6 +2628,11 @@ async function loadMembersTab() {
   });
 
   list.innerHTML = html;
+
+  } catch (err) {
+    console.error('loadMembersTab error:', err);
+    list.innerHTML = '<div class="empty-state">Could not load users. Please try again.</div>';
+  }
 }
 
 window.toggleMemberRole = async function(uid, role, checked, labelEl) {
@@ -2758,6 +2765,8 @@ async function loadRoleRequestsTab() {
   if (!list) return;
   list.innerHTML = '<div class="empty-state">Loading...</div>';
 
+  try {
+
   const snap = await getDocs(collection(db, 'roleRequests'));
   const requests = [];
   snap.forEach(d => requests.push({ id: d.id, ...d.data() }));
@@ -2799,6 +2808,11 @@ async function loadRoleRequestsTab() {
         </div>
       </div>`;
   }).join('');
+
+  } catch (err) {
+    console.error('loadRoleRequestsTab error:', err);
+    list.innerHTML = '<div class="empty-state">Could not load role requests. Please try again.</div>';
+  }
 }
 
 
@@ -3501,24 +3515,34 @@ async function loadJvPlayers(seasonId) {
   const list = document.getElementById('jvPlayersList');
   if (!list) return;
   list.innerHTML = '<div class="empty-state">Loading...</div>';
-  const snap = await getDocs(collection(db, 'jv-roster', seasonId, 'players'));
-  const players = [];
-  snap.forEach(d => players.push(d.data()));
-  if (!players.length) { list.innerHTML = '<div class="empty-state">No players added yet</div>'; return; }
-  list.innerHTML = '';
-  players.sort((a, b) => parseInt(a.number) - parseInt(b.number)).forEach(p => list.appendChild(buildJvRosterItem(p, 'player', seasonId)));
+  try {
+    const snap = await getDocs(collection(db, 'jv-roster', seasonId, 'players'));
+    const players = [];
+    snap.forEach(d => players.push(d.data()));
+    if (!players.length) { list.innerHTML = '<div class="empty-state">No players added yet</div>'; return; }
+    list.innerHTML = '';
+    players.sort((a, b) => parseInt(a.number) - parseInt(b.number)).forEach(p => list.appendChild(buildJvRosterItem(p, 'player', seasonId)));
+  } catch (err) {
+    console.error('loadJvPlayers error:', err);
+    list.innerHTML = '<div class="empty-state">Could not load players. Please try again.</div>';
+  }
 }
 
 async function loadJvCoaches(seasonId) {
   const list = document.getElementById('jvCoachesList');
   if (!list) return;
   list.innerHTML = '<div class="empty-state">Loading...</div>';
-  const snap = await getDocs(collection(db, 'jv-roster', seasonId, 'coaches'));
-  const coaches = [];
-  snap.forEach(d => coaches.push(d.data()));
-  if (!coaches.length) { list.innerHTML = '<div class="empty-state">No coaches added yet</div>'; return; }
-  list.innerHTML = '';
-  coaches.forEach(c => list.appendChild(buildJvRosterItem(c, 'coach', seasonId)));
+  try {
+    const snap = await getDocs(collection(db, 'jv-roster', seasonId, 'coaches'));
+    const coaches = [];
+    snap.forEach(d => coaches.push(d.data()));
+    if (!coaches.length) { list.innerHTML = '<div class="empty-state">No coaches added yet</div>'; return; }
+    list.innerHTML = '';
+    coaches.forEach(c => list.appendChild(buildJvRosterItem(c, 'coach', seasonId)));
+  } catch (err) {
+    console.error('loadJvCoaches error:', err);
+    list.innerHTML = '<div class="empty-state">Could not load coaches. Please try again.</div>';
+  }
 }
 
 function buildJvRosterItem(m, type, seasonId) {
@@ -3615,6 +3639,7 @@ async function loadJvGames(seasonId) {
   const list = document.getElementById('jvGamesList');
   if (!list) return;
   list.innerHTML = '<div class="empty-state">Loading...</div>';
+  try {
   const snap = await getDocs(collection(db, 'jv-schedule', seasonId, 'games'));
   const games = [];
   snap.forEach(d => games.push({ id: d.id, ...d.data() }));
@@ -3642,6 +3667,10 @@ async function loadJvGames(seasonId) {
       </div>`;
     list.appendChild(item);
   });
+  } catch (err) {
+    console.error('loadJvGames error:', err);
+    list.innerHTML = '<div class="empty-state">Could not load games. Please try again.</div>';
+  }
 }
 
 window.editJvGame = async (id, seasonId) => {
@@ -3904,6 +3933,7 @@ async function loadTeamEventsAdmin() {
   const list = document.getElementById('teamEventsList');
   if (!list) return;
   list.innerHTML = '<div class="empty-state">Loading...</div>';
+  try {
   const snap = await getDocs(collection(db, 'teamEvents'));
   window._teamEvents = [];
   snap.forEach(d => window._teamEvents.push({ id: d.id, ...d.data() }));
@@ -3930,6 +3960,10 @@ async function loadTeamEventsAdmin() {
       </div>`;
     list.appendChild(item);
   });
+  } catch (err) {
+    console.error('loadTeamEventsAdmin error:', err);
+    list.innerHTML = '<div class="empty-state">Could not load team events. Please try again.</div>';
+  }
 }
 
 document.querySelector('[data-tab="teamEvents"]').addEventListener('click', loadTeamEventsAdmin);
