@@ -1867,6 +1867,7 @@ function renderSummerRoster() {
       <span style="color:#5D1725;font-size:0.75rem;font-weight:600;">${p.position === 'Goalie' ? 'G' : ''}</span>
       <button onclick="editSummerPlayer(${i})" style="background:none;border:1px solid #999;border-radius:3px;color:#555;cursor:pointer;font-size:0.7rem;padding:1px 5px;flex-shrink:0;">Edit</button>
       <button onclick="linkMemberToPlayer(${i})" style="background:none;border:1px solid #999;border-radius:3px;color:${p.memberUid ? '#2e7d32' : '#999'};cursor:pointer;font-size:0.7rem;padding:1px 5px;flex-shrink:0;" title="${p.memberUid ? 'Linked: ' + (p.memberName||p.memberUid) : 'Link to member account'}">${p.memberUid ? '🔗' : 'Link'}</button>
+      <button onclick="linkParentsToSummerPlayer(${i})" style="background:none;border:1px solid #999;border-radius:3px;color:${(p.parentUids&&p.parentUids.length) ? '#1565c0' : '#999'};cursor:pointer;font-size:0.7rem;padding:1px 5px;flex-shrink:0;" title="${(p.parentNames&&p.parentNames.length) ? 'Parents: ' + p.parentNames.join(', ') : 'Link parent(s)'}">👪${(p.parentUids&&p.parentUids.length) ? ' ' + p.parentUids.length : ''}</button>
       <button onclick="removeSummerPlayer(${i})" style="background:none;border:none;color:#c62828;cursor:pointer;font-size:1rem;padding:0 4px;flex-shrink:0;">×</button>
     </div>`).join('');
 
@@ -1935,6 +1936,52 @@ window.linkMemberToPlayer = async function(index) {
   if (unlinkBtn) unlinkBtn.onclick = () => {
     summerRoster[index].memberUid = null;
     summerRoster[index].memberName = null;
+    modal.remove();
+    renderSummerRoster();
+  };
+};
+
+window.linkParentsToSummerPlayer = async function(index) {
+  const snap = await getDocs(collection(db, 'members'));
+  const members = [];
+  snap.forEach(d => {
+    const m = { id: d.id, ...d.data() };
+    const isPlayer = m.role === 'player' || (Array.isArray(m.roles) && m.roles.includes('player'));
+    if (!isPlayer) members.push(m);
+  });
+  members.sort((a,b) => {
+    const aIsParent = a.role === 'parent' || (Array.isArray(a.roles) && a.roles.includes('parent'));
+    const bIsParent = b.role === 'parent' || (Array.isArray(b.roles) && b.roles.includes('parent'));
+    if (aIsParent !== bIsParent) return aIsParent ? -1 : 1;
+    return (a.displayName||'').localeCompare(b.displayName||'');
+  });
+
+  const current = summerRoster[index];
+  const currentSet = new Set(Array.isArray(current.parentUids) ? current.parentUids : []);
+
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  const checkboxesHtml = members.map(m => `
+    <label style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0;border-bottom:1px solid #f5f5f5;font-size:0.88rem;">
+      <input type="checkbox" class="summerParentCb" value="${m.id}" data-name="${(m.displayName||m.email||'').replace(/"/g,'&quot;')}" ${currentSet.has(m.id) ? 'checked' : ''}>
+      ${m.displayName || m.email} <span style="color:#999;font-size:0.75rem;">(${m.role || 'member'})</span>
+    </label>`).join('');
+
+  modal.innerHTML = `<div style="background:white;border-radius:8px;padding:1.5rem;max-width:420px;width:90%;max-height:80vh;display:flex;flex-direction:column;">
+    <h3 style="margin-bottom:0.5rem;">Link Parent(s) to "${current.name}"</h3>
+    <p style="font-size:0.8rem;color:#666;margin-bottom:0.75rem;">Select all member accounts that should be able to see this player's schedule and RSVP for them.</p>
+    <div style="overflow-y:auto;flex:1;margin-bottom:1rem;border:1px solid #eee;border-radius:6px;padding:0 0.75rem;">${checkboxesHtml}</div>
+    <div style="display:flex;gap:0.5rem;">
+      <button id="spSave" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.6rem 1.2rem;cursor:pointer;font-weight:600;">Save</button>
+      <button id="spCancel" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:0.6rem 1.2rem;cursor:pointer;">Cancel</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+  modal.querySelector('#spCancel').onclick = () => modal.remove();
+  modal.querySelector('#spSave').onclick = () => {
+    const checked = Array.from(modal.querySelectorAll('.summerParentCb:checked'));
+    summerRoster[index].parentUids = checked.map(cb => cb.value);
+    summerRoster[index].parentNames = checked.map(cb => cb.dataset.name);
     modal.remove();
     renderSummerRoster();
   };
@@ -3612,14 +3659,20 @@ function buildJvRosterItem(m, type, seasonId) {
       jvStatusHtml = `<span style="display:block;color:#999;font-size:0.75rem;margin-top:2px;">No account found</span>`;
     }
   }
+  const jvParentUids = Array.isArray(m.parentUids) ? m.parentUids : [];
+  const jvParentNames = jvParentUids.map(uid => _rosterMembersMap[uid] || 'Unknown').filter(Boolean);
+  const jvParentsHtml = (type === 'player' && jvParentNames.length)
+    ? `<span style="display:block;color:#1565c0;font-size:0.75rem;margin-top:2px;">👪 Parent(s): ${jvParentNames.join(', ')}</span>` : '';
   item.innerHTML = `
     <div class="item-info"><div>
       <strong>${label}</strong>
       <span>${sub}</span>
       ${jvStatusHtml}
+      ${jvParentsHtml}
     </div></div>
     <div style="display:flex;gap:0.5rem;">
       <button class="btn-secondary" style="font-size:0.75rem;padding:3px 8px;background:${m.memberUid?'white':'#c62828'};color:${m.memberUid?'#2e7d32':'white'};border-color:${m.memberUid?'#2e7d32':'#c62828'};" onclick="linkRosterMember('${seasonId}','${type==='player'?'players':'coaches'}','${m.id || m.name}','${m.memberUid||''}','jv-roster')" title="${m.memberUid?'Linked - click to change':'Not linked - click to link'}">${m.memberUid?'🔗 Linked':'Link'}</button>
+      ${type === 'player' ? `<button class="btn-secondary" style="font-size:0.75rem;padding:3px 8px;" onclick='linkRosterParents("${seasonId}","players","${m.id || m.name}",${JSON.stringify(jvParentUids)},"jv-roster")'>👪 Parents${jvParentUids.length ? ' (' + jvParentUids.length + ')' : ''}</button>` : ''}
       <button class="btn-edit" onclick="editJvMember('${m.id || m.name}','${type}','${seasonId}')">Edit</button>
       <button class="btn-delete" onclick="deleteJvMember('${m.id || m.name}','${type}','${seasonId}')">Delete</button>
     </div>`;
