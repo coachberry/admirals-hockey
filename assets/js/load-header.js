@@ -6,7 +6,7 @@
   document.head.appendChild(navHideStyle);
 
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', '/assets/partials/header.html', false); // synchronous
+  xhr.open('GET', '/assets/partials/header.html?t=' + Date.now(), false); // synchronous, cache-busted
   try {
     xhr.send();
     if (xhr.status === 200) {

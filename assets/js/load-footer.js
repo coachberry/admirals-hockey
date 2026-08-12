@@ -1,6 +1,6 @@
 (function() {
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', '/assets/partials/footer.html', false); // synchronous
+  xhr.open('GET', '/assets/partials/footer.html?t=' + Date.now(), false); // synchronous, cache-busted
   try {
     xhr.send();
     if (xhr.status === 200) {
