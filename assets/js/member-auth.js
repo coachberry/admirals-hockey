@@ -218,6 +218,9 @@ onAuthStateChanged(auth, async (user) => {
     if (loginBtn) {
       loginBtn.textContent = 'My Profile';
       loginBtn.onclick = () => { window.location.href = '/profile'; };
+      loginBtn.style.background = '#000000';
+      loginBtn.style.color = '#ffffff';
+      loginBtn.style.border = '1px solid #ffffff';
     }
     if (signupBtn) signupBtn.style.display = 'none';
 
@@ -241,6 +244,9 @@ onAuthStateChanged(auth, async (user) => {
     if (loginBtn) {
       loginBtn.textContent = 'Login';
       loginBtn.onclick = () => showMemberModal('login');
+      loginBtn.style.background = '';
+      loginBtn.style.color = '';
+      loginBtn.style.border = '';
     }
     if (signupBtn) signupBtn.style.display = '';
     const adminBtn = document.getElementById('adminDashboardBtn');

@@ -43,8 +43,8 @@ img {
 }
 
 header {
-  background: var(--white);
-  border-bottom: 2px solid var(--primary-maroon);
+  background: var(--primary-maroon);
+  border-bottom: 2px solid var(--dark-maroon);
   padding: 1rem 0;
   position: sticky;
   top: 0;
@@ -147,7 +147,7 @@ header {
 .nav-links a {
   font-size: 0.95rem;
   font-weight: 500;
-  color: var(--text-primary);
+  color: var(--white);
   transition: color 0.2s;
   padding: 0.5rem 0;
   border-bottom: 2px solid transparent;
@@ -155,8 +155,8 @@ header {
 
 .nav-links a:hover,
 .nav-links a.active {
-  color: var(--primary-maroon);
-  border-bottom-color: var(--primary-maroon);
+  color: var(--accent-gold);
+  border-bottom-color: var(--accent-gold);
 }
 
 /* Dropdown categories (Navigation organizer) */
@@ -579,6 +579,7 @@ footer {
     font-size: 1rem;
     border-bottom: none;
     width: 100%;
+    color: var(--text-primary);
   }
 
   .nav-dropdown-toggle .dropdown-arrow {
