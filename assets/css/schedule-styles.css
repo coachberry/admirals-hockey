@@ -103,7 +103,7 @@
 }
 
 .featured-label {
-  background: linear-gradient(135deg, #5D1725, #3c0f17);
+  background: #5D1725;
   color: white;
   padding: 0.6rem 1.25rem;
   font-size: 0.8rem;
@@ -387,7 +387,7 @@
 }
 
 .gvm-header {
-  background: linear-gradient(135deg, #5D1725, #3c0f17);
+  background: #5D1725;
   padding: 1.25rem 1.5rem;
   color: white;
 }

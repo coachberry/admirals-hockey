@@ -471,7 +471,7 @@ body {
 }
 
 .photo-preview-empty {
-  background: linear-gradient(135deg, #5D1725, #3c0f17);
+  background: #5D1725;
   color: white;
   font-size: 0.8rem;
   font-weight: 600;
