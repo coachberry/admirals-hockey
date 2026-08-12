@@ -13,10 +13,10 @@ html, body {
   --primary-maroon: #5D1725;
   --dark-maroon: #3c0f17;
   --white: #FFFFFF;
-  --light-gray: #f0f0f0;
-  --dark-gray: #222;
-  --text-primary: #111;
-  --text-secondary: #666;
+  --light-gray: #C1C6C8;
+  --dark-gray: #000000;
+  --text-primary: #000000;
+  --text-secondary: #777777;
   --accent-gold: #d4a574;
 }
 

@@ -8,11 +8,11 @@
   --primary-maroon: #5D1725;
   --dark-maroon: #3c0f17;
   --white: #FFFFFF;
-  --light-gray: #f5f5f5;
-  --border: #e0e0e0;
+  --light-gray: #C1C6C8;
+  --border: #a2aaad;
   --accent-gold: #d4a574;
-  --text-primary: #111;
-  --text-secondary: #666;
+  --text-primary: #000000;
+  --text-secondary: #777777;
 }
 
 body {
