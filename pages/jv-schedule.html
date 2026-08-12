@@ -2,22 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=201">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=202">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=201">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=202">
   <title>JV Schedule - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=201">
-  <link rel="stylesheet" href="/assets/css/schedule-styles.css?v=201">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=201">
-  <script src="/assets/js/page-guard.js?v=201"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=202">
+  <link rel="stylesheet" href="/assets/css/schedule-styles.css?v=202">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=202">
+  <script src="/assets/js/page-guard.js?v=202"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=201" defer></script>
-<script src="/assets/js/load-header.js?v=201"></script>
+<script src="/assets/js/load-hero.js?v=202" defer></script>
+<script src="/assets/js/load-header.js?v=202"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -124,7 +124,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=201"></script>
+<script src="/assets/js/load-footer.js?v=202"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -454,8 +454,41 @@
     else { lastCard.style.display = 'none'; }
     featuredEl.style.display = nextGame||lastGame ? 'grid' : 'none';
 
+    // Split into Upcoming (games not yet played + upcoming practices) and Results (played games).
+    // Past practices (already happened) are hidden entirely.
+    const upcoming = games.filter(g => {
+      if (g.gameType === 'Practice') return new Date(g.date+'T12:00:00') >= today;
+      return !g.played;
+    });
+    const results = games.filter(g => g.gameType !== 'Practice' && g.played).reverse(); // most recent result first
+
     list.innerHTML = '';
-    games.forEach(g => list.appendChild(buildGameRow(g, seasonId)));
+
+    const upcomingHeader = document.createElement('h2');
+    upcomingHeader.textContent = 'Upcoming Schedule';
+    upcomingHeader.style.cssText = 'margin:1.5rem 0 0.75rem;font-size:1.15rem;color:#5D1725;border-bottom:2px solid #5D1725;padding-bottom:0.4rem;';
+    list.appendChild(upcomingHeader);
+    if (!upcoming.length) {
+      const p = document.createElement('p');
+      p.style.cssText = 'color:#666;font-style:italic;';
+      p.textContent = 'No upcoming games or practices scheduled.';
+      list.appendChild(p);
+    } else {
+      upcoming.forEach(g => list.appendChild(buildGameRow(g, seasonId)));
+    }
+
+    const resultsHeader = document.createElement('h2');
+    resultsHeader.textContent = 'Results';
+    resultsHeader.style.cssText = 'margin:2rem 0 0.75rem;font-size:1.15rem;color:#5D1725;border-bottom:2px solid #5D1725;padding-bottom:0.4rem;';
+    list.appendChild(resultsHeader);
+    if (!results.length) {
+      const p = document.createElement('p');
+      p.style.cssText = 'color:#666;font-style:italic;';
+      p.textContent = 'No results yet.';
+      list.appendChild(p);
+    } else {
+      results.forEach(g => list.appendChild(buildGameRow(g, seasonId)));
+    }
   }
 
   async function initSeasons() {
@@ -618,7 +651,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=201"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=201"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=202"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=202"></script>
 </body>
 </html>
