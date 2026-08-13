@@ -110,7 +110,7 @@ header {
   display: block;
   width: 26px;
   height: 2px;
-  background: var(--primary-maroon);
+  background: var(--white);
   border-radius: 2px;
   transition: all 0.3s;
 }
@@ -202,6 +202,12 @@ header {
   border-bottom: none !important;
   white-space: nowrap;
   font-size: 0.9rem;
+  color: var(--text-primary) !important;
+}
+
+.dropdown-menu a:hover {
+  background: #fdf8f8;
+  color: var(--primary-maroon) !important;
 }
 
 .dropdown-menu a:hover,
