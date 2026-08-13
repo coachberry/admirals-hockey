@@ -200,6 +200,14 @@ async function doApply() {
 // ============================================
 // AUTH STATE
 // ============================================
+// Other scripts (chat-widget.js, nav-render.js, etc.) that run on every page can
+// `await window.currentMemberPromise` to get the member profile without doing their
+// own redundant Firestore read of the same document — this was a real source of
+// mobile slowness since several scripts were each independently re-fetching it.
+let _resolveCurrentMemberPromise;
+window.currentMemberPromise = new Promise((resolve) => { _resolveCurrentMemberPromise = resolve; });
+let _currentMemberPromiseResolved = false;
+
 onAuthStateChanged(auth, async (user) => {
   const loginBtn = document.getElementById('memberNavBtn');
   const signupBtn = document.getElementById('memberSignupBtn');
@@ -208,6 +216,7 @@ onAuthStateChanged(auth, async (user) => {
     const snap = await getDoc(doc(db, 'members', user.uid));
     const profile = snap.exists() ? snap.data() : { role: 'member', status: 'active', displayName: user.displayName };
     window.currentMember = { ...profile, uid: user.uid };
+    if (!_currentMemberPromiseResolved) { _currentMemberPromiseResolved = true; _resolveCurrentMemberPromise(window.currentMember); }
 
     // Set up push notifications (non-blocking)
     initPushNotifications(app, user).catch(() => {});
@@ -241,6 +250,7 @@ onAuthStateChanged(auth, async (user) => {
     }
   } else {
     window.currentMember = null;
+    if (!_currentMemberPromiseResolved) { _currentMemberPromiseResolved = true; _resolveCurrentMemberPromise(null); }
     if (loginBtn) {
       loginBtn.textContent = 'Login';
       loginBtn.onclick = () => showMemberModal('login');

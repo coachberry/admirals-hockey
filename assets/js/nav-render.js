@@ -139,8 +139,16 @@ async function init() {
   onAuthStateChanged(auth, async (user) => {
     if (!user) { applyChatVisibility(false); return; }
     try {
-      const mSnap = await getDoc(doc(db, 'members', user.uid));
-      const profile = mSnap.exists() ? mSnap.data() : null;
+      // Reuse the profile member-auth.js already fetched instead of re-fetching the
+      // same document here — cuts a redundant Firestore round-trip on every page load.
+      let profile = null;
+      if (window.currentMemberPromise) {
+        try { profile = await window.currentMemberPromise; } catch (e) {}
+      }
+      if (!profile) {
+        const mSnap = await getDoc(doc(db, 'members', user.uid));
+        profile = mSnap.exists() ? mSnap.data() : null;
+      }
       if (profile && user.email === 'coachberry03@gmail.com') profile.role = 'superadmin';
       // Override with preview role if set
 

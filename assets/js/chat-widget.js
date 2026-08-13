@@ -417,8 +417,18 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  const snap = await getDoc(doc(db, 'members', user.uid));
-  currentProfile = snap.exists() ? snap.data() : { role: 'member', status: 'pending' };
+  // Reuse the profile member-auth.js already fetched instead of re-fetching the same
+  // document here — cuts a redundant Firestore round-trip on every page load.
+  let sharedProfile = null;
+  if (window.currentMemberPromise) {
+    try { sharedProfile = await window.currentMemberPromise; } catch (e) {}
+  }
+  if (sharedProfile) {
+    currentProfile = sharedProfile;
+  } else {
+    const snap = await getDoc(doc(db, 'members', user.uid));
+    currentProfile = snap.exists() ? snap.data() : { role: 'member', status: 'pending' };
+  }
   currentUser = user;
 
   if (user.email === 'coachberry03@gmail.com') currentProfile.role = 'superadmin';
