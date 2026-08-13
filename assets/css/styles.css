@@ -45,7 +45,7 @@ img {
 header {
   background: var(--primary-maroon);
   border-bottom: 2px solid var(--dark-maroon);
-  padding: 1rem 0;
+  padding-top: 1rem;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -55,7 +55,7 @@ header {
 .header-container {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 2rem 1rem;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
