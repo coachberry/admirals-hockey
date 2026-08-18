@@ -1495,7 +1495,7 @@ async function loadScheduleGames(seasonId) {
     return `${hour12}:${m} ${ampm}`;
   }
 
-  games.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(g => {
+  function buildGameItem(g) {
     const dateStr = new Date(g.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
     const homeAway = g.homeAway === 'Home' ? 'vs.' : '@';
     const resultStr = g.result ? ` | ${g.result} ${g.teamScore}-${g.opponentScore}` : '';
@@ -1515,8 +1515,29 @@ async function loadScheduleGames(seasonId) {
         <button class="btn-delete" onclick="deleteGame('${g.id}')">Delete</button>
       </div>
     `;
-    list.appendChild(item);
-  });
+    return item;
+  }
+
+  // Split into Upcoming (no result yet + future/today practices) and Past Events
+  // (games with a result, or practices whose date has already passed) — admin-view
+  // only, purely a display convenience, does not affect the public site at all.
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const isPast = (g) => {
+    if (g.gameType === 'Practice') return new Date(g.date + 'T12:00:00') < today;
+    return !!g.result;
+  };
+  const upcoming = games.filter(g => !isPast(g)).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const past = games.filter(isPast).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  upcoming.forEach(g => list.appendChild(buildGameItem(g)));
+
+  if (past.length) {
+    const pastHeader = document.createElement('div');
+    pastHeader.textContent = 'Past Events';
+    pastHeader.style.cssText = 'margin:1.5rem 0 0.5rem;font-weight:700;font-size:0.9rem;color:#777777;border-top:1px solid #e0e0e0;padding-top:1rem;';
+    list.appendChild(pastHeader);
+    past.forEach(g => list.appendChild(buildGameItem(g)));
+  }
 }
 
 window.editGame = async (id) => {
@@ -3850,10 +3871,10 @@ async function loadJvGames(seasonId) {
   const snap = await getDocs(collection(db, 'jv-schedule', seasonId, 'games'));
   const games = [];
   snap.forEach(d => games.push({ id: d.id, ...d.data() }));
-  games.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
   if (!games.length) { list.innerHTML = '<div class="empty-state">No games added yet</div>'; return; }
   list.innerHTML = '';
-  games.forEach(g => {
+
+  function buildJvGameItem(g) {
     const item = document.createElement('div');
     item.className = 'item';
     const d = g.date ? new Date(g.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }) : 'TBD';
@@ -3872,8 +3893,29 @@ async function loadJvGames(seasonId) {
         <button class="btn-edit" onclick="editJvGame('${g.id}','${seasonId}')">Edit</button>
         <button class="btn-delete" onclick="deleteJvGame('${g.id}','${seasonId}')">Delete</button>
       </div>`;
-    list.appendChild(item);
-  });
+    return item;
+  }
+
+  // Split into Upcoming (not yet played + future/today practices) and Past Events
+  // (played games, or practices whose date has already passed) — admin-view only,
+  // purely a display convenience, does not affect the public site at all.
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const isPast = (g) => {
+    if (g.gameType === 'Practice') return new Date(g.date + 'T12:00:00') < today;
+    return !!g.played;
+  };
+  const upcoming = games.filter(g => !isPast(g)).sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+  const past = games.filter(isPast).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+  upcoming.forEach(g => list.appendChild(buildJvGameItem(g)));
+
+  if (past.length) {
+    const pastHeader = document.createElement('div');
+    pastHeader.textContent = 'Past Events';
+    pastHeader.style.cssText = 'margin:1.5rem 0 0.5rem;font-weight:700;font-size:0.9rem;color:#777777;border-top:1px solid #e0e0e0;padding-top:1rem;';
+    list.appendChild(pastHeader);
+    past.forEach(g => list.appendChild(buildJvGameItem(g)));
+  }
   } catch (err) {
     console.error('loadJvGames error:', err);
     list.innerHTML = '<div class="empty-state">Could not load games. Please try again.</div>';
