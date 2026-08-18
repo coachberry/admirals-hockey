@@ -776,6 +776,15 @@ document.getElementById('saveMemberBtn').addEventListener('click', async () => {
   // like memberUid (account link) and parentUids (parent-linking).
   await setDoc(doc(db, rosterCollection, saveSeason, collName, id), member, { merge: true });
 
+  // For coaches/board members added via "select returning staff", propagate bio/title/photo
+  // to every other roster entry (Varsity + JV, any season) that shares the same staffId,
+  // so editing one place keeps every appearance of that person in sync.
+  if (!isPlayer && member.staffId) {
+    syncStaffAcrossRosters(member.staffId, type, {
+      bio: member.bio, title: member.title || '', photoURL: member.photoURL
+    }, rosterCollection, saveSeason, id);
+  }
+
   status.textContent = '✅ Saved!';
   status.style.color = 'green';
   if (window._rosterMode === 'jv') {
@@ -784,6 +793,43 @@ document.getElementById('saveMemberBtn').addEventListener('click', async () => {
     setTimeout(() => { rosterModal.classList.remove('active'); loadRoster(currentSeasonId); }, 800);
   }
 });
+
+async function syncStaffAcrossRosters(staffId, type, updates, skipCollection, skipSeason, skipId) {
+  try {
+    const seasonsSnap = await getDocs(collection(db, 'seasons'));
+    const collName = type === 'coach' ? 'coaches' : 'board';
+    const tasks = [];
+
+    for (const seasonDoc of seasonsSnap.docs) {
+      const seasonId = seasonDoc.id;
+
+      // Varsity roster
+      tasks.push((async () => {
+        const q = query(collection(db, 'roster', seasonId, collName), where('staffId', '==', staffId));
+        const snap = await getDocs(q);
+        snap.forEach(d => {
+          if (skipCollection === 'roster' && seasonId === skipSeason && d.id === skipId) return;
+          setDoc(doc(db, 'roster', seasonId, collName, d.id), updates, { merge: true });
+        });
+      })());
+
+      // JV roster — coaches only, JV has no board members
+      if (type === 'coach') {
+        tasks.push((async () => {
+          const q = query(collection(db, 'jv-roster', seasonId, 'coaches'), where('staffId', '==', staffId));
+          const snap = await getDocs(q);
+          snap.forEach(d => {
+            if (skipCollection === 'jv-roster' && seasonId === skipSeason && d.id === skipId) return;
+            setDoc(doc(db, 'jv-roster', seasonId, 'coaches', d.id), updates, { merge: true });
+          });
+        })());
+      }
+    }
+    await Promise.all(tasks);
+  } catch (e) {
+    console.error('syncStaffAcrossRosters error:', e);
+  }
+}
 
 // Add buttons
 document.getElementById('addPlayerBtn').addEventListener('click', () => { window._rosterMode = 'varsity'; openRosterModal('player'); });
