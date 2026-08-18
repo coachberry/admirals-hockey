@@ -755,7 +755,10 @@ document.getElementById('saveMemberBtn').addEventListener('click', async () => {
   const collName = type === 'player' ? 'players' : type === 'coach' ? 'coaches' : 'boards';
   const rosterCollection = window._rosterMode === 'jv' ? 'jv-roster' : 'roster';
   const saveSeason = window._rosterMode === 'jv' ? (window._jvSaveSeasonId || jvCurrentSeasonId) : currentSeasonId;
-  await setDoc(doc(db, rosterCollection, saveSeason, collName, id), member);
+  // merge:true is critical here — without it, saving this form (e.g. just adding a bio)
+  // completely overwrites the roster document, silently wiping fields set elsewhere
+  // like memberUid (account link) and parentUids (parent-linking).
+  await setDoc(doc(db, rosterCollection, saveSeason, collName, id), member, { merge: true });
 
   status.textContent = '✅ Saved!';
   status.style.color = 'green';
