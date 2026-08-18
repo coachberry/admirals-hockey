@@ -491,6 +491,18 @@ function openRosterModal(type, data = null) {
   document.getElementById('memberType').value = type;
   document.getElementById('memberPlayerId').value = data?.playerId || '';
   document.getElementById('memberBio').value = data?.bio || '';
+  if (document.getElementById('memberBioVisual')) document.getElementById('memberBioVisual').innerHTML = data?.bio || '';
+  // Default back to Visual tab each time the modal opens
+  const bioVisualBtn = document.getElementById('bioEditorVisualBtn');
+  const bioHtmlBtn = document.getElementById('bioEditorHtmlBtn');
+  if (bioVisualBtn && bioHtmlBtn) {
+    bioVisualBtn.classList.add('active');
+    bioHtmlBtn.classList.remove('active');
+    document.getElementById('memberBioVisual').style.display = 'block';
+    document.getElementById('memberBio').style.display = 'none';
+    const bioToolbar = document.getElementById('bioEditorToolbar');
+    if (bioToolbar) bioToolbar.style.display = 'flex';
+  }
   document.getElementById('bioPart').style.display = type === 'player' ? 'none' : 'block';
   document.getElementById('memberPhoto').value = '';
   document.getElementById('memberSaveStatus').textContent = '';
@@ -714,7 +726,11 @@ document.getElementById('saveMemberBtn').addEventListener('click', async () => {
   const name = isPlayer ? document.getElementById('memberName').value : document.getElementById('memberNameStaff').value;
 
   const title = !isPlayer ? document.getElementById('memberTitle').value : '';
-  const member = { id, type, name, bio: document.getElementById('memberBio').value, photoURL, season: currentSeasonId, ...(title && { title }) };
+  const bioHtmlBtnActive = document.getElementById('bioEditorHtmlBtn');
+  const bioContent = (bioHtmlBtnActive && bioHtmlBtnActive.classList.contains('active'))
+    ? document.getElementById('memberBio').value
+    : (document.getElementById('memberBioVisual')?.innerHTML || document.getElementById('memberBio').value);
+  const member = { id, type, name, bio: bioContent, photoURL, season: currentSeasonId, ...(title && { title }) };
 
   if (isPlayer) {
     member.number = document.getElementById('memberNumber').value.trim() || null;
@@ -1725,6 +1741,45 @@ if (editorVisualBtn && editorHtmlBtn) {
     if (toolbar) toolbar.style.display = 'none';
   });
 }
+
+const bioEditorVisualBtn = document.getElementById('bioEditorVisualBtn');
+const bioEditorHtmlBtn = document.getElementById('bioEditorHtmlBtn');
+if (bioEditorVisualBtn && bioEditorHtmlBtn) {
+  bioEditorVisualBtn.addEventListener('click', () => {
+    bioEditorVisualBtn.classList.add('active');
+    bioEditorHtmlBtn.classList.remove('active');
+    const visual = document.getElementById('memberBioVisual');
+    const html = document.getElementById('memberBio');
+    const toolbar = document.getElementById('bioEditorToolbar');
+    visual.innerHTML = html.value;
+    visual.style.display = 'block';
+    html.style.display = 'none';
+    if (toolbar) toolbar.style.display = 'flex';
+  });
+  bioEditorHtmlBtn.addEventListener('click', () => {
+    bioEditorHtmlBtn.classList.add('active');
+    bioEditorVisualBtn.classList.remove('active');
+    const visual = document.getElementById('memberBioVisual');
+    const html = document.getElementById('memberBio');
+    const toolbar = document.getElementById('bioEditorToolbar');
+    html.value = visual.innerHTML;
+    visual.style.display = 'none';
+    html.style.display = 'block';
+    if (toolbar) toolbar.style.display = 'none';
+  });
+}
+
+window.execCmdBio = function(cmd, val) {
+  const el = document.getElementById('memberBioVisual');
+  if (el) { el.focus(); document.execCommand(cmd, false, val || null); }
+};
+window.insertLinkBio = function() {
+  const url = prompt('Enter URL:');
+  if (url) {
+    document.getElementById('memberBioVisual')?.focus();
+    document.execCommand('createLink', false, url);
+  }
+};
 
 // Click handler for resizing images in the visual editor
 document.addEventListener('click', (e) => {

@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=214">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=215">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=214">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=214">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=215">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=215">
 </head>
 <body>
 
@@ -768,7 +768,34 @@
         <input type="text" id="memberTitle" placeholder="Title (e.g. Head Coach, President)">
       </div>
 
-      <div id="bioPart"><textarea id="memberBio" placeholder="Bio" rows="4"></textarea></div>
+      <div id="bioPart">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+          <label class="field-label" style="margin-bottom:0;">Bio</label>
+          <div style="display:flex;gap:0.5rem;align-items:center;">
+            <button type="button" id="bioEditorVisualBtn" class="news-editor-tab active">Visual</button>
+            <button type="button" id="bioEditorHtmlBtn" class="news-editor-tab">HTML</button>
+          </div>
+        </div>
+
+        <!-- Visual editor toolbar -->
+        <div id="bioEditorToolbar" class="editor-toolbar">
+          <button type="button" onclick="execCmdBio('bold')" title="Bold"><b>B</b></button>
+          <button type="button" onclick="execCmdBio('italic')" title="Italic"><i>I</i></button>
+          <button type="button" onclick="execCmdBio('underline')" title="Underline"><u>U</u></button>
+          <span class="toolbar-sep"></span>
+          <button type="button" onclick="execCmdBio('insertUnorderedList')" title="Bullet List">• List</button>
+          <span class="toolbar-sep"></span>
+          <button type="button" onclick="execCmdBio('formatBlock', 'p')" title="Paragraph">¶</button>
+          <span class="toolbar-sep"></span>
+          <button type="button" onclick="insertLinkBio()" title="Link">🔗</button>
+        </div>
+
+        <!-- Visual editor -->
+        <div id="memberBioVisual" class="editor-visual" contenteditable="true"></div>
+
+        <!-- HTML editor -->
+        <textarea id="memberBio" class="editor-html" style="display:none;" placeholder="<p>Write bio HTML here...</p>" rows="8"></textarea>
+      </div>
 
       <div class="photo-upload-section">
         <input type="file" id="memberPhoto" accept="image/*,.heic,.heif,.HEIC,.HEIF" style="display:none;">
@@ -1300,10 +1327,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=214"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=214"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=214"></script>
-<script type="module" src="/assets/js/game-stats.js?v=214"></script>
+<script type="module" src="/assets/js/admin.js?v=215"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=215"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=215"></script>
+<script type="module" src="/assets/js/game-stats.js?v=215"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
