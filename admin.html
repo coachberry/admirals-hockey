@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=226">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=227">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=226">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=226">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=227">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=227">
 </head>
 <body>
 
@@ -1038,6 +1038,10 @@
         <input type="time" id="teamEventTime">
       </div>
       <div class="form-label-group">
+        <label class="field-label">End Time <span style="font-weight:400;color:#999;">(optional)</span></label>
+        <input type="time" id="teamEventEndTime">
+      </div>
+      <div class="form-label-group">
         <label class="field-label">Location</label>
         <input type="text" id="teamEventLocation" placeholder="e.g. Ford Ice Center">
       </div>
@@ -1328,10 +1332,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=226"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=226"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=226"></script>
-<script type="module" src="/assets/js/game-stats.js?v=226"></script>
+<script type="module" src="/assets/js/admin.js?v=227"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=227"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=227"></script>
+<script type="module" src="/assets/js/game-stats.js?v=227"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";

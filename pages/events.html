@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=226">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=227">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=226">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=227">
   <title>Events - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=226">
-  <link rel="stylesheet" href="/assets/css/events-styles.css?v=226">
-  <script src="/assets/js/page-guard.js?v=226"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=227">
+  <link rel="stylesheet" href="/assets/css/events-styles.css?v=227">
+  <script src="/assets/js/page-guard.js?v=227"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=226" defer></script>
-<script src="/assets/js/load-header.js?v=226"></script>
+<script src="/assets/js/load-hero.js?v=227" defer></script>
+<script src="/assets/js/load-header.js?v=227"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -42,7 +42,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=226"></script>
+<script src="/assets/js/load-footer.js?v=227"></script>
 
 <script type="module">
   import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -130,6 +130,17 @@
     } else {
       rsvpHtml = "<p style=\"font-size:0.82rem;color:#999;margin-top:0.5rem;\"><a href=\"#\" class=\"te-login-link\" style=\"color:#5D1725;font-weight:600;\">Log in</a> to RSVP</p>";
     }
+    const webcalUrl = "webcal://us-central1-admirals-hockey.cloudfunctions.net/icsFeed?eventId=" + e.id;
+    const httpsUrl = "https://us-central1-admirals-hockey.cloudfunctions.net/icsFeed?eventId=" + e.id;
+    const googleUrl = "https://calendar.google.com/calendar/r?cid=" + encodeURIComponent(webcalUrl + "&gcb=" + Date.now());
+    const outlookUrl = "https://outlook.office.com/calendar/0/addfromweb?url=" + encodeURIComponent(webcalUrl);
+    const calBtnStyle = "font-size:0.72rem;font-weight:600;padding:4px 9px;border-radius:5px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;border:none;cursor:pointer;";
+    const addToCalHtml = "<div style=\"margin-top:0.6rem;display:flex;gap:0.4rem;flex-wrap:wrap;\">"
+      + "<a style=\"" + calBtnStyle + "background:#4285F4;color:white;\" href=\"" + googleUrl + "\" target=\"_blank\" rel=\"noopener\">📅 Google</a>"
+      + "<a style=\"" + calBtnStyle + "background:#0078D4;color:white;\" href=\"" + outlookUrl + "\" target=\"_blank\" rel=\"noopener\">📧 Outlook</a>"
+      + "<a style=\"" + calBtnStyle + "background:#000000;color:white;\" href=\"" + webcalUrl + "\">🍎 Apple</a>"
+      + "</div>";
+
     return "<div class=\"event-card\">"
       + "<div class=\"event-card-body\">"
       + "<div class=\"event-card-top\">"
@@ -147,6 +158,7 @@
       + "</div></div>"
       + (e.description ? "<p class=\"event-details\">" + e.description + "</p>" : "")
       + rsvpHtml
+      + addToCalHtml
       + "</div></div>";
   }
 
@@ -381,7 +393,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=226"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=226"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=227"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=227"></script>
 </body>
 </html>

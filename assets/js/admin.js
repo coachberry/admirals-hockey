@@ -4115,6 +4115,7 @@ function openTeamEventModal(data = null) {
   document.getElementById('teamEventName').value = data?.name || '';
   document.getElementById('teamEventDate').value = data?.date || '';
   document.getElementById('teamEventTime').value = data?.time || '';
+  document.getElementById('teamEventEndTime').value = data?.endTime || '';
   document.getElementById('teamEventLocation').value = data?.location || '';
   document.getElementById('teamEventDesc').value = data?.description || '';
   document.getElementById('teamEventStatus').textContent = '';
@@ -4163,6 +4164,7 @@ document.getElementById('saveTeamEventBtn').addEventListener('click', async () =
     name,
     date: document.getElementById('teamEventDate').value,
     time: document.getElementById('teamEventTime').value,
+    endTime: document.getElementById('teamEventEndTime').value || '',
     location: document.getElementById('teamEventLocation').value.trim(),
     description: document.getElementById('teamEventDesc').value.trim(),
     invitedRoles,

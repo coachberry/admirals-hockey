@@ -203,8 +203,80 @@ function fmtICSDateTime(dateStr, timeStr) {
   );
 }
 
+function vtimezoneBlock() {
+  let s = "BEGIN:VTIMEZONE\r\n";
+  s += "TZID:America/Chicago\r\n";
+  s += "BEGIN:DAYLIGHT\r\n";
+  s += "TZOFFSETFROM:-0600\r\n";
+  s += "TZOFFSETTO:-0500\r\n";
+  s += "TZNAME:CDT\r\n";
+  s += "DTSTART:19700308T020000\r\n";
+  s += "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU\r\n";
+  s += "END:DAYLIGHT\r\n";
+  s += "BEGIN:STANDARD\r\n";
+  s += "TZOFFSETFROM:-0500\r\n";
+  s += "TZOFFSETTO:-0600\r\n";
+  s += "TZNAME:CST\r\n";
+  s += "DTSTART:19701101T020000\r\n";
+  s += "RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU\r\n";
+  s += "END:STANDARD\r\n";
+  s += "END:VTIMEZONE\r\n";
+  return s;
+}
+
 exports.icsFeed = onRequest(async (req, res) => {
   try {
+    // Single Team Event mode — used by the "Add to Calendar" buttons on the Events page.
+    if (req.query.eventId) {
+      const eventDoc = await db.collection("teamEvents").doc(req.query.eventId).get();
+      if (!eventDoc.exists) {
+        res.status(404).send("Event not found");
+        return;
+      }
+      const ev = eventDoc.data();
+      if (!ev.date) {
+        res.status(400).send("Event has no date");
+        return;
+      }
+      const time = ev.time || "00:00";
+      const start = fmtICSDateTime(ev.date, time);
+      const end = ev.endTime
+        ? fmtICSDateTime(ev.date, ev.endTime)
+        : (() => {
+          const startDate = new Date(ev.date + "T" + time + ":00");
+          const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000); // default 2-hour block
+          const pad = (n) => String(n).padStart(2, "0");
+          return (
+            endDate.getFullYear() + pad(endDate.getMonth() + 1) + pad(endDate.getDate()) +
+            "T" + pad(endDate.getHours()) + pad(endDate.getMinutes()) + "00"
+          );
+        })();
+      const now = new Date();
+      const dtstamp = fmtICSDateTime(now.toISOString().split("T")[0], now.toISOString().split("T")[1].slice(0, 5)) + "Z";
+
+      let ics = "BEGIN:VCALENDAR\r\n";
+      ics += "VERSION:2.0\r\n";
+      ics += "PRODID:-//Franklin Admirals Hockey//Team Event//EN\r\n";
+      ics += "CALSCALE:GREGORIAN\r\n";
+      ics += "METHOD:PUBLISH\r\n";
+      ics += vtimezoneBlock();
+      ics += "BEGIN:VEVENT\r\n";
+      ics += "UID:teamevent-" + req.query.eventId + "@fhsadmiralshockey.com\r\n";
+      ics += "DTSTAMP:" + dtstamp + "\r\n";
+      ics += "DTSTART;TZID=America/Chicago:" + start + "\r\n";
+      ics += "DTEND;TZID=America/Chicago:" + end + "\r\n";
+      ics += "SUMMARY:" + escapeICS(ev.name || "Team Event") + "\r\n";
+      if (ev.location) ics += "LOCATION:" + escapeICS(ev.location) + "\r\n";
+      if (ev.description) ics += "DESCRIPTION:" + escapeICS(ev.description) + "\r\n";
+      ics += "END:VEVENT\r\n";
+      ics += "END:VCALENDAR\r\n";
+
+      res.set("Content-Type", "text/calendar; charset=utf-8");
+      res.set("Content-Disposition", "inline; filename=event.ics");
+      res.status(200).send(ics);
+      return;
+    }
+
     const team = req.query.team === "jv" ? "jv" : "varsity";
     const gamesOnly = req.query.type === "games";
 
