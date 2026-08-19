@@ -2,22 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=223">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=224">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=223">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=224">
   <title>JV Schedule - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=223">
-  <link rel="stylesheet" href="/assets/css/schedule-styles.css?v=223">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=223">
-  <script src="/assets/js/page-guard.js?v=223"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=224">
+  <link rel="stylesheet" href="/assets/css/schedule-styles.css?v=224">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=224">
+  <script src="/assets/js/page-guard.js?v=224"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=223" defer></script>
-<script src="/assets/js/load-header.js?v=223"></script>
+<script src="/assets/js/load-hero.js?v=224" defer></script>
+<script src="/assets/js/load-header.js?v=224"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -144,7 +144,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=223"></script>
+<script src="/assets/js/load-footer.js?v=224"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -511,7 +511,7 @@
     }
   }
 
-  // Calendar subscribe widget — builds one-click Google/Outlook/Apple links plus a Copy Link fallback
+  // Calendar subscribe widget — builds one-click Google/Outlook/Apple buttons plus a plain-text Copy Link fallback
   function buildCalLinkButtons(containerId, type) {
     const httpsUrl = 'https://us-central1-admirals-hockey.cloudfunctions.net/icsFeed?team=jv&type=' + type;
     const webcalUrl = 'webcal://us-central1-admirals-hockey.cloudfunctions.net/icsFeed?team=jv&type=' + type;
@@ -521,12 +521,14 @@
 
     const container = document.getElementById(containerId);
     if (!container) return;
-    const btnStyle = 'font-size:0.76rem;padding:4px 10px;text-decoration:none;display:inline-block;';
+    const baseBtnStyle = 'font-size:0.78rem;font-weight:600;padding:6px 12px;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;gap:5px;border:none;cursor:pointer;';
     container.innerHTML = `
-      <a class="btn-secondary" style="${btnStyle}" href="${googleUrl}" target="_blank" rel="noopener">Google</a>
-      <a class="btn-secondary" style="${btnStyle}" href="${outlookUrl}" target="_blank" rel="noopener">Outlook</a>
-      <a class="btn-secondary" style="${btnStyle}" href="${webcalUrl}">Apple</a>
-      <button class="btn-secondary" style="${btnStyle.replace('text-decoration:none;display:inline-block;','cursor:pointer;')}" onclick="copyCalLink('${type}')">Copy Link</button>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.4rem;">
+        <a style="${baseBtnStyle}background:#4285F4;color:white;" href="${googleUrl}" target="_blank" rel="noopener">📅 Google</a>
+        <a style="${baseBtnStyle}background:#0078D4;color:white;" href="${outlookUrl}" target="_blank" rel="noopener">📧 Outlook</a>
+        <a style="${baseBtnStyle}background:#000000;color:white;" href="${webcalUrl}">🍎 Apple</a>
+      </div>
+      <a href="#" onclick="copyCalLink('${type}'); return false;" style="font-size:0.76rem;color:#5D1725;text-decoration:underline;cursor:pointer;">Copy Link</a>
     `;
   }
   buildCalLinkButtons('calLinksGames', 'games');
@@ -711,7 +713,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=223"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=223"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=224"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=224"></script>
 </body>
 </html>
