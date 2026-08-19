@@ -2,22 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=220">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=221">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=220">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=221">
   <title>JV Schedule - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=220">
-  <link rel="stylesheet" href="/assets/css/schedule-styles.css?v=220">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=220">
-  <script src="/assets/js/page-guard.js?v=220"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=221">
+  <link rel="stylesheet" href="/assets/css/schedule-styles.css?v=221">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=221">
+  <script src="/assets/js/page-guard.js?v=221"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=220" defer></script>
-<script src="/assets/js/load-header.js?v=220"></script>
+<script src="/assets/js/load-hero.js?v=221" defer></script>
+<script src="/assets/js/load-header.js?v=221"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -72,6 +72,32 @@
     <div class="section-header">
       <h2 class="section-title">Full Schedule</h2>
     </div>
+
+    <div class="calendar-subscribe-wrap" style="position:relative;margin-bottom:1.25rem;">
+      <button id="calSubscribeBtn" class="btn-secondary" type="button">📅 Subscribe to Calendar</button>
+      <div id="calSubscribePanel" style="display:none;position:absolute;top:100%;left:0;margin-top:8px;background:white;border:1px solid #ddd;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.15);padding:1rem;width:300px;z-index:500;">
+        <p style="font-size:0.8rem;color:#666;margin:0 0 0.75rem;">Subscribe once and your calendar updates automatically whenever the schedule changes.</p>
+
+        <div style="margin-bottom:0.75rem;">
+          <div style="font-weight:600;font-size:0.85rem;margin-bottom:0.3rem;">Games Only</div>
+          <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+            <button class="btn-secondary" style="font-size:0.76rem;padding:4px 10px;" onclick="copyCalLink('games')">Copy Link</button>
+            <a class="btn-secondary" style="font-size:0.76rem;padding:4px 10px;text-decoration:none;display:inline-block;" href="webcal://us-central1-admirals-hockey.cloudfunctions.net/icsFeed?team=jv&type=games">Open in Calendar App</a>
+          </div>
+        </div>
+
+        <div style="margin-bottom:0.5rem;">
+          <div style="font-weight:600;font-size:0.85rem;margin-bottom:0.3rem;">All Events (Games + Practices)</div>
+          <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+            <button class="btn-secondary" style="font-size:0.76rem;padding:4px 10px;" onclick="copyCalLink('all')">Copy Link</button>
+            <a class="btn-secondary" style="font-size:0.76rem;padding:4px 10px;text-decoration:none;display:inline-block;" href="webcal://us-central1-admirals-hockey.cloudfunctions.net/icsFeed?team=jv&type=all">Open in Calendar App</a>
+          </div>
+        </div>
+
+        <p style="font-size:0.7rem;color:#999;margin:0.5rem 0 0;">iPhone/Mac: tap "Open in Calendar App".<br>Google/Outlook: use "Copy Link", then add it via "Subscribe from URL" in your calendar's settings.</p>
+      </div>
+    </div>
+
     <div id="scheduleList" class="schedule-list">
       <p style="color:#666;font-style:italic;">Loading schedule...</p>
     </div>
@@ -124,7 +150,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=220"></script>
+<script src="/assets/js/load-footer.js?v=221"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -491,6 +517,26 @@
     }
   }
 
+  // Calendar subscribe widget
+  window.copyCalLink = function(type) {
+    const url = 'https://us-central1-admirals-hockey.cloudfunctions.net/icsFeed?team=jv&type=' + type;
+    navigator.clipboard.writeText(url).then(() => {
+      alert('Calendar link copied! In Google Calendar: Settings > Add Calendar > From URL. In Outlook: Add Calendar > Subscribe from web.');
+    }).catch(() => {
+      prompt('Copy this link:', url);
+    });
+  };
+  document.getElementById('calSubscribeBtn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const panel = document.getElementById('calSubscribePanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  });
+  document.addEventListener('click', (e) => {
+    const wrap = document.querySelector('.calendar-subscribe-wrap');
+    const panel = document.getElementById('calSubscribePanel');
+    if (wrap && panel && !wrap.contains(e.target)) panel.style.display = 'none';
+  });
+
   async function initSeasons() {
     const snap = await getDocs(collection(db, 'seasons'));
     let seasons = [];
@@ -651,7 +697,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=220"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=220"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=221"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=221"></script>
 </body>
 </html>
