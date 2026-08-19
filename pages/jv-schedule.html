@@ -2,22 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=225">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=226">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=225">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=226">
   <title>JV Schedule - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=225">
-  <link rel="stylesheet" href="/assets/css/schedule-styles.css?v=225">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=225">
-  <script src="/assets/js/page-guard.js?v=225"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=226">
+  <link rel="stylesheet" href="/assets/css/schedule-styles.css?v=226">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=226">
+  <script src="/assets/js/page-guard.js?v=226"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=225" defer></script>
-<script src="/assets/js/load-header.js?v=225"></script>
+<script src="/assets/js/load-hero.js?v=226" defer></script>
+<script src="/assets/js/load-header.js?v=226"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -144,7 +144,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=225"></script>
+<script src="/assets/js/load-footer.js?v=226"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -515,7 +515,12 @@
   function buildCalLinkButtons(containerId, type) {
     const httpsUrl = 'https://us-central1-admirals-hockey.cloudfunctions.net/icsFeed?team=jv&type=' + type;
     const webcalUrl = 'webcal://us-central1-admirals-hockey.cloudfunctions.net/icsFeed?team=jv&type=' + type;
-    const encodedWebcal = encodeURIComponent(webcalUrl);
+    // Google Calendar caches a feed URL centrally the first time ANYONE subscribes to it via
+    // this button, and serves that same cached copy to every future subscriber until its own
+    // refresh cycle elapses (can be a day+). Appending a cache-bust marker gives Google a URL
+    // it's never seen, forcing a fresh fetch for each new subscriber instead of stale data.
+    const googleWebcalUrl = webcalUrl + '&gcb=' + Date.now();
+    const encodedWebcal = encodeURIComponent(googleWebcalUrl);
     const googleUrl = 'https://calendar.google.com/calendar/r?cid=' + encodedWebcal;
     const outlookUrl = 'https://outlook.office.com/calendar/0/addfromweb?url=' + encodedWebcal;
 
@@ -713,7 +718,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=225"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=225"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=226"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=226"></script>
 </body>
 </html>
