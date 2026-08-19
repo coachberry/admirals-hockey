@@ -1109,7 +1109,7 @@ function showGameModal(data = null) {
   if (!modal) createGameModal();
 
   // Reset fields
-  const fields = ['gameDate','gameTime','gameTimezone','gameOpponent','gameHomeAway','gameRinkName','gameRinkAddress','gameResult','gameTeamScore','gameOpponentScore'];
+  const fields = ['gameDate','gameTime','gameEndTime','gameTimezone','gameOpponent','gameHomeAway','gameRinkName','gameRinkAddress','gameResult','gameTeamScore','gameOpponentScore'];
   fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = data?.[id.replace('game', '').toLowerCase()] || ''; });
 
   // Always reset logo preview first
@@ -1119,6 +1119,7 @@ function showGameModal(data = null) {
   if (data) {
     document.getElementById('gameDate').value = data.date || '';
     document.getElementById('gameTime').value = data.time || '';
+    document.getElementById('gameEndTime').value = data.endTime || '';
     document.getElementById('gameTimezone').value = data.timezone || '';
     document.getElementById('gameGameType').value = data.gameType || '';
     document.getElementById('gameLeagueName').value = data.leagueName || '';
@@ -1139,7 +1140,7 @@ function showGameModal(data = null) {
       document.getElementById('removeOpponentLogo').style.display = 'inline-block';
     }
   } else {
-    ['gameDate','gameTime','gameTimezone','gameGameType','gameLeagueName','gameTournamentName',
+    ['gameDate','gameTime','gameEndTime','gameTimezone','gameGameType','gameLeagueName','gameTournamentName',
      'gameSubtype','gameOpponent','gameHomeAway','gameRinkName','gameRinkAddress','gameResult',
      'gameTeamScore','gameOpponentScore','gamePracticeNotes'].forEach(id => {
       const el = document.getElementById(id);
@@ -1378,6 +1379,7 @@ function createGameModal() {
       id,
       date: document.getElementById('gameDate').value,
       time: document.getElementById('gameTime').value,
+      endTime: document.getElementById('gameEndTime').value || '',
       timezone: document.getElementById('gameTimezone').value,
       gameType,
       subtype: isPractice ? '' : document.getElementById('gameSubtype').value,
@@ -3954,6 +3956,7 @@ function openJvGameModal(data, seasonId) {
   document.getElementById('jvGameSeasonId').value = seasonId;
   document.getElementById('jvGameDate').value = data?.date || '';
   document.getElementById('jvGameTime').value = data?.time || '';
+  document.getElementById('jvGameEndTime').value = data?.endTime || '';
   document.getElementById('jvGameType').value = data?.gameType || 'Game';
   document.getElementById('jvGameOpponent').value = data?.opponent || '';
   document.getElementById('jvGameLocation').value = data?.location || '';
@@ -3984,6 +3987,7 @@ if (saveJvGameBtn) {
     await setDoc(doc(db, 'jv-schedule', seasonId, 'games', id), {
       date: document.getElementById('jvGameDate').value,
       time: document.getElementById('jvGameTime').value,
+      endTime: document.getElementById('jvGameEndTime').value || '',
       gameType,
       opponent: isPractice ? '' : document.getElementById('jvGameOpponent').value.trim(),
       location: document.getElementById('jvGameLocation').value.trim(),

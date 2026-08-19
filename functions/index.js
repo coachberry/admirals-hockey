@@ -241,6 +241,8 @@ exports.icsFeed = onRequest(async (req, res) => {
           uid: team + "-" + docSnap.id + "@fhsadmiralshockey.com",
           date: g.date,
           time: g.time || "00:00",
+          endTime: g.endTime || "",
+          isPractice,
           summary: (isPractice ? "Practice: " : "") + summary + (isPractice ? "" : (team === "jv" ? " (JV)" : " (Varsity)")),
           location,
         });
@@ -261,21 +263,48 @@ exports.icsFeed = onRequest(async (req, res) => {
     ics += "REFRESH-INTERVAL;VALUE=DURATION:PT6H\r\n";
     ics += "X-PUBLISHED-TTL:PT6H\r\n";
 
+    // Explicit timezone definition — without this, some calendar apps (notably Google)
+    // treat our times as UTC instead of local Central Time, showing events ~5-6 hours early.
+    ics += "BEGIN:VTIMEZONE\r\n";
+    ics += "TZID:America/Chicago\r\n";
+    ics += "BEGIN:DAYLIGHT\r\n";
+    ics += "TZOFFSETFROM:-0600\r\n";
+    ics += "TZOFFSETTO:-0500\r\n";
+    ics += "TZNAME:CDT\r\n";
+    ics += "DTSTART:19700308T020000\r\n";
+    ics += "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU\r\n";
+    ics += "END:DAYLIGHT\r\n";
+    ics += "BEGIN:STANDARD\r\n";
+    ics += "TZOFFSETFROM:-0500\r\n";
+    ics += "TZOFFSETTO:-0600\r\n";
+    ics += "TZNAME:CST\r\n";
+    ics += "DTSTART:19701101T020000\r\n";
+    ics += "RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU\r\n";
+    ics += "END:STANDARD\r\n";
+    ics += "END:VTIMEZONE\r\n";
+
     events.forEach((e) => {
       const start = fmtICSDateTime(e.date, e.time);
-      const startDate = new Date(e.date + "T" + e.time + ":00");
-      const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000); // default 2-hour block
-      const pad = (n) => String(n).padStart(2, "0");
-      const end = (
-        endDate.getFullYear() + pad(endDate.getMonth() + 1) + pad(endDate.getDate()) +
-        "T" + pad(endDate.getHours()) + pad(endDate.getMinutes()) + "00"
-      );
+      // Use the real end time if one was entered; otherwise default by event type:
+      // practices run 1 hour, games run 1.5 hours.
+      const end = e.endTime
+        ? fmtICSDateTime(e.date, e.endTime)
+        : (() => {
+          const defaultMs = (e.isPractice ? 60 : 90) * 60 * 1000;
+          const startDate = new Date(e.date + "T" + e.time + ":00");
+          const endDate = new Date(startDate.getTime() + defaultMs);
+          const pad = (n) => String(n).padStart(2, "0");
+          return (
+            endDate.getFullYear() + pad(endDate.getMonth() + 1) + pad(endDate.getDate()) +
+            "T" + pad(endDate.getHours()) + pad(endDate.getMinutes()) + "00"
+          );
+        })();
 
       ics += "BEGIN:VEVENT\r\n";
       ics += "UID:" + e.uid + "\r\n";
       ics += "DTSTAMP:" + dtstamp + "\r\n";
-      ics += "DTSTART:" + start + "\r\n";
-      ics += "DTEND:" + end + "\r\n";
+      ics += "DTSTART;TZID=America/Chicago:" + start + "\r\n";
+      ics += "DTEND;TZID=America/Chicago:" + end + "\r\n";
       ics += "SUMMARY:" + escapeICS(e.summary) + "\r\n";
       if (e.location) ics += "LOCATION:" + escapeICS(e.location) + "\r\n";
       ics += "END:VEVENT\r\n";
