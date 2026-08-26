@@ -2795,6 +2795,91 @@ loadPageVisibility();
 // MEMBERS ADMIN TAB
 // ============================================
 
+// Builds a map of memberUid -> { asPlayer: [...], asParent: [...] } by scanning
+// current-season rosters (Varsity, JV, Summer), so admins can see at a glance
+// exactly who each account is linked to, to help catch mis-linked accounts.
+async function buildRosterLinkMap() {
+  const linkMap = {};
+  function addPlayerLink(uid, label) {
+    if (!uid) return;
+    if (!linkMap[uid]) linkMap[uid] = { asPlayer: [], asParent: [] };
+    linkMap[uid].asPlayer.push(label);
+  }
+  function addParentLink(uids, childName, teamLabel) {
+    (uids || []).forEach(uid => {
+      if (!uid) return;
+      if (!linkMap[uid]) linkMap[uid] = { asPlayer: [], asParent: [] };
+      linkMap[uid].asParent.push(childName + ' (' + teamLabel + ')');
+    });
+  }
+
+  try {
+    const seasonsSnap = await getDocs(collection(db, 'seasons'));
+    const currentSeasons = seasonsSnap.docs.filter(d => d.data().current);
+
+    await Promise.all(currentSeasons.map(async seasonDoc => {
+      const seasonId = seasonDoc.id;
+      const sd = seasonDoc.data();
+
+      // Varsity: players, coaches, board
+      const [vPlayers, vCoaches, vBoard] = await Promise.all([
+        getDocs(collection(db, 'roster', seasonId, 'players')),
+        getDocs(collection(db, 'roster', seasonId, 'coaches')),
+        getDocs(collection(db, 'roster', seasonId, 'board')),
+      ]);
+      vPlayers.forEach(d => {
+        const p = d.data();
+        addPlayerLink(p.memberUid, 'Varsity Player: ' + (p.name || 'Unknown'));
+        addParentLink(p.parentUids, p.name || 'Unknown', 'Varsity');
+      });
+      vCoaches.forEach(d => {
+        const c = d.data();
+        addPlayerLink(c.memberUid, 'Varsity Coach: ' + (c.name || 'Unknown'));
+      });
+      vBoard.forEach(d => {
+        const b = d.data();
+        addPlayerLink(b.memberUid, 'Board: ' + (b.name || 'Unknown'));
+      });
+
+      // JV: players, coaches (only if JV enabled for this season)
+      if (sd.jvEnabled) {
+        const [jPlayers, jCoaches] = await Promise.all([
+          getDocs(collection(db, 'jv-roster', seasonId, 'players')),
+          getDocs(collection(db, 'jv-roster', seasonId, 'coaches')),
+        ]);
+        jPlayers.forEach(d => {
+          const p = d.data();
+          addPlayerLink(p.memberUid, 'JV Player: ' + (p.name || 'Unknown'));
+          addParentLink(p.parentUids, p.name || 'Unknown', 'JV');
+        });
+        jCoaches.forEach(d => {
+          const c = d.data();
+          addPlayerLink(c.memberUid, 'JV Coach: ' + (c.name || 'Unknown'));
+        });
+      }
+    }));
+
+    // Summer Hockey: roster is an array embedded in each team doc, across non-hidden seasons
+    const summerSeasonsSnap = await getDocs(collection(db, 'summer'));
+    const relevantSummerSeasons = summerSeasonsSnap.docs.filter(d => !d.data().hidden);
+    await Promise.all(relevantSummerSeasons.map(async seasonDoc => {
+      const teamsSnap = await getDocs(collection(db, 'summer', seasonDoc.id, 'teams'));
+      teamsSnap.forEach(teamDoc => {
+        const team = teamDoc.data();
+        const roster = Array.isArray(team.roster) ? team.roster : [];
+        roster.forEach(p => {
+          addPlayerLink(p.memberUid, 'Summer (' + (team.name || 'Team') + '): ' + (p.name || 'Unknown'));
+          addParentLink(p.parentUids, p.name || 'Unknown', 'Summer · ' + (team.name || 'Team'));
+        });
+      });
+    }));
+  } catch (err) {
+    console.error('buildRosterLinkMap error:', err);
+  }
+
+  return linkMap;
+}
+
 async function loadMembersTab() {
   const list = document.getElementById('membersList');
   if (!list) return;
@@ -2802,6 +2887,7 @@ async function loadMembersTab() {
 
   try {
 
+  const rosterLinkMap = await buildRosterLinkMap();
   const snap = await getDocs(collection(db, 'members'));
   const members = [];
   snap.forEach(d => members.push({ id: d.id, ...d.data() }));
@@ -2838,6 +2924,18 @@ async function loadMembersTab() {
               <span>${m.email}</span>
               ${m.status === 'pending' ? '<span style="color:#856404;font-size:0.75rem;font-weight:600;">⏳ Pending</span>' : ''}
               ${m.status === 'denied' ? '<span style="color:#c62828;font-size:0.75rem;font-weight:600;">❌ Denied</span>' : ''}
+              ${(() => {
+                const link = rosterLinkMap[m.id];
+                if (!link || (!link.asPlayer.length && !link.asParent.length)) return '';
+                let html = '';
+                if (link.asPlayer.length) {
+                  html += '<span style="display:block;color:#2e7d32;font-size:0.75rem;margin-top:2px;">🔗 ' + link.asPlayer.join(', ') + '</span>';
+                }
+                if (link.asParent.length) {
+                  html += '<span style="display:block;color:#1565c0;font-size:0.75rem;margin-top:2px;">👪 Parent of: ' + link.asParent.join(', ') + '</span>';
+                }
+                return html;
+              })()}
             </div>
           </div>
         </div>
