@@ -23,9 +23,30 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Network-first strategy: always try network, fall back to cache when offline
+// Network-first strategy: always try network, fall back to cache when offline.
+// Firebase/Firestore API calls are explicitly excluded — they're dynamic, per-query
+// data (not cacheable static assets), have their own sophisticated internal caching
+// already, and wrapping every single one in an extra Cache Storage open+write adds
+// real overhead on mobile devices with slower local storage I/O, especially when a
+// page fires off many parallel Firestore requests at once.
+const SKIP_CACHE_HOSTS = [
+  'firestore.googleapis.com',
+  'firebasestorage.googleapis.com',
+  'identitytoolkit.googleapis.com',
+  'securetoken.googleapis.com',
+  'firebaseinstallations.googleapis.com',
+  'fcmregistrations.googleapis.com',
+];
+
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  const url = new URL(event.request.url);
+  if (SKIP_CACHE_HOSTS.some((host) => url.hostname === host)) {
+    // Let the browser handle these natively — no caching wrapper at all.
+    return;
+  }
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {
