@@ -3840,7 +3840,7 @@ async function loadJvPlayers(seasonId) {
   try {
     const snap = await getDocs(collection(db, 'jv-roster', seasonId, 'players'));
     const players = [];
-    snap.forEach(d => players.push(d.data()));
+    snap.forEach(d => players.push({ id: d.id, ...d.data() }));
     if (!players.length) { list.innerHTML = '<div class="empty-state">No players added yet</div>'; return; }
     list.innerHTML = '';
     players.sort((a, b) => parseInt(a.number) - parseInt(b.number)).forEach(p => list.appendChild(buildJvRosterItem(p, 'player', seasonId)));
@@ -3857,7 +3857,7 @@ async function loadJvCoaches(seasonId) {
   try {
     const snap = await getDocs(collection(db, 'jv-roster', seasonId, 'coaches'));
     const coaches = [];
-    snap.forEach(d => coaches.push(d.data()));
+    snap.forEach(d => coaches.push({ id: d.id, ...d.data() }));
     if (!coaches.length) { list.innerHTML = '<div class="empty-state">No coaches added yet</div>'; return; }
     list.innerHTML = '';
     coaches.forEach(c => list.appendChild(buildJvRosterItem(c, 'coach', seasonId)));
@@ -3896,10 +3896,10 @@ function buildJvRosterItem(m, type, seasonId) {
       ${jvParentsHtml}
     </div></div>
     <div style="display:flex;gap:0.5rem;">
-      <button class="btn-secondary" style="font-size:0.75rem;padding:3px 8px;background:${m.memberUid?'white':'#c62828'};color:${m.memberUid?'#2e7d32':'white'};border-color:${m.memberUid?'#2e7d32':'#c62828'};" onclick="linkRosterMember('${seasonId}','${type==='player'?'players':'coaches'}','${m.id || m.name}','${m.memberUid||''}','jv-roster')" title="${m.memberUid?'Linked - click to change':'Not linked - click to link'}">${m.memberUid?'🔗 Linked':'Link'}</button>
-      ${type === 'player' ? `<button class="btn-secondary" style="font-size:0.75rem;padding:3px 8px;" onclick='linkRosterParents("${seasonId}","players","${m.id || m.name}",${JSON.stringify(jvParentUids)},"jv-roster")'>👪 Parents${jvParentUids.length ? ' (' + jvParentUids.length + ')' : ''}</button>` : ''}
-      <button class="btn-edit" onclick="editJvMember('${m.id || m.name}','${type}','${seasonId}')">Edit</button>
-      <button class="btn-delete" onclick="deleteJvMember('${m.id || m.name}','${type}','${seasonId}')">Delete</button>
+      <button class="btn-secondary" style="font-size:0.75rem;padding:3px 8px;background:${m.memberUid?'white':'#c62828'};color:${m.memberUid?'#2e7d32':'white'};border-color:${m.memberUid?'#2e7d32':'#c62828'};" onclick="linkRosterMember('${seasonId}','${type==='player'?'players':'coaches'}','${m.id}','${m.memberUid||''}','jv-roster')" title="${m.memberUid?'Linked - click to change':'Not linked - click to link'}">${m.memberUid?'🔗 Linked':'Link'}</button>
+      ${type === 'player' ? `<button class="btn-secondary" style="font-size:0.75rem;padding:3px 8px;" onclick='linkRosterParents("${seasonId}","players","${m.id}",${JSON.stringify(jvParentUids)},"jv-roster")'>👪 Parents${jvParentUids.length ? ' (' + jvParentUids.length + ')' : ''}</button>` : ''}
+      <button class="btn-edit" onclick="editJvMember('${m.id}','${type}','${seasonId}')">Edit</button>
+      <button class="btn-delete" onclick="deleteJvMember('${m.id}','${type}','${seasonId}')">Delete</button>
     </div>`;
   return item;
 }
