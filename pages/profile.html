@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=228">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=229">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=228">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=229">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=228">
-  <script src="/assets/js/page-guard.js?v=228"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=229">
+  <script src="/assets/js/page-guard.js?v=229"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -293,7 +293,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=228"></script>
+<script src="/assets/js/load-header.js?v=229"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -569,7 +569,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=228"></script>
+<script src="/assets/js/load-footer.js?v=229"></script>
 
 <!-- MEMBER MODAL v2 -->
 <!-- CHANGE PASSWORD MODAL -->
@@ -762,13 +762,13 @@ function showSection(name) {
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=228"></script>
+<script type="module" src="/assets/js/member-auth.js?v=229"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { initPushNotifications } from "/assets/js/push-notifications.js?v=228";
+  import { initPushNotifications } from "/assets/js/push-notifications.js?v=229";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
@@ -1076,7 +1076,8 @@ function showSection(name) {
     const items = [];
     try {
       const summerSeasonsSnap = await getDocs(collection(db, 'summer'));
-      const teamsSnaps = await Promise.all(summerSeasonsSnap.docs.map(seasonDoc =>
+      const relevantSummerSeasons = summerSeasonsSnap.docs.filter(d => !d.data().hidden);
+      const teamsSnaps = await Promise.all(relevantSummerSeasons.map(seasonDoc =>
         getDocs(collection(db, 'summer', seasonDoc.id, 'teams')).then(snap => ({ seasonId: seasonDoc.id, snap }))
       ));
       // Each entry represents either "me" or "my child" on a specific team
@@ -1134,7 +1135,7 @@ function showSection(name) {
     const seasonsSnap = await seasonsSnapPromise;
     if (wantsVarsity && seasonsSnap) {
       try {
-        const relevantSeasons = seasonsSnap.docs.filter(d => !d.data().varsityScheduleHidden);
+        const relevantSeasons = seasonsSnap.docs.filter(d => d.data().current && !d.data().varsityScheduleHidden);
         const gamesSnaps = await Promise.all(relevantSeasons.map(seasonDoc =>
           getDocs(collection(db, 'seasons', seasonDoc.id, 'schedule')).then(snap => ({ seasonDoc, snap }))
         ));
@@ -1166,7 +1167,7 @@ function showSection(name) {
     const seasonsSnap = await seasonsSnapPromise;
     if (wantsJv && seasonsSnap) {
       try {
-        const relevantSeasons = seasonsSnap.docs.filter(d => d.data().jvEnabled && !d.data().jvScheduleHidden);
+        const relevantSeasons = seasonsSnap.docs.filter(d => d.data().current && d.data().jvEnabled && !d.data().jvScheduleHidden);
         const gamesSnaps = await Promise.all(relevantSeasons.map(seasonDoc =>
           getDocs(collection(db, 'jv-schedule', seasonDoc.id, 'games')).then(snap => ({ seasonDoc, snap }))
         ));
@@ -1200,7 +1201,7 @@ function showSection(name) {
       try {
         const allSeasons = seasonsSnap.docs;
 
-        const varsitySeasons = allSeasons.filter(d => !d.data().varsityScheduleHidden);
+        const varsitySeasons = allSeasons.filter(d => d.data().current && !d.data().varsityScheduleHidden);
         const vData = await Promise.all(varsitySeasons.map(async seasonDoc => {
           const [rosterSnap, gamesSnap] = await Promise.all([
             getDocs(collection(db, 'roster', seasonDoc.id, 'players')),
@@ -1236,7 +1237,7 @@ function showSection(name) {
           });
         });
 
-        const jvSeasons = allSeasons.filter(d => d.data().jvEnabled && !d.data().jvScheduleHidden);
+        const jvSeasons = allSeasons.filter(d => d.data().current && d.data().jvEnabled && !d.data().jvScheduleHidden);
         const jData = await Promise.all(jvSeasons.map(async seasonDoc => {
           const [rosterSnap, gamesSnap] = await Promise.all([
             getDocs(collection(db, 'jv-roster', seasonDoc.id, 'players')),
