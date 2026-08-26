@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=230">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=231">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=230">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=231">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=230">
-  <script src="/assets/js/page-guard.js?v=230"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=231">
+  <script src="/assets/js/page-guard.js?v=231"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -293,7 +293,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=230"></script>
+<script src="/assets/js/load-header.js?v=231"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -560,7 +560,13 @@
         </div>
         <div class="profile-section-body">
           <p style="font-size:0.85rem;color:#666;margin-bottom:1rem;">Upcoming games and events based on your team assignments and roles.</p>
-          <div id="myScheduleList"><p style="color:#999;font-style:italic;">Loading...</p></div>
+          <div id="myScheduleList">
+            <div style="text-align:center;padding:2rem 1rem;color:#999;">
+              <div style="width:32px;height:32px;border:3px solid #eee;border-top-color:#5D1725;border-radius:50%;margin:0 auto 0.75rem;animation:spin 0.8s linear infinite;"></div>
+              <p style="font-style:italic;font-size:0.9rem;">Loading your schedule...</p>
+            </div>
+          </div>
+          <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
         </div>
       </div>
 
@@ -569,7 +575,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=230"></script>
+<script src="/assets/js/load-footer.js?v=231"></script>
 
 <!-- MEMBER MODAL v2 -->
 <!-- CHANGE PASSWORD MODAL -->
@@ -762,13 +768,13 @@ function showSection(name) {
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=230"></script>
+<script type="module" src="/assets/js/member-auth.js?v=231"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { initPushNotifications } from "/assets/js/push-notifications.js?v=230";
+  import { initPushNotifications } from "/assets/js/push-notifications.js?v=231";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
@@ -1049,7 +1055,19 @@ function showSection(name) {
   window.loadMySchedule = async function() {
     if (!currentUser || !currentProfile) return;
     const list = document.getElementById('myScheduleList');
-    list.innerHTML = '<p style="color:#999;font-style:italic;">Loading...</p>';
+    const spinnerHtml = (msg) => '<div style="text-align:center;padding:2rem 1rem;color:#999;">'
+      + '<div style="width:32px;height:32px;border:3px solid #eee;border-top-color:#5D1725;border-radius:50%;margin:0 auto 0.75rem;animation:spin 0.8s linear infinite;"></div>'
+      + '<p style="font-style:italic;font-size:0.9rem;">' + msg + '</p></div>'
+      + '<style>@keyframes spin { to { transform: rotate(360deg); } }</style>';
+    list.innerHTML = spinnerHtml('Loading your schedule...');
+    // If it's taking a while (slower mobile connections can have a one-time delay
+    // establishing a fresh connection), reassure the user this is still working
+    // rather than leaving a static message that could look stuck or broken.
+    const slowLoadTimer = setTimeout(() => {
+      if (list.innerHTML.indexOf('spin') !== -1) {
+        list.innerHTML = spinnerHtml("Still loading — this can take a little longer on some connections. Hang tight!");
+      }
+    }, 5000);
     const role = currentProfile.role || 'member';
     const today = new Date().toISOString().split('T')[0];
     const items = [];
@@ -1314,6 +1332,10 @@ function showSection(name) {
         i.rsvp = snap.exists() ? snap.data().response : null;
       } catch(e) { /* leave as null on failure */ }
     }));
+
+    // Content is about to render — cancel the "still loading" reassurance timer
+    // so it can't fire afterward and overwrite already-rendered content.
+    clearTimeout(slowLoadTimer);
 
     // Sort all by date
     items.sort((a, b) => (a.date + (a.time||'')).localeCompare(b.date + (b.time||'')));
