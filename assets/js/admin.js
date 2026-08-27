@@ -4537,9 +4537,15 @@ function buildLineupCardHtml(assignments, teamLabel, game) {
     const pid = assignments[slotKey];
     const p = pid ? lineupPlayerById(pid) : null;
     if (!p) return `<div class="lc-slot lc-slot-empty"></div>`;
+    const nameParts = (p.name || '').trim().split(/\s+/);
+    const lastName = nameParts.length > 1 ? nameParts.pop() : '';
+    const firstName = nameParts.join(' ');
     return `<div class="lc-slot">
       <div class="lc-num">${p.number || '-'}</div>
-      <div class="lc-name">${(p.name || '').toUpperCase()}</div>
+      <div class="lc-name-block">
+        <div class="lc-first">${firstName.toUpperCase()}</div>
+        <div class="lc-last">${lastName.toUpperCase()}</div>
+      </div>
     </div>`;
   }
   const lineRows = [1,2,3,4].map(n => `
@@ -4548,7 +4554,7 @@ function buildLineupCardHtml(assignments, teamLabel, game) {
   const dRows = [1,2,3].map(n => `
     <div class="lc-row">${slotPlayerHtml('d'+n+'_LD')}${slotPlayerHtml('d'+n+'_RD')}</div>
   `).join('');
-  const gRow = `<div class="lc-row" style="max-width:66%;">${slotPlayerHtml('goalie_starter')}${slotPlayerHtml('goalie_backup')}</div>`;
+  const gRow = `<div class="lc-row" style="max-width:66%;margin:0 auto;">${slotPlayerHtml('goalie_starter')}${slotPlayerHtml('goalie_backup')}</div>`;
 
   const formattedDate = game.date ? new Date(game.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
   const timeStr = game.time ? (() => {
@@ -4588,10 +4594,12 @@ function buildLineupCardHtml(assignments, teamLabel, game) {
   </div>
   <style>
     .lc-row { display:flex; gap:0.4rem; margin-bottom:0.4rem; }
-    .lc-slot { flex:1; display:flex; flex-direction:column; align-items:center; background:#f5f5f5; border-radius:6px; padding:0.4rem 0.2rem; min-height:52px; justify-content:center; }
+    .lc-slot { flex:1; display:flex; align-items:center; justify-content:center; gap:0.5rem; background:#f5f5f5; border-radius:6px; padding:0.4rem 0.5rem; min-height:52px; }
     .lc-slot-empty { background:#fafafa; }
-    .lc-num { font-size:1.3rem; font-weight:900; color:#5D1725; line-height:1; }
-    .lc-name { font-size:0.62rem; font-weight:700; color:#333; text-align:center; margin-top:2px; line-height:1.1; }
+    .lc-num { font-size:1.3rem; font-weight:900; color:#5D1725; line-height:1; flex-shrink:0; }
+    .lc-name-block { display:flex; flex-direction:column; align-items:flex-start; line-height:1.05; }
+    .lc-first { font-size:0.58rem; font-weight:600; color:#777; }
+    .lc-last { font-size:0.8rem; font-weight:800; color:#222; }
   </style>`;
 }
 
