@@ -2,22 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=243">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=244">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=243">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=244">
   <title>Schedule - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=243">
-  <link rel="stylesheet" href="/assets/css/schedule-styles.css?v=243">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=243">
-  <script src="/assets/js/page-guard.js?v=243"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=244">
+  <link rel="stylesheet" href="/assets/css/schedule-styles.css?v=244">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=244">
+  <script src="/assets/js/page-guard.js?v=244"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=243" defer></script>
-<script src="/assets/js/load-header.js?v=243"></script>
+<script src="/assets/js/load-hero.js?v=244" defer></script>
+<script src="/assets/js/load-header.js?v=244"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -147,7 +147,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=243"></script>
+<script src="/assets/js/load-footer.js?v=244"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -216,7 +216,57 @@
   document.getElementById('closeGameViewModal').addEventListener('click', () => gameViewModal.classList.remove('active'));
   gameViewModal.addEventListener('click', e => { if (e.target === gameViewModal) gameViewModal.classList.remove('active'); });
 
-  function buildLineupCardHtml(assignments, rosterById, teamLabel, game) {
+  function buildGameHeaderHtml(game, teamLabel, opts) {
+    opts = opts || {};
+    const formattedDate = game.date ? new Date(game.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
+    const timeStr = game.time ? (() => {
+      const [h, m] = game.time.split(':');
+      const hr = parseInt(h);
+      return (hr % 12 || 12) + ':' + m + ' ' + (hr >= 12 ? 'PM' : 'AM') + (game.timezone ? ' ' + game.timezone : '');
+    })() : '';
+    const locationLine = game.rinkName
+      ? (game.rinkName + (game.rinkAddress ? ' · ' + game.rinkAddress : ''))
+      : (game.location || '');
+
+    const logosBlock = `
+      <div style="display:flex;align-items:center;justify-content:${opts.leftAlign ? 'flex-start' : 'center'};gap:0.9rem;margin-bottom:0.6rem;">
+        <div style="width:52px;height:52px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.35);">
+          <img src="/assets/images/admiral-logo.png?v=244" style="width:78%;height:78%;object-fit:contain;">
+        </div>
+        <div style="font-size:1rem;font-weight:900;opacity:0.7;letter-spacing:1px;">VS</div>
+        <div style="width:52px;height:52px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.35);">
+          ${game.opponentLogo ? `<img src="${game.opponentLogo}" style="width:78%;height:78%;object-fit:contain;">` : `<span style="font-size:1.6rem;">🏒</span>`}
+        </div>
+      </div>`;
+
+    const textBlock = `
+      ${opts.subtitle ? `<div style="font-size:0.65rem;letter-spacing:1.5px;opacity:0.7;text-transform:uppercase;margin-bottom:2px;">${opts.subtitle}</div>` : ''}
+      <div style="font-size:1.25rem;font-weight:800;margin-bottom:5px;">Admirals vs ${game.opponent || 'TBD'}</div>
+      <div style="font-size:0.8rem;opacity:0.9;font-weight:600;">${formattedDate}${timeStr ? ' · ' + timeStr : ''}</div>
+      ${locationLine ? `<div style="font-size:0.73rem;opacity:0.75;margin-top:3px;">📍 ${locationLine}</div>` : ''}
+    `;
+
+    if (opts.leftAlign) {
+      return `
+      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);color:white;padding:1.25rem 1.25rem 1rem;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+          <div style="text-align:left;">
+            ${logosBlock}
+            ${textBlock}
+          </div>
+          ${opts.resultHtml ? `<div style="text-align:right;flex-shrink:0;">${opts.resultHtml}</div>` : ''}
+        </div>
+      </div>`;
+    }
+
+    return `
+    <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);color:white;padding:1.25rem 1rem 1rem;text-align:center;">
+      ${logosBlock}
+      ${textBlock}
+    </div>`;
+  }
+
+  function buildLineupLinesHtml(assignments, rosterById) {
     function slotPlayerHtml(slotKey) {
       const pid = assignments[slotKey];
       const p = pid ? rosterById[pid] : null;
@@ -240,41 +290,14 @@
     `).join('');
     const gRow = `<div class="lc-row" style="max-width:66%;margin:0 auto;">${slotPlayerHtml('goalie_starter')}${slotPlayerHtml('goalie_backup')}</div>`;
 
-    const formattedDate = game.date ? new Date(game.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
-    const timeStr = game.time ? (() => {
-      const [h, m] = game.time.split(':');
-      const hr = parseInt(h);
-      return (hr % 12 || 12) + ':' + m + ' ' + (hr >= 12 ? 'PM' : 'AM') + (game.timezone ? ' ' + game.timezone : '');
-    })() : '';
-    const locationLine = game.rinkName
-      ? (game.rinkName + (game.rinkAddress ? ' · ' + game.rinkAddress : ''))
-      : (game.location || '');
-
     return `
-    <div class="lineup-card" style="background:white;border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.15);max-width:480px;margin:0 auto;">
-      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);color:white;padding:1.25rem 1rem 1rem;text-align:center;">
-        <div style="display:flex;align-items:center;justify-content:center;gap:0.9rem;margin-bottom:0.6rem;">
-          <div style="width:52px;height:52px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.35);">
-            <img src="/assets/images/admiral-logo.png?v=243" style="width:78%;height:78%;object-fit:contain;">
-          </div>
-          <div style="font-size:1rem;font-weight:900;opacity:0.7;letter-spacing:1px;">VS</div>
-          <div style="width:52px;height:52px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.35);">
-            ${game.opponentLogo ? `<img src="${game.opponentLogo}" style="width:78%;height:78%;object-fit:contain;">` : `<span style="font-size:1.6rem;">🏒</span>`}
-          </div>
-        </div>
-        <div style="font-size:0.65rem;letter-spacing:1.5px;opacity:0.7;text-transform:uppercase;margin-bottom:2px;">${teamLabel} · Game Day Lineup</div>
-        <div style="font-size:1.25rem;font-weight:800;margin-bottom:5px;">Admirals vs ${game.opponent || 'TBD'}</div>
-        <div style="font-size:0.8rem;opacity:0.9;font-weight:600;">${formattedDate}${timeStr ? ' · ' + timeStr : ''}</div>
-        ${locationLine ? `<div style="font-size:0.73rem;opacity:0.75;margin-top:3px;">📍 ${locationLine}</div>` : ''}
-      </div>
-      <div style="padding:1rem;">
-        <div style="font-size:0.75rem;font-weight:700;color:#5D1725;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #5D1725;padding-bottom:0.25rem;margin-bottom:0.5rem;">Forwards</div>
-        ${lineRows}
-        <div style="font-size:0.75rem;font-weight:700;color:#5D1725;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #5D1725;padding-bottom:0.25rem;margin:0.75rem 0 0.5rem;">Defense</div>
-        ${dRows}
-        <div style="font-size:0.75rem;font-weight:700;color:#5D1725;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #5D1725;padding-bottom:0.25rem;margin:0.75rem 0 0.5rem;">Goalies</div>
-        ${gRow}
-      </div>
+    <div style="padding:1rem;">
+      <div style="font-size:0.75rem;font-weight:700;color:#5D1725;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #5D1725;padding-bottom:0.25rem;margin-bottom:0.5rem;">Forwards</div>
+      ${lineRows}
+      <div style="font-size:0.75rem;font-weight:700;color:#5D1725;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #5D1725;padding-bottom:0.25rem;margin:0.75rem 0 0.5rem;">Defense</div>
+      ${dRows}
+      <div style="font-size:0.75rem;font-weight:700;color:#5D1725;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #5D1725;padding-bottom:0.25rem;margin:0.75rem 0 0.5rem;">Goalies</div>
+      ${gRow}
     </div>
     <style>
       .lc-row { display:flex; gap:0.4rem; margin-bottom:0.4rem; }
@@ -288,32 +311,12 @@
   }
 
   async function openGameViewModal(game, seasonId) {
-    const homeAway = game.homeAway === 'Home' ? 'vs.' : '@';
-    const resultColor = resultColors[game.result] || '#333';
-
-    document.getElementById('gvmHeader').innerHTML = `
-      <div class="gvm-header-inner">
-        <div class="gvm-matchup">
-          <span class="gvm-homeaway">${homeAway}</span>
-          ${opponentLogoHTML(game, 48)}
-          <span class="gvm-opponent">${game.opponent}</span>
-        </div>
-        ${game.result
-          ? `<div class="gvm-result" style="color:${resultColor}">${resultLabel[game.result]} ${game.teamScore}-${game.opponentScore}</div>`
-          : '<div class="gvm-no-result">No Result Yet</div>'}
-      </div>
-      <div class="gvm-meta">
-        <span>${formatDate(game.date)} · ${formatTime(game.time, game.timezone)}</span>
-        <span>${gameTypeLabel(game)}</span>
-        <span>${game.rinkName}${game.rinkAddress ? ' · ' + game.rinkAddress : ''}</span>
-      </div>
-    `;
-
-    // Lineup vs Stats: if the game hasn't happened yet (no result), show the
-    // published lineup (or a "not yet set" placeholder) instead of stats.
+    const gvmHeader = document.getElementById('gvmHeader');
     const lineupSection = document.getElementById('gvmLineupSection');
     const statsSection = document.getElementById('gvmStatsSection');
+
     if (!game.result) {
+      gvmHeader.innerHTML = buildGameHeaderHtml(game, 'Varsity', { subtitle: 'VARSITY · GAME DAY LINEUP' });
       statsSection.style.display = 'none';
       lineupSection.style.display = 'block';
       lineupSection.innerHTML = '<p style="text-align:center;color:#999;padding:2rem;">Loading lineup...</p>';
@@ -324,18 +327,21 @@
           const rosterSnap2 = await getDocs(collection(db, 'roster', seasonId, 'players'));
           const rosterById = {};
           rosterSnap2.forEach(d => { rosterById[d.id] = d.data(); });
-          lineupSection.innerHTML = buildLineupCardHtml(lineupSnap.data().assignments || {}, rosterById, 'Varsity', game);
+          lineupSection.innerHTML = buildLineupLinesHtml(lineupSnap.data().assignments || {}, rosterById);
         } else {
-          lineupSection.innerHTML = '<p style="text-align:center;color:#999;padding:2rem;font-style:italic;">Lineups for this game are not yet set.</p>';
+          lineupSection.innerHTML = '<p style="text-align:center;color:#999;padding:2.5rem 1rem;font-style:italic;">Lineups for this game are not yet set.</p>';
         }
       } catch (err) {
         console.error('lineup load error:', err);
-        lineupSection.innerHTML = '<p style="text-align:center;color:#999;padding:2rem;font-style:italic;">Lineups for this game are not yet set.</p>';
+        lineupSection.innerHTML = '<p style="text-align:center;color:#999;padding:2.5rem 1rem;font-style:italic;">Lineups for this game are not yet set.</p>';
       }
       gameViewModal.querySelector('.gvm-modal').scrollTop = 0;
       gameViewModal.classList.add('active');
       return;
     }
+
+    const resultHtml = `<div style="font-size:1.5rem;font-weight:900;">${resultLabel[game.result]} ${game.teamScore}-${game.opponentScore}</div>`;
+    gvmHeader.innerHTML = buildGameHeaderHtml(game, 'Varsity', { leftAlign: true, resultHtml });
     statsSection.style.display = 'block';
     lineupSection.style.display = 'none';
 
@@ -820,7 +826,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=243"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=243"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=244"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=244"></script>
 </body>
 </html>
