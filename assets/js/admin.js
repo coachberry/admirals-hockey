@@ -4383,6 +4383,18 @@ async function loadLineupGames() {
   }
 }
 
+const LINEUP_SLOT_KEYS = [
+  ...[1,2,3,4].flatMap(n => [`fwd${n}_LW`, `fwd${n}_C`, `fwd${n}_RW`]),
+  ...[1,2,3].flatMap(n => [`d${n}_LD`, `d${n}_RD`]),
+  'goalie_starter', 'goalie_backup'
+];
+
+let _lineupAssignments = {}; // slotKey -> playerId
+
+function lineupDocId(team, seasonId, gameId) {
+  return team + '_' + seasonId + '_' + gameId;
+}
+
 document.getElementById('lineupGameSelect')?.addEventListener('change', async () => {
   const gameId = document.getElementById('lineupGameSelect').value;
   const area = document.getElementById('lineupBuilderArea');
@@ -4403,6 +4415,15 @@ document.getElementById('lineupGameSelect')?.addEventListener('change', async ()
     _lineupRosterPlayers.sort((a, b) => (parseInt(a.number) || 999) - (parseInt(b.number) || 999));
 
     _lineupCurrentGame = { id: gameId, seasonId, team };
+
+    // Load any previously saved lineup for this exact game
+    _lineupAssignments = {};
+    const docId = lineupDocId(team, seasonId, gameId);
+    const existingSnap = await getDoc(doc(db, 'lineups', docId));
+    if (existingSnap.exists()) {
+      _lineupAssignments = existingSnap.data().assignments || {};
+    }
+
     renderLineupBuilder();
   } catch (err) {
     console.error('lineup roster load error:', err);
@@ -4410,32 +4431,55 @@ document.getElementById('lineupGameSelect')?.addEventListener('change', async ()
   }
 });
 
+function lineupPlayerById(id) {
+  return _lineupRosterPlayers.find(p => p.id === id);
+}
+
+// Roster pool chip — draggable, shows number as the primary visual
 function lineupPlayerChip(p) {
-  const photo = p.photoURL
-    ? `<img src="${p.photoURL}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
-    : `<div style="width:28px;height:28px;border-radius:50%;background:#5D1725;color:white;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0;">${(p.name||'?').charAt(0)}</div>`;
-  return `<div class="lineup-player-chip" style="display:flex;align-items:center;gap:0.4rem;background:white;border:1px solid #ddd;border-radius:6px;padding:0.35rem 0.5rem;font-size:0.82rem;">
-    <strong style="color:#5D1725;min-width:20px;">${p.number || '-'}</strong>
-    ${photo}
+  return `<div class="lineup-player-chip" draggable="true" data-player-id="${p.id}"
+    style="display:flex;align-items:center;gap:0.5rem;background:white;border:1px solid #ddd;border-radius:6px;padding:0.4rem 0.6rem;font-size:0.85rem;cursor:grab;">
+    <div style="width:28px;height:28px;border-radius:50%;background:#5D1725;color:white;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:800;flex-shrink:0;">${p.number || '-'}</div>
     <span>${p.name || 'Unknown'}</span>
   </div>`;
 }
 
-function lineupSlot(label) {
-  return `<div class="lineup-slot" style="min-height:44px;border:2px dashed #ccc;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:0.75rem;">${label}</div>`;
+// Filled slot card — big number as the primary visual, draggable to move/swap, with a remove (x) button
+function lineupFilledSlot(slotKey, p) {
+  return `<div class="lineup-slot lineup-slot-filled" draggable="true" data-slot-key="${slotKey}"
+    style="position:relative;min-height:52px;border:2px solid #5D1725;border-radius:6px;display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.5rem;background:#fdf3f0;cursor:grab;">
+    <div style="font-size:1.4rem;font-weight:800;color:#5D1725;min-width:32px;text-align:center;">${p.number || '-'}</div>
+    <span style="font-size:0.82rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name || 'Unknown'}</span>
+    <button class="lineup-slot-remove" data-slot-key="${slotKey}" title="Remove"
+      style="position:absolute;top:2px;right:2px;background:none;border:none;color:#c62828;font-size:0.9rem;font-weight:700;cursor:pointer;line-height:1;padding:2px;">✕</button>
+  </div>`;
+}
+
+function lineupEmptySlot(slotKey, label) {
+  return `<div class="lineup-slot" data-slot-key="${slotKey}"
+    style="min-height:52px;border:2px dashed #ccc;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:0.75rem;">${label}</div>`;
+}
+
+function lineupSlotHtml(slotKey, label) {
+  const playerId = _lineupAssignments[slotKey];
+  const p = playerId ? lineupPlayerById(playerId) : null;
+  return p ? lineupFilledSlot(slotKey, p) : lineupEmptySlot(slotKey, label);
 }
 
 function renderLineupBuilder() {
   const area = document.getElementById('lineupBuilderArea');
-  const poolHtml = _lineupRosterPlayers.map(p => lineupPlayerChip(p)).join('');
+  const assignedIds = new Set(Object.values(_lineupAssignments).filter(Boolean));
+  const availablePlayers = _lineupRosterPlayers.filter(p => !assignedIds.has(p.id));
+  const poolHtml = availablePlayers.map(p => lineupPlayerChip(p)).join('');
 
   area.innerHTML = `
     <div style="display:grid;grid-template-columns:220px 1fr;gap:1.5rem;align-items:start;">
       <div>
         <h3 style="font-size:0.9rem;color:#5D1725;margin-bottom:0.5rem;">Available Players</h3>
-        <div id="lineupRosterPool" style="display:flex;flex-direction:column;gap:0.4rem;background:#f9f9f9;border-radius:8px;padding:0.6rem;max-height:600px;overflow-y:auto;">
-          ${poolHtml || '<p style="color:#999;font-size:0.8rem;">No players on this roster.</p>'}
+        <div id="lineupRosterPool" style="display:flex;flex-direction:column;gap:0.4rem;background:#f9f9f9;border-radius:8px;padding:0.6rem;max-height:600px;overflow-y:auto;min-height:60px;">
+          ${poolHtml || '<p style="color:#999;font-size:0.8rem;">All players assigned.</p>'}
         </div>
+        <p style="font-size:0.72rem;color:#999;margin-top:0.5rem;">Drag a player onto a slot. Drag a filled slot back here (or click ✕) to remove.</p>
       </div>
       <div>
         <h3 style="font-size:0.9rem;color:#5D1725;margin-bottom:0.5rem;">Forwards</h3>
@@ -4443,7 +4487,7 @@ function renderLineupBuilder() {
           <div style="margin-bottom:0.6rem;">
             <div style="font-size:0.75rem;color:#999;margin-bottom:0.2rem;">Line ${n}</div>
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;">
-              ${lineupSlot('LW')}${lineupSlot('C')}${lineupSlot('RW')}
+              ${lineupSlotHtml(`fwd${n}_LW`, 'LW')}${lineupSlotHtml(`fwd${n}_C`, 'C')}${lineupSlotHtml(`fwd${n}_RW`, 'RW')}
             </div>
           </div>
         `).join('')}
@@ -4452,20 +4496,110 @@ function renderLineupBuilder() {
           <div style="margin-bottom:0.6rem;">
             <div style="font-size:0.75rem;color:#999;margin-bottom:0.2rem;">Pair ${n}</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
-              ${lineupSlot('LD')}${lineupSlot('RD')}
+              ${lineupSlotHtml(`d${n}_LD`, 'LD')}${lineupSlotHtml(`d${n}_RD`, 'RD')}
             </div>
           </div>
         `).join('')}
         <h3 style="font-size:0.9rem;color:#5D1725;margin:1rem 0 0.5rem;">Goalies</h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
-          ${lineupSlot('Starter')}${lineupSlot('Backup')}
+          ${lineupSlotHtml('goalie_starter', 'Starter')}${lineupSlotHtml('goalie_backup', 'Backup')}
         </div>
-        <div style="margin-top:1.5rem;">
-          <button id="saveLineupBtn" class="btn-primary" disabled title="Drag-and-drop coming in the next stage">Save Lineup</button>
+        <div style="margin-top:1.5rem;display:flex;align-items:center;gap:0.75rem;">
+          <button id="saveLineupBtn" class="btn-primary">Save Lineup</button>
+          <span id="lineupSaveStatus" style="font-size:0.85rem;"></span>
         </div>
       </div>
     </div>
   `;
+
+  wireLineupDragAndDrop();
+  document.getElementById('saveLineupBtn')?.addEventListener('click', saveLineup);
+}
+
+function wireLineupDragAndDrop() {
+  // Draggable sources: pool chips and filled slots
+  document.querySelectorAll('.lineup-player-chip[draggable="true"]').forEach(el => {
+    el.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', JSON.stringify({ playerId: el.dataset.playerId, fromSlot: null }));
+    });
+  });
+  document.querySelectorAll('.lineup-slot-filled[draggable="true"]').forEach(el => {
+    el.addEventListener('dragstart', (e) => {
+      const slotKey = el.dataset.slotKey;
+      const playerId = _lineupAssignments[slotKey];
+      e.dataTransfer.setData('text/plain', JSON.stringify({ playerId, fromSlot: slotKey }));
+    });
+  });
+
+  // Drop targets: every slot (empty or filled)
+  document.querySelectorAll('.lineup-slot').forEach(el => {
+    el.addEventListener('dragover', (e) => { e.preventDefault(); });
+    el.addEventListener('drop', (e) => {
+      e.preventDefault();
+      let data;
+      try { data = JSON.parse(e.dataTransfer.getData('text/plain')); } catch (err) { return; }
+      if (!data || !data.playerId) return;
+      const targetSlot = el.dataset.slotKey;
+
+      // Clear the player's previous slot (if they were already assigned elsewhere)
+      if (data.fromSlot) delete _lineupAssignments[data.fromSlot];
+      Object.keys(_lineupAssignments).forEach(k => {
+        if (_lineupAssignments[k] === data.playerId && k !== targetSlot) delete _lineupAssignments[k];
+      });
+
+      // Whoever was previously in the target slot goes back to the pool
+      _lineupAssignments[targetSlot] = data.playerId;
+      renderLineupBuilder();
+    });
+  });
+
+  // Drop target: the pool itself (dragging a filled slot back here removes the assignment)
+  const pool = document.getElementById('lineupRosterPool');
+  if (pool) {
+    pool.addEventListener('dragover', (e) => { e.preventDefault(); });
+    pool.addEventListener('drop', (e) => {
+      e.preventDefault();
+      let data;
+      try { data = JSON.parse(e.dataTransfer.getData('text/plain')); } catch (err) { return; }
+      if (data && data.fromSlot) {
+        delete _lineupAssignments[data.fromSlot];
+        renderLineupBuilder();
+      }
+    });
+  }
+
+  // Remove (x) buttons on filled slots
+  document.querySelectorAll('.lineup-slot-remove').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const slotKey = btn.dataset.slotKey;
+      delete _lineupAssignments[slotKey];
+      renderLineupBuilder();
+    });
+  });
+}
+
+async function saveLineup() {
+  if (!_lineupCurrentGame) return;
+  const status = document.getElementById('lineupSaveStatus');
+  status.textContent = 'Saving...';
+  status.style.color = '#666';
+  try {
+    const { team, seasonId, id: gameId } = _lineupCurrentGame;
+    const docId = lineupDocId(team, seasonId, gameId);
+    await setDoc(doc(db, 'lineups', docId), {
+      team, seasonId, gameId,
+      assignments: _lineupAssignments,
+      updatedAt: new Date().toISOString()
+    });
+    status.textContent = '✅ Saved!';
+    status.style.color = 'green';
+    setTimeout(() => { if (status) status.textContent = ''; }, 2000);
+  } catch (err) {
+    console.error('saveLineup error:', err);
+    status.textContent = 'Error saving. Please try again.';
+    status.style.color = '#c62828';
+  }
 }
 loadTeamEventsAdmin();
 
