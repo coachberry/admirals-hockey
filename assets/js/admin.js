@@ -4375,7 +4375,7 @@ async function loadLineupGames() {
       return;
     }
     _lineupGamesCache = {};
-    games.forEach(g => { _lineupGamesCache[g.id] = { opponent: g.opponent || 'TBD', date: g.date || '' }; });
+    games.forEach(g => { _lineupGamesCache[g.id] = g; });
     gameSelect.innerHTML = '<option value="">Select a game...</option>' + games.map(g => {
       const d = g.date ? new Date(g.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'TBD';
       return `<option value="${g.id}">${d} vs ${g.opponent || 'TBD'}</option>`;
@@ -4420,7 +4420,7 @@ document.getElementById('lineupGameSelect')?.addEventListener('change', async ()
     _lineupRosterPlayers.sort((a, b) => (parseInt(a.number) || 999) - (parseInt(b.number) || 999));
 
     const gameMeta = _lineupGamesCache[gameId] || {};
-    _lineupCurrentGame = { id: gameId, seasonId, team, opponent: gameMeta.opponent, date: gameMeta.date };
+    _lineupCurrentGame = { id: gameId, seasonId, team, ...gameMeta };
 
     // Load any previously saved lineup for this exact game
     _lineupAssignments = {};
@@ -4532,7 +4532,7 @@ function renderLineupBuilder() {
 
 // Shared card renderer — used for the admin preview, and will be reused for the
 // public site display and the shareable image export.
-function buildLineupCardHtml(assignments, teamLabel, opponent, dateStr) {
+function buildLineupCardHtml(assignments, teamLabel, game) {
   function slotPlayerHtml(slotKey) {
     const pid = assignments[slotKey];
     const p = pid ? lineupPlayerById(pid) : null;
@@ -4549,14 +4549,33 @@ function buildLineupCardHtml(assignments, teamLabel, opponent, dateStr) {
     <div class="lc-row">${slotPlayerHtml('d'+n+'_LD')}${slotPlayerHtml('d'+n+'_RD')}</div>
   `).join('');
   const gRow = `<div class="lc-row" style="max-width:66%;">${slotPlayerHtml('goalie_starter')}${slotPlayerHtml('goalie_backup')}</div>`;
-  const formattedDate = dateStr ? new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
+
+  const formattedDate = game.date ? new Date(game.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
+  const timeStr = game.time ? (() => {
+    const [h, m] = game.time.split(':');
+    const hr = parseInt(h);
+    return (hr % 12 || 12) + ':' + m + ' ' + (hr >= 12 ? 'PM' : 'AM') + (game.timezone ? ' ' + game.timezone : '');
+  })() : '';
+  const locationLine = game.rinkName
+    ? (game.rinkName + (game.rinkAddress ? ' · ' + game.rinkAddress : ''))
+    : (game.location || '');
 
   return `
   <div class="lineup-card" style="background:white;border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.15);max-width:480px;margin:0 auto;">
-    <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);color:white;padding:1rem 1.25rem;text-align:center;">
-      <div style="font-size:0.7rem;letter-spacing:1px;opacity:0.8;text-transform:uppercase;">${teamLabel}</div>
-      <div style="font-size:1.3rem;font-weight:800;">vs ${opponent || 'TBD'}</div>
-      <div style="font-size:0.75rem;opacity:0.85;">${formattedDate}</div>
+    <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);color:white;padding:1.25rem 1rem 1rem;text-align:center;">
+      <div style="display:flex;align-items:center;justify-content:center;gap:0.9rem;margin-bottom:0.6rem;">
+        <div style="width:52px;height:52px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.35);">
+          <img src="/assets/images/admiral-logo.png" style="width:78%;height:78%;object-fit:contain;">
+        </div>
+        <div style="font-size:1rem;font-weight:900;opacity:0.7;letter-spacing:1px;">VS</div>
+        <div style="width:52px;height:52px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.35);">
+          ${game.opponentLogo ? `<img src="${game.opponentLogo}" style="width:78%;height:78%;object-fit:contain;">` : `<span style="font-size:1.6rem;">🏒</span>`}
+        </div>
+      </div>
+      <div style="font-size:0.65rem;letter-spacing:1.5px;opacity:0.7;text-transform:uppercase;margin-bottom:2px;">${teamLabel} · Game Day Lineup</div>
+      <div style="font-size:1.25rem;font-weight:800;margin-bottom:5px;">Admirals vs ${game.opponent || 'TBD'}</div>
+      <div style="font-size:0.8rem;opacity:0.9;font-weight:600;">${formattedDate}${timeStr ? ' · ' + timeStr : ''}</div>
+      ${locationLine ? `<div style="font-size:0.73rem;opacity:0.75;margin-top:3px;">📍 ${locationLine}</div>` : ''}
     </div>
     <div style="padding:1rem;">
       <div style="font-size:0.75rem;font-weight:700;color:#5D1725;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #5D1725;padding-bottom:0.25rem;margin-bottom:0.5rem;">Forwards</div>
@@ -4581,7 +4600,7 @@ function toggleLineupPreview() {
   if (!panel) return;
   if (panel.style.display === 'none') {
     const teamLabel = _lineupCurrentGame.team === 'jv' ? 'JV' : 'Varsity';
-    panel.innerHTML = buildLineupCardHtml(_lineupAssignments, teamLabel, _lineupCurrentGame.opponent, _lineupCurrentGame.date);
+    panel.innerHTML = buildLineupCardHtml(_lineupAssignments, teamLabel, _lineupCurrentGame);
     panel.style.display = 'block';
   } else {
     panel.style.display = 'none';
