@@ -4374,6 +4374,8 @@ async function loadLineupGames() {
       gameSelect.innerHTML = '<option value="">No games found</option>';
       return;
     }
+    _lineupGamesCache = {};
+    games.forEach(g => { _lineupGamesCache[g.id] = { opponent: g.opponent || 'TBD', date: g.date || '' }; });
     gameSelect.innerHTML = '<option value="">Select a game...</option>' + games.map(g => {
       const d = g.date ? new Date(g.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'TBD';
       return `<option value="${g.id}">${d} vs ${g.opponent || 'TBD'}</option>`;
@@ -4391,6 +4393,8 @@ const LINEUP_SLOT_KEYS = [
 ];
 
 let _lineupAssignments = {}; // slotKey -> playerId
+let _lineupGamesCache = {}; // gameId -> { opponent, date }
+let _lineupPublished = false;
 
 function lineupDocId(team, seasonId, gameId) {
   return team + '_' + seasonId + '_' + gameId;
@@ -4415,14 +4419,17 @@ document.getElementById('lineupGameSelect')?.addEventListener('change', async ()
     rosterSnap.forEach(d => _lineupRosterPlayers.push({ id: d.id, ...d.data() }));
     _lineupRosterPlayers.sort((a, b) => (parseInt(a.number) || 999) - (parseInt(b.number) || 999));
 
-    _lineupCurrentGame = { id: gameId, seasonId, team };
+    const gameMeta = _lineupGamesCache[gameId] || {};
+    _lineupCurrentGame = { id: gameId, seasonId, team, opponent: gameMeta.opponent, date: gameMeta.date };
 
     // Load any previously saved lineup for this exact game
     _lineupAssignments = {};
+    _lineupPublished = false;
     const docId = lineupDocId(team, seasonId, gameId);
     const existingSnap = await getDoc(doc(db, 'lineups', docId));
     if (existingSnap.exists()) {
       _lineupAssignments = existingSnap.data().assignments || {};
+      _lineupPublished = existingSnap.data().published === true;
     }
 
     renderLineupBuilder();
@@ -4505,16 +4512,104 @@ function renderLineupBuilder() {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
           ${lineupSlotHtml('goalie_starter', 'Starter')}${lineupSlotHtml('goalie_backup', 'Backup')}
         </div>
-        <div style="margin-top:1.5rem;display:flex;align-items:center;gap:0.75rem;">
+        <div style="margin-top:1.5rem;display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
           <button id="saveLineupBtn" class="btn-primary">Save Lineup</button>
+          <button id="previewLineupBtn" class="btn-secondary" type="button">👁️ Preview</button>
+          <button id="publishLineupBtn" class="btn-secondary" type="button" style="${_lineupPublished ? 'background:#c62828;color:white;border-color:#c62828;' : 'background:#2e7d32;color:white;border-color:#2e7d32;'}">${_lineupPublished ? 'Unpublish' : 'Publish to Site'}</button>
+          <span id="lineupPublishBadge" style="font-size:0.78rem;font-weight:700;color:${_lineupPublished ? '#2e7d32' : '#999'};">${_lineupPublished ? '🟢 Live on site' : '⚪ Not published'}</span>
           <span id="lineupSaveStatus" style="font-size:0.85rem;"></span>
         </div>
+        <div id="lineupPreviewPanel" style="display:none;margin-top:1.5rem;padding:1.5rem;background:#eee;border-radius:10px;"></div>
       </div>
     </div>
   `;
 
   wireLineupDragAndDrop();
   document.getElementById('saveLineupBtn')?.addEventListener('click', saveLineup);
+  document.getElementById('previewLineupBtn')?.addEventListener('click', toggleLineupPreview);
+  document.getElementById('publishLineupBtn')?.addEventListener('click', toggleLineupPublish);
+}
+
+// Shared card renderer — used for the admin preview, and will be reused for the
+// public site display and the shareable image export.
+function buildLineupCardHtml(assignments, teamLabel, opponent, dateStr) {
+  function slotPlayerHtml(slotKey) {
+    const pid = assignments[slotKey];
+    const p = pid ? lineupPlayerById(pid) : null;
+    if (!p) return `<div class="lc-slot lc-slot-empty"></div>`;
+    return `<div class="lc-slot">
+      <div class="lc-num">${p.number || '-'}</div>
+      <div class="lc-name">${(p.name || '').toUpperCase()}</div>
+    </div>`;
+  }
+  const lineRows = [1,2,3,4].map(n => `
+    <div class="lc-row">${slotPlayerHtml('fwd'+n+'_LW')}${slotPlayerHtml('fwd'+n+'_C')}${slotPlayerHtml('fwd'+n+'_RW')}</div>
+  `).join('');
+  const dRows = [1,2,3].map(n => `
+    <div class="lc-row">${slotPlayerHtml('d'+n+'_LD')}${slotPlayerHtml('d'+n+'_RD')}</div>
+  `).join('');
+  const gRow = `<div class="lc-row" style="max-width:66%;">${slotPlayerHtml('goalie_starter')}${slotPlayerHtml('goalie_backup')}</div>`;
+  const formattedDate = dateStr ? new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
+
+  return `
+  <div class="lineup-card" style="background:white;border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.15);max-width:480px;margin:0 auto;">
+    <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);color:white;padding:1rem 1.25rem;text-align:center;">
+      <div style="font-size:0.7rem;letter-spacing:1px;opacity:0.8;text-transform:uppercase;">${teamLabel}</div>
+      <div style="font-size:1.3rem;font-weight:800;">vs ${opponent || 'TBD'}</div>
+      <div style="font-size:0.75rem;opacity:0.85;">${formattedDate}</div>
+    </div>
+    <div style="padding:1rem;">
+      <div style="font-size:0.75rem;font-weight:700;color:#5D1725;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #5D1725;padding-bottom:0.25rem;margin-bottom:0.5rem;">Forwards</div>
+      ${lineRows}
+      <div style="font-size:0.75rem;font-weight:700;color:#5D1725;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #5D1725;padding-bottom:0.25rem;margin:0.75rem 0 0.5rem;">Defense</div>
+      ${dRows}
+      <div style="font-size:0.75rem;font-weight:700;color:#5D1725;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #5D1725;padding-bottom:0.25rem;margin:0.75rem 0 0.5rem;">Goalies</div>
+      ${gRow}
+    </div>
+  </div>
+  <style>
+    .lc-row { display:flex; gap:0.4rem; margin-bottom:0.4rem; }
+    .lc-slot { flex:1; display:flex; flex-direction:column; align-items:center; background:#f5f5f5; border-radius:6px; padding:0.4rem 0.2rem; min-height:52px; justify-content:center; }
+    .lc-slot-empty { background:#fafafa; }
+    .lc-num { font-size:1.3rem; font-weight:900; color:#5D1725; line-height:1; }
+    .lc-name { font-size:0.62rem; font-weight:700; color:#333; text-align:center; margin-top:2px; line-height:1.1; }
+  </style>`;
+}
+
+function toggleLineupPreview() {
+  const panel = document.getElementById('lineupPreviewPanel');
+  if (!panel) return;
+  if (panel.style.display === 'none') {
+    const teamLabel = _lineupCurrentGame.team === 'jv' ? 'JV' : 'Varsity';
+    panel.innerHTML = buildLineupCardHtml(_lineupAssignments, teamLabel, _lineupCurrentGame.opponent, _lineupCurrentGame.date);
+    panel.style.display = 'block';
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+async function toggleLineupPublish() {
+  if (!_lineupCurrentGame) return;
+  const status = document.getElementById('lineupSaveStatus');
+  try {
+    const { team, seasonId, id: gameId } = _lineupCurrentGame;
+    const docId = lineupDocId(team, seasonId, gameId);
+    const newPublished = !_lineupPublished;
+    await setDoc(doc(db, 'lineups', docId), {
+      team, seasonId, gameId,
+      assignments: _lineupAssignments,
+      published: newPublished,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+    _lineupPublished = newPublished;
+    renderLineupBuilder();
+    status.textContent = newPublished ? '✅ Published to site!' : 'Unpublished.';
+    status.style.color = newPublished ? 'green' : '#666';
+    setTimeout(() => { if (status) status.textContent = ''; }, 2500);
+  } catch (err) {
+    console.error('toggleLineupPublish error:', err);
+    if (status) { status.textContent = 'Error — please try again.'; status.style.color = '#c62828'; }
+  }
 }
 
 function wireLineupDragAndDrop() {
@@ -4591,6 +4686,7 @@ async function saveLineup() {
     await setDoc(doc(db, 'lineups', docId), {
       team, seasonId, gameId,
       assignments: _lineupAssignments,
+      published: _lineupPublished,
       updatedAt: new Date().toISOString()
     });
     status.textContent = '✅ Saved!';
