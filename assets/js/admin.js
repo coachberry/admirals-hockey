@@ -1181,6 +1181,11 @@ function createGameModal() {
           </div>
         </div>
 
+        <div class="form-label-group">
+          <label class="field-label">End Time <span style="font-weight:400;color:#999;">(optional — defaults to 1.5 hours after start if left blank)</span></label>
+          <input type="time" id="gameEndTime">
+        </div>
+
         <div class="form-row">
           <div class="form-label-group">
             <label class="field-label">Game Type</label>
