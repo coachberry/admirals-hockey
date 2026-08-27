@@ -245,6 +245,7 @@ async function showDashboard() {
     if (savedTab === 'jvSchedule') loadJvScheduleSeasons();
     if (savedTab === 'summer') loadSummerSeasons();
     if (savedTab === 'schedule') loadScheduleGames(document.getElementById('scheduleSeasonSelect')?.value);
+    if (savedTab === 'lineups') loadLineupsTab();
     if (savedTab === 'chat') loadChannelsAdmin();
     if (savedTab === 'teamEvents') loadTeamEventsAdmin();
     if (savedTab === 'contactInfo') { loadContactInfo(); loadFooterLinks(); }
