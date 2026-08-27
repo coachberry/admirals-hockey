@@ -4320,6 +4320,153 @@ async function loadTeamEventsAdmin() {
 }
 
 document.querySelector('[data-tab="teamEvents"]').addEventListener('click', loadTeamEventsAdmin);
+
+// ============================================
+// LINEUPS TAB
+// ============================================
+let _lineupCurrentGame = null; // { id, seasonId, team, gameType, opponent, date }
+let _lineupRosterPlayers = []; // roster players for the currently selected team+season
+
+document.querySelector('[data-tab="lineups"]').addEventListener('click', loadLineupsTab);
+
+async function loadLineupsTab() {
+  const seasonSelect = document.getElementById('lineupSeasonSelect');
+  seasonSelect.innerHTML = '<option value="">Loading seasons...</option>';
+  try {
+    const snap = await getDocs(collection(db, 'seasons'));
+    const seasons = [];
+    snap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
+    seasons.sort((a, b) => (b.label || '').localeCompare(a.label || ''));
+    seasonSelect.innerHTML = seasons.map(s => `<option value="${s.id}">${s.label}${s.current ? ' (Current)' : ''}</option>`).join('');
+    const current = seasons.find(s => s.current) || seasons[0];
+    if (current) seasonSelect.value = current.id;
+  } catch (err) {
+    console.error('loadLineupsTab seasons error:', err);
+    seasonSelect.innerHTML = '<option value="">Could not load seasons</option>';
+  }
+  await loadLineupGames();
+}
+
+document.getElementById('lineupTeamSelect')?.addEventListener('change', loadLineupGames);
+document.getElementById('lineupSeasonSelect')?.addEventListener('change', loadLineupGames);
+
+async function loadLineupGames() {
+  const team = document.getElementById('lineupTeamSelect').value;
+  const seasonId = document.getElementById('lineupSeasonSelect').value;
+  const gameSelect = document.getElementById('lineupGameSelect');
+  document.getElementById('lineupBuilderArea').innerHTML = '<p style="color:#999;font-style:italic;">Select a team, season, and game above to build a lineup.</p>';
+  if (!seasonId) { gameSelect.innerHTML = '<option value="">Select a season first</option>'; return; }
+
+  gameSelect.innerHTML = '<option value="">Loading games...</option>';
+  try {
+    const snap = team === 'jv'
+      ? await getDocs(collection(db, 'jv-schedule', seasonId, 'games'))
+      : await getDocs(collection(db, 'seasons', seasonId, 'schedule'));
+    const games = [];
+    snap.forEach(d => {
+      const g = d.data();
+      if (g.gameType === 'Practice') return; // lineups are for games, not practices
+      games.push({ id: d.id, ...g });
+    });
+    games.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+    if (!games.length) {
+      gameSelect.innerHTML = '<option value="">No games found</option>';
+      return;
+    }
+    gameSelect.innerHTML = '<option value="">Select a game...</option>' + games.map(g => {
+      const d = g.date ? new Date(g.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'TBD';
+      return `<option value="${g.id}">${d} vs ${g.opponent || 'TBD'}</option>`;
+    }).join('');
+  } catch (err) {
+    console.error('loadLineupGames error:', err);
+    gameSelect.innerHTML = '<option value="">Could not load games</option>';
+  }
+}
+
+document.getElementById('lineupGameSelect')?.addEventListener('change', async () => {
+  const gameId = document.getElementById('lineupGameSelect').value;
+  const area = document.getElementById('lineupBuilderArea');
+  if (!gameId) {
+    area.innerHTML = '<p style="color:#999;font-style:italic;">Select a team, season, and game above to build a lineup.</p>';
+    return;
+  }
+  const team = document.getElementById('lineupTeamSelect').value;
+  const seasonId = document.getElementById('lineupSeasonSelect').value;
+  area.innerHTML = '<div class="empty-state">Loading roster...</div>';
+
+  try {
+    const rosterSnap = team === 'jv'
+      ? await getDocs(collection(db, 'jv-roster', seasonId, 'players'))
+      : await getDocs(collection(db, 'roster', seasonId, 'players'));
+    _lineupRosterPlayers = [];
+    rosterSnap.forEach(d => _lineupRosterPlayers.push({ id: d.id, ...d.data() }));
+    _lineupRosterPlayers.sort((a, b) => (parseInt(a.number) || 999) - (parseInt(b.number) || 999));
+
+    _lineupCurrentGame = { id: gameId, seasonId, team };
+    renderLineupBuilder();
+  } catch (err) {
+    console.error('lineup roster load error:', err);
+    area.innerHTML = '<div class="empty-state">Could not load roster. Please try again.</div>';
+  }
+});
+
+function lineupPlayerChip(p) {
+  const photo = p.photoURL
+    ? `<img src="${p.photoURL}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
+    : `<div style="width:28px;height:28px;border-radius:50%;background:#5D1725;color:white;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0;">${(p.name||'?').charAt(0)}</div>`;
+  return `<div class="lineup-player-chip" style="display:flex;align-items:center;gap:0.4rem;background:white;border:1px solid #ddd;border-radius:6px;padding:0.35rem 0.5rem;font-size:0.82rem;">
+    <strong style="color:#5D1725;min-width:20px;">${p.number || '-'}</strong>
+    ${photo}
+    <span>${p.name || 'Unknown'}</span>
+  </div>`;
+}
+
+function lineupSlot(label) {
+  return `<div class="lineup-slot" style="min-height:44px;border:2px dashed #ccc;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:0.75rem;">${label}</div>`;
+}
+
+function renderLineupBuilder() {
+  const area = document.getElementById('lineupBuilderArea');
+  const poolHtml = _lineupRosterPlayers.map(p => lineupPlayerChip(p)).join('');
+
+  area.innerHTML = `
+    <div style="display:grid;grid-template-columns:220px 1fr;gap:1.5rem;align-items:start;">
+      <div>
+        <h3 style="font-size:0.9rem;color:#5D1725;margin-bottom:0.5rem;">Available Players</h3>
+        <div id="lineupRosterPool" style="display:flex;flex-direction:column;gap:0.4rem;background:#f9f9f9;border-radius:8px;padding:0.6rem;max-height:600px;overflow-y:auto;">
+          ${poolHtml || '<p style="color:#999;font-size:0.8rem;">No players on this roster.</p>'}
+        </div>
+      </div>
+      <div>
+        <h3 style="font-size:0.9rem;color:#5D1725;margin-bottom:0.5rem;">Forwards</h3>
+        ${[1,2,3,4].map(n => `
+          <div style="margin-bottom:0.6rem;">
+            <div style="font-size:0.75rem;color:#999;margin-bottom:0.2rem;">Line ${n}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;">
+              ${lineupSlot('LW')}${lineupSlot('C')}${lineupSlot('RW')}
+            </div>
+          </div>
+        `).join('')}
+        <h3 style="font-size:0.9rem;color:#5D1725;margin:1rem 0 0.5rem;">Defense</h3>
+        ${[1,2,3].map(n => `
+          <div style="margin-bottom:0.6rem;">
+            <div style="font-size:0.75rem;color:#999;margin-bottom:0.2rem;">Pair ${n}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+              ${lineupSlot('LD')}${lineupSlot('RD')}
+            </div>
+          </div>
+        `).join('')}
+        <h3 style="font-size:0.9rem;color:#5D1725;margin:1rem 0 0.5rem;">Goalies</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+          ${lineupSlot('Starter')}${lineupSlot('Backup')}
+        </div>
+        <div style="margin-top:1.5rem;">
+          <button id="saveLineupBtn" class="btn-primary" disabled title="Drag-and-drop coming in the next stage">Save Lineup</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
 loadTeamEventsAdmin();
 
 // ============================================

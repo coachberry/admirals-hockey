@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=233">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=234">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=233">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=233">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=234">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=234">
 </head>
 <body>
 
@@ -100,6 +100,7 @@
         <button class="tab-btn" data-tab="jvRoster">🏒 JV Roster</button>
         <button class="tab-btn" data-tab="schedule">📅 Varsity Schedule</button>
         <button class="tab-btn" data-tab="jvSchedule">📅 JV Schedule</button>
+        <button class="tab-btn" data-tab="lineups">🧩 Lineups</button>
         <button class="tab-btn" data-tab="seasons">🗓 Seasons</button>
         <button class="tab-btn" data-tab="tryouts">🎯 Tryouts</button>
       </div>
@@ -188,6 +189,30 @@
         <button id="addJvGameBtn" class="btn-primary">+ Add Game</button>
       </div>
       <div id="jvGamesList" class="items-list"><div class="empty-state">No games added yet</div></div>
+    </div>
+
+    <!-- LINEUPS TAB -->
+    <div id="lineupsTab" class="tab-content">
+      <div class="roster-tab-header">
+        <h2>Lineups</h2>
+      </div>
+      <div class="roster-action-buttons" style="gap:0.75rem;flex-wrap:wrap;align-items:center;">
+        <select id="lineupTeamSelect" class="season-select">
+          <option value="varsity">Varsity</option>
+          <option value="jv">JV</option>
+        </select>
+        <select id="lineupSeasonSelect" class="season-select">
+          <option value="">Loading seasons...</option>
+        </select>
+        <select id="lineupGameSelect" class="season-select">
+          <option value="">Select a game...</option>
+        </select>
+        <button id="viewPastLineupsBtn" class="btn-secondary" type="button">📋 Past Lineups</button>
+      </div>
+
+      <div id="lineupBuilderArea" style="margin-top:1.5rem;">
+        <p style="color:#999;font-style:italic;">Select a team, season, and game above to build a lineup.</p>
+      </div>
     </div>
 
     <!-- SCHEDULE TAB -->
@@ -1332,10 +1357,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=233"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=233"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=233"></script>
-<script type="module" src="/assets/js/game-stats.js?v=233"></script>
+<script type="module" src="/assets/js/admin.js?v=234"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=234"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=234"></script>
+<script type="module" src="/assets/js/game-stats.js?v=234"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
