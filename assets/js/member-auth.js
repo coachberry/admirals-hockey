@@ -147,7 +147,8 @@ async function doApply() {
   if (!password || password.length < 6) { setError('applyError', 'Password must be at least 6 characters.'); return; }
   if (password !== confirm) { setError('applyError', 'Passwords do not match.'); return; }
 
-  const roleData = { requestedRole: roleType || 'member' };
+  const requestedRoleMap = { player:'player', parent:'parent', prospect:'prospect', alumni:'alumni', rep:'rep', summer:'player', other:'member' };
+  const roleData = { requestedRole: requestedRoleMap[roleType] || 'member' };
 
   if (roleType === 'player' || roleType === 'prospect') {
     const gradYear = document.getElementById(roleType === 'player' ? 'applyGradYear' : 'applyProspectGradYear')?.value;

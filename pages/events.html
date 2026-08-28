@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=250">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=251">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=250">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=251">
   <title>Events - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=250">
-  <link rel="stylesheet" href="/assets/css/events-styles.css?v=250">
-  <script src="/assets/js/page-guard.js?v=250"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=251">
+  <link rel="stylesheet" href="/assets/css/events-styles.css?v=251">
+  <script src="/assets/js/page-guard.js?v=251"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=250" defer></script>
-<script src="/assets/js/load-header.js?v=250"></script>
+<script src="/assets/js/load-hero.js?v=251" defer></script>
+<script src="/assets/js/load-header.js?v=251"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -42,7 +42,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=250"></script>
+<script src="/assets/js/load-footer.js?v=251"></script>
 
 <script type="module">
   import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -329,15 +329,16 @@
         <input type="tel" id="applyPhone" placeholder="Phone number (optional)" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
 
         <div>
-          <label style="font-size:0.85rem;font-weight:600;color:#333;display:block;margin-bottom:0.4rem;">I am a... *</label>
+          <label style="font-size:0.85rem;font-weight:600;color:#333;display:block;margin-bottom:0.4rem;">I am a...</label>
           <select id="applyRoleType" onchange="showApplyFields(this.value)" style="width:100%;padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
             <option value="">Select...</option>
             <option value="player">Current FHS Hockey Player</option>
+            <option value="parent">Current Player Parent</option>
             <option value="prospect">Prospective Player</option>
             <option value="alumni">FHS Hockey Alumni</option>
-            <option value="coach">Coach</option>
             <option value="rep">Team Representative</option>
-            <option value="member">Summer League / Other</option>
+            <option value="summer">Summer League Player</option>
+            <option value="other">Other</option>
           </select>
         </div>
 
@@ -393,7 +394,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=250"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=250"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=251"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=251"></script>
 </body>
 </html>
