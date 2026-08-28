@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=247">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=248">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=247">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=248">
   <title>Franklin High School Hockey - Admirals</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=247">
-  <link rel="stylesheet" href="/assets/css/home-styles.css?v=247">
-  <link rel="stylesheet" href="/assets/css/schedule-styles.css?v=247">
-  <script src="/assets/js/page-guard.js?v=247"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=248">
+  <link rel="stylesheet" href="/assets/css/home-styles.css?v=248">
+  <link rel="stylesheet" href="/assets/css/schedule-styles.css?v=248">
+  <script src="/assets/js/page-guard.js?v=248"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=247"></script>
+<script src="/assets/js/load-header.js?v=248"></script>
 
 <!-- FEATURED NEWS SECTION -->
 <div id="featuredSection" class="featured-section"><div class="featured-section-inner" id="featuredSectionInner">
@@ -75,7 +75,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=247"></script>
+<script src="/assets/js/load-footer.js?v=248"></script>
 
 <!-- Non-module script so onclick attrs can reach these functions -->
 <script>
@@ -257,24 +257,26 @@
 
     const gamesSnap = await getDocs(collection(db, 'seasons', currentSeason.id, 'schedule'));
     const games = [];
-    gamesSnap.forEach(d => games.push(d.data()));
+    gamesSnap.forEach(d => games.push({ id: d.id, ...d.data() }));
     games.sort((a, b) => new Date(a.date+'T'+(a.time||'00:00')) - new Date(b.date+'T'+(b.time||'00:00')));
 
     const today = new Date(); today.setHours(0,0,0,0);
     const nextGame = games.find(g => g.gameType !== 'Practice' && !g.result && new Date(g.date+'T12:00:00') >= today);
     const gamesWithResult = games.filter(g => g.result);
     let lastGame = gamesWithResult.length ? gamesWithResult[gamesWithResult.length-1] : null;
+    if (lastGame) lastGame._seasonId = currentSeason.id;
 
     if (!lastGame) {
       for (const prev of seasons.filter(s => s.id !== currentSeason.id)) {
         const prevSnap = await getDocs(collection(db, 'seasons', prev.id, 'schedule'));
         const prevGames = [];
-        prevSnap.forEach(d => prevGames.push(d.data()));
+        prevSnap.forEach(d => prevGames.push({ id: d.id, ...d.data() }));
         const prevWithResult = prevGames.filter(g => g.result);
         if (prevWithResult.length) {
           prevWithResult.sort((a, b) => new Date(a.date) - new Date(b.date));
           lastGame = prevWithResult[prevWithResult.length - 1];
           lastGame._fromSeason = prev.label;
+          lastGame._seasonId = prev.id;
           break;
         }
       }
@@ -444,6 +446,52 @@
 </div>
 
 
+<div id="gameViewModal" class="modal-overlay">
+  <div class="modal gvm-modal">
+    <button class="modal-close-float" id="closeGameViewModal">&times;</button>
+    <div class="gvm-sticky-header">
+      <div id="gvmHeader" class="gvm-header"></div>
+      <div class="gvm-sticky-bar" id="gvmTeamStats" style="display:none;"></div>
+    </div>
+    <div class="modal-body">
+      <div id="gvmLineupSection" style="display:none;"></div>
+      <div id="gvmStatsSection">
+      <div style="margin-bottom:1.5rem;">
+        <h3 class="gvm-section-title">Skaters</h3>
+        <div class="gvm-table-wrap">
+          <table class="game-stats-table">
+            <thead>
+              <tr>
+                <th>#</th><th>Player</th>
+                <th>G</th><th>A</th><th>PTS</th>
+                <th>PPG</th><th>PPA</th><th>SHG</th><th>SHA</th>
+                <th>+</th><th>-</th><th>+/-</th><th>SOG</th><th>PIM</th>
+              </tr>
+            </thead>
+            <tbody id="gvmSkatersBody"></tbody>
+          </table>
+        </div>
+        <div id="gvmGwgKey" class="gwg-key" style="display:none;">⭐ Game Winning Goal</div>
+      </div>
+      <div>
+        <h3 class="gvm-section-title">Goaltenders</h3>
+        <div class="gvm-table-wrap">
+          <table class="game-stats-table">
+            <thead>
+              <tr>
+                <th>#</th><th>Player</th>
+                <th>DEC</th><th>MIN</th><th>SA</th><th>SV</th><th>SV%</th><th>GA</th>
+              </tr>
+            </thead>
+            <tbody id="gvmGoaliesBody"></tbody>
+          </table>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 function showRoleFields(role) {
   ['player','family','alumni'].forEach(r => {
@@ -453,7 +501,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=247"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=247"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=248"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=248"></script>
 </body>
 </html>
