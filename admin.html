@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=251">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=252">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=251">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=251">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=252">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=252">
 </head>
 <body>
 
@@ -1101,42 +1101,146 @@
 
 <!-- JV GAME MODAL -->
 <div id="jvGameModal" class="modal-overlay">
-  <div class="modal">
+  <div class="modal" style="max-width:560px;">
     <div class="modal-header">
-      <h2>JV Game</h2>
+      <h2 id="jvGameModalTitle">JV Game</h2>
       <button class="modal-close" onclick="document.getElementById('jvGameModal').classList.remove('active')">&times;</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="jvGameId">
       <input type="hidden" id="jvGameSeasonId">
-      <div class="form-label-group"><label class="field-label">Date</label><input type="date" id="jvGameDate"></div>
-      <div class="form-label-group"><label class="field-label">Time</label><input type="time" id="jvGameTime"></div>
-      <div class="form-label-group"><label class="field-label">End Time <span style="font-weight:400;color:#999;">(optional)</span></label><input type="time" id="jvGameEndTime"></div>
+
       <div class="form-label-group">
-        <label class="field-label">Type</label>
-        <select id="jvGameType">
-          <option value="Game">Game</option>
-          <option value="Practice">Practice</option>
-        </select>
-      </div>
-      <div class="form-label-group" id="jvOpponentField"><label class="field-label">Opponent</label><input type="text" id="jvGameOpponent" placeholder="e.g. Hendersonville"></div>
-      <div class="form-label-group"><label class="field-label">Location</label><input type="text" id="jvGameLocation" placeholder="e.g. Ford Ice Center"></div>
-      <div id="jvHomeField"><label class="captain-label"><input type="checkbox" id="jvGameHome"> Home game</label></div>
-      <div id="jvPlayedSection">
-        <label class="captain-label" style="margin-top:0.5rem;"><input type="checkbox" id="jvGamePlayed" onchange="document.getElementById('jvGameScoreFields').style.display=this.checked?'block':'none'"> Game played</label>
-        <div id="jvGameScoreFields" style="display:none;margin-top:0.75rem;">
-          <div class="form-label-group"><label class="field-label">Admirals Score</label><input type="number" id="jvGameHomeScore" min="0"></div>
-          <div class="form-label-group"><label class="field-label">Opponent Score</label><input type="number" id="jvGameAwayScore" min="0"></div>
+        <label class="field-label">Date, Time &amp; Timezone</label>
+        <div style="display:grid;grid-template-columns:1fr 120px 90px;gap:0.5rem;">
+          <input type="date" id="jvGameDate">
+          <input type="time" id="jvGameTime">
+          <select id="jvGameTimezone">
+            <option value="">TZ</option>
+            <option value="ET">ET</option>
+            <option value="CT">CT</option>
+            <option value="MT">MT</option>
+            <option value="PT">PT</option>
+          </select>
         </div>
       </div>
+
+      <div class="form-label-group">
+        <label class="field-label">End Time <span style="font-weight:400;color:#999;">(optional — defaults to 1.5 hours after start if left blank)</span></label>
+        <input type="time" id="jvGameEndTime">
+      </div>
+
+      <div class="form-row">
+        <div class="form-label-group">
+          <label class="field-label">Game Type</label>
+          <select id="jvGameType">
+            <option value="">Select...</option>
+            <option value="Exhibition">Exhibition</option>
+            <option value="League">League</option>
+            <option value="Tournament">Tournament</option>
+            <option value="Practice">Practice</option>
+          </select>
+        </div>
+        <div class="form-label-group">
+          <label class="field-label">Sub-Type</label>
+          <select id="jvGameSubtype">
+            <option value="">Select...</option>
+            <option value="Regular Season">Regular Season</option>
+            <option value="Playoffs">Playoffs</option>
+            <option value="Championship">Championship</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="jvLeagueField" style="display:none;">
+        <div class="form-label-group">
+          <label class="field-label">League Name</label>
+          <input type="text" id="jvGameLeagueName" placeholder="e.g. GNASH" list="jvLeaguesList">
+          <datalist id="jvLeaguesList"></datalist>
+        </div>
+      </div>
+      <div id="jvTournamentField" style="display:none;">
+        <div class="form-label-group">
+          <label class="field-label">Tournament Name</label>
+          <input type="text" id="jvGameTournamentName" placeholder="e.g. Battle at the Border" list="jvTournamentsList">
+          <datalist id="jvTournamentsList"></datalist>
+        </div>
+      </div>
+
+      <div class="form-row" id="jvOpponentRow">
+        <div class="form-label-group">
+          <label class="field-label">Opponent</label>
+          <input type="text" id="jvGameOpponent" placeholder="Opponent Name">
+        </div>
+        <div class="form-label-group">
+          <label class="field-label">Home or Away</label>
+          <select id="jvGameHomeAway">
+            <option value="">Select...</option>
+            <option value="Home">Home</option>
+            <option value="Away">Away</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="photo-upload-section" id="jvOpponentLogoSection" style="margin-bottom:0.75rem;">
+        <label class="field-label">Opponent Logo (optional)</label>
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.4rem;">
+          <div id="jvGameOpponentLogoPreview" class="opp-logo-admin-preview"></div>
+          <label class="btn-secondary photo-btn photo-choose-label" style="font-size:0.8rem;">
+            Choose Logo
+            <input type="file" id="jvGameOpponentLogo" accept="image/*" style="display:none;">
+          </label>
+          <button type="button" id="jvRemoveOpponentLogo" class="btn-delete photo-btn" style="font-size:0.8rem;display:none;">Remove</button>
+        </div>
+      </div>
+
       <div class="form-label-group" id="jvPracticeNotesField" style="display:none;">
         <label class="field-label">Practice Notes (optional)</label>
         <textarea id="jvGameNotes" rows="2" placeholder="e.g. Full ice, focus on breakouts"></textarea>
       </div>
+
+      <div class="form-row">
+        <div class="form-label-group">
+          <label class="field-label">Rink Name</label>
+          <input type="text" id="jvGameRinkName" placeholder="e.g. Centennial Sportsplex" list="jvRinkNamesList">
+          <datalist id="jvRinkNamesList"></datalist>
+        </div>
+        <div class="form-label-group">
+          <label class="field-label">Rink Address</label>
+          <input type="text" id="jvGameRinkAddress" placeholder="e.g. 222 25th Ave N Nashville, TN" list="jvRinkAddressList">
+          <datalist id="jvRinkAddressList"></datalist>
+        </div>
+      </div>
+
+      <div class="form-label-group" id="jvResultSection" style="margin-top:1rem;">
+        <label class="field-label" style="color:#5D1725;">Result</label>
+        <select id="jvGameResult">
+          <option value="">No Result Yet</option>
+          <option value="W">W - Win</option>
+          <option value="L">L - Loss</option>
+          <option value="T">T - Tie</option>
+          <option value="OTW">OTW - Overtime Win</option>
+          <option value="OTL">OTL - Overtime Loss</option>
+          <option value="SOW">SOW - Shootout Win</option>
+          <option value="SOL">SOL - Shootout Loss</option>
+        </select>
+      </div>
+      <div class="form-row" id="jvScoreFields" style="display:none;">
+        <div class="form-label-group">
+          <label class="field-label">Our Score</label>
+          <input type="number" id="jvGameTeamScore" placeholder="0" min="0">
+        </div>
+        <div class="form-label-group">
+          <label class="field-label">Opponent Score</label>
+          <input type="number" id="jvGameOpponentScore" placeholder="0" min="0">
+        </div>
+      </div>
+
       <div class="form-buttons">
         <button id="saveJvGameBtn" class="btn-primary">Save Game</button>
         <button onclick="document.getElementById('jvGameModal').classList.remove('active')" class="btn-secondary">Cancel</button>
       </div>
+      <p id="jvGameSaveStatus" class="save-status"></p>
     </div>
   </div>
 </div>
@@ -1356,10 +1460,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=251"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=251"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=251"></script>
-<script type="module" src="/assets/js/game-stats.js?v=251"></script>
+<script type="module" src="/assets/js/admin.js?v=252"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=252"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=252"></script>
+<script type="module" src="/assets/js/game-stats.js?v=252"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";

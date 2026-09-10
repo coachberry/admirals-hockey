@@ -1484,6 +1484,16 @@ async function loadSavedOptions() {
   if (rinkAddressList) rinkAddressList.innerHTML = savedRinks.map(r => `<option value="${r.address}">`).join('');
   if (leagueList) leagueList.innerHTML = savedLeagues.map(l => `<option value="${l.name}">`).join('');
   if (tournList) tournList.innerHTML = savedTournaments.map(t => `<option value="${t.name}">`).join('');
+
+  const jvRinkList = document.getElementById('jvRinkNamesList');
+  const jvRinkAddressList = document.getElementById('jvRinkAddressList');
+  const jvLeagueList = document.getElementById('jvLeaguesList');
+  const jvTournList = document.getElementById('jvTournamentsList');
+
+  if (jvRinkList) jvRinkList.innerHTML = savedRinks.map(r => `<option value="${r.name}">`).join('');
+  if (jvRinkAddressList) jvRinkAddressList.innerHTML = savedRinks.map(r => `<option value="${r.address}">`).join('');
+  if (jvLeagueList) jvLeagueList.innerHTML = savedLeagues.map(l => `<option value="${l.name}">`).join('');
+  if (jvTournList) jvTournList.innerHTML = savedTournaments.map(t => `<option value="${t.name}">`).join('');
 }
 
 async function loadScheduleGames(seasonId) {
@@ -3985,11 +3995,12 @@ async function loadJvGames(seasonId) {
     item.className = 'item';
     const d = g.date ? new Date(g.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }) : 'TBD';
     const isPractice = g.gameType === 'Practice';
-    const score = g.played ? ` — ${g.homeScore || 0}-${g.awayScore || 0}` : '';
+    const score = g.result ? ` — ${g.result} ${g.teamScore ?? 0}-${g.opponentScore ?? 0}` : '';
     const titleHtml = isPractice ? `<strong>🏒 Practice</strong>` : `<strong>vs. ${g.opponent || 'TBD'}${score}</strong>`;
+    const rinkLabel = g.rinkName || '';
     const subHtml = isPractice
-      ? `${d}${g.time ? ' · ' + g.time : ''}${g.location ? ' · ' + g.location : ''}${g.notes ? ' · ' + g.notes : ''}`
-      : `${d}${g.time ? ' · ' + g.time : ''}${g.location ? ' · ' + g.location : ''}${g.played ? ' · FINAL' : ' · Upcoming'}`;
+      ? `${d}${g.time ? ' · ' + g.time : ''}${rinkLabel ? ' · ' + rinkLabel : ''}${g.notes ? ' · ' + g.notes : ''}`
+      : `${d}${g.time ? ' · ' + g.time : ''}${rinkLabel ? ' · ' + rinkLabel : ''}${g.result ? ' · FINAL' : ' · Upcoming'}`;
     item.innerHTML = `
       <div class="item-info"><div>
         ${titleHtml}
@@ -4008,7 +4019,7 @@ async function loadJvGames(seasonId) {
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const isPast = (g) => {
     if (g.gameType === 'Practice') return new Date(g.date + 'T12:00:00') < today;
-    return !!g.played;
+    return !!g.result;
   };
   const upcoming = games.filter(g => !isPast(g)).sort((a, b) => (a.date || '').localeCompare(b.date || ''));
   const past = games.filter(isPast).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
@@ -4039,37 +4050,88 @@ window.deleteJvGame = async (id, seasonId) => {
   loadJvGames(seasonId);
 };
 
+let jvOpponentLogoData = null;
+
 function toggleJvGameTypeFields() {
   const type = document.getElementById('jvGameType')?.value;
   const isPractice = type === 'Practice';
-  const opponentField = document.getElementById('jvOpponentField');
-  const homeField = document.getElementById('jvHomeField');
-  const playedSection = document.getElementById('jvPlayedSection');
+  const leagueField = document.getElementById('jvLeagueField');
+  const tournamentField = document.getElementById('jvTournamentField');
+  const subtypeField = document.getElementById('jvGameSubtype')?.parentElement;
+  if (leagueField) leagueField.style.display = (!isPractice && type === 'League') ? 'block' : 'none';
+  if (tournamentField) tournamentField.style.display = (!isPractice && type === 'Tournament') ? 'block' : 'none';
+  if (subtypeField) subtypeField.style.display = (!isPractice && type !== 'Exhibition') ? 'block' : 'none';
+
+  const opponentRow = document.getElementById('jvOpponentRow');
+  const opponentLogoSection = document.getElementById('jvOpponentLogoSection');
+  const resultSection = document.getElementById('jvResultSection');
+  const scoreFields = document.getElementById('jvScoreFields');
   const practiceNotesField = document.getElementById('jvPracticeNotesField');
-  if (opponentField) opponentField.style.display = isPractice ? 'none' : 'block';
-  if (homeField) homeField.style.display = isPractice ? 'none' : 'block';
-  if (playedSection) playedSection.style.display = isPractice ? 'none' : 'block';
+  if (opponentRow) opponentRow.style.display = isPractice ? 'none' : 'flex';
+  if (opponentLogoSection) opponentLogoSection.style.display = isPractice ? 'none' : 'block';
+  if (resultSection) resultSection.style.display = isPractice ? 'none' : 'block';
+  if (scoreFields && isPractice) scoreFields.style.display = 'none';
   if (practiceNotesField) practiceNotesField.style.display = isPractice ? 'block' : 'none';
 }
 document.getElementById('jvGameType')?.addEventListener('change', toggleJvGameTypeFields);
 
-function openJvGameModal(data, seasonId) {
+document.getElementById('jvGameOpponentLogo')?.addEventListener('change', function() {
+  const file = this.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    jvOpponentLogoData = e.target.result;
+    document.getElementById('jvGameOpponentLogoPreview').innerHTML = `<img src="${jvOpponentLogoData}" style="height:50px;object-fit:contain;">`;
+    document.getElementById('jvRemoveOpponentLogo').style.display = 'inline-block';
+  };
+  reader.readAsDataURL(file);
+});
+document.getElementById('jvRemoveOpponentLogo')?.addEventListener('click', () => {
+  jvOpponentLogoData = null;
+  document.getElementById('jvGameOpponentLogoPreview').innerHTML = '';
+  document.getElementById('jvGameOpponentLogo').value = '';
+  document.getElementById('jvRemoveOpponentLogo').style.display = 'none';
+});
+document.getElementById('jvGameRinkName')?.addEventListener('change', () => {
+  const name = document.getElementById('jvGameRinkName').value;
+  const rink = savedRinks.find(r => r.name === name);
+  if (rink) document.getElementById('jvGameRinkAddress').value = rink.address;
+});
+
+async function openJvGameModal(data, seasonId) {
   const modal = document.getElementById('jvGameModal');
   if (!modal) return;
+  jvOpponentLogoData = null;
+  await loadSavedOptions();
+
   document.getElementById('jvGameId').value = data?.id || '';
   document.getElementById('jvGameSeasonId').value = seasonId;
   document.getElementById('jvGameDate').value = data?.date || '';
   document.getElementById('jvGameTime').value = data?.time || '';
   document.getElementById('jvGameEndTime').value = data?.endTime || '';
-  document.getElementById('jvGameType').value = data?.gameType || 'Game';
+  document.getElementById('jvGameTimezone').value = data?.timezone || '';
+  document.getElementById('jvGameType').value = data?.gameType || '';
+  document.getElementById('jvGameSubtype').value = data?.subtype || '';
+  document.getElementById('jvGameLeagueName').value = data?.leagueName || '';
+  document.getElementById('jvGameTournamentName').value = data?.tournamentName || '';
   document.getElementById('jvGameOpponent').value = data?.opponent || '';
-  document.getElementById('jvGameLocation').value = data?.location || '';
-  document.getElementById('jvGameHome').checked = data?.isHome || false;
-  document.getElementById('jvGamePlayed').checked = data?.played || false;
-  document.getElementById('jvGameHomeScore').value = data?.homeScore ?? '';
-  document.getElementById('jvGameAwayScore').value = data?.awayScore ?? '';
-  document.getElementById('jvGameScoreFields').style.display = data?.played ? 'block' : 'none';
+  document.getElementById('jvGameHomeAway').value = data?.homeAway || '';
+  document.getElementById('jvGameRinkName').value = data?.rinkName || '';
+  document.getElementById('jvGameRinkAddress').value = data?.rinkAddress || '';
+  document.getElementById('jvGameResult').value = data?.result || '';
+  document.getElementById('jvGameTeamScore').value = data?.teamScore ?? '';
+  document.getElementById('jvGameOpponentScore').value = data?.opponentScore ?? '';
+  document.getElementById('jvScoreFields').style.display = data?.result ? 'grid' : 'none';
   document.getElementById('jvGameNotes').value = data?.notes || '';
+
+  document.getElementById('jvGameOpponentLogoPreview').innerHTML = '<span style="font-size:1.5rem;">🏒</span>';
+  document.getElementById('jvRemoveOpponentLogo').style.display = 'none';
+  window._editingJvGameLogo = data?.opponentLogo || '';
+  if (data?.opponentLogo) {
+    document.getElementById('jvGameOpponentLogoPreview').innerHTML = `<img src="${data.opponentLogo}" style="height:50px;object-fit:contain;">`;
+    document.getElementById('jvRemoveOpponentLogo').style.display = 'inline-block';
+  }
+
   toggleJvGameTypeFields();
   modal.classList.add('active');
 }
@@ -4084,23 +4146,64 @@ const saveJvGameBtn = document.getElementById('saveJvGameBtn');
 if (saveJvGameBtn) {
   saveJvGameBtn.addEventListener('click', async () => {
     const seasonId = document.getElementById('jvGameSeasonId').value;
+    if (!seasonId) { alert('Please select a season first'); return; }
+
+    const status = document.getElementById('jvGameSaveStatus');
+    if (status) status.textContent = 'Saving...';
+
     const id = document.getElementById('jvGameId').value || Date.now().toString();
     const gameType = document.getElementById('jvGameType').value;
+    const result = document.getElementById('jvGameResult').value;
+    const rinkName = document.getElementById('jvGameRinkName').value;
+    const rinkAddress = document.getElementById('jvGameRinkAddress').value;
+    const leagueName = document.getElementById('jvGameLeagueName').value;
+    const tournamentName = document.getElementById('jvGameTournamentName').value;
+
+    let opponentLogo = window._editingJvGameLogo || '';
+    if (jvOpponentLogoData) {
+      try {
+        const storageRef = ref(storage, `jv-schedule/${seasonId}/${id}/opponentLogo`);
+        await uploadString(storageRef, jvOpponentLogoData, 'data_url');
+        opponentLogo = await getDownloadURL(storageRef);
+      } catch(e) { console.error('Logo upload failed:', e); }
+    }
+
     const isPractice = gameType === 'Practice';
-    const played = isPractice ? false : document.getElementById('jvGamePlayed').checked;
-    await setDoc(doc(db, 'jv-schedule', seasonId, 'games', id), {
+
+    const game = {
+      id,
       date: document.getElementById('jvGameDate').value,
       time: document.getElementById('jvGameTime').value,
       endTime: document.getElementById('jvGameEndTime').value || '',
+      timezone: document.getElementById('jvGameTimezone').value,
       gameType,
+      subtype: isPractice ? '' : document.getElementById('jvGameSubtype').value,
+      leagueName: gameType === 'League' ? leagueName : '',
+      tournamentName: gameType === 'Tournament' ? tournamentName : '',
       opponent: isPractice ? '' : document.getElementById('jvGameOpponent').value.trim(),
-      location: document.getElementById('jvGameLocation').value.trim(),
-      isHome: isPractice ? false : document.getElementById('jvGameHome').checked,
-      played,
-      homeScore: (played) ? parseInt(document.getElementById('jvGameHomeScore').value) || 0 : null,
-      awayScore: (played) ? parseInt(document.getElementById('jvGameAwayScore').value) || 0 : null,
+      homeAway: isPractice ? '' : document.getElementById('jvGameHomeAway').value,
+      rinkName,
+      rinkAddress,
+      opponentLogo: isPractice ? '' : opponentLogo,
+      result: isPractice ? '' : result,
+      teamScore: isPractice ? null : (result ? parseInt(document.getElementById('jvGameTeamScore').value) || 0 : null),
+      opponentScore: isPractice ? null : (result ? parseInt(document.getElementById('jvGameOpponentScore').value) || 0 : null),
       notes: isPractice ? document.getElementById('jvGameNotes').value.trim() : '',
-    }, { merge: true });
+    };
+
+    await setDoc(doc(db, 'jv-schedule', seasonId, 'games', id), game);
+
+    if (rinkName) {
+      await setDoc(doc(db, 'rinks', rinkName.replace(/\s+/g, '_')), { name: rinkName, address: rinkAddress }, { merge: true });
+    }
+    if (gameType === 'League' && leagueName) {
+      await setDoc(doc(db, 'leagues', leagueName.replace(/\s+/g, '_')), { name: leagueName }, { merge: true });
+    }
+    if (gameType === 'Tournament' && tournamentName) {
+      await setDoc(doc(db, 'tournaments', tournamentName.replace(/\s+/g, '_')), { name: tournamentName }, { merge: true });
+    }
+
+    if (status) status.textContent = '✅ Saved!';
     document.getElementById('jvGameModal').classList.remove('active');
     loadJvGames(seasonId);
   });
