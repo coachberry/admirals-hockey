@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 let currentStatsGameId = null;
 let currentStatsSeasonId = null;
+let currentStatsTeam = 'varsity';
 
 document.getElementById('closeGameStatsModal').addEventListener('click', () => {
   document.getElementById('gameStatsModal').classList.remove('active');
@@ -42,11 +43,15 @@ document.querySelectorAll('.stats-tab-btn').forEach(btn => {
   });
 });
 
-window.openGameStats = async (gameId, seasonId) => {
+window.openGameStats = async (gameId, seasonId, team = 'varsity') => {
   currentStatsGameId = gameId;
   currentStatsSeasonId = seasonId;
+  currentStatsTeam = team;
+  const scheduleRoot = team === 'jv' ? 'jv-schedule' : 'seasons';
+  const scheduleSubcol = team === 'jv' ? 'games' : 'schedule';
+  const rosterRoot = team === 'jv' ? 'jv-roster' : 'roster';
 
-  const gameSnap = await getDoc(doc(db, 'seasons', seasonId, 'schedule', gameId));
+  const gameSnap = await getDoc(doc(db, scheduleRoot, seasonId, scheduleSubcol, gameId));
   const game = gameSnap.data();
 
   const homeAway = game.homeAway === 'Home' ? 'vs.' : '@';
@@ -64,7 +69,7 @@ window.openGameStats = async (gameId, seasonId) => {
   `;
 
   // Load roster for this season
-  const playersSnap = await getDocs(collection(db, 'roster', seasonId, 'players'));
+  const playersSnap = await getDocs(collection(db, rosterRoot, seasonId, 'players'));
   const players = [];
   playersSnap.forEach(d => players.push(d.data()));
 
@@ -78,16 +83,16 @@ window.openGameStats = async (gameId, seasonId) => {
   ];
 
   // Load existing stats
-  const existingSkaterSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule', gameId, 'skaterstats'));
+  const existingSkaterSnap = await getDocs(collection(db, scheduleRoot, seasonId, scheduleSubcol, gameId, 'skaterstats'));
   const existingSkaterStats = {};
   existingSkaterSnap.forEach(d => { existingSkaterStats[d.id] = d.data(); });
 
-  const existingGoalieSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule', gameId, 'goaliestats'));
+  const existingGoalieSnap = await getDocs(collection(db, scheduleRoot, seasonId, scheduleSubcol, gameId, 'goaliestats'));
   const existingGoalieStats = {};
   existingGoalieSnap.forEach(d => { existingGoalieStats[d.id] = d.data(); });
 
   // Load existing team stats
-  const teamStatsSnap = await getDoc(doc(db, 'seasons', seasonId, 'schedule', gameId, 'teamstats', 'game'));
+  const teamStatsSnap = await getDoc(doc(db, scheduleRoot, seasonId, scheduleSubcol, gameId, 'teamstats', 'game'));
   const teamStats = teamStatsSnap.exists() ? teamStatsSnap.data() : {};
 
   // Build team stats tab
@@ -198,6 +203,8 @@ document.getElementById('saveGameStatsBtn').addEventListener('click', async () =
 
   const seasonId = currentStatsSeasonId;
   const gameId = currentStatsGameId;
+  const scheduleRoot = currentStatsTeam === 'jv' ? 'jv-schedule' : 'seasons';
+  const scheduleSubcol = currentStatsTeam === 'jv' ? 'games' : 'schedule';
 
   // Save team stats
   const teamStats = {
@@ -207,7 +214,7 @@ document.getElementById('saveGameStatsBtn').addEventListener('click', async () =
     pkAttempts: parseInt(document.getElementById('tsPKAttempts').value) || 0,
     successfulPKs: parseInt(document.getElementById('tsSuccessfulPKs').value) || 0,
   };
-  await setDoc(doc(db, 'seasons', seasonId, 'schedule', gameId, 'teamstats', 'game'), teamStats);
+  await setDoc(doc(db, scheduleRoot, seasonId, scheduleSubcol, gameId, 'teamstats', 'game'), teamStats);
 
   // Save skater stats
   const skaterRows = document.querySelectorAll('#skaterStatsBody tr[data-player-id]');
@@ -223,7 +230,7 @@ document.getElementById('saveGameStatsBtn').addEventListener('click', async () =
     stats.gwg = gwgCheck?.checked ? 1 : 0;
     stats.pts = (stats.goals || 0) + (stats.assists || 0);
     stats.plusMinus = (stats.plus || 0) - (stats.minus || 0);
-    await setDoc(doc(db, 'seasons', seasonId, 'schedule', gameId, 'skaterstats', playerId), stats);
+    await setDoc(doc(db, scheduleRoot, seasonId, scheduleSubcol, gameId, 'skaterstats', playerId), stats);
   }
 
   // Save goalie stats
@@ -245,7 +252,7 @@ document.getElementById('saveGameStatsBtn').addEventListener('click', async () =
     stats.saves = Math.max(0, sa - ga);
     stats.savePct = sa > 0 ? parseFloat((stats.saves / sa).toFixed(3)) : 0;
     stats.gaa = min > 0 ? parseFloat(((ga * 60) / min).toFixed(2)) : 0;
-    await setDoc(doc(db, 'seasons', seasonId, 'schedule', gameId, 'goaliestats', playerId), stats);
+    await setDoc(doc(db, scheduleRoot, seasonId, scheduleSubcol, gameId, 'goaliestats', playerId), stats);
   }
 
   status.textContent = '✅ Stats saved!';

@@ -3221,29 +3221,33 @@ window.adminSetTeamEventRsvp = async function(eventId, uid, name, response, isAc
   await window.viewTeamEventRsvp(eventId);
 };
 
-window.viewScheduleGameRsvp = async function(gameId, seasonId) {
+window.viewScheduleGameRsvp = async function(gameId, seasonId, team = 'varsity') {
   const modal = document.getElementById('rsvpViewerModal');
   modal.classList.add('active');
   document.getElementById('rsvpViewerContent').innerHTML = '<p style="color:#999;">Loading...</p>';
 
+  const scheduleRoot = team === 'jv' ? 'jv-schedule' : 'seasons';
+  const scheduleSubcol = team === 'jv' ? 'games' : 'schedule';
+  const rosterRoot = team === 'jv' ? 'jv-roster' : 'roster';
+
   try {
 
-  const gSnap = await getDoc(doc(db, 'seasons', seasonId, 'schedule', gameId));
+  const gSnap = await getDoc(doc(db, scheduleRoot, seasonId, scheduleSubcol, gameId));
   const g = gSnap.exists() ? gSnap.data() : {};
   const d = g.date ? new Date(g.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }) : '';
   document.getElementById('rsvpViewerTitle').textContent = 'vs ' + (g.opponent||'TBD') + (d ? ' — ' + d : '');
 
-  const rsvpSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule', gameId, 'rsvps'));
+  const rsvpSnap = await getDocs(collection(db, scheduleRoot, seasonId, scheduleSubcol, gameId, 'rsvps'));
   const rsvps = {};
   rsvpSnap.forEach(d => { rsvps[d.id] = d.data(); });
 
-  // Load full varsity roster (linked and unlinked) — players and coaches
-  const playersSnap = await getDocs(collection(db, 'roster', seasonId, 'players'));
+  // Load full roster (linked and unlinked) — players and coaches
+  const playersSnap = await getDocs(collection(db, rosterRoot, seasonId, 'players'));
   const players = [];
   playersSnap.forEach(d => players.push(d.data()));
   players.sort((a,b) => parseInt(a.number||99) - parseInt(b.number||99));
 
-  const coachesSnap = await getDocs(collection(db, 'roster', seasonId, 'coaches'));
+  const coachesSnap = await getDocs(collection(db, rosterRoot, seasonId, 'coaches'));
   const coaches = [];
   coachesSnap.forEach(d => coaches.push(d.data()));
   coaches.sort((a,b) => (a.name||'').localeCompare(b.name||''));
@@ -3264,8 +3268,8 @@ window.viewScheduleGameRsvp = async function(gameId, seasonId) {
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:0.88rem;">
       <span>${showNumber && p.number ? '<strong>#'+p.number+'</strong> ' : ''}${p.name}${!p.memberUid ? ' <span style="color:#aaa;font-size:0.75rem;">(unlinked)</span>' : ''}</span>
       <div style="display:flex;gap:0.3rem;">
-        <button onclick="adminSetScheduleRsvp('${gameId}','${seasonId}','${key}','${p.name}','yes',${inA})" style="border-radius:4px;padding:2px 8px;font-size:0.75rem;font-weight:600;cursor:pointer;border:1.5px solid #2e7d32;background:${inA?'#2e7d32':'white'};color:${inA?'white':'#2e7d32'};">✅ In</button>
-        <button onclick="adminSetScheduleRsvp('${gameId}','${seasonId}','${key}','${p.name}','no',${outA})" style="border-radius:4px;padding:2px 8px;font-size:0.75rem;font-weight:600;cursor:pointer;border:1.5px solid #c62828;background:${outA?'#c62828':'white'};color:${outA?'white':'#c62828'};">❌ Out</button>
+        <button onclick="adminSetScheduleRsvp('${gameId}','${seasonId}','${key}','${p.name}','yes',${inA},'${team}')" style="border-radius:4px;padding:2px 8px;font-size:0.75rem;font-weight:600;cursor:pointer;border:1.5px solid #2e7d32;background:${inA?'#2e7d32':'white'};color:${inA?'white':'#2e7d32'};">✅ In</button>
+        <button onclick="adminSetScheduleRsvp('${gameId}','${seasonId}','${key}','${p.name}','no',${outA},'${team}')" style="border-radius:4px;padding:2px 8px;font-size:0.75rem;font-weight:600;cursor:pointer;border:1.5px solid #c62828;background:${outA?'#c62828':'white'};color:${outA?'white':'#c62828'};">❌ Out</button>
       </div>
     </div>`;
   }
@@ -3287,11 +3291,13 @@ window.viewScheduleGameRsvp = async function(gameId, seasonId) {
   }
 };
 
-window.adminSetScheduleRsvp = async function(gameId, seasonId, uid, name, response, isActive) {
-  const rsvpRef = doc(db, 'seasons', seasonId, 'schedule', gameId, 'rsvps', uid);
+window.adminSetScheduleRsvp = async function(gameId, seasonId, uid, name, response, isActive, team = 'varsity') {
+  const scheduleRoot = team === 'jv' ? 'jv-schedule' : 'seasons';
+  const scheduleSubcol = team === 'jv' ? 'games' : 'schedule';
+  const rsvpRef = doc(db, scheduleRoot, seasonId, scheduleSubcol, gameId, 'rsvps', uid);
   if (isActive) { await deleteDoc(rsvpRef); }
   else { await setDoc(rsvpRef, { response, name, adminSet: true, timestamp: new Date().toISOString() }); }
-  await window.viewScheduleGameRsvp(gameId, seasonId);
+  await window.viewScheduleGameRsvp(gameId, seasonId, team);
 };
 
 window.approveRoleRequest = async function(requestId, uid, role) {
@@ -4007,6 +4013,8 @@ async function loadJvGames(seasonId) {
         <span>${subHtml}</span>
       </div></div>
       <div style="display:flex;gap:0.5rem;">
+        <button class="btn-stats" onclick="openGameStats('${g.id}', '${seasonId}', 'jv')">Stats</button>
+        <button class="btn-edit" onclick="viewScheduleGameRsvp('${g.id}','${seasonId}','jv')">📋 RSVPs</button>
         <button class="btn-edit" onclick="editJvGame('${g.id}','${seasonId}')">Edit</button>
         <button class="btn-delete" onclick="deleteJvGame('${g.id}','${seasonId}')">Delete</button>
       </div>`;
