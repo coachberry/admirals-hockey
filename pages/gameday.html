@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=254">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=255">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=254">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=255">
   <title>Game Day - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=254">
+  <link rel="stylesheet" href="/assets/css/styles.css?v=255">
   <style>
     body { background: #f0f0f0; }
 
@@ -148,7 +148,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=254"></script>
+<script src="/assets/js/load-header.js?v=255"></script>
 
 <div class="gameday-hero">
   <h1>🏒 Game Day</h1>
@@ -158,7 +158,8 @@
 <div class="gameday-container">
 
   <div class="season-tabs">
-    <button class="season-tab active" id="tabRegular" onclick="switchLeague('regular')">Regular Season</button>
+    <button class="season-tab active" id="tabRegular" onclick="switchLeague('regular')">Varsity</button>
+    <button class="season-tab" id="tabJv" onclick="switchLeague('jv')">JV</button>
     <button class="season-tab" id="tabSummer" onclick="switchLeague('summer')">Summer Hockey</button>
   </div>
 
@@ -178,7 +179,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=254"></script>
+<script src="/assets/js/load-footer.js?v=255"></script>
 
 <div id="memberModal" class="modal-overlay" style="z-index:2000;">
   <div class="modal" style="max-width:440px;max-height:90vh;overflow-y:auto;">
@@ -223,6 +224,7 @@
   function switchLeague(league) {
     currentLeague = league;
     document.getElementById('tabRegular').classList.toggle('active', league === 'regular');
+    document.getElementById('tabJv').classList.toggle('active', league === 'jv');
     document.getElementById('tabSummer').classList.toggle('active', league === 'summer');
     loadGames();
 
@@ -315,7 +317,38 @@
 
       sel.innerHTML = allGamesData.map(g => {
         const opp = g.opponent || g.awayTeam || 'Opponent';
-        const ha = g.homeAway === 'away' ? `@ ${opp}` : `vs. ${opp}`;
+        const ha = g.gameType === 'Practice' ? 'Team Practice' : (g.homeAway === 'Away' ? `@ ${opp}` : `vs. ${opp}`);
+        return `<option value="${g.id}">${formatDate(g.date)} ${formatTime(g.time)} — ${ha}</option>`;
+      }).join('');
+
+      // Auto-select today or next upcoming
+      const today = new Date().toISOString().split('T')[0];
+      const next = allGamesData.find(g => g.date >= today);
+      if (next) sel.value = next.id;
+
+    } else if (currentLeague === 'jv') {
+      const seasonsSnap = await getDocs(collection(db, 'seasons'));
+      const seasons = [];
+      seasonsSnap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
+      const current = seasons.find(s => s.current) || seasons.sort((a,b) => b.id.localeCompare(a.id))[0];
+      if (!current) { sel.innerHTML = '<option>No seasons found</option>'; return; }
+      currentSeasonId = current.id;
+
+      const gamesSnap = await getDocs(collection(db, 'jv-schedule', current.id, 'games'));
+      allGamesData = [];
+      gamesSnap.forEach(d => allGamesData.push({ id: d.id, ...d.data() }));
+      allGamesData.sort((a,b) => a.date.localeCompare(b.date));
+
+      // Load roster
+      currentRoster = [];
+      try {
+        const rSnap = await getDocs(collection(db, 'jv-roster', current.id, 'players'));
+        rSnap.forEach(d => currentRoster.push(d.data()));
+      } catch(e) {}
+
+      sel.innerHTML = allGamesData.map(g => {
+        const opp = g.opponent || g.awayTeam || 'Opponent';
+        const ha = g.gameType === 'Practice' ? 'Team Practice' : (g.homeAway === 'Away' ? `@ ${opp}` : `vs. ${opp}`);
         return `<option value="${g.id}">${formatDate(g.date)} ${formatTime(g.time)} — ${ha}</option>`;
       }).join('');
 
@@ -372,7 +405,10 @@
     let rsvpSnap, roster = [], teams = {};
 
     if (currentLeague === 'regular') {
-      rsvpSnap = await getDocs(collection(db, 'seasons', currentSeasonId, 'schedule', gameId, 'memberRsvps'));
+      rsvpSnap = await getDocs(collection(db, 'seasons', currentSeasonId, 'schedule', gameId, 'rsvps'));
+      roster = currentRoster;
+    } else if (currentLeague === 'jv') {
+      rsvpSnap = await getDocs(collection(db, 'jv-schedule', currentSeasonId, 'games', gameId, 'rsvps'));
       roster = currentRoster;
     } else {
       rsvpSnap = await getDocs(collection(db, 'summer', currentSeasonId, 'games', gameId, 'rsvps'));
@@ -410,8 +446,8 @@
       }
     });
 
-    const opp = currentLeague === 'regular'
-      ? (game.homeAway === 'away' ? `@ ${game.opponent||'Opponent'}` : `vs. ${game.opponent||'Opponent'}`)
+    const opp = (currentLeague === 'regular' || currentLeague === 'jv')
+      ? (game.gameType === 'Practice' ? 'Team Practice' : (game.homeAway === 'Away' ? `@ ${game.opponent||'Opponent'}` : `vs. ${game.opponent||'Opponent'}`))
       : `${teams[game.homeTeamId]?.name||'?'} vs. ${teams[game.awayTeamId]?.name||'?'}`;
 
     // Summer team filter
@@ -428,7 +464,9 @@
       teamFilter.style.display = 'none';
     }
 
-    const location = currentLeague === 'summer' ? 'Centennial Ice Rink' : (game.location || '');
+    const location = currentLeague === 'summer'
+      ? 'Centennial Ice Rink'
+      : [game.rinkName, game.rinkAddress].filter(Boolean).join(', ');
 
     content.innerHTML = `
       <div class="rsvp-counts">
@@ -535,6 +573,6 @@
   };
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=254"></script>
+<script type="module" src="/assets/js/member-auth.js?v=255"></script>
 </body>
 </html>
