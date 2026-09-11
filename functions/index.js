@@ -305,9 +305,7 @@ exports.icsFeed = onRequest(async (req, res) => {
           ? (g.notes || "Team Practice")
           : ("vs " + (g.opponent || "TBD"));
 
-        const location = team === "varsity"
-          ? [g.rinkName, g.rinkAddress].filter(Boolean).join(", ")
-          : (g.location || "");
+        const location = [g.rinkName, g.rinkAddress].filter(Boolean).join(", ");
 
         events.push({
           uid: team + "-" + docSnap.id + "@fhsadmiralshockey.com",
