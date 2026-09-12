@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=257">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#5D1725">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=257">
+  <title>JV Statistics - Franklin Admirals Hockey</title>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=257">
+  <link rel="stylesheet" href="/assets/css/stats-styles.css?v=257">
+  <script src="/assets/js/page-guard.js?v=257"></script>
+</head>
+<body>
+
+<div id="site-header"></div>
+<script src="/assets/js/load-hero.js?v=257" defer></script>
+<script src="/assets/js/load-header.js?v=257"></script>
+
+<section class="hero-section">
+  <div class="hero-container">
+    <div class="hero-badge" id="seasonBadge">Loading...</div>
+    <h1 class="hero-title">JV Statistics</h1>
+    <p class="hero-subtitle">Season stats for every player</p>
+  </div>
+</section>
+
+<div class="main-container">
+
+  <div class="season-selector-wrap">
+    <label for="seasonSelect">View Season:</label>
+    <select id="seasonSelect" class="season-selector-public"></select>
+  </div>
+
+  <div id="statsTBDBanner" style="display:none;background:linear-gradient(135deg,#5D1725,#3c0f17);color:white;border-radius:8px;padding:2.5rem 1.5rem;text-align:center;margin:2rem 0;">
+    <h2 style="font-size:1.4rem;font-weight:700;margin-bottom:0.5rem;">2026-27 Stats Coming Soon</h2>
+    <p style="opacity:0.9;margin-bottom:1.25rem;max-width:560px;margin-left:auto;margin-right:auto;">Information about the 2026-27 roster is to be determined and will be revealed following tryouts.</p>
+    <a href="/tryouts" style="display:inline-block;background:white;color:#5D1725;padding:0.65rem 1.75rem;border-radius:6px;font-weight:700;text-decoration:none;">View Tryout Information</a>
+  </div>
+  <div id="statsSections">
+  <!-- Team Stats -->
+  <div style="margin-top:2rem; margin-bottom:1rem;">
+    <div class="section-header"><h2 class="section-title">Team Stats</h2></div>
+    <div class="team-stats-bar" id="teamStatsBar">
+      <div class="team-stat-card">
+        <div class="team-stat-card-label">PP%</div>
+        <div class="team-stat-card-value" id="tsPPPct">0.0%</div>
+      </div>
+      <div class="team-stat-card">
+        <div class="team-stat-card-label">PK%</div>
+        <div class="team-stat-card-value" id="tsPKPct">0.0%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skaters -->
+  <div style="margin-top:2rem; margin-bottom:3rem;">
+    <div class="section-header"><h2 class="section-title">Skaters</h2></div>
+    <div class="stats-table-wrap">
+      <table class="stats-table" id="skatersTable">
+        <thead>
+          <tr>
+            <th class="col-num sortable" data-col="number" data-type="num"># <span class="sort-arrow"></span></th>
+            <th class="col-name sortable" data-col="name" data-type="str">Player <span class="sort-arrow"></span></th>
+            <th class="col-pos sortable" data-col="position" data-type="str">POS <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="gp" data-type="num" title="Games Played">GP <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="sog" data-type="num" title="Shots on Goal">SOG <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="goals" data-type="num" title="Goals">G <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="assists" data-type="num" title="Assists">A <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="pts" data-type="num" title="Points">PTS <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="ppg" data-type="num" title="Power Play Goals">PPG <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="ppa" data-type="num" title="Power Play Assists">PPA <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="shg" data-type="num" title="Short Handed Goals">SHG <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="sha" data-type="num" title="Short Handed Assists">SHA <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="gwg" data-type="num" title="Game Winning Goals">GWG <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="plus" data-type="num" title="Plus">+ <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="minus" data-type="num" title="Minus">- <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="plusMinus" data-type="num" title="Plus/Minus">+/- <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="pim" data-type="num" title="Penalty Minutes">PIM <span class="sort-arrow"></span></th>
+          </tr>
+        </thead>
+        <tbody id="skatersBody">
+          <tr><td colspan="17" class="empty-cell">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Goalies -->
+  <div style="margin-top:2rem; margin-bottom:3rem;">
+    <div class="section-header"><h2 class="section-title">Goaltenders</h2></div>
+    <div class="stats-table-wrap">
+      <table class="stats-table" id="goaliesTable">
+        <thead>
+          <tr>
+            <th class="col-num sortable" data-col="number" data-type="num"># <span class="sort-arrow"></span></th>
+            <th class="col-name sortable" data-col="name" data-type="str">Player <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="gs" data-type="num" title="Games Started">GS <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="gp" data-type="num" title="Games Played">GP <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="w" data-type="num" title="Wins">W <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="t" data-type="num" title="Ties">T <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="l" data-type="num" title="Losses">L <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="otw" data-type="num" title="Overtime Wins">OTW <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="otl" data-type="num" title="Overtime Losses">OTL <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="sow" data-type="num" title="Shootout Wins">SOW <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="sol" data-type="num" title="Shootout Losses">SOL <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="min" data-type="num" title="Minutes Played">MIN <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="sa" data-type="num" title="Shots Against">SA <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="sv" data-type="num" title="Saves">SV <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="svPct" data-type="num" title="Save Percentage">SV% <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="ga" data-type="num" title="Goals Against">GA <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="gaa" data-type="num" title="Goals Against Average">GAA <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="shutouts" data-type="num" title="Shutouts">SO <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="assists" data-type="num" title="Assists">A <span class="sort-arrow"></span></th>
+            <th class="sortable" data-col="pim" data-type="num" title="Penalty Minutes">PIM <span class="sort-arrow"></span></th>
+          </tr>
+        </thead>
+        <tbody id="goaliesBody">
+          <tr><td colspan="20" class="empty-cell">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  </div>
+
+</div>
+
+<div id="site-footer"></div>
+<script src="/assets/js/load-footer.js?v=257"></script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
+    authDomain: "admirals-hockey.firebaseapp.com",
+    projectId: "admirals-hockey",
+    storageBucket: "admirals-hockey.firebasestorage.app",
+    messagingSenderId: "783358659334",
+    appId: "1:783358659334:web:5daffd093adca386faec87"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+  document.querySelectorAll('.nav-link').forEach(link => {
+    const href = link.getAttribute('href').split('/').pop() || 'index.html';
+    if (href === currentPage) link.classList.add('active');
+  });
+
+  const svPctFmt = (sv, sa) => sa > 0 ? '.' + (sv/sa).toFixed(3).slice(2) : '.000';
+  const gaaFmt = (ga, min) => min > 0 ? ((ga * 60) / min).toFixed(2) : '0.00';
+  const minToMMSS = min => { const m = Math.floor(min); const s = Math.round((min - m) * 60); return `${m}:${s.toString().padStart(2, "0")}`; };
+  const posAbbr = p => p === 'Forward' ? 'F' : p === 'Defense' ? 'D' : p?.charAt(0) || '-';
+  const pct = (n, d) => d > 0 ? ((n/d)*100).toFixed(1) + '%' : '0.0%';
+
+  // ============================================
+  // SORT STATE
+  // ============================================
+  const skaterSort = { col: 'pts', dir: 'desc' };
+  const goalieSort = { col: 'gp', dir: 'desc' };
+
+  let currentSkaters = [];
+  let currentGoalies = [];
+  let currentRegularGoalies = [];
+  let currentEmptyNet = null;
+  let currentTotSkater = null;
+  let currentTotGoalie = null;
+
+  function setupSortHeaders(tableId, sortState, renderFn) {
+    const table = document.getElementById(tableId);
+    table.querySelectorAll('th.sortable').forEach(th => {
+      th.style.cursor = 'pointer';
+      th.style.userSelect = 'none';
+      th.addEventListener('click', () => {
+        const col = th.dataset.col;
+        if (sortState.col === col) {
+          sortState.dir = sortState.dir === 'desc' ? 'asc' : 'desc';
+        } else {
+          sortState.col = col;
+          sortState.dir = 'desc';
+        }
+        // Update arrows
+        table.querySelectorAll('th.sortable').forEach(h => {
+          h.querySelector('.sort-arrow').textContent = '';
+          h.classList.remove('sort-active');
+        });
+        th.querySelector('.sort-arrow').textContent = sortState.dir === 'desc' ? ' ▼' : ' ▲';
+        th.classList.add('sort-active');
+        renderFn();
+      });
+    });
+    // Set default arrow
+    const defaultTh = table.querySelector(`th[data-col="${sortState.col}"]`);
+    if (defaultTh) {
+      defaultTh.querySelector('.sort-arrow').textContent = ' ▼';
+      defaultTh.classList.add('sort-active');
+    }
+  }
+
+  function sortData(arr, col, dir, type) {
+    return [...arr].sort((a, b) => {
+      let va = a[col] ?? 0;
+      let vb = b[col] ?? 0;
+      if (type === 'str') {
+        va = String(va).toLowerCase();
+        vb = String(vb).toLowerCase();
+        return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+      }
+      return dir === 'asc' ? va - vb : vb - va;
+    });
+  }
+
+  // ============================================
+  // RENDER SKATERS
+  // ============================================
+  function renderSkaters() {
+    if (!currentSkaters.length) return;
+    const col = skaterSort.col;
+    const dir = skaterSort.dir;
+    const type = col === 'name' || col === 'position' ? 'str' : 'num';
+    const sorted = sortData(currentSkaters, col, dir, type);
+    const tot = currentTotSkater;
+
+    document.getElementById('skatersBody').innerHTML = sorted.map(s => {
+      const pts = s.goals + s.assists;
+      const pm = s.plus - s.minus;
+      return `<tr>
+        <td class="col-num">${s.number || '-'}</td>
+        <td class="col-name">${s.name}</td>
+        <td class="col-pos">${posAbbr(s.position)}</td>
+        <td>${s.gp}</td><td>${s.sog}</td><td>${s.goals}</td><td>${s.assists}</td>
+        <td class="stat-pts">${pts}</td>
+        <td>${s.ppg}</td><td>${s.ppa}</td><td>${s.shg}</td><td>${s.sha}</td><td>${s.gwg}</td>
+        <td>${s.plus}</td><td>${s.minus}</td>
+        <td>${pm > 0 ? '+'+pm : pm}</td>
+        <td>${s.pim}</td>
+      </tr>`;
+    }).join('') + `<tr class="stats-totals-row">
+      <td colspan="3">TEAM TOTALS</td>
+      <td>${tot.gp}</td><td>${tot.sog}</td><td>${tot.goals}</td><td>${tot.assists}</td>
+      <td>${tot.goals+tot.assists}</td>
+      <td>${tot.ppg}</td><td>${tot.ppa}</td><td>${tot.shg}</td><td>${tot.sha}</td><td>${tot.gwg}</td>
+      <td>${tot.plus}</td><td>${tot.minus}</td>
+      <td>${tot.plus-tot.minus > 0 ? '+'+(tot.plus-tot.minus) : tot.plus-tot.minus}</td>
+      <td>${tot.pim}</td>
+    </tr>`;
+  }
+
+  // ============================================
+  // RENDER GOALIES
+  // ============================================
+  function renderGoalies() {
+    if (!currentRegularGoalies.length && !currentEmptyNet) return;
+    const col = goalieSort.col;
+    const dir = goalieSort.dir;
+    const type = col === 'name' ? 'str' : 'num';
+    const sorted = sortData(currentRegularGoalies, col, dir, type);
+    const emptyNet = currentEmptyNet;
+    const gt = currentTotGoalie;
+
+    const allGoalies = [...sorted, emptyNet].filter(Boolean);
+
+    document.getElementById('goaliesBody').innerHTML = allGoalies.map(g => {
+      const isEN = g.isEmptyNet;
+      return `<tr ${isEN ? 'class="empty-net-row"' : ''}>
+        <td class="col-num">${g.number || '-'}</td>
+        <td class="col-name">${g.name}</td>
+        <td>${isEN ? '-' : g.gs}</td>
+        <td>${isEN ? '-' : g.gp}</td>
+        <td>${isEN ? '-' : g.w}</td>
+        <td>${isEN ? '-' : g.t}</td>
+        <td>${isEN ? '-' : g.l}</td>
+        <td>${isEN ? '-' : g.otw}</td>
+        <td>${isEN ? '-' : g.otl}</td>
+        <td>${isEN ? '-' : g.sow}</td>
+        <td>${isEN ? '-' : g.sol}</td>
+        <td>${minToMMSS(g.min)}</td>
+        <td>${g.sa}</td><td>${g.sv}</td>
+        <td class="${isEN ? '' : 'stat-pts'}">${isEN ? '-' : svPctFmt(g.sv, g.sa)}</td>
+        <td>${g.ga}</td>
+        <td>${isEN ? '-' : gaaFmt(g.ga, g.min)}</td>
+        <td>${isEN ? '-' : g.shutouts}</td>
+        <td>${isEN ? '-' : g.assists}</td>
+        <td>${isEN ? '-' : g.pim}</td>
+      </tr>`;
+    }).join('') + `<tr class="stats-totals-row">
+      <td colspan="2">TOTALS</td>
+      <td>${gt.gs}</td><td>${gt.gp}</td><td>${gt.w}</td><td>${gt.t}</td><td>${gt.l}</td>
+      <td>${gt.otw}</td><td>${gt.otl}</td><td>${gt.sow}</td><td>${gt.sol}</td>
+      <td>${minToMMSS(gt.min)}</td>
+      <td>${gt.sa}</td><td>${gt.sv}</td>
+      <td>${svPctFmt(gt.sv, gt.sa)}</td>
+      <td>${gt.ga}</td><td>${gaaFmt(gt.ga, gt.min)}</td>
+      <td>${gt.shutouts}</td><td>${gt.assists}</td><td>${gt.pim}</td>
+    </tr>`;
+  }
+
+  // ============================================
+  // LOAD STATS (JV)
+  // ============================================
+  async function loadStats(seasonId, season) {
+    const statsSections = document.getElementById('statsSections');
+    const statsBanner = document.getElementById('statsTBDBanner');
+    if (season && season.jvRosterHidden) {
+      statsSections.style.display = 'none';
+      statsBanner.style.display = 'block';
+      return;
+    } else {
+      statsSections.style.display = '';
+      statsBanner.style.display = 'none';
+    }
+    document.getElementById('skatersBody').innerHTML = '<tr><td colspan="17" class="empty-cell">Loading...</td></tr>';
+    document.getElementById('goaliesBody').innerHTML = '<tr><td colspan="20" class="empty-cell">Loading...</td></tr>';
+
+    const playersSnap = await getDocs(collection(db, 'jv-roster', seasonId, 'players'));
+    const players = [];
+    playersSnap.forEach(d => players.push(d.data()));
+
+    const gamesSnap = await getDocs(collection(db, 'jv-schedule', seasonId, 'games'));
+    const games = [];
+    gamesSnap.forEach(d => games.push(d.data()));
+
+    const skaterStats = {};
+    const goalieStats = {};
+
+    players.forEach(p => {
+      if (p.position === 'Goaltender') {
+        goalieStats[p.id] = { name: p.name, number: p.number, isEmptyNet: false, gs:0, gp:0, w:0, l:0, t:0, otw:0, otl:0, sow:0, sol:0, min:0, sa:0, sv:0, ga:0, shutouts:0, assists:0, pim:0, svPct:0, gaa:0 };
+      } else {
+        skaterStats[p.id] = { name: p.name, number: p.number, position: p.position, gp:0, sog:0, goals:0, assists:0, ppg:0, ppa:0, shg:0, sha:0, gwg:0, plus:0, minus:0, pim:0, pts:0, plusMinus:0 };
+      }
+    });
+
+    goalieStats['EMPTY_NET'] = { name:'EMPTY NET', number:'0', isEmptyNet:true, gs:0, gp:0, w:0, l:0, t:0, otw:0, otl:0, sow:0, sol:0, min:0, sa:0, sv:0, ga:0, shutouts:0, assists:0, pim:0, svPct:0, gaa:0 };
+
+    let totalBenchPIM=0, totalPPOpps=0, totalPPG=0, totalPKAttempts=0, totalSuccessfulPKs=0;
+
+    await Promise.all(games.map(async game => {
+      const [skaterSnap, goalieSnap, tsSnap] = await Promise.all([
+        getDocs(collection(db, 'jv-schedule', seasonId, 'games', game.id, 'skaterstats')),
+        getDocs(collection(db, 'jv-schedule', seasonId, 'games', game.id, 'goaliestats')),
+        getDoc(doc(db, 'jv-schedule', seasonId, 'games', game.id, 'teamstats', 'game'))
+      ]);
+
+      skaterSnap.forEach(d => {
+        const s = d.data();
+        if (!skaterStats[s.playerId]) return;
+        const st = skaterStats[s.playerId];
+        st.gp += s.gp||0; st.sog += s.sog||0; st.goals += s.goals||0; st.assists += s.assists||0;
+        st.ppg += s.ppg||0; st.ppa += s.ppa||0; st.shg += s.shg||0; st.sha += s.sha||0;
+        st.gwg += s.gwg||0; st.plus += s.plus||0; st.minus += s.minus||0; st.pim += s.pim||0;
+      });
+
+      goalieSnap.forEach(d => {
+        const g = d.data();
+        if (!goalieStats[g.playerId]) return;
+        const gt = goalieStats[g.playerId];
+        gt.gp += g.gp||0; gt.min += g.minutesPlayed||0; gt.sa += g.shotsAgainst||0;
+        gt.ga += g.goalsAgainst||0; gt.assists += g.assists||0; gt.pim += g.pim||0;
+        if (!g.isEmptyNet) {
+          gt.gs += g.gs||0;
+          if (g.gs && g.goalsAgainst === 0) gt.shutouts++;
+          if (g.decision==='W') gt.w++;
+          else if (g.decision==='L') gt.l++;
+          else if (g.decision==='T') gt.t++;
+          else if (g.decision==='OTW') gt.otw++;
+          else if (g.decision==='OTL') gt.otl++;
+          else if (g.decision==='SOW') gt.sow++;
+          else if (g.decision==='SOL') gt.sol++;
+        }
+        gt.sv = Math.max(0, gt.sa - gt.ga);
+      });
+
+      if (tsSnap.exists()) {
+        const ts = tsSnap.data();
+        totalBenchPIM += ts.benchPIM||0; totalPPOpps += ts.ppOpps||0; totalPPG += ts.ppg||0;
+        totalPKAttempts += ts.pkAttempts||0; totalSuccessfulPKs += ts.successfulPKs||0;
+      }
+    }));
+
+    // Compute derived sortable fields for skaters
+    Object.values(skaterStats).forEach(s => {
+      s.pts = s.goals + s.assists;
+      s.plusMinus = s.plus - s.minus;
+    });
+
+    // Compute derived sortable fields for goalies
+    Object.values(goalieStats).forEach(g => {
+      g.sv = Math.max(0, g.sa - g.ga);
+      g.svPct = g.sa > 0 ? g.sv / g.sa : 0;
+      g.gaa = g.min > 0 ? (g.ga * 60) / g.min : 0;
+    });
+
+
+    document.getElementById('tsPPPct').textContent = pct(totalPPG, totalPPOpps);
+    document.getElementById('tsPKPct').textContent = pct(totalSuccessfulPKs, totalPKAttempts);
+
+    currentSkaters = Object.values(skaterStats);
+
+    const tot = { gp:0, sog:0, goals:0, assists:0, ppg:0, ppa:0, shg:0, sha:0, gwg:0, plus:0, minus:0, pim:totalBenchPIM };
+    currentSkaters.forEach(s => {
+      tot.gp+=s.gp; tot.sog+=s.sog; tot.goals+=s.goals; tot.assists+=s.assists;
+      tot.ppg+=s.ppg; tot.ppa+=s.ppa; tot.shg+=s.shg; tot.sha+=s.sha;
+      tot.gwg+=s.gwg; tot.plus+=s.plus; tot.minus+=s.minus; tot.pim+=s.pim;
+    });
+    currentTotSkater = tot;
+
+    currentRegularGoalies = Object.values(goalieStats).filter(g => !g.isEmptyNet && g.name && g.name.trim() !== '' && g.name !== '?');
+    const enStats = goalieStats['EMPTY_NET'];
+    currentEmptyNet = (enStats && enStats.ga > 0) ? enStats : null;
+
+    const gt = { gs:0, gp:0, w:0, l:0, t:0, otw:0, otl:0, sow:0, sol:0, min:0, sa:0, sv:0, ga:0, shutouts:0, assists:0, pim:0 };
+    currentRegularGoalies.forEach(g => {
+      gt.gs+=g.gs; gt.gp+=g.gp; gt.w+=g.w; gt.l+=g.l; gt.t+=g.t;
+      gt.otw+=g.otw; gt.otl+=g.otl; gt.sow+=g.sow; gt.sol+=g.sol;
+      gt.min+=g.min; gt.sa+=g.sa; gt.sv+=g.sv; gt.ga+=g.ga;
+      gt.shutouts+=g.shutouts; gt.assists+=g.assists; gt.pim+=g.pim;
+    });
+    if (currentEmptyNet) { gt.min += currentEmptyNet.min; gt.sa += currentEmptyNet.sa; gt.ga += currentEmptyNet.ga; }
+    gt.sv = Math.max(0, gt.sa - gt.ga);
+    currentTotGoalie = gt;
+
+    renderSkaters();
+    renderGoalies();
+  }
+
+  // ============================================
+  // SEASONS
+  // ============================================
+  async function initSeasons() {
+    const snap = await getDocs(collection(db, 'seasons'));
+    const seasons = [];
+    snap.forEach(d => seasons.push({ id: d.id, ...d.data() }));
+    seasons.sort((a, b) => b.label.localeCompare(a.label));
+
+    const select = document.getElementById('seasonSelect');
+    select.innerHTML = seasons.map(s =>
+      `<option value="${s.id}" ${s.current?'selected':''}>${s.label}${s.current?' (Current)':''}</option>`
+    ).join('');
+
+    const savedSeason = localStorage.getItem('admirals_jvStatsSeasonPublic');
+    const startSeason = (savedSeason && seasons.find(s => s.id === savedSeason))
+      ? seasons.find(s => s.id === savedSeason)
+      : (seasons.find(s => s.current) || seasons[0]);
+
+    if (startSeason) {
+      select.value = startSeason.id;
+      document.getElementById('seasonBadge').textContent = startSeason.label + ' Season';
+      await loadStats(startSeason.id, startSeason);
+      // Set up sort after data loads
+      setupSortHeaders('skatersTable', skaterSort, renderSkaters);
+      setupSortHeaders('goaliesTable', goalieSort, renderGoalies);
+    }
+
+    select.addEventListener('change', async e => {
+      const season = seasons.find(s => s.id === e.target.value);
+      document.getElementById('seasonBadge').textContent = season.label + ' Season';
+      localStorage.setItem('admirals_jvStatsSeasonPublic', e.target.value);
+      await loadStats(e.target.value, season);
+    });
+  }
+
+  initSeasons();
+
+  // Mobile nav toggle
+  (function() {
+    var btn = document.getElementById('navToggle');
+    var nav = document.getElementById('navLinks');
+    if (!btn || !nav) return;
+    btn.addEventListener('click', function() {
+      btn.classList.toggle('open');
+      nav.classList.toggle('open');
+    });
+    nav.querySelectorAll('a').forEach(function(link) {
+      link.addEventListener('click', function() {
+        btn.classList.remove('open');
+        nav.classList.remove('open');
+      });
+    });
+  })();
+</script>
+<!-- MEMBER MODAL v2 -->
+<div id="memberModal" class="modal-overlay" style="z-index:2000;">
+  <div class="modal" style="max-width:480px;max-height:90vh;overflow-y:auto;">
+    <button class="modal-close-float" onclick="hideMemberModal()">&times;</button>
+
+    <!-- LOGIN VIEW -->
+    <div class="member-view" id="memberView_login" style="display:block;">
+      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;text-align:center;">
+        <h2 style="font-size:1.3rem;font-weight:700;">Member Login</h2>
+        <p style="font-size:0.82rem;opacity:0.85;margin-top:0.25rem;">Sign in to access your account</p>
+      </div>
+      <div style="padding:1.5rem;display:flex;flex-direction:column;gap:0.75rem;">
+        <button onclick="memberGoogleSignIn()" style="display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.75rem;border:1px solid #ddd;border-radius:6px;background:white;font-size:0.95rem;cursor:pointer;">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px;">Continue with Google
+        </button>
+        <div style="display:flex;align-items:center;gap:0.5rem;"><hr style="flex:1;border:none;border-top:1px solid #eee;"><span style="font-size:0.8rem;color:#999;">or</span><hr style="flex:1;border:none;border-top:1px solid #eee;"></div>
+        <input type="email" id="loginEmail" placeholder="Email address" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <input type="password" id="loginPassword" placeholder="Password" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <p id="loginError" class="member-error" style="color:#c62828;font-size:0.85rem;min-height:1rem;"></p>
+        <p style="text-align:center;margin-top:0.5rem;"><a href="#" onclick="sendPasswordReset()" style="font-size:0.82rem;color:#5D1725;font-weight:600;">Forgot Password?</a></p>
+        <button onclick="memberSignIn()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-size:1rem;font-weight:600;cursor:pointer;">Sign In</button>
+        <p style="text-align:center;font-size:0.85rem;color:#555;">
+          Player or Alumni? <a href="#" onclick="showMemberView('apply')" style="color:#5D1725;font-weight:600;">Apply for access →</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- APPLY VIEW -->
+    <div class="member-view" id="memberView_apply" style="display:none;">
+      <div style="background:linear-gradient(135deg,#5D1725,#3c0f17);padding:1.5rem;color:white;">
+        <h2 style="font-size:1.2rem;font-weight:700;">Join the Admirals Community</h2>
+        <p style="font-size:0.82rem;opacity:0.85;margin-top:0.3rem;">For current players, alumni, and summer league participants. Sign up to access member features.</p>
+      </div>
+      <div style="padding:1.5rem;display:flex;flex-direction:column;gap:0.75rem;">
+        <button onclick="memberGoogleSignIn()" style="display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.75rem;border:1px solid #ddd;border-radius:6px;background:white;font-size:0.95rem;cursor:pointer;">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px;">Sign Up with Google
+        </button>
+        <div style="display:flex;align-items:center;gap:0.5rem;"><hr style="flex:1;border:none;border-top:1px solid #eee;"><span style="font-size:0.8rem;color:#999;">or</span><hr style="flex:1;border:none;border-top:1px solid #eee;"></div>
+
+        <input type="text" id="applyName" placeholder="Full name *" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <input type="email" id="applyEmail" placeholder="Email address *" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <input type="password" id="applyPassword" placeholder="Password (min 6 characters) *" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <input type="password" id="applyConfirm" placeholder="Confirm password *" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        <input type="tel" id="applyPhone" placeholder="Phone number (optional)" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+
+        <div>
+          <label style="font-size:0.85rem;font-weight:600;color:#333;display:block;margin-bottom:0.4rem;">I am a...</label>
+          <select id="applyRoleType" onchange="showApplyFields(this.value)" style="width:100%;padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+            <option value="">Select...</option>
+            <option value="player">Current FHS Hockey Player</option>
+            <option value="parent">Current Player Parent</option>
+            <option value="prospect">Prospective Player</option>
+            <option value="alumni">FHS Hockey Alumni</option>
+            <option value="rep">Team Representative</option>
+            <option value="summer">Summer League Player</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <!-- Player fields -->
+        <div id="applyFields_player" style="display:none;flex-direction:column;gap:0.75rem;">
+          <input type="number" id="applyGradYear" placeholder="Graduation year *" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+          <select id="applyPosition" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+            <option value="">Position *</option>
+            <option value="Forward">Forward</option>
+            <option value="Defense">Defense</option>
+            <option value="Goaltender">Goaltender</option>
+          </select>
+        </div>
+
+
+        <!-- Prospect fields -->
+        <div id="applyFields_prospect" style="display:none;flex-direction:column;gap:0.75rem;">
+          <input type="number" id="applyProspectGradYear" placeholder="Graduation year *" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+          <select id="applyProspectPosition" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+            <option value="">Position *</option>
+            <option value="Forward">Forward</option>
+            <option value="Defense">Defense</option>
+            <option value="Goaltender">Goaltender</option>
+          </select>
+        </div>
+
+        <!-- Alumni fields -->
+        <div id="applyFields_alumni" style="display:none;flex-direction:column;gap:0.75rem;">
+          <input type="number" id="applyAlumniGradYear" placeholder="Graduation year *" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+          <input type="text" id="applyYearsPlayed" placeholder="Years played (e.g. 2019-2022) *" style="padding:0.65rem 0.9rem;border:1px solid #ddd;border-radius:6px;font-size:0.95rem;font-family:inherit;">
+        </div>
+
+        <p id="applyError" class="member-error" style="color:#c62828;font-size:0.85rem;min-height:1rem;"></p>
+        <button onclick="memberApply()" style="background:#5D1725;color:white;border:none;border-radius:6px;padding:0.8rem;font-size:1rem;font-weight:600;cursor:pointer;">Sign Up</button>
+        <p style="text-align:center;font-size:0.85rem;color:#555;">
+          Already have an account? <a href="#" onclick="showMemberView('login')" style="color:#5D1725;font-weight:600;">Sign in</a>
+        </p>
+      </div>
+    </div>
+
+
+
+  </div>
+</div>
+
+
+<script>
+function showRoleFields(role) {
+  ['player','family','alumni'].forEach(r => {
+    const el = document.getElementById('roleFields_' + r);
+    if (el) el.style.display = r === role ? 'flex' : 'none';
+  });
+}
+</script>
+
+  <script type="module" src="/assets/js/member-auth.js?v=257"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=257"></script>
+</body>
+</html>
