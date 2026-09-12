@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=260">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=261">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=260">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=261">
   <title>JV Statistics - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=260">
-  <link rel="stylesheet" href="/assets/css/stats-styles.css?v=260">
-  <script src="/assets/js/page-guard.js?v=260"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=261">
+  <link rel="stylesheet" href="/assets/css/stats-styles.css?v=261">
+  <script src="/assets/js/page-guard.js?v=261"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=260" defer></script>
-<script src="/assets/js/load-header.js?v=260"></script>
+<script src="/assets/js/load-hero.js?v=261" defer></script>
+<script src="/assets/js/load-header.js?v=261"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -127,7 +127,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=260"></script>
+<script src="/assets/js/load-footer.js?v=261"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -152,7 +152,7 @@
   });
 
   const svPctFmt = (sv, sa) => sa > 0 ? '.' + (sv/sa).toFixed(3).slice(2) : '.000';
-  const gaaFmt = (ga, min) => min > 0 ? ((ga * 60) / min).toFixed(2) : '0.00';
+  const gaaFmt = (ga, min) => min > 0 ? ((ga * 42) / min).toFixed(2) : '0.00';
   const minToMMSS = min => { const m = Math.floor(min); const s = Math.round((min - m) * 60); return `${m}:${s.toString().padStart(2, "0")}`; };
   const posAbbr = p => p === 'Forward' ? 'F' : p === 'Defense' ? 'D' : p?.charAt(0) || '-';
   const pct = (n, d) => d > 0 ? ((n/d)*100).toFixed(1) + '%' : '0.0%';
@@ -392,7 +392,7 @@
     Object.values(goalieStats).forEach(g => {
       g.sv = Math.max(0, g.sa - g.ga);
       g.svPct = g.sa > 0 ? g.sv / g.sa : 0;
-      g.gaa = g.min > 0 ? (g.ga * 60) / g.min : 0;
+      g.gaa = g.min > 0 ? (g.ga * 42) / g.min : 0;
     });
 
 
@@ -594,7 +594,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=260"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=260"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=261"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=261"></script>
 </body>
 </html>

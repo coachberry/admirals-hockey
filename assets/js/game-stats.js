@@ -251,7 +251,7 @@ document.getElementById('saveGameStatsBtn').addEventListener('click', async () =
     const min = stats.minutesPlayed || 0;
     stats.saves = Math.max(0, sa - ga);
     stats.savePct = sa > 0 ? parseFloat((stats.saves / sa).toFixed(3)) : 0;
-    stats.gaa = min > 0 ? parseFloat(((ga * 60) / min).toFixed(2)) : 0;
+    stats.gaa = min > 0 ? parseFloat(((ga * 42) / min).toFixed(2)) : 0;
     await setDoc(doc(db, scheduleRoot, seasonId, scheduleSubcol, gameId, 'goaliestats', playerId), stats);
   }
 
