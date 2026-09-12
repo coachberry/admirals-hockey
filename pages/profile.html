@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=257">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=258">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=257">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=258">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=257">
-  <script src="/assets/js/page-guard.js?v=257"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=258">
+  <script src="/assets/js/page-guard.js?v=258"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -293,7 +293,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=257"></script>
+<script src="/assets/js/load-header.js?v=258"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -560,6 +560,11 @@
         </div>
         <div class="profile-section-body">
           <p style="font-size:0.85rem;color:#666;margin-bottom:1rem;">Upcoming games and events based on your team assignments and roles.</p>
+          <div id="scheduleTeamFilter" style="display:none;gap:0.5rem;margin-bottom:1rem;">
+            <button class="sch-filter-chip" data-filter="all" data-color="#333" style="border-radius:20px;padding:5px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #333;background:#333;color:white;">All</button>
+            <button class="sch-filter-chip" data-filter="varsity" data-color="#5D1725" style="border-radius:20px;padding:5px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #5D1725;background:white;color:#5D1725;">Varsity</button>
+            <button class="sch-filter-chip" data-filter="jv" data-color="#1565c0" style="border-radius:20px;padding:5px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;border:2px solid #1565c0;background:white;color:#1565c0;">JV</button>
+          </div>
           <div id="myScheduleList">
             <div style="text-align:center;padding:2rem 1rem;color:#999;">
               <div style="width:32px;height:32px;border:3px solid #eee;border-top-color:#5D1725;border-radius:50%;margin:0 auto 0.75rem;animation:spin 0.8s linear infinite;"></div>
@@ -575,7 +580,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=257"></script>
+<script src="/assets/js/load-footer.js?v=258"></script>
 
 <!-- MEMBER MODAL v2 -->
 <!-- CHANGE PASSWORD MODAL -->
@@ -769,13 +774,13 @@ function showSection(name) {
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=257"></script>
+<script type="module" src="/assets/js/member-auth.js?v=258"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { initPushNotifications } from "/assets/js/push-notifications.js?v=257";
+  import { initPushNotifications } from "/assets/js/push-notifications.js?v=258";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
@@ -1341,12 +1346,40 @@ function showSection(name) {
     // Sort all by date
     items.sort((a, b) => (a.date + (a.time||'')).localeCompare(b.date + (b.time||'')));
 
+    const filterWrap = document.getElementById('scheduleTeamFilter');
+
     if (!items.length) {
       list.innerHTML = '<p style="color:#999;font-style:italic;">No upcoming games or events found.</p>';
+      if (filterWrap) filterWrap.style.display = 'none';
       return;
     }
 
-    list.innerHTML = items.map(item => {
+    // Show the Varsity/JV filter only when the person actually has items from both teams —
+    // no point filtering a JV-only parent's view down to a control that never changes anything.
+    const hasVarsityItems = items.some(i => i.type === 'varsity');
+    const hasJvItems = items.some(i => i.type === 'jv');
+    if (filterWrap) filterWrap.style.display = (hasVarsityItems && hasJvItems) ? 'flex' : 'none';
+
+    let activeScheduleFilter = 'all';
+
+    function updateFilterChipStyles() {
+      if (!filterWrap) return;
+      filterWrap.querySelectorAll('.sch-filter-chip').forEach(chip => {
+        const color = chip.dataset.color;
+        const isActive = chip.dataset.filter === activeScheduleFilter;
+        chip.style.background = isActive ? color : 'white';
+        chip.style.color = isActive ? 'white' : color;
+      });
+    }
+    updateFilterChipStyles();
+
+    function renderScheduleItems() {
+      const filtered = activeScheduleFilter === 'all' ? items : items.filter(i => i.type === activeScheduleFilter);
+      if (!filtered.length) {
+        list.innerHTML = '<p style="color:#999;font-style:italic;">No items match this filter.</p>';
+        return;
+      }
+      list.innerHTML = filtered.map(item => {
       const d = new Date(item.date + 'T12:00:00');
       const dateStr = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
       const timeStr = item.time ? (() => { const p = item.time.split(':'); const hr = parseInt(p[0]); return (hr%12||12)+':'+p[1]+' '+(hr>=12?'PM':'AM'); })() : '';
@@ -1440,6 +1473,19 @@ function showSection(name) {
         }
       });
     });
+    }
+
+    renderScheduleItems();
+
+    if (filterWrap) {
+      filterWrap.querySelectorAll('.sch-filter-chip').forEach(chip => {
+        chip.onclick = () => {
+          activeScheduleFilter = chip.dataset.filter;
+          updateFilterChipStyles();
+          renderScheduleItems();
+        };
+      });
+    }
   };
 
   function rsvpBtnsTE(eventId, uid, existing) {
