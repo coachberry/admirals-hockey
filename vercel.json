@@ -94,6 +94,10 @@
     {
       "source": "/jv-schedule",
       "destination": "/pages/jv-schedule.html"
+    },
+    {
+      "source": "/jv-stats",
+      "destination": "/pages/jv-stats.html"
     }
   ],
   "redirects": [
