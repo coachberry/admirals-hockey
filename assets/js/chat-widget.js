@@ -242,6 +242,16 @@ function updateBadge() {
   }
 }
 
+function formatWidgetDate(ts) {
+  if (!ts) return '';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  const today = new Date();
+  const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+  if (d.toDateString() === today.toDateString()) return 'Today';
+  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+}
+
 function renderWidgetMessages(messages) {
   if (currentChannel) {
     if (isOpen) {
@@ -263,13 +273,20 @@ function renderWidgetMessages(messages) {
     return;
   }
 
+  let widgetLastDate = null;
   container.innerHTML = messages.slice(-50).map(msg => {
     const isCoach = msg.role === 'superadmin' || msg.role === 'admin';
     const time = msg.timestamp ? (() => {
       const d = msg.timestamp.toDate ? msg.timestamp.toDate() : new Date(msg.timestamp);
       return d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
     })() : '';
-    return `<div style="display:flex;gap:0.5rem;align-items:flex-start;">
+    const dateLabel = msg.timestamp ? formatWidgetDate(msg.timestamp) : '';
+    let dividerHtml = '';
+    if (dateLabel && dateLabel !== widgetLastDate) {
+      dividerHtml = `<div style="text-align:center;font-size:0.68rem;color:#999;position:sticky;top:0;z-index:2;background:white;padding:0.3rem 0;margin:0.25rem 0;">${dateLabel}</div>`;
+      widgetLastDate = dateLabel;
+    }
+    return dividerHtml + `<div style="display:flex;gap:0.5rem;align-items:flex-start;">
       <div style="width:26px;height:26px;border-radius:50%;background:${isCoach?'#5D1725':'#555'};
         color:white;display:flex;align-items:center;justify-content:center;font-size:0.7rem;
         font-weight:700;flex-shrink:0;">${(msg.displayName||'?').charAt(0)}</div>

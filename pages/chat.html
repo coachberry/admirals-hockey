@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=261">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=262">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=261">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=262">
   <title>Team Chat - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=261">
-  <script src="/assets/js/page-guard.js?v=261"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=262">
+  <script src="/assets/js/page-guard.js?v=262"></script>
   <style>
     .chat-layout {
       display: grid;
@@ -302,7 +302,11 @@
       font-size: 0.72rem;
       color: #aaa;
       margin: 0.5rem 0;
-      position: relative;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: white;
+      padding: 0.3rem 0;
     }
 
     .date-divider::before, .date-divider::after {
@@ -348,7 +352,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=261"></script>
+<script src="/assets/js/load-header.js?v=262"></script>
 
 <div class="main-container" style="padding-top:1rem;">
 
@@ -784,6 +788,6 @@ document.addEventListener('click', e => {
 });
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=261"></script>
+<script type="module" src="/assets/js/member-auth.js?v=262"></script>
 </body>
 </html>
