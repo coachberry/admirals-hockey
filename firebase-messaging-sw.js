@@ -35,7 +35,18 @@ self.addEventListener('push', function(event) {
     data: { url: url }
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  // Best-effort app icon badge bump while the app is closed/backgrounded. A service
+  // worker can't read the person's true unread total (that lives in localStorage on
+  // their device), so this just signals "something's new" — the app corrects it to
+  // the real count the next time it's opened.
+  const badgePromise = ('setAppBadge' in self.navigator)
+    ? self.navigator.setAppBadge().catch(() => {})
+    : Promise.resolve();
+
+  event.waitUntil(Promise.all([
+    self.registration.showNotification(title, options),
+    badgePromise
+  ]));
 });
 
 self.addEventListener('notificationclick', function(event) {
