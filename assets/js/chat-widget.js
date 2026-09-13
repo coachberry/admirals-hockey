@@ -33,8 +33,13 @@ let readableChannelsCache = [];
 let unreadByChannel = {};
 let totalUnread = 0;
 
+// Read/unread tracking is per-device AND per-signed-in-user (namespaced by uid) so a
+// shared family device doesn't mix up two different members' read state.
+function lastReadKey(channelId) {
+  return 'chat_lastRead_' + (currentUser?.uid || 'anon') + '_' + channelId;
+}
 function getLastRead(channelId) {
-  const stored = localStorage.getItem('chat_lastRead_' + channelId);
+  const stored = localStorage.getItem(lastReadKey(channelId));
   if (stored) return parseInt(stored);
   // First time we've ever tracked this channel — treat "now" as the baseline so the
   // entire pre-existing message history doesn't get counted as unread all at once.
@@ -43,13 +48,30 @@ function getLastRead(channelId) {
   return now;
 }
 function setLastRead(channelId, ms) {
-  localStorage.setItem('chat_lastRead_' + channelId, String(ms));
+  localStorage.setItem(lastReadKey(channelId), String(ms));
+}
+function forceUnreadKey(channelId) {
+  return 'chat_forceUnread_' + (currentUser?.uid || 'anon') + '_' + channelId;
+}
+function isForcedUnread(channelId) {
+  return localStorage.getItem(forceUnreadKey(channelId)) === 'true';
+}
+function setForcedUnread(channelId, val) {
+  if (val) localStorage.setItem(forceUnreadKey(channelId), 'true');
+  else localStorage.removeItem(forceUnreadKey(channelId));
 }
 function msOf(ts) {
   if (!ts) return 0;
   if (typeof ts.toMillis === 'function') return ts.toMillis();
   if (ts.seconds) return ts.seconds * 1000;
   return 0;
+}
+function updateAppBadge(count) {
+  if (!('setAppBadge' in navigator)) return;
+  try {
+    if (count > 0) navigator.setAppBadge(count).catch(() => {});
+    else navigator.clearAppBadge().catch(() => {});
+  } catch (e) { /* Badge API unsupported/blocked — ignore */ }
 }
 
 // Count messages newer than this channel's last-read marker, excluding the current user's own messages
@@ -62,6 +84,9 @@ async function computeUnreadForChannel(channelId) {
       const m = d.data();
       if (m.uid !== currentUser?.uid && msOf(m.timestamp) > lastRead) count++;
     });
+    // A manually "marked unread" channel shows at least 1 until it's opened again,
+    // even if there's nothing genuinely new.
+    if (count === 0 && isForcedUnread(channelId)) count = 1;
     return count;
   } catch (e) {
     return 0;
@@ -71,6 +96,7 @@ async function computeUnreadForChannel(channelId) {
 function recomputeTotalUnread() {
   totalUnread = Object.values(unreadByChannel).reduce((a, b) => a + b, 0);
   updateBadge();
+  updateAppBadge(totalUnread);
 }
 
 // Refresh unread counts for all readable channels except the one currently open/active
@@ -257,10 +283,13 @@ function renderWidgetMessages(messages) {
     if (isOpen) {
       // Actively viewing this channel right now — treat as fully read
       setLastRead(currentChannel.id, Date.now());
+      setForcedUnread(currentChannel.id, false);
       unreadByChannel[currentChannel.id] = 0;
     } else {
       const lastRead = getLastRead(currentChannel.id);
-      unreadByChannel[currentChannel.id] = messages.filter(m => m.uid !== currentUser?.uid && msOf(m.timestamp) > lastRead).length;
+      let count = messages.filter(m => m.uid !== currentUser?.uid && msOf(m.timestamp) > lastRead).length;
+      if (count === 0 && isForcedUnread(currentChannel.id)) count = 1;
+      unreadByChannel[currentChannel.id] = count;
     }
     recomputeTotalUnread();
   }

@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=262">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=263">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=262">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=263">
   <title>Team Chat - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=262">
-  <script src="/assets/js/page-guard.js?v=262"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=263">
+  <script src="/assets/js/page-guard.js?v=263"></script>
   <style>
     .chat-layout {
       display: grid;
@@ -352,7 +352,7 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=262"></script>
+<script src="/assets/js/load-header.js?v=263"></script>
 
 <div class="main-container" style="padding-top:1rem;">
 
@@ -488,6 +488,89 @@
     return roles.length === 0 || getMemberRoles().some(r => roles.includes(r));
   }
 
+  // Read/unread tracking — per-device AND per-signed-in-user (namespaced by uid).
+  function lastReadKey(channelId) {
+    return 'chat_lastRead_' + (currentUser?.uid || 'anon') + '_' + channelId;
+  }
+  function getLastRead(channelId) {
+    const stored = localStorage.getItem(lastReadKey(channelId));
+    if (stored) return parseInt(stored);
+    const now = Date.now();
+    setLastRead(channelId, now);
+    return now;
+  }
+  function setLastRead(channelId, ms) {
+    localStorage.setItem(lastReadKey(channelId), String(ms));
+  }
+  function forceUnreadKey(channelId) {
+    return 'chat_forceUnread_' + (currentUser?.uid || 'anon') + '_' + channelId;
+  }
+  function isForcedUnread(channelId) {
+    return localStorage.getItem(forceUnreadKey(channelId)) === 'true';
+  }
+  function setForcedUnread(channelId, val) {
+    if (val) localStorage.setItem(forceUnreadKey(channelId), 'true');
+    else localStorage.removeItem(forceUnreadKey(channelId));
+  }
+  function msOfTs(ts) {
+    if (!ts) return 0;
+    if (typeof ts.toMillis === 'function') return ts.toMillis();
+    if (ts.seconds) return ts.seconds * 1000;
+    return 0;
+  }
+  function updateAppBadge(count) {
+    if (!('setAppBadge' in navigator)) return;
+    try {
+      if (count > 0) navigator.setAppBadge(count).catch(() => {});
+      else navigator.clearAppBadge().catch(() => {});
+    } catch (e) { /* Badge API unsupported/blocked — ignore */ }
+  }
+  function markChannelRead(channelId) {
+    setLastRead(channelId, Date.now());
+    setForcedUnread(channelId, false);
+  }
+  async function computeUnreadForChannel(channelId) {
+    try {
+      const lastRead = getLastRead(channelId);
+      const snap = await getDocs(query(collection(db, 'chat', channelId, 'messages'), orderBy('timestamp', 'desc'), limit(100)));
+      let count = 0;
+      snap.forEach(d => {
+        const m = d.data();
+        if (m.uid !== currentUser?.uid && msOfTs(m.timestamp) > lastRead) count++;
+      });
+      if (count === 0 && isForcedUnread(channelId)) count = 1;
+      return count;
+    } catch (e) {
+      return 0;
+    }
+  }
+  async function refreshSidebarUnreadBadges() {
+    const accessible = CHANNELS.filter(ch => canRead(ch));
+    const results = await Promise.all(accessible.map(async ch => {
+      if (currentChannel && ch.id === currentChannel.id) {
+        return { id: ch.id, count: isForcedUnread(ch.id) ? 1 : 0 };
+      }
+      return { id: ch.id, count: await computeUnreadForChannel(ch.id) };
+    }));
+    let total = 0;
+    results.forEach(r => {
+      total += r.count;
+      const badge = document.getElementById('unread_' + r.id);
+      if (!badge) return;
+      if (r.count > 0) {
+        badge.textContent = r.count > 99 ? '99+' : String(r.count);
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    });
+    updateAppBadge(total);
+  }
+  window.markChannelUnread = function(channelId) {
+    setForcedUnread(channelId, true);
+    refreshSidebarUnreadBadges();
+  };
+
   function formatTime(ts) {
     if (!ts) return '';
     const d = ts.toDate ? ts.toDate() : new Date(ts);
@@ -515,15 +598,18 @@
 
     list.innerHTML = `<div class="channel-group-label">Channels</div>` +
       accessible.map(ch => `
-        <button class="channel-btn" data-channel="${ch.id}" onclick="switchChannel('${ch.id}')">
+        <div class="channel-btn" data-channel="${ch.id}" onclick="switchChannel('${ch.id}')">
           <span>${ch.icon}</span>
-          <span>${ch.name}</span>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${ch.name}</span>
           <span class="channel-unread" id="unread_${ch.id}" style="display:none;"></span>
-        </button>`).join('');
+          <button onclick="event.stopPropagation(); markChannelUnread('${ch.id}')" title="Mark as unread"
+            style="background:none;border:none;cursor:pointer;color:#999;font-size:0.7rem;padding:2px 4px;line-height:1;flex-shrink:0;margin-left:auto;">●</button>
+        </div>`).join('');
 
     // Auto-open general or first accessible
     const first = accessible[0];
     if (first) switchChannel(first.id);
+    refreshSidebarUnreadBadges();
   }
 
   window.switchChannel = function(channelId) {
@@ -560,6 +646,8 @@
     const q = query(collection(db, 'chat', channelId, 'messages'), orderBy('timestamp', 'asc'), limit(50));
     unsubscribeMessages = onSnapshot(q, (snap) => {
       renderMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      markChannelRead(channelId);
+      refreshSidebarUnreadBadges();
     });
   };
 
@@ -788,6 +876,6 @@ document.addEventListener('click', e => {
 });
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=262"></script>
+<script type="module" src="/assets/js/member-auth.js?v=263"></script>
 </body>
 </html>
