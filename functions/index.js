@@ -106,6 +106,45 @@ exports.sendMentionNotification = onCall(async (request) => {
 });
 
 // ============================================
+// Chat message push notification (fires for every new message in a channel,
+// to every member with read access, excluding the sender). Push only — does
+// NOT write a per-recipient in-app notification-bell entry, since doing that
+// for every single message would flood the bell in an active channel.
+// ============================================
+exports.sendChatMessageNotification = onCall(async (request) => {
+  const { channelId, channelName, text, senderName } = request.data;
+  const auth = request.auth;
+
+  if (!auth) throw new HttpsError("unauthenticated", "Must be logged in");
+  if (!channelId || !text) {
+    throw new HttpsError("invalid-argument", "channelId and text required");
+  }
+
+  const channelSnap = await db.collection("chatChannels").doc(channelId).get();
+  const readRoles = channelSnap.exists ? (channelSnap.data().readRoles || []) : [];
+
+  const membersSnap = await db.collection("members").get();
+  const targetUids = [];
+  membersSnap.forEach((doc) => {
+    if (doc.id === auth.uid) return; // never notify the sender
+    const m = doc.data();
+    const memberRoles = [m.role, ...(m.roles || []), ...(m.teams || [])].filter(Boolean);
+    if (readRoles.length === 0 || memberRoles.some((r) => readRoles.includes(r))) {
+      targetUids.push(doc.id);
+    }
+  });
+
+  if (!targetUids.length) return { sent: 0, failed: 0 };
+
+  const title = (senderName || "Someone") + " in #" + (channelName || "chat");
+  const body = String(text).slice(0, 120);
+
+  const result = await sendPushToMembers(targetUids, title, body, "/chat");
+  logger.info("Chat message notification sent", { channelId, targetCount: targetUids.length, ...result });
+  return result;
+});
+
+// ============================================
 // Scheduled RSVP reminder check (daily at 9am Central)
 // ============================================
 exports.rsvpReminderCheck = onSchedule(

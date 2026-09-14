@@ -229,6 +229,20 @@ window.toggleChatWidget = function() {
   }
 };
 
+async function notifyWidgetChannelMessage(text, channelId, channelName) {
+  try {
+    const fn = httpsCallable(functions, 'sendChatMessageNotification');
+    await fn({
+      channelId,
+      channelName: channelName || 'general',
+      text,
+      senderName: currentProfile?.displayName || currentUser?.displayName || 'Someone'
+    });
+  } catch (err) {
+    console.error('notifyWidgetChannelMessage error:', err);
+  }
+}
+
 window.sendWidgetMessage = async function() {
   const input = document.getElementById('widgetInput');
   const text = input?.value.trim();
@@ -246,6 +260,8 @@ window.sendWidgetMessage = async function() {
     text,
     timestamp: serverTimestamp()
   });
+
+  notifyWidgetChannelMessage(text, currentChannel.id, currentChannel.name);
 
   const mentionedUidsW = new Set();
   pendingMentionsW.forEach(pm => {
