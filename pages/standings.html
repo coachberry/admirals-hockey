@@ -2,20 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=269">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=270">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=269">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=270">
   <title>Standings - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=269">
-  <script src="/assets/js/page-guard.js?v=269"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=270">
+  <script src="/assets/js/page-guard.js?v=270"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=269" defer></script>
-<script src="/assets/js/load-header.js?v=269"></script>
+<script src="/assets/js/load-hero.js?v=270" defer></script>
+<script src="/assets/js/load-header.js?v=270"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -77,7 +77,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=269"></script>
+<script src="/assets/js/load-footer.js?v=270"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -130,6 +130,12 @@
       v.gp++; h.gp++;
       v.gf += g.visitorScore; v.ga += g.homeScore;
       h.gf += g.homeScore; h.ga += g.visitorScore;
+      // Tiebreak-only accumulator: each game's differential capped at +/-6 before
+      // summing, so one blowout can't dominate the standings order. The displayed
+      // DIFF column (t.diff, below) stays the true, uncapped total.
+      const vGameDiff = g.visitorScore - g.homeScore;
+      v.tiebreakDiff = (v.tiebreakDiff || 0) + Math.max(-6, Math.min(6, vGameDiff));
+      h.tiebreakDiff = (h.tiebreakDiff || 0) + Math.max(-6, Math.min(6, -vGameDiff));
       if (g.visitorScore > g.homeScore) {
         v.w++; h.l++; v.results.push('W'); h.results.push('L');
       } else if (g.visitorScore < g.homeScore) {
@@ -142,6 +148,7 @@
     const list = Object.values(teams).map(t => {
       t.pts = t.w * 2 + t.t * 1;
       t.diff = t.gf - t.ga;
+      t.tiebreakDiff = t.tiebreakDiff || 0;
       let streakType = null, streakCount = 0;
       for (let i = t.results.length - 1; i >= 0; i--) {
         const r = t.results[i];
@@ -172,7 +179,7 @@
       if (b.w !== a.w) return b.w - a.w;
       const h2h = h2hNet(a.name, b.name);
       if (h2h !== 0) return -h2h;
-      if (b.diff !== a.diff) return b.diff - a.diff;
+      if (b.tiebreakDiff !== a.tiebreakDiff) return b.tiebreakDiff - a.tiebreakDiff;
       return a.ga - b.ga;
     });
 
@@ -267,7 +274,7 @@
   })();
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=269"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=269"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=270"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=270"></script>
 </body>
 </html>
