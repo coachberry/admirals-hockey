@@ -1,6 +1,6 @@
 import { showFramer } from '/assets/js/image-framer.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, getDoc, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, getDoc, query, where, orderBy, limit, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js";
 
@@ -243,6 +243,7 @@ async function showDashboard() {
     // Load data for the restored tab
     if (savedTab === 'jvRoster') loadJvRosterSeasons();
     if (savedTab === 'jvSchedule') loadJvScheduleSeasons();
+    if (savedTab === 'standings') loadLeagueStandingsTab();
     if (savedTab === 'summer') loadSummerSeasons();
     if (savedTab === 'schedule') loadScheduleGames(document.getElementById('scheduleSeasonSelect')?.value);
     if (savedTab === 'lineups') loadLineupsTab();
@@ -318,6 +319,235 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     e.target.classList.add('active');
     localStorage.setItem('admirals_activeTab', tab);
   });
+});
+document.querySelector('[data-tab="standings"]')?.addEventListener('click', loadLeagueStandingsTab);
+
+// ============================================
+// LEAGUE STANDINGS (all 120 GNASH season games)
+// ============================================
+// Compact seed rows: [order, date, visitorTeam, homeTeam, visitorScore, homeScore]
+// Scores are null for games not yet played (14-120 at time of writing).
+const LEAGUE_GAMES_SEED = [
+  [1,"2026-09-02","Father Ryan","Montgomery Bell Academy",3,2],
+  [2,"2026-09-02","Franklin","Nolensville",2,2],
+  [3,"2026-09-02","BHS-BA-USN","Independence-Centennial",8,1],
+  [4,"2026-09-02","Page-Summit-NCS","Station Camp-Lawson-Battle Creek",2,0],
+  [5,"2026-09-02","Rutherford Co. Rampage","Clarksville Kings",10,3],
+  [6,"2026-09-02","Ensworth-Lipscomb-CPA","JPII-MLK-GCS",5,4],
+  [7,"2026-09-09","Ravenwood","Montgomery Bell Academy",4,6],
+  [8,"2026-09-09","Tennessee Outlaws","Ensworth-Lipscomb-CPA",8,4],
+  [9,"2026-09-09","JPII-MLK-GCS","Mt. Juliet-Wilson Central-Green Hill",5,6],
+  [10,"2026-09-09","Page-Summit-NCS","Franklin",2,8],
+  [11,"2026-09-09","Rutherford Co. Rampage","Father Ryan",1,11],
+  [12,"2026-09-09","Independence-Centennial","Station Camp-Lawson-Battle Creek",3,6],
+  [13,"2026-09-09","Hendersonville-Beech","BHS-BA-USN",2,5],
+  [14,"2026-09-14","Ensworth-Lipscomb-CPA","Rutherford Co. Rampage",null,null],
+  [15,"2026-09-16","BHS-BA-USN","Montgomery Bell Academy",null,null],
+  [16,"2026-09-16","Mt. Juliet-Wilson Central-Green Hill","Ensworth-Lipscomb-CPA",null,null],
+  [17,"2026-09-16","Nolensville","Father Ryan",null,null],
+  [18,"2026-09-16","Clarksville Kings","Ravenwood",null,null],
+  [19,"2026-09-16","Station Camp-Lawson-Battle Creek","Franklin",null,null],
+  [20,"2026-09-16","Independence-Centennial","Page-Summit-NCS",null,null],
+  [21,"2026-09-21","Montgomery Bell Academy","Franklin",null,null],
+  [22,"2026-09-21","Nolensville","Station Camp-Lawson-Battle Creek",null,null],
+  [23,"2026-09-21","Hendersonville-Beech","Independence-Centennial",null,null],
+  [24,"2026-09-21","Ensworth-Lipscomb-CPA","Clarksville Kings",null,null],
+  [25,"2026-09-21","JPII-MLK-GCS","Tennessee Outlaws",null,null],
+  [26,"2026-09-23","Rutherford Co. Rampage","JPII-MLK-GCS",null,null],
+  [27,"2026-09-23","Franklin","Hendersonville-Beech",null,null],
+  [28,"2026-09-23","Mt. Juliet-Wilson Central-Green Hill","BHS-BA-USN",null,null],
+  [29,"2026-09-23","Ravenwood","Independence-Centennial",null,null],
+  [30,"2026-09-23","Tennessee Outlaws","Montgomery Bell Academy",null,null],
+  [31,"2026-09-28","Father Ryan","Franklin",null,null],
+  [32,"2026-09-28","Nolensville","Ravenwood",null,null],
+  [33,"2026-09-28","Clarksville Kings","Mt. Juliet-Wilson Central-Green Hill",null,null],
+  [34,"2026-09-28","Rutherford Co. Rampage","Independence-Centennial",null,null],
+  [35,"2026-09-30","Father Ryan","Ravenwood",null,null],
+  [36,"2026-09-30","Montgomery Bell Academy","Rutherford Co. Rampage",null,null],
+  [37,"2026-09-30","Franklin","JPII-MLK-GCS",null,null],
+  [38,"2026-09-30","BHS-BA-USN","Page-Summit-NCS",null,null],
+  [39,"2026-09-30","Nolensville","Independence-Centennial",null,null],
+  [40,"2026-09-30","Hendersonville-Beech","Station Camp-Lawson-Battle Creek",null,null],
+  [41,"2026-09-30","Tennessee Outlaws","Mt. Juliet-Wilson Central-Green Hill",null,null],
+  [42,"2026-10-05","Hendersonville-Beech","Ensworth-Lipscomb-CPA",null,null],
+  [43,"2026-10-05","Clarksville Kings","Nolensville",null,null],
+  [44,"2026-10-05","Ravenwood","Page-Summit-NCS",null,null],
+  [45,"2026-10-07","Ensworth-Lipscomb-CPA","Father Ryan",null,null],
+  [46,"2026-10-07","Independence-Centennial","Franklin",null,null],
+  [47,"2026-10-07","Tennessee Outlaws","Hendersonville-Beech",null,null],
+  [48,"2026-10-12","Mt. Juliet-Wilson Central-Green Hill","Montgomery Bell Academy",null,null],
+  [49,"2026-10-19","Father Ryan","BHS-BA-USN",null,null],
+  [50,"2026-10-19","Mt. Juliet-Wilson Central-Green Hill","Nolensville",null,null],
+  [51,"2026-10-19","Station Camp-Lawson-Battle Creek","JPII-MLK-GCS",null,null],
+  [52,"2026-10-19","Montgomery Bell Academy","Clarksville Kings",null,null],
+  [53,"2026-10-19","Hendersonville-Beech","Ravenwood",null,null],
+  [54,"2026-10-21","BHS-BA-USN","Rutherford Co. Rampage",null,null],
+  [55,"2026-10-21","Clarksville Kings","Page-Summit-NCS",null,null],
+  [56,"2026-10-21","Station Camp-Lawson-Battle Creek","Mt. Juliet-Wilson Central-Green Hill",null,null],
+  [57,"2026-10-21","Franklin","Ensworth-Lipscomb-CPA",null,null],
+  [58,"2026-10-21","Father Ryan","Tennessee Outlaws",null,null],
+  [59,"2026-10-26","Ravenwood","BHS-BA-USN",null,null],
+  [60,"2026-10-26","Independence-Centennial","Clarksville Kings",null,null],
+  [61,"2026-10-26","Mt. Juliet-Wilson Central-Green Hill","Father Ryan",null,null],
+  [62,"2026-10-28","BHS-BA-USN","Ensworth-Lipscomb-CPA",null,null],
+  [63,"2026-10-28","Nolensville","Rutherford Co. Rampage",null,null],
+  [64,"2026-10-28","Franklin","Tennessee Outlaws",null,null],
+  [65,"2026-10-28","Hendersonville-Beech","Page-Summit-NCS",null,null],
+  [66,"2026-10-28","Station Camp-Lawson-Battle Creek","Montgomery Bell Academy",null,null],
+  [67,"2026-10-28","JPII-MLK-GCS","Independence-Centennial",null,null],
+  [68,"2026-11-02","Nolensville","BHS-BA-USN",null,null],
+  [69,"2026-11-02","Mt. Juliet-Wilson Central-Green Hill","Ravenwood",null,null],
+  [70,"2026-11-02","Montgomery Bell Academy","Independence-Centennial",null,null],
+  [71,"2026-11-04","Ravenwood","JPII-MLK-GCS",null,null],
+  [72,"2026-11-04","Rutherford Co. Rampage","Franklin",null,null],
+  [73,"2026-11-04","Independence-Centennial","Tennessee Outlaws",null,null],
+  [74,"2026-11-04","BHS-BA-USN","Clarksville Kings",null,null],
+  [75,"2026-11-04","Montgomery Bell Academy","Hendersonville-Beech",null,null],
+  [76,"2026-11-04","Station Camp-Lawson-Battle Creek","Father Ryan",null,null],
+  [77,"2026-11-04","Mt. Juliet-Wilson Central-Green Hill","Page-Summit-NCS",null,null],
+  [78,"2026-11-11","Page-Summit-NCS","JPII-MLK-GCS",null,null],
+  [79,"2026-11-16","Page-Summit-NCS","Nolensville",null,null],
+  [80,"2026-11-16","Mt. Juliet-Wilson Central-Green Hill","Hendersonville-Beech",null,null],
+  [81,"2026-11-16","Father Ryan","Clarksville Kings",null,null],
+  [82,"2026-11-16","BHS-BA-USN","Station Camp-Lawson-Battle Creek",null,null],
+  [83,"2026-11-18","Independence-Centennial","Father Ryan",null,null],
+  [84,"2026-11-18","Page-Summit-NCS","Rutherford Co. Rampage",null,null],
+  [85,"2026-11-18","Montgomery Bell Academy","Ensworth-Lipscomb-CPA",null,null],
+  [86,"2026-11-18","Clarksville Kings","Station Camp-Lawson-Battle Creek",null,null],
+  [87,"2026-11-18","Tennessee Outlaws","Nolensville",null,null],
+  [88,"2026-11-18","Franklin","Ravenwood",null,null],
+  [89,"2026-11-30","Ravenwood","Ensworth-Lipscomb-CPA",null,null],
+  [90,"2026-11-30","BHS-BA-USN","Franklin",null,null],
+  [91,"2026-11-30","JPII-MLK-GCS","Clarksville Kings",null,null],
+  [92,"2026-12-02","Tennessee Outlaws","Rutherford Co. Rampage",null,null],
+  [93,"2026-12-02","Ravenwood","Station Camp-Lawson-Battle Creek",null,null],
+  [94,"2026-12-02","Hendersonville-Beech","Clarksville Kings",null,null],
+  [95,"2026-12-02","Franklin","Mt. Juliet-Wilson Central-Green Hill",null,null],
+  [96,"2026-12-02","Ensworth-Lipscomb-CPA","Nolensville",null,null],
+  [97,"2026-12-02","JPII-MLK-GCS","BHS-BA-USN",null,null],
+  [98,"2026-12-07","Nolensville","Montgomery Bell Academy",null,null],
+  [99,"2026-12-07","Father Ryan","Hendersonville-Beech",null,null],
+  [100,"2026-12-07","Page-Summit-NCS","Ensworth-Lipscomb-CPA",null,null],
+  [101,"2026-12-07","Tennessee Outlaws","Ravenwood",null,null],
+  [102,"2026-12-09","Hendersonville-Beech","Rutherford Co. Rampage",null,null],
+  [103,"2026-12-09","Station Camp-Lawson-Battle Creek","Tennessee Outlaws",null,null],
+  [104,"2026-12-09","JPII-MLK-GCS","Nolensville",null,null],
+  [105,"2026-12-14","Ensworth-Lipscomb-CPA","Independence-Centennial",null,null],
+  [106,"2026-12-14","Rutherford Co. Rampage","Mt. Juliet-Wilson Central-Green Hill",null,null],
+  [107,"2026-12-14","Page-Summit-NCS","Tennessee Outlaws",null,null],
+  [108,"2026-12-16","Clarksville Kings","Tennessee Outlaws",null,null],
+  [109,"2026-12-16","JPII-MLK-GCS","Hendersonville-Beech",null,null],
+  [110,"2026-12-16","Station Camp-Lawson-Battle Creek","Rutherford Co. Rampage",null,null],
+  [111,"2026-12-16","Montgomery Bell Academy","Page-Summit-NCS",null,null],
+  [112,"2027-01-11","Father Ryan","Page-Summit-NCS",null,null],
+  [113,"2027-01-11","Rutherford Co. Rampage","Ravenwood",null,null],
+  [114,"2027-01-11","Nolensville","Hendersonville-Beech",null,null],
+  [115,"2027-01-11","Montgomery Bell Academy","JPII-MLK-GCS",null,null],
+  [116,"2027-01-13","JPII-MLK-GCS","Father Ryan",null,null],
+  [117,"2027-01-13","Independence-Centennial","Mt. Juliet-Wilson Central-Green Hill",null,null],
+  [118,"2027-01-13","Clarksville Kings","Franklin",null,null],
+  [119,"2027-01-13","Tennessee Outlaws","BHS-BA-USN",null,null],
+  [120,"2027-01-13","Ensworth-Lipscomb-CPA","Station Camp-Lawson-Battle Creek",null,null]
+];
+
+function renderLeagueGamesTable(games) {
+  const container = document.getElementById('leagueGamesList');
+  if (!games.length) {
+    container.innerHTML = '<div class="empty-state">No games yet — click Seed above to load the season.</div>';
+    return;
+  }
+  const rows = games.map(g => {
+    const highlight = g.isFranklinGame ? 'background:#fdf0f1;' : '';
+    const statusColor = g.played ? '#2e7d32' : '#999';
+    const statusText = g.played ? '✓ Played' : 'TBD';
+    return `<tr style="${highlight}" data-id="${g.id}">
+      <td style="padding:0.5rem;white-space:nowrap;">${g.date}</td>
+      <td style="padding:0.5rem;">${g.visitorTeam}</td>
+      <td style="padding:0.5rem;width:60px;">
+        <input type="number" class="league-score-input" data-id="${g.id}" data-field="visitorScore" value="${g.visitorScore ?? ''}" style="width:55px;padding:4px;text-align:center;">
+      </td>
+      <td style="padding:0.5rem;text-align:center;color:#999;">@</td>
+      <td style="padding:0.5rem;">${g.homeTeam}</td>
+      <td style="padding:0.5rem;width:60px;">
+        <input type="number" class="league-score-input" data-id="${g.id}" data-field="homeScore" value="${g.homeScore ?? ''}" style="width:55px;padding:4px;text-align:center;">
+      </td>
+      <td style="padding:0.5rem;font-size:0.75rem;color:${statusColor};" class="league-status-cell">${statusText}</td>
+    </tr>`;
+  }).join('');
+
+  container.innerHTML = `<div style="overflow-x:auto;max-height:70vh;overflow-y:auto;"><table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+    <thead><tr style="border-bottom:2px solid #5D1725;text-align:left;position:sticky;top:0;background:white;">
+      <th style="padding:0.5rem;">Date</th><th style="padding:0.5rem;">Visitor</th><th style="padding:0.5rem;">Score</th>
+      <th></th><th style="padding:0.5rem;">Home</th><th style="padding:0.5rem;">Score</th><th style="padding:0.5rem;">Status</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+
+  container.querySelectorAll('.league-score-input').forEach(input => {
+    input.addEventListener('blur', async () => {
+      const gameId = input.dataset.id;
+      const field = input.dataset.field;
+      const val = input.value.trim() === '' ? null : parseInt(input.value);
+      const row = games.find(g => g.id === gameId);
+      if (!row) return;
+      row[field] = val;
+      const played = row.visitorScore !== null && row.visitorScore !== undefined && row.homeScore !== null && row.homeScore !== undefined;
+      row.played = played;
+      try {
+        await setDoc(doc(db, 'leagueGames', gameId), { [field]: val, played }, { merge: true });
+        const statusCell = input.closest('tr').querySelector('.league-status-cell');
+        if (statusCell) {
+          statusCell.textContent = played ? '✓ Played' : 'TBD';
+          statusCell.style.color = played ? '#2e7d32' : '#999';
+        }
+      } catch (e) {
+        console.error('Error saving league game score:', e);
+        alert('Failed to save score — check your connection and try again.');
+      }
+    });
+  });
+}
+
+window.loadLeagueStandingsTab = async function() {
+  const container = document.getElementById('leagueGamesList');
+  container.innerHTML = '<div class="empty-state">Loading...</div>';
+  try {
+    const snap = await getDocs(query(collection(db, 'leagueGames'), orderBy('order')));
+    const games = [];
+    snap.forEach(d => games.push({ id: d.id, ...d.data() }));
+    renderLeagueGamesTable(games);
+  } catch (e) {
+    console.error('Error loading league games:', e);
+    container.innerHTML = '<div class="empty-state">Error loading games — check console.</div>';
+  }
+};
+
+document.getElementById('seedLeagueGamesBtn')?.addEventListener('click', async () => {
+  const confirmMsg = 'This will reset all 120 league games back to the starting data: the 13 ' +
+    'already-played games keep their real scores, and the other 107 reset to blank (TBD). ' +
+    'Any scores you have entered so far for games beyond the original 13 will be lost. Continue?';
+  if (!confirm(confirmMsg)) return;
+  const FRANKLIN_NAME = 'Franklin';
+  const batch = writeBatch(db);
+  LEAGUE_GAMES_SEED.forEach(([order, date, visitorTeam, homeTeam, visitorScore, homeScore]) => {
+    const played = visitorScore !== null && homeScore !== null;
+    const ref = doc(db, 'leagueGames', String(order));
+    batch.set(ref, {
+      order, date, visitorTeam, homeTeam,
+      visitorScore, homeScore, played,
+      isFranklinGame: visitorTeam === FRANKLIN_NAME || homeTeam === FRANKLIN_NAME,
+      linkedScheduleSeasonId: null,
+      linkedScheduleGameId: null
+    });
+  });
+  try {
+    await batch.commit();
+    alert('League games seeded successfully.');
+    loadLeagueStandingsTab();
+  } catch (e) {
+    console.error('Error seeding league games:', e);
+    alert('Failed to seed league games — check console.');
+  }
 });
 
 // ============================================

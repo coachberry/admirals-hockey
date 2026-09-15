@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=264">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=265">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=264">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=264">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=265">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=265">
 </head>
 <body>
 
@@ -103,6 +103,7 @@
         <button class="tab-btn" data-tab="lineups">🧩 Lineups</button>
         <button class="tab-btn" data-tab="seasons">🗓 Seasons</button>
         <button class="tab-btn" data-tab="tryouts">🎯 Tryouts</button>
+        <button class="tab-btn" data-tab="standings">🏆 League Standings</button>
       </div>
       <div class="sidebar-group">
         <div class="sidebar-group-label">Content</div>
@@ -224,6 +225,18 @@
       </div>
       <button id="addGameBtn" class="btn-primary">+ Add Game</button>
       <div id="gamesList" class="items-list"><div class="empty-state">No games added yet</div></div>
+    </div>
+
+    <!-- LEAGUE STANDINGS TAB -->
+    <div id="standingsTab" class="tab-content">
+      <h2>League Standings — Game Scores</h2>
+      <p style="color:#666;font-size:0.85rem;margin-bottom:1rem;max-width:640px;">
+        Enter final scores for every game in the season below. Franklin's games are highlighted —
+        for now enter those here too; once the Varsity Schedule auto-sync ships those rows will
+        update automatically instead. Scores save automatically when you click out of the field.
+      </p>
+      <button id="seedLeagueGamesBtn" class="btn-secondary" style="margin-bottom:1rem;">⚠️ Seed/Reset Full Season Schedule (120 games)</button>
+      <div id="leagueGamesList"><div class="empty-state">Loading...</div></div>
     </div>
 
     <!-- NEWS TAB -->
@@ -1460,10 +1473,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=264"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=264"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=264"></script>
-<script type="module" src="/assets/js/game-stats.js?v=264"></script>
+<script type="module" src="/assets/js/admin.js?v=265"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=265"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=265"></script>
+<script type="module" src="/assets/js/game-stats.js?v=265"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
