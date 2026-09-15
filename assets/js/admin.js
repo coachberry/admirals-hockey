@@ -522,6 +522,43 @@ window.loadLeagueStandingsTab = async function() {
   }
 };
 
+document.getElementById('saveAllScoresBtn')?.addEventListener('click', async () => {
+  const statusEl = document.getElementById('saveAllScoresStatus');
+  const inputs = document.querySelectorAll('.league-score-input');
+  if (!inputs.length) return;
+
+  statusEl.textContent = 'Saving…';
+  statusEl.style.color = '#666';
+
+  // Group the flat input list back into per-game { visitorScore, homeScore } pairs.
+  const byGame = {};
+  inputs.forEach(input => {
+    const gameId = input.dataset.id;
+    const field = input.dataset.field;
+    const val = input.value.trim() === '' ? null : parseInt(input.value);
+    if (!byGame[gameId]) byGame[gameId] = {};
+    byGame[gameId][field] = val;
+  });
+
+  try {
+    const batch = writeBatch(db);
+    Object.entries(byGame).forEach(([gameId, scores]) => {
+      const played = scores.visitorScore !== undefined && scores.visitorScore !== null &&
+                      scores.homeScore !== undefined && scores.homeScore !== null;
+      batch.set(doc(db, 'leagueGames', gameId), { ...scores, played }, { merge: true });
+    });
+    await batch.commit();
+    const now = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    statusEl.textContent = `✓ Saved ${Object.keys(byGame).length} games at ${now}`;
+    statusEl.style.color = '#2e7d32';
+    loadLeagueStandingsTab();
+  } catch (e) {
+    console.error('Error saving all league scores:', e);
+    statusEl.textContent = 'Failed to save — check your connection and try again.';
+    statusEl.style.color = '#c62828';
+  }
+});
+
 // One-time seed is already done. Kept as a console-only escape hatch (not a
 // visible button) in case the whole season ever needs a hard reset — run
 // window.seedLeagueGames() from the browser console while on /admin.

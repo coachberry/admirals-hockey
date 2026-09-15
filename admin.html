@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=267">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=268">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=267">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=267">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=268">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=268">
 </head>
 <body>
 
@@ -235,6 +235,10 @@
         for now enter those here too; once the Varsity Schedule auto-sync ships those rows will
         update automatically instead. Scores save automatically when you click out of the field.
       </p>
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
+        <button id="saveAllScoresBtn" class="btn-primary">💾 Save All Scores</button>
+        <span id="saveAllScoresStatus" style="font-size:0.85rem;color:#666;"></span>
+      </div>
       <div id="leagueGamesList"><div class="empty-state">Loading...</div></div>
     </div>
 
@@ -1472,10 +1476,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=267"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=267"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=267"></script>
-<script type="module" src="/assets/js/game-stats.js?v=267"></script>
+<script type="module" src="/assets/js/admin.js?v=268"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=268"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=268"></script>
+<script type="module" src="/assets/js/game-stats.js?v=268"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
