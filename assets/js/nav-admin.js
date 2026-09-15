@@ -118,6 +118,21 @@ function render() {
       hrefInput.style.width = '120px';
       hrefInput.oninput = () => { item.href = hrefInput.value; };
       titleWrap.appendChild(hrefInput);
+
+      const newTabLabel = document.createElement('label');
+      newTabLabel.style.display = 'flex';
+      newTabLabel.style.alignItems = 'center';
+      newTabLabel.style.gap = '0.25rem';
+      newTabLabel.style.fontSize = '0.78rem';
+      newTabLabel.style.color = '#666';
+      newTabLabel.style.cursor = 'pointer';
+      const newTabCb = document.createElement('input');
+      newTabCb.type = 'checkbox';
+      newTabCb.checked = !!item.openInNewTab;
+      newTabCb.onchange = () => { item.openInNewTab = newTabCb.checked; };
+      newTabLabel.appendChild(newTabCb);
+      newTabLabel.appendChild(document.createTextNode('New tab'));
+      titleWrap.appendChild(newTabLabel);
     }
 
     header.appendChild(titleWrap);
@@ -153,7 +168,7 @@ function render() {
           if (!sel.value) return;
           const target = navItems.find(it => it.id === sel.value);
           target.children = target.children || [];
-          target.children.push({ id: item.id, type: 'link', label: item.label, href: item.href });
+          target.children.push({ id: item.id, type: 'link', label: item.label, href: item.href, openInNewTab: item.openInNewTab });
           navItems.splice(i, 1);
           render();
         };
@@ -233,6 +248,21 @@ function render() {
         childHrefInput.oninput = () => { child.href = childHrefInput.value; };
         childWrapLabel.appendChild(childHrefInput);
 
+        const childNewTabLabel = document.createElement('label');
+        childNewTabLabel.style.display = 'flex';
+        childNewTabLabel.style.alignItems = 'center';
+        childNewTabLabel.style.gap = '0.25rem';
+        childNewTabLabel.style.fontSize = '0.75rem';
+        childNewTabLabel.style.color = '#666';
+        childNewTabLabel.style.cursor = 'pointer';
+        const childNewTabCb = document.createElement('input');
+        childNewTabCb.type = 'checkbox';
+        childNewTabCb.checked = !!child.openInNewTab;
+        childNewTabCb.onchange = () => { child.openInNewTab = childNewTabCb.checked; };
+        childNewTabLabel.appendChild(childNewTabCb);
+        childNewTabLabel.appendChild(document.createTextNode('New tab'));
+        childWrapLabel.appendChild(childNewTabLabel);
+
         row.appendChild(childWrapLabel);
 
         const rc = document.createElement('div');
@@ -252,7 +282,7 @@ function render() {
         out.className = 'btn-edit'; out.textContent = 'Move to top level';
         out.onclick = () => {
           const c = item.children.splice(ci, 1)[0];
-          navItems.push({ id: c.id, type: 'link', label: c.label, href: c.href });
+          navItems.push({ id: c.id, type: 'link', label: c.label, href: c.href, openInNewTab: c.openInNewTab });
           render();
         };
 

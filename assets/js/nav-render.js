@@ -85,13 +85,13 @@ async function init() {
       const li = document.createElement('li');
       li.className = 'nav-dropdown';
       li.innerHTML = `<a href="#" class="nav-link nav-dropdown-toggle">${item.label} <span class="dropdown-arrow">▾</span></a>
-        <ul class="dropdown-menu">${children.map(c => `<li><a href="${c.href}" class="nav-link">${c.label}</a></li>`).join('')}</ul>`;
+        <ul class="dropdown-menu">${children.map(c => `<li><a href="${c.href}" class="nav-link"${c.openInNewTab ? ' target="_blank" rel="noopener noreferrer"' : ''}>${c.label}</a></li>`).join('')}</ul>`;
       fragment.appendChild(li);
     } else {
       const pid = hrefToPageId(item.href);
       if (pid && hiddenPages[pid]) return;
       const li = document.createElement('li');
-      li.innerHTML = `<a href="${item.href}" class="nav-link">${item.label}</a>`;
+      li.innerHTML = `<a href="${item.href}" class="nav-link"${item.openInNewTab ? ' target="_blank" rel="noopener noreferrer"' : ''}>${item.label}</a>`;
       fragment.appendChild(li);
     }
   });
