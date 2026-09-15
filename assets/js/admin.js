@@ -1634,6 +1634,38 @@ function createGameModal() {
     });
   }
 
+  // Looks up the leagueGames doc matching this Varsity game's date (Franklin plays
+  // at most one league game per day, so date alone is a reliable match — no need to
+  // fuzzy-match opponent name spelling between the two independent data sources).
+  // Uses the league schedule's OWN recorded home/away assignment, not this form's
+  // homeAway field, to decide which score column (visitor/home) to update. Never
+  // throws — a sync failure must never prevent the actual schedule save from working.
+  async function syncFranklinLeagueGame(game) {
+    if (game.gameType === 'Practice' || !game.result || game.teamScore === null || game.opponentScore === null) return;
+    try {
+      const snap = await getDocs(query(
+        collection(db, 'leagueGames'),
+        where('date', '==', game.date),
+        where('isFranklinGame', '==', true)
+      ));
+      if (snap.empty) return; // no matching league-schedule game for this date — nothing to sync
+      if (snap.size > 1) {
+        console.warn('Franklin league-game auto-sync: multiple leagueGames matched date', game.date, '- skipping to avoid ambiguity. Update manually in League Standings.');
+        return;
+      }
+      const leagueDoc = snap.docs[0];
+      const leagueData = leagueDoc.data();
+      const franklinIsVisitor = leagueData.visitorTeam === 'Franklin';
+      const updates = franklinIsVisitor
+        ? { visitorScore: game.teamScore, homeScore: game.opponentScore }
+        : { visitorScore: game.opponentScore, homeScore: game.teamScore };
+      updates.played = true;
+      await setDoc(doc(db, 'leagueGames', leagueDoc.id), updates, { merge: true });
+    } catch (e) {
+      console.error('Error auto-syncing Franklin league game:', e);
+    }
+  }
+
   document.getElementById('saveGameBtn').addEventListener('click', async () => {
     const seasonId = document.getElementById('scheduleSeasonSelect').value;
     if (!seasonId) { alert('Please select a season first'); return; }
@@ -1683,6 +1715,7 @@ function createGameModal() {
     };
 
     await setDoc(doc(db, 'seasons', seasonId, 'schedule', id), game);
+    await syncFranklinLeagueGame(game);
 
     // Save rink for reuse
     if (rinkName) {
