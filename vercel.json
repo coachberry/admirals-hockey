@@ -98,6 +98,10 @@
     {
       "source": "/jv-stats",
       "destination": "/pages/jv-stats.html"
+    },
+    {
+      "source": "/standings",
+      "destination": "/pages/standings.html"
     }
   ],
   "redirects": [
