@@ -522,7 +522,10 @@ window.loadLeagueStandingsTab = async function() {
   }
 };
 
-document.getElementById('seedLeagueGamesBtn')?.addEventListener('click', async () => {
+// One-time seed is already done. Kept as a console-only escape hatch (not a
+// visible button) in case the whole season ever needs a hard reset — run
+// window.seedLeagueGames() from the browser console while on /admin.
+window.seedLeagueGames = async function() {
   const confirmMsg = 'This will reset all 120 league games back to the starting data: the 13 ' +
     'already-played games keep their real scores, and the other 107 reset to blank (TBD). ' +
     'Any scores you have entered so far for games beyond the original 13 will be lost. Continue?';
@@ -548,7 +551,7 @@ document.getElementById('seedLeagueGamesBtn')?.addEventListener('click', async (
     console.error('Error seeding league games:', e);
     alert('Failed to seed league games — check console.');
   }
-});
+};
 
 // ============================================
 // SEASONS
