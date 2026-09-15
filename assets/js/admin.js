@@ -320,6 +320,16 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     localStorage.setItem('admirals_activeTab', tab);
   });
 });
+
+// Stop the mouse wheel from silently changing a focused number input's value
+// (scores, stats, etc.) — blur it instead so the page just scrolls normally.
+// Delegated on document so it covers every number input, including ones
+// rendered dynamically later (League Standings rows, the Stats modal, ...).
+document.addEventListener('wheel', () => {
+  if (document.activeElement && document.activeElement.tagName === 'INPUT' && document.activeElement.type === 'number') {
+    document.activeElement.blur();
+  }
+}, { passive: true });
 document.querySelector('[data-tab="standings"]')?.addEventListener('click', () => loadLeagueStandingsTab());
 
 // ============================================

@@ -981,3 +981,17 @@ body {
   margin-top: 0.5rem;
   min-height: 1.2rem;
 }
+
+
+/* Number input spinners removed site-wide in admin — up/down arrows and
+   mouse-wheel scroll were changing values (scores, stats) without the
+   person noticing. Typing is still fully normal. */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
