@@ -320,7 +320,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     localStorage.setItem('admirals_activeTab', tab);
   });
 });
-document.querySelector('[data-tab="standings"]')?.addEventListener('click', loadLeagueStandingsTab);
+document.querySelector('[data-tab="standings"]')?.addEventListener('click', () => loadLeagueStandingsTab());
 
 // ============================================
 // LEAGUE STANDINGS (all 120 GNASH season games)
