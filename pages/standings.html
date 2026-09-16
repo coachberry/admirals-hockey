@@ -2,20 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=274">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=275">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=274">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=275">
   <title>Standings - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=274">
-  <script src="/assets/js/page-guard.js?v=274"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=275">
+  <script src="/assets/js/page-guard.js?v=275"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=274" defer></script>
-<script src="/assets/js/load-header.js?v=274"></script>
+<script src="/assets/js/load-hero.js?v=275" defer></script>
+<script src="/assets/js/load-header.js?v=275"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -77,7 +77,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=274"></script>
+<script src="/assets/js/load-footer.js?v=275"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -160,30 +160,46 @@
       return t;
     });
 
-    // Head-to-head: net wins between exactly two teams. Reasonable for the common
-    // 2-team-tied case; not a full formal resolution for 3+-way circular ties, which
-    // fall through to goal differential.
-    function h2hNet(teamA, teamB) {
-      let aWins = 0, bWins = 0;
+    // Resolves a group of teams already tied on points+wins using a mini-standings
+    // computed ONLY from games played among that group's own members (the standard
+    // multi-team tiebreak approach) — falling through to goal differential, then
+    // fewest goals allowed, if the mini head-to-head still doesn't fully resolve it.
+    function resolveTiedGroup(group) {
+      if (group.length <= 1) return group;
+      const namesInGroup = new Set(group.map(t => t.name));
+      const miniWins = {};
+      group.forEach(t => { miniWins[t.name] = 0; });
       sortedPlayed.forEach(g => {
-        const isMatchup = (g.visitorTeam === teamA && g.homeTeam === teamB) || (g.visitorTeam === teamB && g.homeTeam === teamA);
-        if (!isMatchup || g.visitorScore === g.homeScore) return;
+        if (!namesInGroup.has(g.visitorTeam) || !namesInGroup.has(g.homeTeam)) return;
+        if (g.visitorScore === g.homeScore) return; // a tie among the group grants no mini-win
         const winner = g.visitorScore > g.homeScore ? g.visitorTeam : g.homeTeam;
-        if (winner === teamA) aWins++; else bWins++;
+        miniWins[winner]++;
       });
-      return aWins - bWins;
+      return [...group].sort((a, b) => {
+        if (miniWins[b.name] !== miniWins[a.name]) return miniWins[b.name] - miniWins[a.name];
+        if (b.tiebreakDiff !== a.tiebreakDiff) return b.tiebreakDiff - a.tiebreakDiff;
+        return a.ga - b.ga;
+      });
     }
 
+    // Pass 1: sort strictly by points, then total wins — nothing else yet.
     list.sort((a, b) => {
       if (b.pts !== a.pts) return b.pts - a.pts;
-      if (b.w !== a.w) return b.w - a.w;
-      const h2h = h2hNet(a.name, b.name);
-      if (h2h !== 0) return -h2h;
-      if (b.tiebreakDiff !== a.tiebreakDiff) return b.tiebreakDiff - a.tiebreakDiff;
-      return a.ga - b.ga;
+      return b.w - a.w;
     });
 
-    return list;
+    // Pass 2: walk the points+wins-sorted list, cluster consecutive teams that are
+    // still tied on both, and resolve each cluster with its own mini-standings.
+    const finalList = [];
+    let i = 0;
+    while (i < list.length) {
+      let j = i + 1;
+      while (j < list.length && list[j].pts === list[i].pts && list[j].w === list[i].w) j++;
+      finalList.push(...resolveTiedGroup(list.slice(i, j)));
+      i = j;
+    }
+
+    return finalList;
   }
 
   function renderStandings(list) {
@@ -274,7 +290,7 @@
   })();
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=274"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=274"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=275"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=275"></script>
 </body>
 </html>
