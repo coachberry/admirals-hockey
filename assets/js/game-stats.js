@@ -240,7 +240,10 @@ document.getElementById('saveGameStatsBtn').addEventListener('click', async () =
     const stats = { playerId };
     row.querySelectorAll('.stat-input').forEach(input => {
       const field = input.dataset.field;
-      if (field) stats[field] = field === 'decision' ? input.value : (parseInt(input.value) || 0);
+      if (!field) return;
+      if (field === 'decision') stats[field] = input.value;
+      else if (field === 'minutesPlayed') stats[field] = parseFloat(input.value) || 0;
+      else stats[field] = parseInt(input.value) || 0;
     });
     const gsCheck = row.querySelector('[data-field="gsCheck"]');
     const gpCheck = row.querySelector('[data-field="gpCheck"]');
