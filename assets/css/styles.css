@@ -995,6 +995,8 @@ footer {
   letter-spacing: 0.05em;
   font-weight: 700;
   margin-left: 10px;
+  padding-left: 10px;
+  border-left: 1px solid #ccc;
 }
 @media (max-width: 550px) {
   .article-byline { flex-direction: column; align-items: flex-start; gap: 4px; }
