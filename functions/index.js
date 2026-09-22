@@ -145,7 +145,7 @@ exports.sendChatMessageNotification = onCall(async (request) => {
 });
 
 // ============================================
-// Shared helpers for the social-share pages below
+// Shared helpers for the full server-rendered share pages below
 // ============================================
 const SITE_URL = "https://fhsadmiralshockey.com";
 const DEFAULT_SHARE_IMAGE = SITE_URL + "/assets/images/franklin-admirals-hockey-logo-lowres.png";
@@ -162,35 +162,73 @@ function stripHtml(html) {
   return String(html).replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
-function socialSharePage({ title, description, image, pageUrl, redirectUrl, type }) {
+function formatDateServer(dateStr) {
+  if (!dateStr) return "";
+  return new Date(dateStr + "T12:00:00").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+}
+
+function formatTimeServer(time) {
+  if (!time) return "";
+  const [h, m] = time.split(":");
+  const hour = parseInt(h);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  const hour12 = hour % 12 || 12;
+  return `${hour12}:${m} ${ampm}`;
+}
+
+function svPctFmtServer(sv, sa) {
+  return sa > 0 ? "." + (sv / sa).toFixed(3).slice(2) : ".000";
+}
+
+function minToMMSSServer(min) {
+  const m = Math.floor(min || 0);
+  const s = Math.round(((min || 0) - m) * 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+// Shared page shell (header/hero/footer scripts) so these pages are genuinely
+// part of the site, not standalone stubs - real nav, chat widget, etc.
+function pageShell({ title, description, image, pageUrl, ogType, headExtra, bodyHtml }) {
   const t = escapeHtml(title);
   const d = escapeHtml(description);
-  const redirectJs = JSON.stringify(redirectUrl);
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#5D1725">
 <title>${t} - Franklin Admirals Hockey</title>
 <meta property="og:title" content="${t}">
 <meta property="og:description" content="${d}">
 <meta property="og:image" content="${image}">
 <meta property="og:url" content="${pageUrl}">
-<meta property="og:type" content="${type || 'website'}">
+<meta property="og:type" content="${ogType || 'website'}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${t}">
 <meta name="twitter:description" content="${d}">
 <meta name="twitter:image" content="${image}">
-<meta http-equiv="refresh" content="0; url=${redirectUrl}">
-<script>window.location.replace(${redirectJs});</script>
+<link rel="stylesheet" href="/assets/css/styles.css">
+${headExtra || ""}
+<script src="/assets/js/page-guard.js"></script>
 </head>
 <body>
-<p>Redirecting to <a href="${redirectUrl}">${t}</a>&hellip;</p>
+<div id="site-header"></div>
+<script src="/assets/js/load-hero.js" defer></script>
+<script src="/assets/js/load-header.js"></script>
+
+${bodyHtml}
+
+<div id="site-footer"></div>
+<script src="/assets/js/load-footer.js"></script>
+<script type="module" src="/assets/js/member-auth.js"></script>
+<script type="module" src="/assets/js/chat-widget.js"></script>
 </body>
 </html>`;
 }
 
 // ============================================
-// News post social-share page (real OG tags per post)
+// News post page (full server-rendered article, real OG tags)
 // ============================================
 exports.newsPostPage = onRequest(async (req, res) => {
   const postId = req.query.postId;
@@ -207,10 +245,39 @@ exports.newsPostPage = onRequest(async (req, res) => {
     const description = post.summary || stripHtml(post.content || "").slice(0, 200) || "Read the latest from Franklin Admirals Hockey.";
     const image = post.imageURL || DEFAULT_SHARE_IMAGE;
     const pageUrl = SITE_URL + "/news/" + encodeURIComponent(postId);
-    const redirectUrl = SITE_URL + "/news?post=" + encodeURIComponent(postId);
+    const category = post.category || "";
+    const categoryColors = { "Game Report": "#5D1725", "Team Update": "#1565c0", "Announcement": "#e65100", "Player Spotlight": "#2e7d32" };
+    const catColor = categoryColors[category] || "#5D1725";
+
+    const bylineHtml = post.authorName
+      ? `<div class="article-byline" style="display:flex;">
+          <div class="article-byline-left">By <strong class="article-byline-author">${escapeHtml(post.authorName)}</strong> <span class="article-byline-role">${escapeHtml(post.authorTitle || "")}</span></div>
+          <div class="article-byline-right"><span class="article-byline-date">${escapeHtml(formatDateServer(post.date))}</span><span class="article-byline-location">${escapeHtml(post.location || "")}</span></div>
+        </div>`
+      : `<div class="article-modal-date">${escapeHtml(formatDateServer(post.date))}</div>`;
+
+    const imgHtml = post.imageURL
+      ? `<div class="article-modal-img"><img src="${post.imageURL}" alt="${escapeHtml(title)}" style="width:100%;height:auto;display:block;"></div>`
+      : "";
+
+    const bodyHtml = `
+<div class="main-container" style="max-width:800px;margin:0 auto;padding:2rem 1rem 4rem;">
+  ${imgHtml}
+  <div style="margin-top:1.5rem;">
+    ${category ? `<div class="article-modal-category" style="background:${catColor};display:inline-block;">${escapeHtml(category)}</div>` : ""}
+    <h1 class="article-modal-title">${escapeHtml(title)}</h1>
+    ${bylineHtml}
+    <div class="article-modal-content" style="--article-p-spacing:${post.paragraphSpacing ?? 12}px;--article-h-spacing:${post.headingSpacing ?? 16}px;--article-line-height:${post.lineHeight ?? 1.6};">
+      ${post.content || ""}
+    </div>
+    <div style="margin-top:2rem;"><a href="/news" style="color:#5D1725;font-weight:600;text-decoration:none;">&larr; Back to News</a></div>
+  </div>
+</div>`;
+
+    const html = pageShell({ title, description, image, pageUrl, ogType: "article", bodyHtml });
 
     res.set("Cache-Control", "public, max-age=300, s-maxage=600");
-    res.status(200).send(socialSharePage({ title, description, image, pageUrl, redirectUrl, type: "article" }));
+    res.status(200).send(html);
   } catch (e) {
     logger.error("newsPostPage error:", e);
     res.status(500).send("Error loading post");
@@ -218,8 +285,61 @@ exports.newsPostPage = onRequest(async (req, res) => {
 });
 
 // ============================================
-// Game stats social-share page (real OG tags per game)
+// Game stats page (full server-rendered box score, real OG tags)
 // ============================================
+function renderSkaterRowsServer(skaters) {
+  if (!skaters.length) return '<tr><td colspan="14" style="text-align:center;color:#999;padding:1rem;">No stats entered</td></tr>';
+  return skaters.map((s) => {
+    const pts = (s.goals || 0) + (s.assists || 0);
+    const pm = (s.plus || 0) - (s.minus || 0);
+    return `<tr>
+      <td>${escapeHtml(s.number)}</td><td>${escapeHtml(s.name)}</td>
+      <td>${s.goals || 0}</td><td>${s.assists || 0}</td><td>${pts}</td>
+      <td>${s.ppg || 0}</td><td>${s.ppa || 0}</td><td>${s.shg || 0}</td><td>${s.sha || 0}</td>
+      <td>${s.plus || 0}</td><td>${s.minus || 0}</td><td>${pm > 0 ? "+" + pm : pm}</td>
+      <td>${s.sog || 0}</td><td>${s.pim || 0}</td>
+    </tr>`;
+  }).join("");
+}
+
+function renderGoalieRowsServer(goalies) {
+  if (!goalies.length) return '<tr><td colspan="8" style="text-align:center;color:#999;padding:1rem;">No stats entered</td></tr>';
+  const sorted = [...goalies].sort((a, b) => {
+    if (a.isEmptyNet) return 1;
+    if (b.isEmptyNet) return -1;
+    if ((b.gs || 0) !== (a.gs || 0)) return (b.gs || 0) - (a.gs || 0);
+    return (b.minutesPlayed || 0) - (a.minutesPlayed || 0);
+  });
+  return sorted.map((g) => {
+    const sv = Math.max(0, (g.shotsAgainst || 0) - (g.goalsAgainst || 0));
+    const isEN = g.isEmptyNet;
+    return `<tr ${isEN ? 'style="background:#f5f5f5;font-style:italic;"' : ""}>
+      <td>${escapeHtml(g.number)}</td><td>${escapeHtml(g.name)}</td>
+      <td>${isEN ? "-" : escapeHtml(g.decision || "-")}</td>
+      <td>${minToMMSSServer(g.minutesPlayed)}</td>
+      <td>${g.shotsAgainst || 0}</td><td>${sv}</td>
+      <td>${isEN ? "-" : svPctFmtServer(sv, g.shotsAgainst || 0)}</td>
+      <td>${g.goalsAgainst || 0}</td>
+    </tr>`;
+  }).join("");
+}
+
+function gameHeaderHtmlServer(game, teamLabel, hasResult) {
+  const homeAway = game.homeAway === "Home" ? "vs." : "@";
+  const resultColors = { W: "#2e7d32", OTW: "#2e7d32", SOW: "#2e7d32", L: "#c62828", OTL: "#c62828", SOL: "#c62828", T: "#f57c00" };
+  const dateStr = game.date ? new Date(game.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }) : "";
+  const resultHtml = hasResult
+    ? `<div style="font-size:1.4rem;font-weight:700;color:${resultColors[game.result] || "#333"};margin-top:0.5rem;">${escapeHtml(game.result)} ${game.teamScore}-${game.opponentScore}</div>`
+    : `<div style="font-size:1rem;color:#666;margin-top:0.5rem;">${game.time ? formatTimeServer(game.time) : ""} ${escapeHtml(game.timezone || "")}</div>`;
+  return `<div style="text-align:center;padding:1.5rem 0;border-bottom:2px solid #5D1725;">
+    <div style="font-size:0.85rem;color:#999;text-transform:uppercase;letter-spacing:0.05em;">${escapeHtml(teamLabel)}</div>
+    <h1 style="font-size:1.8rem;margin:0.5rem 0;color:#333;">Franklin ${homeAway} ${escapeHtml(game.opponent || "TBD")}</h1>
+    <div style="color:#666;">${dateStr}</div>
+    ${resultHtml}
+    ${game.rinkName ? `<div style="color:#999;font-size:0.9rem;margin-top:0.3rem;">${escapeHtml(game.rinkName)}${game.rinkAddress ? " &middot; " + escapeHtml(game.rinkAddress) : ""}</div>` : ""}
+  </div>`;
+}
+
 exports.gameStatsPage = onRequest(async (req, res) => {
   const team = req.query.team === "jv" ? "jv" : "varsity";
   const seasonId = req.query.seasonId;
@@ -228,18 +348,20 @@ exports.gameStatsPage = onRequest(async (req, res) => {
 
   const scheduleRoot = team === "jv" ? "jv-schedule" : "seasons";
   const scheduleSubcol = team === "jv" ? "games" : "schedule";
+  const rosterRoot = team === "jv" ? "jv-roster" : "roster";
   const scheduleUrl = team === "jv" ? "/jv-schedule" : "/schedule";
+  const teamLabel = team === "jv" ? "JV" : "Varsity";
 
   try {
-    const snap = await db.collection(scheduleRoot).doc(seasonId).collection(scheduleSubcol).doc(gameId).get();
-    if (!snap.exists) {
+    const gameRef = db.collection(scheduleRoot).doc(seasonId).collection(scheduleSubcol).doc(gameId);
+    const gameSnap = await gameRef.get();
+    if (!gameSnap.exists) {
       res.redirect(302, SITE_URL + scheduleUrl);
       return;
     }
-    const game = snap.data();
-    const teamLabel = team === "jv" ? "JV" : "Varsity";
-    const homeAway = game.homeAway === "Home" ? "vs." : "@";
+    const game = gameSnap.data();
     const opponent = game.opponent || "TBD";
+    const homeAway = game.homeAway === "Home" ? "vs." : "@";
     const title = `Franklin ${teamLabel} ${homeAway} ${opponent}`;
     const hasResult = game.result && game.teamScore !== undefined && game.opponentScore !== undefined;
     const description = hasResult
@@ -247,10 +369,78 @@ exports.gameStatsPage = onRequest(async (req, res) => {
       : `Upcoming ${teamLabel} game vs ${opponent}. Full schedule and stats.`;
     const image = game.opponentLogo || DEFAULT_SHARE_IMAGE;
     const pageUrl = SITE_URL + "/game/" + team + "/" + encodeURIComponent(seasonId) + "/" + encodeURIComponent(gameId);
-    const redirectUrl = SITE_URL + scheduleUrl + "?game=" + encodeURIComponent(seasonId) + ":" + encodeURIComponent(gameId);
+    const headerHtml = gameHeaderHtmlServer(game, teamLabel, hasResult);
+
+    let statsHtml;
+    if (!hasResult) {
+      // Upcoming game - no box score yet. Lineups (if published) are a
+      // separate, more complex data structure - not rendered here for now.
+      statsHtml = `<div style="text-align:center;color:#999;padding:2rem 0;">Stats will be available after the game.</div>`;
+    } else {
+      const [rosterSnap, skaterSnap, goalieSnap] = await Promise.all([
+        db.collection(rosterRoot).doc(seasonId).collection("players").get(),
+        gameRef.collection("skaterstats").get(),
+        gameRef.collection("goaliestats").get(),
+      ]);
+
+      const rosterById = {};
+      rosterSnap.forEach((d) => { rosterById[d.id] = d.data(); });
+
+      const skaters = [];
+      skaterSnap.forEach((d) => {
+        const s = d.data();
+        const player = rosterById[s.playerId] || {};
+        skaters.push({ ...s, name: player.name || s.name || "?", number: player.number || s.number || "-" });
+      });
+
+      const goalies = [];
+      goalieSnap.forEach((d) => {
+        const g = d.data();
+        const player = rosterById[g.playerId] || {};
+        goalies.push({ ...g, name: player.name || g.name || "?", number: player.number || g.number || "-", isEmptyNet: g.playerId === "EMPTY_NET" });
+      });
+
+      statsHtml = `
+      <div style="margin-top:1.5rem;">
+        <h3 class="gvm-section-title">Skaters</h3>
+        <div class="gvm-table-wrap">
+          <table class="game-stats-table">
+            <thead><tr>
+              <th>#</th><th>Player</th><th>G</th><th>A</th><th>PTS</th>
+              <th>PPG</th><th>PPA</th><th>SHG</th><th>SHA</th>
+              <th>+</th><th>-</th><th>+/-</th><th>SOG</th><th>PIM</th>
+            </tr></thead>
+            <tbody>${renderSkaterRowsServer(skaters)}</tbody>
+          </table>
+        </div>
+      </div>
+      <div style="margin-top:2rem;">
+        <h3 class="gvm-section-title">Goaltenders</h3>
+        <div class="gvm-table-wrap">
+          <table class="game-stats-table">
+            <thead><tr>
+              <th>#</th><th>Player</th><th>Dec</th><th>Min</th><th>SA</th><th>SV</th><th>SV%</th><th>GA</th>
+            </tr></thead>
+            <tbody>${renderGoalieRowsServer(goalies)}</tbody>
+          </table>
+        </div>
+      </div>`;
+    }
+
+    const bodyHtml = `
+<div class="main-container" style="max-width:900px;margin:0 auto;padding:1rem 1rem 4rem;">
+  ${headerHtml}
+  ${statsHtml}
+  <div style="margin-top:2rem;"><a href="${scheduleUrl}" style="color:#5D1725;font-weight:600;text-decoration:none;">&larr; Back to Schedule</a></div>
+</div>`;
+
+    const headExtra = `<link rel="stylesheet" href="/assets/css/schedule-styles.css">
+<link rel="stylesheet" href="/assets/css/game-stats.css">`;
+
+    const html = pageShell({ title, description, image, pageUrl, ogType: "website", headExtra, bodyHtml });
 
     res.set("Cache-Control", "public, max-age=300, s-maxage=600");
-    res.status(200).send(socialSharePage({ title, description, image, pageUrl, redirectUrl, type: "website" }));
+    res.status(200).send(html);
   } catch (e) {
     logger.error("gameStatsPage error:", e);
     res.status(500).send("Error loading game");
