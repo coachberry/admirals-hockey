@@ -1007,7 +1007,7 @@ footer {
    on pure browser-default margins (too spacious). Applies to every post,
    old and new, automatically. */
 .article-modal-content p {
-  margin: 0 0 1rem;
+  margin: 0 0 12px;
   line-height: 1.6;
 }
 .article-modal-content p:last-child {
@@ -1015,7 +1015,7 @@ footer {
 }
 .article-modal-content h2,
 .article-modal-content h3 {
-  margin: 1.5rem 0 0.75rem;
+  margin: 1rem 0 0.6rem;
   color: #5D1725;
 }
 .article-modal-content h2:first-child,
