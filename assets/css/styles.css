@@ -1013,3 +1013,12 @@ footer {
 .article-modal-content p:last-child {
   margin-bottom: 0;
 }
+.article-modal-content h2,
+.article-modal-content h3 {
+  margin: 1.5rem 0 0.75rem;
+  color: #5D1725;
+}
+.article-modal-content h2:first-child,
+.article-modal-content h3:first-child {
+  margin-top: 0;
+}
