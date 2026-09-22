@@ -102,6 +102,14 @@
     {
       "source": "/standings",
       "destination": "/pages/standings.html"
+    },
+    {
+      "source": "/news/:postId",
+      "destination": "https://us-central1-admirals-hockey.cloudfunctions.net/newsPostPage?postId=:postId"
+    },
+    {
+      "source": "/game/:team/:seasonId/:gameId",
+      "destination": "https://us-central1-admirals-hockey.cloudfunctions.net/gameStatsPage?team=:team&seasonId=:seasonId&gameId=:gameId"
     }
   ],
   "redirects": [

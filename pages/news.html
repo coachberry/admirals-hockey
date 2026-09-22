@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=288">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=289">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=288">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=289">
   <title>News - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=288">
-  <link rel="stylesheet" href="/assets/css/news-styles.css?v=288">
-  <script src="/assets/js/page-guard.js?v=288"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=289">
+  <link rel="stylesheet" href="/assets/css/news-styles.css?v=289">
+  <script src="/assets/js/page-guard.js?v=289"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=288" defer></script>
-<script src="/assets/js/load-header.js?v=288"></script>
+<script src="/assets/js/load-hero.js?v=289" defer></script>
+<script src="/assets/js/load-header.js?v=289"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -63,12 +63,15 @@
         </div>
       </div>
       <div id="articleModalContent" class="article-modal-content"></div>
+      <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid #eee;text-align:right;">
+        <a id="articleShareLink" href="#" style="font-size:0.85rem;color:#5D1725;font-weight:600;text-decoration:none;">🔗 Share this post</a>
+      </div>
     </div>
   </div>
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=288"></script>
+<script src="/assets/js/load-footer.js?v=289"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -133,6 +136,8 @@
     contentEl.style.setProperty('--article-h-spacing', (post.headingSpacing ?? 16) + 'px');
     contentEl.style.setProperty('--article-line-height', post.lineHeight ?? 1.6);
     contentEl.innerHTML = post.content || '';
+    const shareLink = document.getElementById('articleShareLink');
+    if (shareLink && post.id) shareLink.href = '/news/' + post.id;
     articleModal.classList.add('active');
   }
   window.openArticle = openArticle;
@@ -196,6 +201,18 @@
   }
 
   loadNews();
+
+  // Deep-link support: /news?post=<id> auto-opens that post's modal
+  (async function checkDeepLink() {
+    const params = new URLSearchParams(window.location.search);
+    const postId = params.get('post');
+    if (!postId) return;
+    // Wait briefly for loadNews() to populate window._newsPosts
+    for (let i = 0; i < 20 && !(window._newsPosts && window._newsPosts.length); i++) {
+      await new Promise(r => setTimeout(r, 100));
+    }
+    if (window.openArticleById) window.openArticleById(postId);
+  })();
 
   // Mobile nav
   (function() {
@@ -319,7 +336,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=288"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=288"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=289"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=289"></script>
 </body>
 </html>

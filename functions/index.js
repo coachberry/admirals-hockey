@@ -145,6 +145,119 @@ exports.sendChatMessageNotification = onCall(async (request) => {
 });
 
 // ============================================
+// Shared helpers for the social-share pages below
+// ============================================
+const SITE_URL = "https://fhsadmiralshockey.com";
+const DEFAULT_SHARE_IMAGE = SITE_URL + "/assets/images/franklin-admirals-hockey-logo-lowres.png";
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function stripHtml(html) {
+  return String(html).replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function socialSharePage({ title, description, image, pageUrl, redirectUrl, type }) {
+  const t = escapeHtml(title);
+  const d = escapeHtml(description);
+  const redirectJs = JSON.stringify(redirectUrl);
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>${t} - Franklin Admirals Hockey</title>
+<meta property="og:title" content="${t}">
+<meta property="og:description" content="${d}">
+<meta property="og:image" content="${image}">
+<meta property="og:url" content="${pageUrl}">
+<meta property="og:type" content="${type || 'website'}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${t}">
+<meta name="twitter:description" content="${d}">
+<meta name="twitter:image" content="${image}">
+<meta http-equiv="refresh" content="0; url=${redirectUrl}">
+<script>window.location.replace(${redirectJs});</script>
+</head>
+<body>
+<p>Redirecting to <a href="${redirectUrl}">${t}</a>&hellip;</p>
+</body>
+</html>`;
+}
+
+// ============================================
+// News post social-share page (real OG tags per post)
+// ============================================
+exports.newsPostPage = onRequest(async (req, res) => {
+  const postId = req.query.postId;
+  if (!postId) { res.status(400).send("Missing postId"); return; }
+
+  try {
+    const snap = await db.collection("news").doc(postId).get();
+    if (!snap.exists) {
+      res.redirect(302, SITE_URL + "/news");
+      return;
+    }
+    const post = snap.data();
+    const title = post.title || "Admirals Hockey News";
+    const description = post.summary || stripHtml(post.content || "").slice(0, 200) || "Read the latest from Franklin Admirals Hockey.";
+    const image = post.imageURL || DEFAULT_SHARE_IMAGE;
+    const pageUrl = SITE_URL + "/news/" + encodeURIComponent(postId);
+    const redirectUrl = SITE_URL + "/news?post=" + encodeURIComponent(postId);
+
+    res.set("Cache-Control", "public, max-age=300, s-maxage=600");
+    res.status(200).send(socialSharePage({ title, description, image, pageUrl, redirectUrl, type: "article" }));
+  } catch (e) {
+    logger.error("newsPostPage error:", e);
+    res.status(500).send("Error loading post");
+  }
+});
+
+// ============================================
+// Game stats social-share page (real OG tags per game)
+// ============================================
+exports.gameStatsPage = onRequest(async (req, res) => {
+  const team = req.query.team === "jv" ? "jv" : "varsity";
+  const seasonId = req.query.seasonId;
+  const gameId = req.query.gameId;
+  if (!seasonId || !gameId) { res.status(400).send("Missing seasonId or gameId"); return; }
+
+  const scheduleRoot = team === "jv" ? "jv-schedule" : "seasons";
+  const scheduleSubcol = team === "jv" ? "games" : "schedule";
+  const scheduleUrl = team === "jv" ? "/jv-schedule" : "/schedule";
+
+  try {
+    const snap = await db.collection(scheduleRoot).doc(seasonId).collection(scheduleSubcol).doc(gameId).get();
+    if (!snap.exists) {
+      res.redirect(302, SITE_URL + scheduleUrl);
+      return;
+    }
+    const game = snap.data();
+    const teamLabel = team === "jv" ? "JV" : "Varsity";
+    const homeAway = game.homeAway === "Home" ? "vs." : "@";
+    const opponent = game.opponent || "TBD";
+    const title = `Franklin ${teamLabel} ${homeAway} ${opponent}`;
+    const hasResult = game.result && game.teamScore !== undefined && game.opponentScore !== undefined;
+    const description = hasResult
+      ? `Final: ${game.result} ${game.teamScore}-${game.opponentScore}. Full box score and stats.`
+      : `Upcoming ${teamLabel} game vs ${opponent}. Full schedule and stats.`;
+    const image = game.opponentLogo || DEFAULT_SHARE_IMAGE;
+    const pageUrl = SITE_URL + "/game/" + team + "/" + encodeURIComponent(seasonId) + "/" + encodeURIComponent(gameId);
+    const redirectUrl = SITE_URL + scheduleUrl + "?game=" + encodeURIComponent(seasonId) + ":" + encodeURIComponent(gameId);
+
+    res.set("Cache-Control", "public, max-age=300, s-maxage=600");
+    res.status(200).send(socialSharePage({ title, description, image, pageUrl, redirectUrl, type: "website" }));
+  } catch (e) {
+    logger.error("gameStatsPage error:", e);
+    res.status(500).send("Error loading game");
+  }
+});
+
+// ============================================
 // Scheduled RSVP reminder check (daily at 9am Central)
 // ============================================
 exports.rsvpReminderCheck = onSchedule(
