@@ -1927,7 +1927,7 @@ if (removeNewsImageBtn) {
 }
 
 document.getElementById('addNewsBtn').addEventListener('click', () => {
-  ['newsId','newsTitle','newsDate','newsCategory','newsContent','newsAuthorName','newsAuthorTitle','newsLocation'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  ['newsId','newsTitle','newsDate','newsCategory','newsContent','newsAuthorName','newsAuthorTitle','newsLocation','newsParagraphSpacing','newsHeadingSpacing'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   if (document.getElementById('newsSummary')) document.getElementById('newsSummary').value = '';
   if (document.getElementById('newsContentVisual')) document.getElementById('newsContentVisual').innerHTML = '';
   if (document.getElementById('newsFeatured')) document.getElementById('newsFeatured').checked = false;
@@ -1968,6 +1968,10 @@ document.getElementById('saveNewsBtn').addEventListener('click', async () => {
   const authorName = document.getElementById('newsAuthorName')?.value.trim() || '';
   const authorTitle = document.getElementById('newsAuthorTitle')?.value.trim() || '';
   const location = document.getElementById('newsLocation')?.value.trim() || '';
+  const paragraphSpacingRaw = document.getElementById('newsParagraphSpacing')?.value;
+  const headingSpacingRaw = document.getElementById('newsHeadingSpacing')?.value;
+  const paragraphSpacing = paragraphSpacingRaw !== '' && paragraphSpacingRaw != null ? parseInt(paragraphSpacingRaw) : null;
+  const headingSpacing = headingSpacingRaw !== '' && headingSpacingRaw != null ? parseInt(headingSpacingRaw) : null;
 
   // Get content from whichever editor is active
   const htmlBtn = document.getElementById('editorHtmlBtn');
@@ -1999,7 +2003,9 @@ document.getElementById('saveNewsBtn').addEventListener('click', async () => {
     homeOrder: isHomeCard ? homeOrder : 99,
     authorName,
     authorTitle,
-    location
+    location,
+    paragraphSpacing,
+    headingSpacing
   });
   const status = document.getElementById('newsSaveStatus');
   if (status) { status.textContent = '✅ Saved!'; status.style.color = 'green'; }
@@ -2046,6 +2052,8 @@ window.editNews = async (id) => {
   if (document.getElementById('newsAuthorName')) document.getElementById('newsAuthorName').value = n.authorName || '';
   if (document.getElementById('newsAuthorTitle')) document.getElementById('newsAuthorTitle').value = n.authorTitle || '';
   if (document.getElementById('newsLocation')) document.getElementById('newsLocation').value = n.location || '';
+  if (document.getElementById('newsParagraphSpacing')) document.getElementById('newsParagraphSpacing').value = (n.paragraphSpacing === null || n.paragraphSpacing === undefined) ? '' : n.paragraphSpacing;
+  if (document.getElementById('newsHeadingSpacing')) document.getElementById('newsHeadingSpacing').value = (n.headingSpacing === null || n.headingSpacing === undefined) ? '' : n.headingSpacing;
   if (document.getElementById('newsFeatured')) document.getElementById('newsFeatured').checked = n.featured || false;
   if (document.getElementById('newsHomeCard')) {
     document.getElementById('newsHomeCard').checked = n.homeCard || false;

@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=284">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=285">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=284">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=284">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=285">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=285">
 </head>
 <body>
 
@@ -271,6 +271,17 @@
         <div class="form-label-group">
           <label class="field-label">Location</label>
           <input type="text" id="newsLocation" placeholder="e.g. Nashville, TN">
+        </div>
+
+        <div class="form-row">
+          <div class="form-label-group">
+            <label class="field-label">Paragraph Spacing (px) <span style="font-weight:400;color:#999;">default 12</span></label>
+            <input type="number" id="newsParagraphSpacing" placeholder="12" min="0" max="60">
+          </div>
+          <div class="form-label-group">
+            <label class="field-label">Heading Spacing (px) <span style="font-weight:400;color:#999;">default 16</span></label>
+            <input type="number" id="newsHeadingSpacing" placeholder="16" min="0" max="80">
+          </div>
         </div>
 
         <div class="form-row">
@@ -1494,10 +1505,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=284"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=284"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=284"></script>
-<script type="module" src="/assets/js/game-stats.js?v=284"></script>
+<script type="module" src="/assets/js/admin.js?v=285"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=285"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=285"></script>
+<script type="module" src="/assets/js/game-stats.js?v=285"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
