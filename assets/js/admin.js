@@ -1927,7 +1927,7 @@ if (removeNewsImageBtn) {
 }
 
 document.getElementById('addNewsBtn').addEventListener('click', () => {
-  ['newsId','newsTitle','newsDate','newsCategory','newsContent','newsAuthorName','newsAuthorTitle','newsLocation','newsParagraphSpacing','newsHeadingSpacing'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  ['newsId','newsTitle','newsDate','newsCategory','newsContent','newsAuthorName','newsAuthorTitle','newsLocation','newsParagraphSpacing','newsHeadingSpacing','newsLineHeight'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   if (document.getElementById('newsSummary')) document.getElementById('newsSummary').value = '';
   if (document.getElementById('newsContentVisual')) document.getElementById('newsContentVisual').innerHTML = '';
   if (document.getElementById('newsFeatured')) document.getElementById('newsFeatured').checked = false;
@@ -1970,8 +1970,10 @@ document.getElementById('saveNewsBtn').addEventListener('click', async () => {
   const location = document.getElementById('newsLocation')?.value.trim() || '';
   const paragraphSpacingRaw = document.getElementById('newsParagraphSpacing')?.value;
   const headingSpacingRaw = document.getElementById('newsHeadingSpacing')?.value;
+  const lineHeightRaw = document.getElementById('newsLineHeight')?.value;
   const paragraphSpacing = paragraphSpacingRaw !== '' && paragraphSpacingRaw != null ? parseInt(paragraphSpacingRaw) : null;
   const headingSpacing = headingSpacingRaw !== '' && headingSpacingRaw != null ? parseInt(headingSpacingRaw) : null;
+  const lineHeight = lineHeightRaw !== '' && lineHeightRaw != null ? parseFloat(lineHeightRaw) : null;
 
   // Get content from whichever editor is active
   const htmlBtn = document.getElementById('editorHtmlBtn');
@@ -2005,7 +2007,8 @@ document.getElementById('saveNewsBtn').addEventListener('click', async () => {
     authorTitle,
     location,
     paragraphSpacing,
-    headingSpacing
+    headingSpacing,
+    lineHeight
   });
   const status = document.getElementById('newsSaveStatus');
   if (status) { status.textContent = '✅ Saved!'; status.style.color = 'green'; }
@@ -2054,6 +2057,7 @@ window.editNews = async (id) => {
   if (document.getElementById('newsLocation')) document.getElementById('newsLocation').value = n.location || '';
   if (document.getElementById('newsParagraphSpacing')) document.getElementById('newsParagraphSpacing').value = (n.paragraphSpacing === null || n.paragraphSpacing === undefined) ? '' : n.paragraphSpacing;
   if (document.getElementById('newsHeadingSpacing')) document.getElementById('newsHeadingSpacing').value = (n.headingSpacing === null || n.headingSpacing === undefined) ? '' : n.headingSpacing;
+  if (document.getElementById('newsLineHeight')) document.getElementById('newsLineHeight').value = (n.lineHeight === null || n.lineHeight === undefined) ? '' : n.lineHeight;
   if (document.getElementById('newsFeatured')) document.getElementById('newsFeatured').checked = n.featured || false;
   if (document.getElementById('newsHomeCard')) {
     document.getElementById('newsHomeCard').checked = n.homeCard || false;

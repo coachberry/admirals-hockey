@@ -1008,7 +1008,7 @@ footer {
    old and new, automatically. */
 .article-modal-content p {
   margin: 0 0 var(--article-p-spacing, 12px);
-  line-height: 1.6;
+  line-height: var(--article-line-height, 1.6);
 }
 .article-modal-content p:last-child {
   margin-bottom: 0;
