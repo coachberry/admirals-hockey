@@ -1017,6 +1017,7 @@ footer {
 .article-modal-content h3 {
   margin: var(--article-h-spacing, 16px) 0 0.6rem;
   color: #5D1725;
+  line-height: 1.2;
 }
 .article-modal-content h2:first-child,
 .article-modal-content h3:first-child {
