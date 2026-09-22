@@ -196,6 +196,7 @@ function pageShell({ title, description, image, pageUrl, ogType, headExtra, body
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<link rel="icon" type="image/png" href="/assets/images/franklin-logo.png">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#5D1725">
 <title>${t} - Franklin Admirals Hockey</title>
