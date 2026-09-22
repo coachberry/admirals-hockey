@@ -961,3 +961,53 @@ footer {
 }
 
 .modal-close-float:hover { background: #f0f0f0; }
+
+
+/* Article byline (news posts) - Franklin maroon branding */
+.article-byline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-top: 2px solid #5D1725;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.6rem 0;
+  margin: 0.75rem 0 1.25rem;
+}
+.article-byline-author { color: #5D1725; }
+.article-byline-role {
+  display: inline-block;
+  font-size: 0.8rem;
+  color: #666;
+  font-style: italic;
+  margin-left: 6px;
+}
+.article-byline-date {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #444;
+}
+.article-byline-location {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: #666;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  margin-left: 10px;
+}
+@media (max-width: 550px) {
+  .article-byline { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .article-byline-role, .article-byline-location { margin-left: 0; display: block; }
+}
+
+/* Article body paragraph spacing - previously undefined, so paragraphs ran
+   on pure browser-default margins (too spacious). Applies to every post,
+   old and new, automatically. */
+.article-modal-content p {
+  margin: 0 0 1rem;
+  line-height: 1.6;
+}
+.article-modal-content p:last-child {
+  margin-bottom: 0;
+}

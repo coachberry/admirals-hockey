@@ -1927,7 +1927,7 @@ if (removeNewsImageBtn) {
 }
 
 document.getElementById('addNewsBtn').addEventListener('click', () => {
-  ['newsId','newsTitle','newsDate','newsCategory','newsContent'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  ['newsId','newsTitle','newsDate','newsCategory','newsContent','newsAuthorName','newsAuthorTitle','newsLocation'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   if (document.getElementById('newsSummary')) document.getElementById('newsSummary').value = '';
   if (document.getElementById('newsContentVisual')) document.getElementById('newsContentVisual').innerHTML = '';
   if (document.getElementById('newsFeatured')) document.getElementById('newsFeatured').checked = false;
@@ -1965,6 +1965,9 @@ document.getElementById('saveNewsBtn').addEventListener('click', async () => {
   const isHomeCard = document.getElementById('newsHomeCard')?.checked || false;
   const homeOrder = parseInt(document.getElementById('newsHomeOrder')?.value) || 99;
   const summary = document.getElementById('newsSummary')?.value || '';
+  const authorName = document.getElementById('newsAuthorName')?.value.trim() || '';
+  const authorTitle = document.getElementById('newsAuthorTitle')?.value.trim() || '';
+  const location = document.getElementById('newsLocation')?.value.trim() || '';
 
   // Get content from whichever editor is active
   const htmlBtn = document.getElementById('editorHtmlBtn');
@@ -1993,7 +1996,10 @@ document.getElementById('saveNewsBtn').addEventListener('click', async () => {
     imageURL: newsImgURL,
     featured: isFeatured,
     homeCard: isHomeCard,
-    homeOrder: isHomeCard ? homeOrder : 99
+    homeOrder: isHomeCard ? homeOrder : 99,
+    authorName,
+    authorTitle,
+    location
   });
   const status = document.getElementById('newsSaveStatus');
   if (status) { status.textContent = '✅ Saved!'; status.style.color = 'green'; }
@@ -2037,6 +2043,9 @@ window.editNews = async (id) => {
   document.getElementById('newsDate').value = n.date;
   document.getElementById('newsCategory').value = n.category;
   document.getElementById('newsContent').value = n.content;
+  if (document.getElementById('newsAuthorName')) document.getElementById('newsAuthorName').value = n.authorName || '';
+  if (document.getElementById('newsAuthorTitle')) document.getElementById('newsAuthorTitle').value = n.authorTitle || '';
+  if (document.getElementById('newsLocation')) document.getElementById('newsLocation').value = n.location || '';
   if (document.getElementById('newsFeatured')) document.getElementById('newsFeatured').checked = n.featured || false;
   if (document.getElementById('newsHomeCard')) {
     document.getElementById('newsHomeCard').checked = n.homeCard || false;
