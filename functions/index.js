@@ -321,7 +321,7 @@ exports.newsPostPage = onRequest(async (req, res) => {
     const headExtra = `<link rel="stylesheet" href="/assets/css/news-styles.css">`;
     const html = pageShell({ title, description, image, pageUrl, ogType: "article", headExtra, bodyHtml });
 
-    res.set("Cache-Control", "public, max-age=300, s-maxage=600");
+    res.set("Cache-Control", "public, max-age=30, s-maxage=60");
     res.status(200).send(html);
   } catch (e) {
     logger.error("newsPostPage error:", e);
@@ -530,7 +530,7 @@ exports.gameStatsPage = onRequest(async (req, res) => {
 
     const html = pageShell({ title, description, image, pageUrl, ogType: "website", headExtra, bodyHtml });
 
-    res.set("Cache-Control", "public, max-age=300, s-maxage=600");
+    res.set("Cache-Control", "public, max-age=30, s-maxage=60");
     res.status(200).send(html);
   } catch (e) {
     logger.error("gameStatsPage error:", e);
