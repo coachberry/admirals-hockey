@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=294">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=295">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=294">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=295">
   <title>Statistics - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=294">
-  <link rel="stylesheet" href="/assets/css/stats-styles.css?v=294">
-  <script src="/assets/js/page-guard.js?v=294"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=295">
+  <link rel="stylesheet" href="/assets/css/stats-styles.css?v=295">
+  <script src="/assets/js/page-guard.js?v=295"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=294" defer></script>
-<script src="/assets/js/load-header.js?v=294"></script>
+<script src="/assets/js/load-hero.js?v=295" defer></script>
+<script src="/assets/js/load-header.js?v=295"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -31,6 +31,13 @@
   <div class="season-selector-wrap">
     <label for="seasonSelect">View Season:</label>
     <select id="seasonSelect" class="season-selector-public"></select>
+  </div>
+
+  <div class="season-selector-wrap" id="gameJumpWrap" style="display:none;">
+    <label for="gameJumpSelect">Jump to a Game:</label>
+    <select id="gameJumpSelect" class="season-selector-public">
+      <option value="">Select a played game...</option>
+    </select>
   </div>
 
   <div id="statsTBDBanner" style="display:none;background:linear-gradient(135deg,#5D1725,#3c0f17);color:white;border-radius:8px;padding:2.5rem 1.5rem;text-align:center;margin:2rem 0;">
@@ -127,7 +134,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=294"></script>
+<script src="/assets/js/load-footer.js?v=295"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -431,6 +438,37 @@
   // ============================================
   // SEASONS
   // ============================================
+  async function loadGameJumpDropdown(seasonId) {
+    const wrap = document.getElementById('gameJumpWrap');
+    const select = document.getElementById('gameJumpSelect');
+    if (!wrap || !select) return;
+
+    const gamesSnap = await getDocs(collection(db, 'seasons', seasonId, 'schedule'));
+    const games = [];
+    gamesSnap.forEach(d => {
+      const g = { id: d.id, ...d.data() };
+      if (g.result && g.date) games.push(g);
+    });
+    games.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (!games.length) {
+      wrap.style.display = 'none';
+      select.innerHTML = '<option value="">Select a played game...</option>';
+      return;
+    }
+
+    select.innerHTML = '<option value="">Select a played game...</option>' + games.map(g => {
+      const d = new Date(g.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const homeAway = g.homeAway === 'Home' ? 'vs' : '@';
+      return `<option value="${g.id}">${d} ${homeAway} ${g.opponent || 'TBD'} (${g.result} ${g.teamScore}-${g.opponentScore})</option>`;
+    }).join('');
+    wrap.style.display = 'block';
+
+    select.onchange = () => {
+      if (select.value) window.location.href = '/game/varsity/' + seasonId + '/' + select.value;
+    };
+  }
+
   async function initSeasons() {
     const snap = await getDocs(collection(db, 'seasons'));
     const seasons = [];
@@ -451,6 +489,7 @@
       select.value = startSeason.id;
       document.getElementById('seasonBadge').textContent = startSeason.label + ' Season';
       await loadStats(startSeason.id, startSeason);
+      await loadGameJumpDropdown(startSeason.id);
       // Set up sort after data loads
       setupSortHeaders('skatersTable', skaterSort, renderSkaters);
       setupSortHeaders('goaliesTable', goalieSort, renderGoalies);
@@ -461,6 +500,7 @@
       document.getElementById('seasonBadge').textContent = season.label + ' Season';
       localStorage.setItem('admirals_statsSeasonPublic', e.target.value);
       await loadStats(e.target.value, season);
+      await loadGameJumpDropdown(e.target.value);
     });
   }
 
@@ -594,7 +634,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=294"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=294"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=295"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=295"></script>
 </body>
 </html>
