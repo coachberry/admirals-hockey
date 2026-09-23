@@ -338,18 +338,22 @@ function renderSkaterRowsServer(skaters) {
     const pts = (s.goals || 0) + (s.assists || 0);
     const pm = (s.plus || 0) - (s.minus || 0);
     return `<tr>
-      <td>${escapeHtml(s.number)}</td><td>${escapeHtml(s.name)}</td>
-      <td>${s.goals || 0}</td><td>${s.assists || 0}</td><td>${pts}</td>
-      <td>${s.ppg || 0}</td><td>${s.ppa || 0}</td><td>${s.shg || 0}</td><td>${s.sha || 0}</td>
-      <td>${s.plus || 0}</td><td>${s.minus || 0}</td><td>${pm > 0 ? "+" + pm : pm}</td>
-      <td>${s.sog || 0}</td><td>${s.pim || 0}</td>
+      <td data-sort="${parseFloat(s.number) || 0}">${escapeHtml(s.number)}</td><td>${escapeHtml(s.name)}</td>
+      <td data-sort="${s.goals || 0}">${s.goals || 0}</td><td data-sort="${s.assists || 0}">${s.assists || 0}</td><td data-sort="${pts}">${pts}</td>
+      <td data-sort="${s.ppg || 0}">${s.ppg || 0}</td><td data-sort="${s.ppa || 0}">${s.ppa || 0}</td><td data-sort="${s.shg || 0}">${s.shg || 0}</td><td data-sort="${s.sha || 0}">${s.sha || 0}</td>
+      <td data-sort="${s.plus || 0}">${s.plus || 0}</td><td data-sort="${s.minus || 0}">${s.minus || 0}</td><td data-sort="${pm}">${pm > 0 ? "+" + pm : pm}</td>
+      <td data-sort="${s.sog || 0}">${s.sog || 0}</td><td data-sort="${s.pim || 0}">${s.pim || 0}</td>
     </tr>`;
   }).join("");
 }
 
 function renderGoalieRowsServer(goalies) {
-  if (!goalies.length) return '<tr><td colspan="8" style="text-align:center;color:#999;padding:1rem;">No stats entered</td></tr>';
-  const sorted = [...goalies].sort((a, b) => {
+  const filtered = goalies.filter((g) => {
+    if (!g.isEmptyNet) return true;
+    return g.gp && g.minutesPlayed > 0;
+  });
+  if (!filtered.length) return '<tr><td colspan="8" style="text-align:center;color:#999;padding:1rem;">No stats entered</td></tr>';
+  const sorted = [...filtered].sort((a, b) => {
     if (a.isEmptyNet) return 1;
     if (b.isEmptyNet) return -1;
     if ((b.gs || 0) !== (a.gs || 0)) return (b.gs || 0) - (a.gs || 0);
@@ -357,14 +361,15 @@ function renderGoalieRowsServer(goalies) {
   });
   return sorted.map((g) => {
     const sv = Math.max(0, (g.shotsAgainst || 0) - (g.goalsAgainst || 0));
+    const svPctNum = (g.shotsAgainst || 0) > 0 ? sv / g.shotsAgainst : 0;
     const isEN = g.isEmptyNet;
     return `<tr ${isEN ? 'style="background:#f5f5f5;font-style:italic;"' : ""}>
-      <td>${escapeHtml(g.number)}</td><td>${escapeHtml(g.name)}</td>
+      <td data-sort="${parseFloat(g.number) || 0}">${escapeHtml(g.number)}</td><td>${escapeHtml(g.name)}</td>
       <td>${isEN ? "-" : escapeHtml(g.decision || "-")}</td>
-      <td>${minToMMSSServer(g.minutesPlayed)}</td>
-      <td>${g.shotsAgainst || 0}</td><td>${sv}</td>
-      <td>${isEN ? "-" : svPctFmtServer(sv, g.shotsAgainst || 0)}</td>
-      <td>${g.goalsAgainst || 0}</td>
+      <td data-sort="${g.minutesPlayed || 0}">${minToMMSSServer(g.minutesPlayed)}</td>
+      <td data-sort="${g.shotsAgainst || 0}">${g.shotsAgainst || 0}</td><td data-sort="${sv}">${sv}</td>
+      <td data-sort="${svPctNum}">${isEN ? "-" : svPctFmtServer(sv, g.shotsAgainst || 0)}</td>
+      <td data-sort="${g.goalsAgainst || 0}">${g.goalsAgainst || 0}</td>
     </tr>`;
   }).join("");
 }
@@ -451,11 +456,11 @@ exports.gameStatsPage = onRequest(async (req, res) => {
         <div class="gvm-table-wrap">
           <table class="game-stats-table">
             <thead><tr>
-              <th>#</th><th>Player</th><th>G</th><th>A</th><th>PTS</th>
-              <th>PPG</th><th>PPA</th><th>SHG</th><th>SHA</th>
-              <th>+</th><th>-</th><th>+/-</th><th>SOG</th><th>PIM</th>
+              <th class="sortable" data-col="0">#<span class="sort-arrow"></span></th><th class="sortable" data-col="1">Player<span class="sort-arrow"></span></th><th class="sortable" data-col="2">G<span class="sort-arrow"></span></th><th class="sortable" data-col="3">A<span class="sort-arrow"></span></th><th class="sortable" data-col="4">PTS<span class="sort-arrow"></span></th>
+              <th class="sortable" data-col="5">PPG<span class="sort-arrow"></span></th><th class="sortable" data-col="6">PPA<span class="sort-arrow"></span></th><th class="sortable" data-col="7">SHG<span class="sort-arrow"></span></th><th class="sortable" data-col="8">SHA<span class="sort-arrow"></span></th>
+              <th class="sortable" data-col="9">+<span class="sort-arrow"></span></th><th class="sortable" data-col="10">-<span class="sort-arrow"></span></th><th class="sortable" data-col="11">+/-<span class="sort-arrow"></span></th><th class="sortable" data-col="12">SOG<span class="sort-arrow"></span></th><th class="sortable" data-col="13">PIM<span class="sort-arrow"></span></th>
             </tr></thead>
-            <tbody>${renderSkaterRowsServer(skaters)}</tbody>
+            <tbody id="ssrSkatersBody">${renderSkaterRowsServer(skaters)}</tbody>
           </table>
         </div>
       </div>
@@ -464,12 +469,50 @@ exports.gameStatsPage = onRequest(async (req, res) => {
         <div class="gvm-table-wrap">
           <table class="game-stats-table">
             <thead><tr>
-              <th>#</th><th>Player</th><th>Dec</th><th>Min</th><th>SA</th><th>SV</th><th>SV%</th><th>GA</th>
+              <th class="sortable" data-col="0">#<span class="sort-arrow"></span></th><th class="sortable" data-col="1">Player<span class="sort-arrow"></span></th><th class="sortable" data-col="2">Dec<span class="sort-arrow"></span></th><th class="sortable" data-col="3">Min<span class="sort-arrow"></span></th><th class="sortable" data-col="4">SA<span class="sort-arrow"></span></th><th class="sortable" data-col="5">SV<span class="sort-arrow"></span></th><th class="sortable" data-col="6">SV%<span class="sort-arrow"></span></th><th class="sortable" data-col="7">GA<span class="sort-arrow"></span></th>
             </tr></thead>
-            <tbody>${renderGoalieRowsServer(goalies)}</tbody>
+            <tbody id="ssrGoaliesBody">${renderGoalieRowsServer(goalies)}</tbody>
           </table>
         </div>
-      </div>`;
+      </div>
+      <script>
+        (function() {
+          function setupSort(tableSelector, bodyId) {
+            var table = document.querySelector(tableSelector);
+            var body = document.getElementById(bodyId);
+            if (!table || !body) return;
+            var state = { col: null, dir: 'desc' };
+            table.querySelectorAll('th.sortable').forEach(function(th) {
+              th.addEventListener('click', function() {
+                var col = parseInt(th.dataset.col, 10);
+                if (state.col === col) { state.dir = state.dir === 'desc' ? 'asc' : 'desc'; }
+                else { state.col = col; state.dir = 'desc'; }
+                table.querySelectorAll('th.sortable').forEach(function(h) {
+                  h.querySelector('.sort-arrow').textContent = '';
+                  h.classList.remove('sort-active');
+                });
+                th.querySelector('.sort-arrow').textContent = state.dir === 'desc' ? ' \u25bc' : ' \u25b2';
+                th.classList.add('sort-active');
+                var rows = Array.prototype.slice.call(body.querySelectorAll('tr'));
+                rows.sort(function(ra, rb) {
+                  var ca = ra.children[col], cb = rb.children[col];
+                  if (!ca || !cb) return 0;
+                  var hasNum = ca.hasAttribute('data-sort');
+                  var va = hasNum ? parseFloat(ca.getAttribute('data-sort')) : ca.textContent.trim().toLowerCase();
+                  var vb = hasNum ? parseFloat(cb.getAttribute('data-sort')) : cb.textContent.trim().toLowerCase();
+                  if (hasNum) return state.dir === 'asc' ? va - vb : vb - va;
+                  if (va < vb) return state.dir === 'asc' ? -1 : 1;
+                  if (va > vb) return state.dir === 'asc' ? 1 : -1;
+                  return 0;
+                });
+                rows.forEach(function(r) { body.appendChild(r); });
+              });
+            });
+          }
+          setupSort('.game-stats-table:nth-of-type(1)', 'ssrSkatersBody');
+          setupSort('.game-stats-table:nth-of-type(2)', 'ssrGoaliesBody');
+        })();
+      </script>`;
     }
 
     const bodyHtml = `
@@ -482,7 +525,8 @@ exports.gameStatsPage = onRequest(async (req, res) => {
 </div>`;
 
     const headExtra = `<link rel="stylesheet" href="/assets/css/schedule-styles.css">
-<link rel="stylesheet" href="/assets/css/game-stats.css">`;
+<link rel="stylesheet" href="/assets/css/game-stats.css">
+<link rel="stylesheet" href="/assets/css/stats-styles.css">`;
 
     const html = pageShell({ title, description, image, pageUrl, ogType: "website", headExtra, bodyHtml });
 
