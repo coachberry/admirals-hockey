@@ -1415,6 +1415,7 @@ function showGameModal(data = null) {
     document.getElementById('gameOpponentScore').value = data.opponentScore ?? '';
     document.getElementById('scoreFields').style.display = data.result ? 'grid' : 'none';
     document.getElementById('gamePracticeNotes').value = data.notes || '';
+    document.getElementById('gameTheme').value = data.themeName || '';
     window._editingGameLogo = data?.opponentLogo || '';
   if (data.opponentLogo) {
       document.getElementById('gameOpponentLogoPreview').innerHTML = `<img src="${data.opponentLogo}" style="height:50px;object-fit:contain;">`;
@@ -1423,7 +1424,7 @@ function showGameModal(data = null) {
   } else {
     ['gameDate','gameTime','gameEndTime','gameTimezone','gameGameType','gameLeagueName','gameTournamentName',
      'gameSubtype','gameOpponent','gameHomeAway','gameRinkName','gameRinkAddress','gameResult',
-     'gameTeamScore','gameOpponentScore','gamePracticeNotes'].forEach(id => {
+     'gameTeamScore','gameOpponentScore','gamePracticeNotes','gameTheme'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
@@ -1533,6 +1534,11 @@ function createGameModal() {
         <div class="form-label-group" id="practiceNotesField" style="display:none;">
           <label class="field-label">Practice Notes (optional)</label>
           <textarea id="gamePracticeNotes" rows="2" placeholder="e.g. Full ice, focus on breakouts"></textarea>
+        </div>
+
+        <div class="form-label-group">
+          <label class="field-label">Theme / Special Night (optional) <span style="font-weight:400;color:#999;">e.g. "Senior Night", "Pink Night"</span></label>
+          <input type="text" id="gameTheme" placeholder="Senior Night">
         </div>
 
         <div class="form-row">
@@ -1712,6 +1718,7 @@ function createGameModal() {
       teamScore: isPractice ? null : (result ? parseInt(document.getElementById('gameTeamScore').value) || 0 : null),
       opponentScore: isPractice ? null : (result ? parseInt(document.getElementById('gameOpponentScore').value) || 0 : null),
       notes: isPractice ? document.getElementById('gamePracticeNotes').value.trim() : '',
+      themeName: document.getElementById('gameTheme').value.trim(),
     };
 
     await setDoc(doc(db, 'seasons', seasonId, 'schedule', id), game);
@@ -4479,6 +4486,7 @@ async function openJvGameModal(data, seasonId) {
   document.getElementById('jvGameOpponentScore').value = data?.opponentScore ?? '';
   document.getElementById('jvScoreFields').style.display = data?.result ? 'grid' : 'none';
   document.getElementById('jvGameNotes').value = data?.notes || '';
+  document.getElementById('jvGameTheme').value = data?.themeName || '';
 
   document.getElementById('jvGameOpponentLogoPreview').innerHTML = '<span style="font-size:1.5rem;">🏒</span>';
   document.getElementById('jvRemoveOpponentLogo').style.display = 'none';
@@ -4545,6 +4553,7 @@ if (saveJvGameBtn) {
       teamScore: isPractice ? null : (result ? parseInt(document.getElementById('jvGameTeamScore').value) || 0 : null),
       opponentScore: isPractice ? null : (result ? parseInt(document.getElementById('jvGameOpponentScore').value) || 0 : null),
       notes: isPractice ? document.getElementById('jvGameNotes').value.trim() : '',
+      themeName: document.getElementById('jvGameTheme').value.trim(),
     };
 
     await setDoc(doc(db, 'jv-schedule', seasonId, 'games', id), game);

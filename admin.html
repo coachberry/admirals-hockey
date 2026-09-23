@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=293">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=294">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=293">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=293">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=294">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=294">
 </head>
 <body>
 
@@ -1253,6 +1253,11 @@
         <textarea id="jvGameNotes" rows="2" placeholder="e.g. Full ice, focus on breakouts"></textarea>
       </div>
 
+      <div class="form-label-group">
+        <label class="field-label">Theme / Special Night (optional) <span style="font-weight:400;color:#999;">e.g. "Senior Night", "Pink Night"</span></label>
+        <input type="text" id="jvGameTheme" placeholder="Senior Night">
+      </div>
+
       <div class="form-row">
         <div class="form-label-group">
           <label class="field-label">Rink Name</label>
@@ -1514,10 +1519,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=293"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=293"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=293"></script>
-<script type="module" src="/assets/js/game-stats.js?v=293"></script>
+<script type="module" src="/assets/js/admin.js?v=294"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=294"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=294"></script>
+<script type="module" src="/assets/js/game-stats.js?v=294"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
