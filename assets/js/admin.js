@@ -1927,7 +1927,7 @@ if (removeNewsImageBtn) {
 }
 
 document.getElementById('addNewsBtn').addEventListener('click', () => {
-  ['newsId','newsTitle','newsDate','newsCategory','newsContent','newsAuthorName','newsAuthorTitle','newsLocation','newsParagraphSpacing','newsHeadingSpacing','newsLineHeight'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  ['newsId','newsTitle','newsSlug','newsDate','newsCategory','newsContent','newsAuthorName','newsAuthorTitle','newsLocation','newsParagraphSpacing','newsHeadingSpacing','newsLineHeight'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   if (document.getElementById('newsSummary')) document.getElementById('newsSummary').value = '';
   if (document.getElementById('newsContentVisual')) document.getElementById('newsContentVisual').innerHTML = '';
   if (document.getElementById('newsFeatured')) document.getElementById('newsFeatured').checked = false;
@@ -1968,6 +1968,8 @@ document.getElementById('saveNewsBtn').addEventListener('click', async () => {
   const authorName = document.getElementById('newsAuthorName')?.value.trim() || '';
   const authorTitle = document.getElementById('newsAuthorTitle')?.value.trim() || '';
   const location = document.getElementById('newsLocation')?.value.trim() || '';
+  const slugRaw = document.getElementById('newsSlug')?.value.trim() || '';
+  const slug = slugRaw ? slugRaw.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') : '';
   const paragraphSpacingRaw = document.getElementById('newsParagraphSpacing')?.value;
   const headingSpacingRaw = document.getElementById('newsHeadingSpacing')?.value;
   const lineHeightRaw = document.getElementById('newsLineHeight')?.value;
@@ -1984,6 +1986,16 @@ document.getElementById('saveNewsBtn').addEventListener('click', async () => {
     bodyContent = document.getElementById('newsContentVisual')?.innerHTML || '';
   }
 
+  if (slug) {
+    const slugCheckSnap = await getDocs(query(collection(db, 'news'), where('slug', '==', slug)));
+    let slugTaken = false;
+    slugCheckSnap.forEach(d => { if (d.id !== id) slugTaken = true; });
+    if (slugTaken) {
+      alert('That URL slug is already used by another post. Choose a different one.');
+      return;
+    }
+  }
+
   if (isFeatured) {
     const allNews = await getDocs(collection(db, 'news'));
     for (const d of allNews.docs) {
@@ -1994,6 +2006,7 @@ document.getElementById('saveNewsBtn').addEventListener('click', async () => {
   }
   await setDoc(doc(db, 'news', id), {
     id,
+    slug,
     title: document.getElementById('newsTitle').value,
     date: document.getElementById('newsDate').value,
     category: document.getElementById('newsCategory').value,
@@ -2052,6 +2065,7 @@ window.editNews = async (id) => {
   document.getElementById('newsDate').value = n.date;
   document.getElementById('newsCategory').value = n.category;
   document.getElementById('newsContent').value = n.content;
+  if (document.getElementById('newsSlug')) document.getElementById('newsSlug').value = n.slug || '';
   if (document.getElementById('newsAuthorName')) document.getElementById('newsAuthorName').value = n.authorName || '';
   if (document.getElementById('newsAuthorTitle')) document.getElementById('newsAuthorTitle').value = n.authorTitle || '';
   if (document.getElementById('newsLocation')) document.getElementById('newsLocation').value = n.location || '';

@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=291">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=292">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=291">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=292">
   <title>News - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=291">
-  <link rel="stylesheet" href="/assets/css/news-styles.css?v=291">
-  <script src="/assets/js/page-guard.js?v=291"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=292">
+  <link rel="stylesheet" href="/assets/css/news-styles.css?v=292">
+  <script src="/assets/js/page-guard.js?v=292"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=291" defer></script>
-<script src="/assets/js/load-header.js?v=291"></script>
+<script src="/assets/js/load-hero.js?v=292" defer></script>
+<script src="/assets/js/load-header.js?v=292"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -63,15 +63,18 @@
         </div>
       </div>
       <div id="articleModalContent" class="article-modal-content"></div>
-      <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid #eee;text-align:right;">
-        <a id="articleShareLink" href="#" style="font-size:0.85rem;color:#5D1725;font-weight:600;text-decoration:none;">🔗 Share this post</a>
+      <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid #eee;display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:0.82rem;color:#666;font-weight:600;">Share:</span>
+        <a id="articleShareFacebook" href="#" target="_blank" rel="noopener noreferrer" style="background:#1877F2;color:white;padding:0.45rem 0.9rem;border-radius:5px;font-size:0.82rem;font-weight:600;text-decoration:none;">Facebook</a>
+        <a id="articleShareLinkedIn" href="#" target="_blank" rel="noopener noreferrer" style="background:#0A66C2;color:white;padding:0.45rem 0.9rem;border-radius:5px;font-size:0.82rem;font-weight:600;text-decoration:none;">LinkedIn</a>
+        <button id="articleCopyLink" style="background:#eee;color:#333;padding:0.45rem 0.9rem;border-radius:5px;font-size:0.82rem;font-weight:600;border:none;cursor:pointer;">Copy Link</button>
       </div>
     </div>
   </div>
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=291"></script>
+<script src="/assets/js/load-footer.js?v=292"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -136,8 +139,25 @@
     contentEl.style.setProperty('--article-h-spacing', (post.headingSpacing ?? 16) + 'px');
     contentEl.style.setProperty('--article-line-height', post.lineHeight ?? 1.6);
     contentEl.innerHTML = post.content || '';
-    const shareLink = document.getElementById('articleShareLink');
-    if (shareLink && post.id) shareLink.href = '/news/' + post.id;
+    if (post.id) {
+      const shareSlug = post.slug || post.id;
+      const shareUrl = window.location.origin + '/news/' + shareSlug;
+      const encodedShareUrl = encodeURIComponent(shareUrl);
+      const fbLink = document.getElementById('articleShareFacebook');
+      const liLink = document.getElementById('articleShareLinkedIn');
+      const copyBtn = document.getElementById('articleCopyLink');
+      if (fbLink) fbLink.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodedShareUrl;
+      if (liLink) liLink.href = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodedShareUrl;
+      if (copyBtn) {
+        copyBtn.onclick = () => {
+          navigator.clipboard.writeText(shareUrl).then(() => {
+            const original = copyBtn.textContent;
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => { copyBtn.textContent = original; }, 1500);
+          });
+        };
+      }
+    }
     articleModal.classList.add('active');
   }
   window.openArticle = openArticle;
@@ -336,7 +356,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=291"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=291"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=292"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=292"></script>
 </body>
 </html>

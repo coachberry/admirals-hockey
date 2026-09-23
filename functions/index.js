@@ -186,6 +186,20 @@ function minToMMSSServer(min) {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+// Share row: Facebook, LinkedIn, and a Copy Link button. Used on both the
+// news post page and the game stats page.
+function shareRowHtml(pageUrl) {
+  const encoded = encodeURIComponent(pageUrl);
+  const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encoded}`;
+  const liUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encoded}`;
+  return `<div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid #eee;display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center;">
+    <span style="font-size:0.82rem;color:#666;font-weight:600;">Share:</span>
+    <a href="${fbUrl}" target="_blank" rel="noopener noreferrer" style="background:#1877F2;color:white;padding:0.45rem 0.9rem;border-radius:5px;font-size:0.82rem;font-weight:600;text-decoration:none;">Facebook</a>
+    <a href="${liUrl}" target="_blank" rel="noopener noreferrer" style="background:#0A66C2;color:white;padding:0.45rem 0.9rem;border-radius:5px;font-size:0.82rem;font-weight:600;text-decoration:none;">LinkedIn</a>
+    <button onclick="(function(btn){navigator.clipboard.writeText(${JSON.stringify(pageUrl)}).then(function(){var t=btn.textContent;btn.textContent='Copied!';setTimeout(function(){btn.textContent=t;},1500);});})(this)" style="background:#eee;color:#333;padding:0.45rem 0.9rem;border-radius:5px;font-size:0.82rem;font-weight:600;border:none;cursor:pointer;">Copy Link</button>
+  </div>`;
+}
+
 // Shared page shell (header/hero/footer scripts) so these pages are genuinely
 // part of the site, not standalone stubs - real nav, chat widget, etc.
 function pageShell({ title, description, image, pageUrl, ogType, headExtra, bodyHtml }) {
@@ -236,8 +250,19 @@ exports.newsPostPage = onRequest(async (req, res) => {
   if (!postId) { res.status(400).send("Missing postId"); return; }
 
   try {
-    const snap = await db.collection("news").doc(postId).get();
-    if (!snap.exists) {
+    // Slug first (news.slug == postId), then fall back to a direct doc-ID
+    // lookup so links already shared with the old raw-ID format keep working.
+    let snap = null;
+    let resolvedId = postId;
+    const slugQuery = await db.collection("news").where("slug", "==", postId).limit(1).get();
+    if (!slugQuery.empty) {
+      snap = slugQuery.docs[0];
+      resolvedId = snap.id;
+    } else {
+      const byId = await db.collection("news").doc(postId).get();
+      if (byId.exists) { snap = byId; resolvedId = byId.id; }
+    }
+    if (!snap) {
       res.redirect(302, SITE_URL + "/news");
       return;
     }
@@ -245,7 +270,7 @@ exports.newsPostPage = onRequest(async (req, res) => {
     const title = post.title || "Admirals Hockey News";
     const description = post.summary || stripHtml(post.content || "").slice(0, 200) || "Read the latest from Franklin Admirals Hockey.";
     const image = post.imageURL || DEFAULT_SHARE_IMAGE;
-    const pageUrl = SITE_URL + "/news/" + encodeURIComponent(postId);
+    const pageUrl = SITE_URL + "/news/" + encodeURIComponent(post.slug || resolvedId);
     const category = post.category || "";
     const categoryColors = { "Game Report": "#5D1725", "Team Update": "#1565c0", "Announcement": "#e65100", "Player Spotlight": "#2e7d32" };
     const catColor = categoryColors[category] || "#5D1725";
@@ -271,11 +296,13 @@ exports.newsPostPage = onRequest(async (req, res) => {
     <div class="article-modal-content" style="--article-p-spacing:${post.paragraphSpacing ?? 12}px;--article-h-spacing:${post.headingSpacing ?? 16}px;--article-line-height:${post.lineHeight ?? 1.6};">
       ${post.content || ""}
     </div>
-    <div style="margin-top:2rem;"><a href="/news" style="color:#5D1725;font-weight:600;text-decoration:none;">&larr; Back to News</a></div>
+    ${shareRowHtml(pageUrl)}
+    <div style="margin-top:1.5rem;"><a href="/news" style="color:#5D1725;font-weight:600;text-decoration:none;">&larr; Back to News</a></div>
   </div>
 </div>`;
 
-    const html = pageShell({ title, description, image, pageUrl, ogType: "article", bodyHtml });
+    const headExtra = `<link rel="stylesheet" href="/assets/css/news-styles.css">`;
+    const html = pageShell({ title, description, image, pageUrl, ogType: "article", headExtra, bodyHtml });
 
     res.set("Cache-Control", "public, max-age=300, s-maxage=600");
     res.status(200).send(html);
@@ -432,7 +459,8 @@ exports.gameStatsPage = onRequest(async (req, res) => {
 <div class="main-container" style="max-width:900px;margin:0 auto;padding:1rem 1rem 4rem;">
   ${headerHtml}
   ${statsHtml}
-  <div style="margin-top:2rem;"><a href="${scheduleUrl}" style="color:#5D1725;font-weight:600;text-decoration:none;">&larr; Back to Schedule</a></div>
+  ${shareRowHtml(pageUrl)}
+  <div style="margin-top:1.5rem;"><a href="${scheduleUrl}" style="color:#5D1725;font-weight:600;text-decoration:none;">&larr; Back to Schedule</a></div>
 </div>`;
 
     const headExtra = `<link rel="stylesheet" href="/assets/css/schedule-styles.css">
