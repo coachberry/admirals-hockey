@@ -466,12 +466,13 @@ function renderLeagueGamesTable(games) {
     container.innerHTML = '<div class="empty-state">No games yet — click Seed above to load the season.</div>';
     return;
   }
+  games.sort((a, b) => (a.date || '').localeCompare(b.date || '') || ((a.order || 0) - (b.order || 0)));
   const rows = games.map(g => {
     const highlight = g.isFranklinGame ? 'background:#fdf0f1;' : '';
     const statusColor = g.played ? '#2e7d32' : '#999';
     const statusText = g.played ? '✓ Played' : 'TBD';
     return `<tr style="${highlight}" data-id="${g.id}">
-      <td style="padding:0.5rem;white-space:nowrap;">${g.date}</td>
+      <td style="padding:0.5rem;white-space:nowrap;"><input type="date" class="league-date-input" data-id="${g.id}" value="${g.date || ''}" style="padding:4px;font-size:0.85rem;"></td>
       <td style="padding:0.5rem;">${g.visitorTeam}</td>
       <td style="padding:0.5rem;width:60px;">
         <input type="number" class="league-score-input" data-id="${g.id}" data-field="visitorScore" value="${g.visitorScore ?? ''}" style="width:55px;padding:4px;text-align:center;">
@@ -492,6 +493,39 @@ function renderLeagueGamesTable(games) {
     </tr></thead>
     <tbody>${rows}</tbody>
   </table></div>`;
+
+  container.querySelectorAll('.league-date-input').forEach(input => {
+    input.addEventListener('blur', async () => {
+      const gameId = input.dataset.id;
+      const row = games.find(g => g.id === gameId);
+      if (!row) return;
+      const newDate = input.value;
+      const oldDate = row.date;
+      if (!newDate) { input.value = oldDate || ''; return; }
+      if (newDate === oldDate) return;
+      const yr = parseInt(newDate.slice(0, 4), 10);
+      if (yr < 2025 || yr > 2030) {
+        input.value = oldDate || '';
+        alert('That year looks wrong, so the date was not changed.');
+        return;
+      }
+      try {
+        await setDoc(doc(db, 'leagueGames', gameId), { date: newDate }, { merge: true });
+        row.date = newDate;
+        renderLeagueGamesTable(games);
+        const moved = document.querySelector(`#leagueGamesList tr[data-id="${gameId}"]`);
+        if (moved) {
+          moved.scrollIntoView({ block: 'center' });
+          moved.style.outline = '2px solid #5D1725';
+          setTimeout(() => { moved.style.outline = ''; }, 2000);
+        }
+      } catch (e) {
+        console.error('Error saving league game date:', e);
+        input.value = oldDate || '';
+        alert('Failed to save date. Check your connection and try again.');
+      }
+    });
+  });
 
   container.querySelectorAll('.league-score-input').forEach(input => {
     input.addEventListener('blur', async () => {
@@ -1649,11 +1683,21 @@ function createGameModal() {
   async function syncFranklinLeagueGame(game) {
     if (game.gameType === 'Practice' || !game.result || game.teamScore === null || game.opponentScore === null) return;
     try {
-      const snap = await getDocs(query(
-        collection(db, 'leagueGames'),
-        where('date', '==', game.date),
-        where('isFranklinGame', '==', true)
-      ));
+      let snap = null;
+      if (game.id) {
+        const linked = await getDocs(query(
+          collection(db, 'leagueGames'),
+          where('linkedScheduleGameId', '==', game.id)
+        ));
+        if (!linked.empty) snap = linked;
+      }
+      if (!snap) {
+        snap = await getDocs(query(
+          collection(db, 'leagueGames'),
+          where('date', '==', game.date),
+          where('isFranklinGame', '==', true)
+        ));
+      }
       if (snap.empty) return; // no matching league-schedule game for this date — nothing to sync
       if (snap.size > 1) {
         console.warn('Franklin league-game auto-sync: multiple leagueGames matched date', game.date, '- skipping to avoid ambiguity. Update manually in League Standings.');
@@ -1666,6 +1710,7 @@ function createGameModal() {
         ? { visitorScore: game.teamScore, homeScore: game.opponentScore }
         : { visitorScore: game.opponentScore, homeScore: game.teamScore };
       updates.played = true;
+      if (game.id) updates.linkedScheduleGameId = game.id;
       await setDoc(doc(db, 'leagueGames', leagueDoc.id), updates, { merge: true });
     } catch (e) {
       console.error('Error auto-syncing Franklin league game:', e);
