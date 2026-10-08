@@ -247,6 +247,9 @@ ${headExtra || ""}
 <div id="site-header"></div>
 <script src="/assets/js/load-hero.js" defer></script>
 <script src="/assets/js/load-header.js"></script>
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<script src="/assets/js/version-check.js"></script>
 
 ${bodyHtml}
 
