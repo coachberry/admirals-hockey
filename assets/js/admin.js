@@ -1173,6 +1173,52 @@ window.backfillPlayerPhotos = async function() {
   alert(msg);
 };
 
+// One-time cleanup: run window.backfillCoachPhotos() from the browser console on the admin page.
+window.backfillCoachPhotos = async function() {
+  const normName = n => (n || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  const hasBio = b => !!(b && String(b).replace(/<[^>]*>/g, '').trim());
+  let filledPhotos = 0, filledBios = 0, linked = 0, pairs = 0;
+  const seasonsSnap = await getDocs(collection(db, 'seasons'));
+  for (const seasonDoc of seasonsSnap.docs) {
+    const sid = seasonDoc.id;
+    const [vSnap, jSnap] = await Promise.all([
+      getDocs(collection(db, 'roster', sid, 'coaches')),
+      getDocs(collection(db, 'jv-roster', sid, 'coaches'))
+    ]);
+    const jv = jSnap.docs.map(d => ({ ref: d.ref, data: d.data() }));
+    for (const vDoc of vSnap.docs) {
+      const v = vDoc.data();
+      let match = v.staffId ? jv.find(j => j.data.staffId === v.staffId) : null;
+      let byName = false;
+      if (!match) {
+        match = jv.find(j => normName(j.data.name) && normName(j.data.name) === normName(v.name));
+        byName = !!match;
+      }
+      if (!match) continue;
+      pairs++;
+      const toJv = {};
+      const toVarsity = {};
+      if (v.photoURL && !match.data.photoURL) toJv.photoURL = v.photoURL;
+      if (match.data.photoURL && !v.photoURL) toVarsity.photoURL = match.data.photoURL;
+      if (hasBio(v.bio) && !hasBio(match.data.bio)) toJv.bio = v.bio;
+      if (hasBio(match.data.bio) && !hasBio(v.bio)) toVarsity.bio = match.data.bio;
+      if (byName && v.staffId && match.data.staffId !== v.staffId) { toJv.staffId = v.staffId; linked++; }
+      else if (byName && !v.staffId && match.data.staffId) { toVarsity.staffId = match.data.staffId; linked++; }
+      if (Object.keys(toJv).length) {
+        await setDoc(match.ref, toJv, { merge: true });
+        filledPhotos += toJv.photoURL ? 1 : 0; filledBios += toJv.bio ? 1 : 0;
+      }
+      if (Object.keys(toVarsity).length) {
+        await setDoc(vDoc.ref, toVarsity, { merge: true });
+        filledPhotos += toVarsity.photoURL ? 1 : 0; filledBios += toVarsity.bio ? 1 : 0;
+      }
+    }
+  }
+  const msg = 'Checked ' + pairs + ' coaches on both rosters. Filled ' + filledPhotos + ' photos and ' + filledBios + ' bios. Linked ' + linked + ' staff IDs.';
+  console.log(msg);
+  alert(msg);
+};
+
 async function syncStaffAcrossRosters(staffId, type, updates, skipCollection, skipSeason, skipId) {
   try {
     const seasonsSnap = await getDocs(collection(db, 'seasons'));
