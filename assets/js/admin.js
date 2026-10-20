@@ -800,6 +800,8 @@ rosterModal.addEventListener('click', e => { if (e.target === rosterModal) roste
 document.getElementById('cancelMemberBtn').addEventListener('click', () => rosterModal.classList.remove('active'));
 
 function openRosterModal(type, data = null) {
+  const _syncBox = document.getElementById('memberSyncPhoto');
+  if (_syncBox) _syncBox.checked = true;
   croppedPhoto = null;
   currentPhotoURL = data?.photoURL || null;
   document.getElementById('memberId').value = data?.id || '';
@@ -1092,7 +1094,7 @@ document.getElementById('saveMemberBtn').addEventListener('click', async () => {
   await setDoc(doc(db, rosterCollection, saveSeason, collName, id), member, { merge: true });
 
   // Players on both rosters share their photo and bio (same season, matched by playerId).
-  if (isPlayer && member.playerId) {
+  if (isPlayer && member.playerId && document.getElementById('memberSyncPhoto')?.checked !== false) {
     const playerUpdates = {};
     if (member.photoURL) playerUpdates.photoURL = member.photoURL;
     if (member.bio && member.bio.trim()) playerUpdates.bio = member.bio;
@@ -1104,7 +1106,7 @@ document.getElementById('saveMemberBtn').addEventListener('click', async () => {
   // For coaches/board members added via "select returning staff", propagate bio/title/photo
   // to every other roster entry (Varsity + JV, any season) that shares the same staffId,
   // so editing one place keeps every appearance of that person in sync.
-  if (!isPlayer && member.staffId) {
+  if (!isPlayer && member.staffId && document.getElementById('memberSyncPhoto')?.checked !== false) {
     syncStaffAcrossRosters(member.staffId, type, {
       bio: member.bio, title: member.title || '', photoURL: member.photoURL
     }, rosterCollection, saveSeason, id);

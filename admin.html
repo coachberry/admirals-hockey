@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=308">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=309">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=308">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=308">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=309">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=309">
 </head>
 <body>
 
@@ -878,6 +878,9 @@
       <div class="photo-upload-section">
         <input type="file" id="memberPhoto" accept="image/*,.heic,.heif,.HEIC,.HEIF" style="display:none;">
         <div id="memberPhotoPreview" class="photo-preview"></div>
+        <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;margin-top:0.5rem;cursor:pointer;">
+          <input type="checkbox" id="memberSyncPhoto" checked> Share this photo and bio with the other roster (Varsity and JV)
+        </label>
       </div>
 
       <div class="form-buttons">
@@ -1519,10 +1522,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=308"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=308"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=308"></script>
-<script type="module" src="/assets/js/game-stats.js?v=308"></script>
+<script type="module" src="/assets/js/admin.js?v=309"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=309"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=309"></script>
+<script type="module" src="/assets/js/game-stats.js?v=309"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
