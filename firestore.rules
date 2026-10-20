@@ -1,0 +1,266 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ------------------------------------------------------------
+    // Helpers
+    // ------------------------------------------------------------
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function memberPath() {
+      return /databases/$(database)/documents/members/$(request.auth.uid);
+    }
+
+    function hasMember() {
+      return signedIn() && exists(memberPath());
+    }
+
+    // Every role the person has: primary role, roles list and teams list.
+    function roleList() {
+      let m = get(memberPath()).data;
+      return [m.get('role', 'member')].concat(m.get('roles', [])).concat(m.get('teams', []));
+    }
+
+    function hasAnyRole(list) {
+      return hasMember() && roleList().hasAny(list);
+    }
+
+    // Matches the admin dashboard gate in the page code:
+    // the superadmin email, or a member with isAdmin = true.
+    function isSuperAdmin() {
+      return signedIn()
+        && request.auth.token.email == 'coachberry03@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+
+    function isStaff() {
+      return isSuperAdmin()
+        || (hasMember() && get(memberPath()).data.get('isAdmin', false) == true);
+    }
+
+    function isChatMember() {
+      return hasAnyRole(['player', 'alumni', 'coach', 'rep', 'admin', 'superadmin', 'jv', 'varsity']);
+    }
+
+    // RSVP documents are keyed by the RSVPing person's uid. A parent saves one under
+    // their child's key, stamped with submittedBy = the parent's uid.
+    function canWriteRsvp(rid) {
+      return isStaff()
+        || (signedIn() && (
+              rid == request.auth.uid
+              || (request.resource.data.get('submittedBy', '') == request.auth.uid && hasAnyRole(['parent']))
+           ));
+    }
+
+    function canDeleteRsvp(rid) {
+      return isStaff()
+        || (signedIn() && (
+              rid == request.auth.uid
+              || resource.data.get('submittedBy', '') == request.auth.uid
+           ));
+    }
+
+    // ------------------------------------------------------------
+    // Members
+    // ------------------------------------------------------------
+    match /members/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || isStaff() || isChatMember());
+      allow list: if isStaff() || isChatMember();
+
+      // A new account can only ever start as a plain member.
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.role == 'member'
+        && !request.resource.data.keys().hasAny(['isAdmin', 'roles', 'teams']);
+
+      // People can edit their own profile fields, never roles, teams, admin flag or status.
+      allow update: if isStaff()
+        || (signedIn() && request.auth.uid == uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                 'displayName', 'email', 'phone', 'shareWithCoach', 'position', 'gradYear',
+                 'yearsWithTeam', 'jerseyNumber', 'hometown', 'bio', 'photoURL', 'fcmTokens'
+               ]));
+
+      allow delete: if isStaff();
+
+      match /notifications/{nid} {
+        allow read: if signedIn() && (request.auth.uid == uid || isStaff());
+        allow create: if isStaff() || (signedIn() && request.auth.uid == uid);
+        allow update: if signedIn() && request.auth.uid == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+        allow delete: if signedIn() && (request.auth.uid == uid || isStaff());
+      }
+    }
+
+    match /roleRequests/{id} {
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.status == 'pending';
+      allow read: if isStaff() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow update, delete: if isStaff();
+    }
+
+    // ------------------------------------------------------------
+    // Varsity season, schedule, game stats and RSVPs
+    // ------------------------------------------------------------
+    match /seasons/{sid} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    match /seasons/{sid}/schedule/{gid} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    match /seasons/{sid}/schedule/{gid}/rsvps/{rid} {
+      allow read: if signedIn();
+      allow create, update: if canWriteRsvp(rid);
+      allow delete: if canDeleteRsvp(rid);
+    }
+
+    // skaterstats, goaliestats, teamstats and any other game subcollection
+    match /seasons/{sid}/schedule/{gid}/{sub}/{docId} {
+      allow read: if sub != 'rsvps';
+      allow write: if sub != 'rsvps' && isStaff();
+    }
+
+    // any other collection directly under a season
+    match /seasons/{sid}/{col}/{docId} {
+      allow read: if col != 'schedule';
+      allow write: if col != 'schedule' && isStaff();
+    }
+
+    // ------------------------------------------------------------
+    // JV schedule, game stats and RSVPs
+    // ------------------------------------------------------------
+    match /jv-schedule/{sid} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    match /jv-schedule/{sid}/games/{gid} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    match /jv-schedule/{sid}/games/{gid}/rsvps/{rid} {
+      allow read: if signedIn();
+      allow create, update: if canWriteRsvp(rid);
+      allow delete: if canDeleteRsvp(rid);
+    }
+
+    match /jv-schedule/{sid}/games/{gid}/{sub}/{docId} {
+      allow read: if sub != 'rsvps';
+      allow write: if sub != 'rsvps' && isStaff();
+    }
+
+    match /jv-schedule/{sid}/{col}/{docId} {
+      allow read: if col != 'games';
+      allow write: if col != 'games' && isStaff();
+    }
+
+    // ------------------------------------------------------------
+    // Summer league
+    // ------------------------------------------------------------
+    match /summer/{sid} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    match /summer/{sid}/{col}/{docId} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    match /summer/{sid}/games/{gid}/rsvps/{rid} {
+      allow read: if signedIn();
+      allow create, update: if canWriteRsvp(rid);
+      allow delete: if canDeleteRsvp(rid);
+    }
+
+    match /summer/{sid}/teams/{tid}/{rest=**} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    // ------------------------------------------------------------
+    // Team events
+    // ------------------------------------------------------------
+    match /teamEvents/{id} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    match /teamEvents/{id}/rsvps/{rid} {
+      allow read: if signedIn();
+      allow create, update: if canWriteRsvp(rid);
+      allow delete: if canDeleteRsvp(rid);
+    }
+
+    // ------------------------------------------------------------
+    // Chat
+    // ------------------------------------------------------------
+    match /chatChannels/{id} {
+      allow read: if isChatMember() || isStaff();
+      allow write: if isStaff();
+    }
+
+    match /chat/{channelId}/messages/{msgId} {
+      allow read: if isChatMember() || isStaff();
+      allow create: if (isChatMember() || isStaff())
+        && request.resource.data.uid == request.auth.uid;
+      allow update: if isStaff();
+      allow delete: if isStaff()
+        || (signedIn() && resource.data.get('uid', '') == request.auth.uid);
+    }
+
+    // ------------------------------------------------------------
+    // Alumni signup form (public). The document ID is the lowercased email,
+    // so a second signup with the same email is rejected as an update.
+    // Only staff can list or read the alumni records.
+    // ------------------------------------------------------------
+    match /alumni/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['name', 'email', 'gradYear', 'position', 'signedUpAt'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() < 120
+        && request.resource.data.email is string
+        && request.resource.data.email.size() < 200
+        && request.resource.data.email.matches('.+@.+')
+        && id == request.resource.data.email.lower();
+      allow read, update, delete: if isStaff();
+    }
+
+    // ------------------------------------------------------------
+    // Staff only
+    // ------------------------------------------------------------
+    match /notificationLog/{docId} {
+      allow read, write: if isStaff();
+    }
+
+    // ------------------------------------------------------------
+    // Public content: anyone can read, only staff can change
+    // ------------------------------------------------------------
+    match /roster/{document=**}      { allow read: if true; allow write: if isStaff(); }
+    match /jv-roster/{document=**}   { allow read: if true; allow write: if isStaff(); }
+    match /news/{document=**}        { allow read: if true; allow write: if isStaff(); }
+    match /gallery/{document=**}     { allow read: if true; allow write: if isStaff(); }
+    match /sponsors/{document=**}    { allow read: if true; allow write: if isStaff(); }
+    match /leagueGames/{document=**} { allow read: if true; allow write: if isStaff(); }
+    match /leagues/{document=**}     { allow read: if true; allow write: if isStaff(); }
+    match /tournaments/{document=**} { allow read: if true; allow write: if isStaff(); }
+    match /rinks/{document=**}       { allow read: if true; allow write: if isStaff(); }
+    match /tryouts/{document=**}     { allow read: if true; allow write: if isStaff(); }
+    match /events/{document=**}      { allow read: if true; allow write: if isStaff(); }
+    match /lineups/{document=**}     { allow read: if true; allow write: if isStaff(); }
+    match /quickhits/{document=**}   { allow read: if true; allow write: if isStaff(); }
+    match /players/{document=**}     { allow read: if true; allow write: if isStaff(); }
+    match /settings/{document=**}    { allow read: if true; allow write: if isStaff(); }
+
+    // Everything not listed above is denied by default.
+  }
+}

@@ -2,24 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=305">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=306">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=305">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=306">
   <title>Alumni - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=305">
-  <link rel="stylesheet" href="/assets/css/alumni-styles.css?v=305">
-  <script src="/assets/js/page-guard.js?v=305"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=306">
+  <link rel="stylesheet" href="/assets/css/alumni-styles.css?v=306">
+  <script src="/assets/js/page-guard.js?v=306"></script>
 </head>
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-hero.js?v=305" defer></script>
-<script src="/assets/js/load-header.js?v=305"></script>
+<script src="/assets/js/load-hero.js?v=306" defer></script>
+<script src="/assets/js/load-header.js?v=306"></script>
 <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
 <script defer src="/_vercel/insights/script.js"></script>
-<script src="/assets/js/version-check.js?v=305"></script>
+<script src="/assets/js/version-check.js?v=306"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -94,11 +94,11 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=305"></script>
+<script src="/assets/js/load-footer.js?v=306"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, query, where, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
@@ -127,16 +127,9 @@
     document.getElementById('alumniSubmitBtn').disabled = true;
 
     try {
-      // Check for duplicate email
-      const existing = await getDocs(query(collection(db, 'alumni'), where('email', '==', email)));
-      if (!existing.empty) {
-        errorEl.textContent = 'This email is already registered.';
-        document.getElementById('alumniSubmitBtn').textContent = 'Join the Alumni Network';
-        document.getElementById('alumniSubmitBtn').disabled = false;
-        return;
-      }
-
-      await addDoc(collection(db, 'alumni'), {
+      // Duplicate emails are rejected by the database rules: the document ID is the
+      // lowercased email, and a document that already exists cannot be created again.
+      await setDoc(doc(db, 'alumni', email.toLowerCase()), {
         name, email,
         gradYear: parseInt(gradYear),
         position: position || '',
@@ -146,7 +139,7 @@
       document.getElementById('signupForm').style.display = 'none';
       document.getElementById('signupSuccess').style.display = 'block';
     } catch(e) {
-      errorEl.textContent = 'Something went wrong. Please try again.';
+      errorEl.textContent = (e && e.code === 'permission-denied') ? 'This email is already registered.' : 'Something went wrong. Please try again.';
       document.getElementById('alumniSubmitBtn').textContent = 'Join the Alumni Network';
       document.getElementById('alumniSubmitBtn').disabled = false;
     }
@@ -274,7 +267,7 @@ function showRoleFields(role) {
 }
 </script>
 
-  <script type="module" src="/assets/js/member-auth.js?v=305"></script>
-  <script type="module" src="/assets/js/chat-widget.js?v=305"></script>
+  <script type="module" src="/assets/js/member-auth.js?v=306"></script>
+  <script type="module" src="/assets/js/chat-widget.js?v=306"></script>
 </body>
 </html>
