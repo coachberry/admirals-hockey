@@ -1091,6 +1091,16 @@ document.getElementById('saveMemberBtn').addEventListener('click', async () => {
   // like memberUid (account link) and parentUids (parent-linking).
   await setDoc(doc(db, rosterCollection, saveSeason, collName, id), member, { merge: true });
 
+  // Players on both rosters share their photo and bio (same season, matched by playerId).
+  if (isPlayer && member.playerId) {
+    const playerUpdates = {};
+    if (member.photoURL) playerUpdates.photoURL = member.photoURL;
+    if (member.bio && member.bio.trim()) playerUpdates.bio = member.bio;
+    if (Object.keys(playerUpdates).length) {
+      syncPlayerAcrossRosters(member.playerId, playerUpdates, rosterCollection, saveSeason);
+    }
+  }
+
   // For coaches/board members added via "select returning staff", propagate bio/title/photo
   // to every other roster entry (Varsity + JV, any season) that shares the same staffId,
   // so editing one place keeps every appearance of that person in sync.
@@ -1108,6 +1118,60 @@ document.getElementById('saveMemberBtn').addEventListener('click', async () => {
     setTimeout(() => { rosterModal.classList.remove('active'); loadRoster(currentSeasonId); }, 800);
   }
 });
+
+async function syncPlayerAcrossRosters(playerId, updates, rosterCollection, seasonId) {
+  try {
+    const otherRoster = rosterCollection === 'jv-roster' ? 'roster' : 'jv-roster';
+    const snap = await getDocs(query(collection(db, otherRoster, seasonId, 'players'), where('playerId', '==', playerId)));
+    snap.forEach(d => {
+      setDoc(doc(db, otherRoster, seasonId, 'players', d.id), updates, { merge: true });
+    });
+  } catch (e) {
+    console.error('syncPlayerAcrossRosters error:', e);
+  }
+}
+
+// One-time cleanup: run window.backfillPlayerPhotos() from the browser console on the admin page.
+// Fills BLANK photos and bios on Varsity and JV players from the matching player on the other roster.
+// Never overwrites anything that is already filled in.
+window.backfillPlayerPhotos = async function() {
+  const normName = n => (n || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  const hasBio = b => !!(b && String(b).replace(/<[^>]*>/g, '').trim());
+  let filledPhotos = 0, filledBios = 0, pairs = 0;
+  const seasonsSnap = await getDocs(collection(db, 'seasons'));
+  for (const seasonDoc of seasonsSnap.docs) {
+    const sid = seasonDoc.id;
+    const [vSnap, jSnap] = await Promise.all([
+      getDocs(collection(db, 'roster', sid, 'players')),
+      getDocs(collection(db, 'jv-roster', sid, 'players'))
+    ]);
+    const jv = jSnap.docs.map(d => ({ ref: d.ref, data: d.data() }));
+    for (const vDoc of vSnap.docs) {
+      const v = vDoc.data();
+      const match = jv.find(j => (v.playerId && j.data.playerId === v.playerId))
+        || jv.find(j => normName(j.data.name) && normName(j.data.name) === normName(v.name));
+      if (!match) continue;
+      pairs++;
+      const toJv = {};
+      const toVarsity = {};
+      if (v.photoURL && !match.data.photoURL) toJv.photoURL = v.photoURL;
+      if (match.data.photoURL && !v.photoURL) toVarsity.photoURL = match.data.photoURL;
+      if (hasBio(v.bio) && !hasBio(match.data.bio)) toJv.bio = v.bio;
+      if (hasBio(match.data.bio) && !hasBio(v.bio)) toVarsity.bio = match.data.bio;
+      if (Object.keys(toJv).length) {
+        await setDoc(match.ref, toJv, { merge: true });
+        filledPhotos += toJv.photoURL ? 1 : 0; filledBios += toJv.bio ? 1 : 0;
+      }
+      if (Object.keys(toVarsity).length) {
+        await setDoc(vDoc.ref, toVarsity, { merge: true });
+        filledPhotos += toVarsity.photoURL ? 1 : 0; filledBios += toVarsity.bio ? 1 : 0;
+      }
+    }
+  }
+  const msg = 'Checked ' + pairs + ' players on both rosters. Filled ' + filledPhotos + ' photos and ' + filledBios + ' bios.';
+  console.log(msg);
+  alert(msg);
+};
 
 async function syncStaffAcrossRosters(staffId, type, updates, skipCollection, skipSeason, skipId) {
   try {
