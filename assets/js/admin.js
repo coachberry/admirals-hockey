@@ -4657,6 +4657,11 @@ async function openJvGameModal(data, seasonId) {
   modal.classList.add('active');
 }
 
+document.getElementById('jvGameResult')?.addEventListener('change', (e) => {
+  const scoreFields = document.getElementById('jvScoreFields');
+  if (scoreFields) scoreFields.style.display = e.target.value ? 'grid' : 'none';
+});
+
 const addJvGameBtn = document.getElementById('addJvGameBtn');
 if (addJvGameBtn) addJvGameBtn.addEventListener('click', () => openJvGameModal(null, jvScheduleSeasonId));
 
