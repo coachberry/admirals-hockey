@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=312">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=313">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#5D1725">
-  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=312">
+  <link rel="apple-touch-icon" href="/assets/images/admiral-logo.png?v=313">
   <title>My Profile - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/styles.css?v=312">
-  <script src="/assets/js/page-guard.js?v=312"></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=313">
+  <script src="/assets/js/page-guard.js?v=313"></script>
   <style>
     .profile-layout {
       display: grid;
@@ -293,10 +293,10 @@
 <body>
 
 <div id="site-header"></div>
-<script src="/assets/js/load-header.js?v=312"></script>
+<script src="/assets/js/load-header.js?v=313"></script>
 <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
 <script defer src="/_vercel/insights/script.js"></script>
-<script src="/assets/js/version-check.js?v=312"></script>
+<script src="/assets/js/version-check.js?v=313"></script>
 
 <section class="hero-section">
   <div class="hero-container">
@@ -583,7 +583,7 @@
 </div>
 
 <div id="site-footer"></div>
-<script src="/assets/js/load-footer.js?v=312"></script>
+<script src="/assets/js/load-footer.js?v=313"></script>
 
 <!-- MEMBER MODAL v2 -->
 <!-- CHANGE PASSWORD MODAL -->
@@ -777,13 +777,13 @@ function showSection(name) {
 }
 </script>
 
-<script type="module" src="/assets/js/member-auth.js?v=312"></script>
+<script type="module" src="/assets/js/member-auth.js?v=313"></script>
 <script type="module">
   import { getAuth, onAuthStateChanged, updateProfile, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { initPushNotifications } from "/assets/js/push-notifications.js?v=312";
+  import { initPushNotifications } from "/assets/js/push-notifications.js?v=313";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAleQHLvA75qr5a-bAuIZKCUyGiZ8jTJbE",
@@ -884,7 +884,23 @@ function showSection(name) {
     if (!file || !currentUser) return;
     const reader = new FileReader();
     reader.onload = async e => {
-      const data = e.target.result;
+      const data = await new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.min(1, 600 / Math.max(img.width, img.height));
+          const c = document.createElement('canvas');
+          c.width = Math.round(img.width * scale);
+          c.height = Math.round(img.height * scale);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          resolve(c.toDataURL('image/jpeg', 0.85));
+        };
+        img.onerror = () => resolve(null);
+        img.src = e.target.result;
+      });
+      if (!data) {
+        alert('That image format is not supported. Please choose a JPG or PNG.');
+        return;
+      }
       const storageRef = ref(storage, `avatars/${currentUser.uid}`);
       await uploadString(storageRef, data, 'data_url');
       const url = await getDownloadURL(storageRef);
