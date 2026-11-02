@@ -1,0 +1,42 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Same admin test as the database rules: the superadmin email, or a member with isAdmin = true.
+    function isStaff() {
+      return signedIn() && (
+        (request.auth.token.email == 'coachberry03@gmail.com' && request.auth.token.email_verified == true)
+        || (firestore.exists(/databases/(default)/documents/members/$(request.auth.uid))
+            && firestore.get(/databases/(default)/documents/members/$(request.auth.uid)).data.get('isAdmin', false) == true)
+      );
+    }
+
+    function validImage() {
+      return request.resource.contentType.matches('image/.*')
+        && request.resource.size < 10 * 1024 * 1024;
+    }
+
+    function publicFolder(folder) {
+      return folder in ['roster', 'schedule', 'jv-schedule', 'news', 'summer', 'sponsors', 'gallery'];
+    }
+
+    // Profile photos: anyone can view, only the owner can change their own.
+    match /avatars/{uid} {
+      allow read: if true;
+      allow create, update: if signedIn() && request.auth.uid == uid && validImage();
+      allow delete: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Roster, schedule and JV schedule logos, news, summer teams, sponsors, gallery:
+    // anyone can view, only admins can upload or delete.
+    match /{folder}/{allPaths=**} {
+      allow read: if publicFolder(folder);
+      allow create, update: if publicFolder(folder) && isStaff() && validImage();
+      allow delete: if publicFolder(folder) && isStaff();
+    }
+  }
+}
