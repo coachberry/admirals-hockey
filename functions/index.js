@@ -377,6 +377,39 @@ function renderGoalieRowsServer(goalies) {
   }).join("");
 }
 
+function renderSkaterTotalsServer(skaters) {
+  if (!skaters.length) return "";
+  const t = { goals: 0, assists: 0, ppg: 0, ppa: 0, shg: 0, sha: 0, plus: 0, minus: 0, sog: 0, pim: 0 };
+  skaters.forEach((s) => { Object.keys(t).forEach((k) => { t[k] += s[k] || 0; }); });
+  const pm = t.plus - t.minus;
+  const st = 'style="background:#5D1725;color:#fff;font-weight:700;"';
+  return `<tr class="stats-totals-row">
+      <td colspan="2" ${st}>TEAM TOTALS</td>
+      <td ${st}>${t.goals}</td><td ${st}>${t.assists}</td><td ${st}>${t.goals + t.assists}</td>
+      <td ${st}>${t.ppg}</td><td ${st}>${t.ppa}</td><td ${st}>${t.shg}</td><td ${st}>${t.sha}</td>
+      <td ${st}>${t.plus}</td><td ${st}>${t.minus}</td><td ${st}>${pm > 0 ? "+" + pm : pm}</td>
+      <td ${st}>${t.sog}</td><td ${st}>${t.pim}</td>
+    </tr>`;
+}
+
+function renderGoalieTotalsServer(goalies) {
+  const shown = goalies.filter((g) => !g.isEmptyNet || (g.gp && g.minutesPlayed > 0));
+  if (!shown.length) return "";
+  const t = { min: 0, sa: 0, sv: 0, ga: 0 };
+  shown.forEach((g) => {
+    t.min += g.minutesPlayed || 0;
+    t.sa += g.shotsAgainst || 0;
+    t.ga += g.goalsAgainst || 0;
+    t.sv += Math.max(0, (g.shotsAgainst || 0) - (g.goalsAgainst || 0));
+  });
+  const st = 'style="background:#5D1725;color:#fff;font-weight:700;"';
+  return `<tr class="stats-totals-row">
+      <td colspan="2" ${st}>TOTALS</td><td ${st}>-</td>
+      <td ${st}>${minToMMSSServer(t.min)}</td><td ${st}>${t.sa}</td><td ${st}>${t.sv}</td>
+      <td ${st}>${svPctFmtServer(t.sv, t.sa)}</td><td ${st}>${t.ga}</td>
+    </tr>`;
+}
+
 function gameHeaderHtmlServer(game, teamLabel, hasResult) {
   const homeAway = game.homeAway === "Home" ? "vs." : "@";
   const resultColors = { W: "#2e7d32", OTW: "#2e7d32", SOW: "#2e7d32", L: "#c62828", OTL: "#c62828", SOL: "#c62828", T: "#f57c00" };
@@ -464,6 +497,7 @@ exports.gameStatsPage = onRequest(async (req, res) => {
               <th class="sortable" data-col="9">+<span class="sort-arrow"></span></th><th class="sortable" data-col="10">-<span class="sort-arrow"></span></th><th class="sortable" data-col="11">+/-<span class="sort-arrow"></span></th><th class="sortable" data-col="12">SOG<span class="sort-arrow"></span></th><th class="sortable" data-col="13">PIM<span class="sort-arrow"></span></th>
             </tr></thead>
             <tbody id="ssrSkatersBody">${renderSkaterRowsServer(skaters)}</tbody>
+            <tfoot>${renderSkaterTotalsServer(skaters)}</tfoot>
           </table>
         </div>
       </div>
@@ -475,6 +509,7 @@ exports.gameStatsPage = onRequest(async (req, res) => {
               <th class="sortable" data-col="0">#<span class="sort-arrow"></span></th><th class="sortable" data-col="1">Player<span class="sort-arrow"></span></th><th class="sortable" data-col="2">Dec<span class="sort-arrow"></span></th><th class="sortable" data-col="3">Min<span class="sort-arrow"></span></th><th class="sortable" data-col="4">SA<span class="sort-arrow"></span></th><th class="sortable" data-col="5">SV<span class="sort-arrow"></span></th><th class="sortable" data-col="6">SV%<span class="sort-arrow"></span></th><th class="sortable" data-col="7">GA<span class="sort-arrow"></span></th>
             </tr></thead>
             <tbody id="ssrGoaliesBody">${renderGoalieRowsServer(goalies)}</tbody>
+            <tfoot>${renderGoalieTotalsServer(goalies)}</tfoot>
           </table>
         </div>
       </div>
