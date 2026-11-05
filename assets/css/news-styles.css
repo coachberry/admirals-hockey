@@ -113,3 +113,14 @@
 @media (max-width: 768px) {
   .news-grid { grid-template-columns: 1fr; }
 }
+
+/* Links inside news post bodies */
+.article-modal-content a:link,
+.article-modal-content a:visited {
+  color: #5D1725;
+  font-weight: 600;
+  text-decoration: underline;
+}
+.article-modal-content a:hover {
+  color: #3d0f18;
+}
