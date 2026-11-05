@@ -5474,7 +5474,6 @@ async function loadChannelsAdmin() {
 
 document.querySelector('[data-tab="chat"]').addEventListener('click', loadChannelsAdmin);
 
-});
 
 // ============================================
 // ANALYTICS TAB (appended)
@@ -5492,3 +5491,5 @@ async function openAnalyticsTab() {
 }
 document.querySelector('[data-tab="analytics"]')?.addEventListener('click', openAnalyticsTab);
 if (localStorage.getItem('admirals_activeTab') === 'analytics') openAnalyticsTab();
+
+});
