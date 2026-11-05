@@ -49,16 +49,32 @@ const BOXES = [
     }
   },
   {
-    id: 'special-teams-goal-share',
-    title: 'Goals Scored on Special Teams',
+    id: 'pp-goal-share',
+    title: 'Power Play Goals',
     compute(rows) {
-      const pp = sum(rows, r => sum(r.skaters, s => s.ppg));
-      const sh = sum(rows, r => sum(r.skaters, s => s.shg));
       const gf = sum(rows, gfOf);
+      const pp = sum(rows, r => sum(r.skaters, s => s.ppg));
+      const used = rows.filter(r => r.ts);
+      const opps = sum(used, r => r.ts.ppOpps);
+      const ppUsed = sum(used, r => sum(r.skaters, s => s.ppg));
       return {
-        value: pct(pp + sh, gf),
-        sub: `${pp + sh} of ${gf} goals scored`,
-        detail: `${pp} power play goals and ${sh} shorthanded goals.`
+        value: pct(pp, gf),
+        sub: `${pp} of ${gf} goals scored`,
+        detail: `Power play: ${ppUsed} goals on ${opps} opportunities (${pct(ppUsed, opps)}) in games with team stats.`
+      };
+    }
+  },
+  {
+    id: 'sh-goal-share',
+    title: 'Shorthanded Goals',
+    compute(rows) {
+      const gf = sum(rows, gfOf);
+      const sh = sum(rows, r => sum(r.skaters, s => s.shg));
+      const games = rows.filter(r => sum(r.skaters, s => s.shg) > 0).length;
+      return {
+        value: pct(sh, gf),
+        sub: `${sh} of ${gf} goals scored`,
+        detail: `Scored in ${games} of ${rows.length} games.`
       };
     }
   },
