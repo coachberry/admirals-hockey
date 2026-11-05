@@ -5475,3 +5475,20 @@ async function loadChannelsAdmin() {
 document.querySelector('[data-tab="chat"]').addEventListener('click', loadChannelsAdmin);
 
 });
+
+// ============================================
+// ANALYTICS TAB (appended)
+// ============================================
+let _analyticsModule = null;
+async function openAnalyticsTab() {
+  try {
+    if (!_analyticsModule) _analyticsModule = await import('/assets/js/analytics-admin.js?t=' + Date.now());
+    await _analyticsModule.loadAnalytics({ db, collection, getDocs, doc, getDoc });
+  } catch (err) {
+    console.error('analytics tab error:', err);
+    const root = document.getElementById('analyticsRoot');
+    if (root) root.innerHTML = '<p style="color:#c62828;">Could not load analytics: ' + (err.message || err) + '</p>';
+  }
+}
+document.querySelector('[data-tab="analytics"]')?.addEventListener('click', openAnalyticsTab);
+if (localStorage.getItem('admirals_activeTab') === 'analytics') openAnalyticsTab();

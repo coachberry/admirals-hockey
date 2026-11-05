@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=313">
+  <link rel="icon" type="image/png" href="/assets/images/franklin-logo.png?v=314">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Admin - Franklin Admirals Hockey</title>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=313">
-  <link rel="stylesheet" href="/assets/css/game-stats.css?v=313">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=314">
+  <link rel="stylesheet" href="/assets/css/game-stats.css?v=314">
 </head>
 <body>
 
@@ -104,6 +104,7 @@
         <button class="tab-btn" data-tab="seasons">🗓 Seasons</button>
         <button class="tab-btn" data-tab="tryouts">🎯 Tryouts</button>
         <button class="tab-btn" data-tab="standings">🏆 League Standings</button>
+        <button class="tab-btn" data-tab="analytics">📊 Analytics</button>
       </div>
       <div class="sidebar-group">
         <div class="sidebar-group-label">Content</div>
@@ -228,6 +229,12 @@
     </div>
 
     <!-- LEAGUE STANDINGS TAB -->
+    <div id="analyticsTab" class="tab-content">
+      <h2 style="color:#5D1725;margin-bottom:0.25rem;">Analytics</h2>
+      <p style="color:#666;font-size:0.9rem;margin-bottom:1rem;">Extra stats for the coaching staff. Not shown on the public site.</p>
+      <div id="analyticsRoot"><p style="color:#666;">Loading...</p></div>
+    </div>
+
     <div id="standingsTab" class="tab-content">
       <h2>League Standings — Game Scores</h2>
       <p style="color:#666;font-size:0.85rem;margin-bottom:1rem;max-width:640px;">
@@ -1522,10 +1529,10 @@
   </div>
 </div>
 
-<script type="module" src="/assets/js/admin.js?v=313"></script>
-<script type="module" src="/assets/js/tryouts-admin.js?v=313"></script>
-<script type="module" src="/assets/js/nav-admin.js?v=313"></script>
-<script type="module" src="/assets/js/game-stats.js?v=313"></script>
+<script type="module" src="/assets/js/admin.js?v=314"></script>
+<script type="module" src="/assets/js/tryouts-admin.js?v=314"></script>
+<script type="module" src="/assets/js/nav-admin.js?v=314"></script>
+<script type="module" src="/assets/js/game-stats.js?v=314"></script>
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
